@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 
 const focusPillars = [
   {
-    title: "Community",
+    title: "Members Benefits",
     body:
-      "Member benefits are how we support our community: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Open Member benefits below to browse all 19 items; expand any row for details.",
+      "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Open the list below to browse all 19 items; expand any row for details.",
   },
   {
     title: "Transparency",
@@ -20,7 +20,7 @@ const focusPillars = [
   },
 ] as const;
 
-const [communityPillar, ...otherFocusPillars] = focusPillars;
+const [memberBenefitsPillar, ...otherFocusPillars] = focusPillars;
 
 const memberBenefits: { number: number; title: string }[] = [
   { number: 1, title: "Legal Aid Assistance (Criminal/Disciplinary)" },
@@ -122,19 +122,19 @@ export default function MembershipServicesPage() {
               <li className="flex flex-col rounded-xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-sm sm:p-8">
                 <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
                 <h3 className="text-lg font-bold text-white">
-                  {communityPillar.title}
+                  {memberBenefitsPillar.title}
                 </h3>
                 <p className="mt-3 text-sm leading-relaxed text-slate-400">
-                  {communityPillar.body}
+                  {memberBenefitsPillar.body}
                 </p>
                 <details className="mt-6 rounded-xl border border-white/10 bg-black/20 open:[&_summary_.mb-chevron]:rotate-180">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-left transition hover:bg-white/5 [&::-webkit-details-marker]:hidden">
                     <span>
                       <span className="block text-xs font-bold uppercase tracking-[0.2em] text-sky-400">
-                        Member benefits
+                        All benefits
                       </span>
                       <span className="mt-1 block text-xs text-slate-500">
-                        19 items — expand to browse
+                        19 items — tap to expand
                       </span>
                     </span>
                     <span
