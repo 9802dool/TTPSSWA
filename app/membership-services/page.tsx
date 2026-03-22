@@ -18,10 +18,6 @@ const focusPillars = [
     title: "Transparency",
     body: "Share updates, reports, or meeting notes so members always know what is happening.",
   },
-  {
-    title: "Action",
-    body: "Describe programs, fundraisers, or partnerships that turn plans into results.",
-  },
 ] as const;
 
 const [communityPillar, ...otherFocusPillars] = focusPillars;
@@ -118,11 +114,11 @@ export default function MembershipServicesPage() {
                 Where we focus
               </h2>
               <p className="mt-4 text-base leading-relaxed text-slate-400">
-                Three pillars you can rename—or replace with metrics and partner
+                Two pillars you can rename—or replace with metrics and partner
                 logos.
               </p>
             </div>
-            <ul className="mt-14 grid list-none gap-6 p-0 sm:grid-cols-3 sm:items-start">
+            <ul className="mt-14 grid list-none gap-6 p-0 sm:grid-cols-2 sm:items-start">
               <li className="flex flex-col rounded-xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-sm sm:p-8">
                 <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
                 <h3 className="text-lg font-bold text-white">
