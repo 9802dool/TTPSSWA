@@ -8,8 +8,9 @@ const pillars = [
       "Legal aid, health and education support, housing programs, scholarships, and more—designed to serve members. See Membership services for the full list.",
   },
   {
-    title: "Transparency",
-    body: "Share updates, reports, or meeting notes so members always know what is happening.",
+    title: "Entrepreneurship Corner",
+    body:
+      "Spotlight member-owned businesses, workshops, and networking—edit this text to describe how TTPSSWA supports entrepreneurs.",
   },
   {
     title: "Action",

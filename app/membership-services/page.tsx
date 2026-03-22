@@ -15,8 +15,9 @@ const focusPillars = [
       "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Open the list below to browse all 19 items; expand any row for details.",
   },
   {
-    title: "Transparency",
-    body: "Share updates, reports, or meeting notes so members always know what is happening.",
+    title: "Entrepreneurship Corner",
+    body:
+      "Highlight member businesses, training, and resources so entrepreneurs can connect, learn, and grow—replace with your programs and contacts.",
   },
 ] as const;
 
