@@ -11,7 +11,8 @@ export const metadata: Metadata = {
 const focusPillars = [
   {
     title: "Community",
-    body: "Highlight how your group brings people together—events, outreach, or mutual support.",
+    body:
+      "Member benefits are how we support our community: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Expand each benefit for the full catalogue and how to access it.",
   },
   {
     title: "Transparency",
@@ -21,7 +22,9 @@ const focusPillars = [
     title: "Action",
     body: "Describe programs, fundraisers, or partnerships that turn plans into results.",
   },
-];
+] as const;
+
+const [communityPillar, ...otherFocusPillars] = focusPillars;
 
 const memberBenefits: { number: number; title: string }[] = [
   { number: 1, title: "Legal Aid Assistance (Criminal/Disciplinary)" },
@@ -119,8 +122,37 @@ export default function MembershipServicesPage() {
                 logos.
               </p>
             </div>
-            <ul className="mt-14 grid list-none gap-6 p-0 sm:grid-cols-3">
-              {focusPillars.map((item) => (
+            <ul className="mt-14 grid list-none gap-6 p-0 sm:grid-cols-3 sm:items-start">
+              <li className="flex flex-col rounded-xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-sm sm:p-8">
+                <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
+                <h3 className="text-lg font-bold text-white">
+                  {communityPillar.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                  {communityPillar.body}
+                </p>
+                <h4 className="mt-8 text-xs font-bold uppercase tracking-[0.2em] text-sky-400">
+                  Member benefits
+                </h4>
+                <p className="mt-2 text-xs text-slate-500">
+                  Click a benefit to open details (1–19).
+                </p>
+                <ul
+                  className="mt-4 list-none space-y-2.5 p-0"
+                  aria-label="Member benefits (expandable)"
+                >
+                  {memberBenefits.map((b) => (
+                    <ExpandableBenefit
+                      key={b.number}
+                      number={b.number}
+                      title={b.title}
+                    >
+                      <BenefitDetails number={b.number} title={b.title} />
+                    </ExpandableBenefit>
+                  ))}
+                </ul>
+              </li>
+              {otherFocusPillars.map((item) => (
                 <li
                   key={item.title}
                   className="flex flex-col rounded-xl border border-white/10 bg-slate-900/60 p-8 shadow-lg shadow-black/20 backdrop-blur-sm"
@@ -131,31 +163,6 @@ export default function MembershipServicesPage() {
                     {item.body}
                   </p>
                 </li>
-              ))}
-            </ul>
-          </div>
-        </section>
-
-        <section
-          className="border-b border-line bg-surface py-12 dark:bg-canvas"
-          aria-label="Membership benefits list"
-        >
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-brand">
-              Member benefits
-            </h2>
-            <p className="mt-2 text-sm text-muted">
-              Click a benefit to open details (1–19).
-            </p>
-            <ul className="mt-6 list-none space-y-3 p-0">
-              {memberBenefits.map((b) => (
-                <ExpandableBenefit
-                  key={b.number}
-                  number={b.number}
-                  title={b.title}
-                >
-                  <BenefitDetails number={b.number} title={b.title} />
-                </ExpandableBenefit>
               ))}
             </ul>
           </div>
