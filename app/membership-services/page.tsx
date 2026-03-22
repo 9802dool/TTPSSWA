@@ -32,9 +32,27 @@ export default function MembershipServicesPage() {
         </section>
 
         <section
-          className="min-h-[40vh] border-b border-line bg-surface dark:bg-canvas"
+          className="border-b border-line bg-surface py-12 dark:bg-canvas"
           aria-label="Membership content"
-        />
+        >
+          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-brand">
+              Member benefits
+            </h2>
+            <ul className="mt-8 list-none space-y-3 p-0">
+              <li>
+                <div className="flex gap-4 rounded-lg border border-line bg-canvas px-4 py-4 shadow-corp dark:bg-surface">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-navy text-sm font-bold text-white">
+                    1
+                  </span>
+                  <span className="min-w-0 flex-1 pt-1 text-base font-bold leading-snug text-ink">
+                    Legal Aid Assistance (Criminal/Disciplinary)
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
       </main>
       <SiteFooter />
     </>
