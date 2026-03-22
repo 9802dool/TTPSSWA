@@ -1,7 +1,12 @@
 import Link from "next/link";
 
-const nav = [
+const nav: {
+  href: string;
+  label: string;
+  uppercase?: boolean;
+}[] = [
   { href: "/#about", label: "About" },
+  { href: "/membership-services", label: "MEMBERSHIP SERVICES", uppercase: true },
   { href: "/#focus", label: "Focus" },
   { href: "/#contact", label: "Contact" },
   { href: "/executive", label: "Executive" },
@@ -28,7 +33,11 @@ export default function SiteHeader() {
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-md px-2.5 py-2 text-sm font-medium text-muted transition hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted sm:px-3"
+              className={
+                item.uppercase
+                  ? "rounded-md px-1.5 py-2 text-[9px] font-semibold leading-tight tracking-wide text-muted transition hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted sm:px-2 sm:text-[10px]"
+                  : "rounded-md px-2.5 py-2 text-sm font-medium text-muted transition hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted sm:px-3"
+              }
             >
               {item.label}
             </Link>

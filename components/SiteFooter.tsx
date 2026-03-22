@@ -27,6 +27,14 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/membership-services"
+                  className="transition hover:text-white"
+                >
+                  Membership services
+                </Link>
+              </li>
+              <li>
                 <Link href="/executive" className="transition hover:text-white">
                   Executive
                 </Link>
