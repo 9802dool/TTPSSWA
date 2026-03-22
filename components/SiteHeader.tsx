@@ -9,7 +9,7 @@ const nav: {
   longUppercase?: boolean;
 }[] = [
   { href: "/#about", label: "About" },
-  { href: "/membership-services", label: "MEMBERSHIP SERVICES", uppercase: true },
+  { href: "/membership-services", label: "Membership Services" },
   { href: "/#focus", label: "Focus" },
   { href: "/#contact", label: "Contact" },
   { href: "/executive", label: "Executive" },
