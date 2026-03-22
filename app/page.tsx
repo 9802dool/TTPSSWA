@@ -3,8 +3,9 @@ import SiteHeader from "@/components/SiteHeader";
 
 const pillars = [
   {
-    title: "Community",
-    body: "Highlight how your group brings people together—events, outreach, or mutual support.",
+    title: "Members Benefits",
+    body:
+      "Legal aid, health and education support, housing programs, scholarships, and more—designed to serve members. See Membership services for the full list.",
   },
   {
     title: "Transparency",
