@@ -55,8 +55,8 @@ export default function MembershipServicesPage() {
               Membership services
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              Member benefits below are clickable—each jumps to a section where you
-              can add forms, PDFs, or eligibility details.
+              Use Select benefits to choose a program—each link jumps to full details
+              on the same page.
             </p>
           </div>
         </section>
@@ -66,8 +66,12 @@ export default function MembershipServicesPage() {
             <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-brand">
               Member benefits
             </h2>
-            <p className="mt-2 text-lg font-bold text-ink">
-              Select a benefit (1–19)
+            <p className="mt-2 text-2xl font-bold tracking-tight text-ink md:text-3xl">
+              Select benefits
+            </p>
+            <p className="mt-3 text-sm text-muted">
+              Click a benefit to jump to its details. Replace placeholders with your
+              policy text, download links, or application forms.
             </p>
             <ul className="mt-8 list-none space-y-2 p-0">
               {benefits.map((b) => (
@@ -92,17 +96,8 @@ export default function MembershipServicesPage() {
                 </li>
               ))}
             </ul>
-          </div>
-        </section>
 
-        <section className="bg-canvas py-12 dark:bg-surface/30">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-lg font-bold text-ink">Benefit details</h2>
-            <p className="mt-2 text-sm text-muted">
-              Replace each placeholder with your policy text, download links, or
-              application forms.
-            </p>
-            <div className="mt-10 space-y-0">
+            <div className="mt-12 space-y-0 border-t border-line pt-10">
               {benefits.map((b) => (
                 <article
                   key={b.id}
@@ -119,12 +114,11 @@ export default function MembershipServicesPage() {
                       </h3>
                       <p className="mt-3 text-sm leading-relaxed text-muted">
                         Add eligibility criteria, contacts, and links here. You can
-                        also set the list link above to point to an external PDF by
-                        changing{" "}
+                        also point a list row to an external PDF by changing{" "}
                         <code className="rounded bg-line/80 px-1 py-0.5 text-xs">
                           href
                         </code>{" "}
-                        for this item in{" "}
+                        for that item in{" "}
                         <code className="rounded bg-line/80 px-1 py-0.5 text-xs">
                           membership-services/page.tsx
                         </code>
