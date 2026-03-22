@@ -2,23 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Modern corporate theme — light-first, optional system dark */
 :root {
-  --bg: #f8f6f3;
-  --fg: #0c1222;
-  --muted: #4a5568;
-  --accent: #0d5c5c;
-  --accent-hover: #0a4848;
+  --bg: #f4f6f9;
+  --fg: #0f172a;
+  --muted: #475569;
   --surface: #ffffff;
+  --border: #e2e8f0;
+  --navy: #0c1929;
+  --navy-muted: #1e3a5f;
+  --brand: #1e40af;
+  --brand-hover: #1d4ed8;
+  --brand-subtle: #eff6ff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0a0f18;
-    --fg: #eef2f7;
-    --muted: #9ca3af;
-    --accent: #5eead4;
-    --accent-hover: #2dd4bf;
+    --bg: #0b1120;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
     --surface: #111827;
+    --border: #1e293b;
+    --navy: #020617;
+    --navy-muted: #0f172a;
+    --brand: #3b82f6;
+    --brand-hover: #60a5fa;
+    --brand-subtle: #172554;
   }
 }
 

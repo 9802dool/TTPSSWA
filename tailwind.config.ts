@@ -11,13 +11,22 @@ const config: Config = {
       colors: {
         ink: "var(--fg)",
         muted: "var(--muted)",
-        accent: "var(--accent)",
         canvas: "var(--bg)",
         surface: "var(--surface)",
+        line: "var(--border)",
+        navy: "var(--navy)",
+        "navy-muted": "var(--navy-muted)",
+        brand: "var(--brand)",
+        "brand-hover": "var(--brand-hover)",
+        "brand-subtle": "var(--brand-subtle)",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "Georgia", "serif"],
+      },
+      boxShadow: {
+        corp: "0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.06)",
+        "corp-md":
+          "0 4px 6px -1px rgb(15 23 42 / 0.07), 0 2px 4px -2px rgb(15 23 42 / 0.05)",
       },
     },
   },

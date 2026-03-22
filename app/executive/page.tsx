@@ -33,44 +33,53 @@ export default function ExecutivePage() {
   return (
     <>
       <SiteHeader />
-      <main className="pt-24">
-        <section className="border-b border-stone-200/80 dark:border-stone-800">
-          <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-accent">
+      <main className="pt-[4.25rem]">
+        <section className="relative overflow-hidden border-b border-line bg-navy text-white">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-50"
+            aria-hidden
+            style={{
+              backgroundImage:
+                "linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)",
+            }}
+          />
+          <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
+            <p className="mb-4 inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
               Leadership
             </p>
-            <h1 className="font-display text-4xl font-medium tracking-tight text-ink md:text-5xl">
+            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
               Meet our executive
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-muted">
-              Names and photos can be added below. Each role has a dedicated spot
-              on the committee.
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
+              Names and photos can be added below. Each role has a dedicated seat on
+              the committee.
             </p>
           </div>
         </section>
 
-        <section className="py-16">
+        <section className="bg-canvas py-16">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {roles.map((role, index) => (
                 <li
                   key={`${role.title}-${index}`}
-                  className="flex flex-col overflow-hidden rounded-lg border border-stone-200/90 bg-surface shadow-sm dark:border-stone-700 dark:bg-stone-950/50"
+                  className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-corp transition hover:shadow-corp-md dark:bg-surface"
                 >
-                  <div className="aspect-[4/3] bg-gradient-to-br from-stone-200/90 to-stone-300/60 dark:from-stone-800 dark:to-stone-900">
+                  <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
+                    <span className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-md bg-navy text-xs font-bold text-white">
+                      {index + 1}
+                    </span>
                     <div className="flex h-full w-full items-center justify-center p-6 text-center">
-                      <span className="text-xs font-medium uppercase tracking-wider text-muted">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         Photo
                       </span>
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col p-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-accent">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-brand">
                       {role.subtitle}
                     </p>
-                    <h2 className="mt-2 font-display text-xl font-medium text-ink">
-                      {role.title}
-                    </h2>
+                    <h2 className="mt-2 text-lg font-bold text-ink">{role.title}</h2>
                     <p className="mt-4 text-sm text-muted">Name to be announced</p>
                   </div>
                 </li>
