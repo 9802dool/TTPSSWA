@@ -1,15 +1,10 @@
 import type { Metadata } from "next";
-import MembershipBenefitsPanel from "@/components/MembershipBenefitsPanel";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
-/** Avoid stale HTML from edge/CDN after deploys */
-export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Membership services | TTPSSWA",
-  description:
-    "TTPSSWA membership services — benefits, enrollment, and member support.",
+  description: "TTPSSWA membership services.",
 };
 
 export default function MembershipServicesPage() {
@@ -33,32 +28,13 @@ export default function MembershipServicesPage() {
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
               Membership services
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              Open <strong className="font-bold text-white">Select benefits</strong>{" "}
-              to view the list, benefit information, and full details for each
-              program.
-            </p>
           </div>
         </section>
 
-        <section className="border-b border-line bg-surface py-12 dark:bg-canvas">
-          <MembershipBenefitsPanel />
-        </section>
-
-        <section className="border-t border-line bg-surface py-16 dark:bg-canvas">
-          <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-            <p className="text-sm text-muted">
-              Questions about membership?{" "}
-              <a
-                href="/#contact"
-                className="font-bold text-brand hover:text-brand-hover"
-              >
-                Contact the office
-              </a>
-              .
-            </p>
-          </div>
-        </section>
+        <section
+          className="min-h-[40vh] border-b border-line bg-surface dark:bg-canvas"
+          aria-label="Membership content"
+        />
       </main>
       <SiteFooter />
     </>
