@@ -14,7 +14,7 @@ const nav = [
 ];
 
 const linkClass =
-  "rounded-md px-2.5 py-2 text-sm font-medium text-muted transition hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted sm:px-3";
+  "rounded-md px-2.5 py-2 text-sm font-bold text-muted transition hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted sm:px-3";
 
 export default function SiteHeader() {
   return (
