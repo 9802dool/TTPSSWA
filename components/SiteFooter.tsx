@@ -40,6 +40,14 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/central-committee-representatives"
+                  className="transition hover:text-white"
+                >
+                  Central committee representatives
+                </Link>
+              </li>
+              <li>
                 <Link href="/#contact" className="transition hover:text-white">
                   Contact
                 </Link>
