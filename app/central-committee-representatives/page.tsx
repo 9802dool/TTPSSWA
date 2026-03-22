@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { CENTRAL_COMMITTEE_REGIONS } from "@/lib/central-committee-regions";
 
 export const metadata: Metadata = {
   title: "Central Committee Representative | TTPSSWA",
@@ -30,34 +32,40 @@ export default function CentralCommitteePage() {
               Central Committee Representative
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-relaxed text-slate-300">
-              Central Committee Representative from all Divisions and Sections
+              Central Committee Representative from all Divisions and Sections.
+              Select a division to view or edit details.
             </p>
           </div>
         </section>
 
-        <section className="border-b border-line bg-surface py-12 dark:bg-canvas">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-lg font-bold text-ink md:text-xl">
-              Divisions and sections
-            </h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted">
-              Add representative names, roles, and contact details for each division
-              or section here. Edit this page in{" "}
-              <code className="rounded bg-line/80 px-1.5 py-0.5 text-xs">
-                app/central-committee-representatives/page.tsx
-              </code>
-              .
-            </p>
-            <ul className="mt-8 space-y-4">
-              {[
-                "Division or section name — representative name & role (placeholder)",
-                "Add more rows as needed, or replace this list with cards and photos.",
-              ].map((line, i) => (
-                <li
-                  key={i}
-                  className="rounded-xl border border-line bg-canvas p-5 text-sm text-muted shadow-corp dark:bg-surface"
-                >
-                  {line}
+        <section className="border-b border-line bg-[#0a0f18] py-14 text-white dark:bg-[#050810]">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">
+                Divisions
+              </p>
+              <h2 className="mt-3 text-2xl font-bold tracking-tight md:text-3xl">
+                Divisions and sections
+              </h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-400">
+                Click a pillar to open that division&apos;s page.
+              </p>
+            </div>
+            <ul className="mt-10 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {CENTRAL_COMMITTEE_REGIONS.map((region) => (
+                <li key={region.slug}>
+                  <Link
+                    href={`/central-committee-representatives/${region.slug}`}
+                    className="flex min-h-[5.5rem] flex-col items-center justify-center rounded-xl border border-white/10 bg-slate-900/60 px-3 py-4 text-center shadow-lg shadow-black/20 backdrop-blur-sm transition hover:border-sky-400/40 hover:bg-slate-800/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                  >
+                    <span className="mb-2 h-1 w-8 shrink-0 rounded-full bg-brand" />
+                    <span className="text-sm font-bold leading-snug text-white">
+                      {region.name}
+                    </span>
+                    <span className="mt-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-500">
+                      View
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>
