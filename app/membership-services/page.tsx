@@ -8,6 +8,21 @@ export const metadata: Metadata = {
   description: "TTPSSWA membership services.",
 };
 
+const focusPillars = [
+  {
+    title: "Community",
+    body: "Highlight how your group brings people together—events, outreach, or mutual support.",
+  },
+  {
+    title: "Transparency",
+    body: "Share updates, reports, or meeting notes so members always know what is happening.",
+  },
+  {
+    title: "Action",
+    body: "Describe programs, fundraisers, or partnerships that turn plans into results.",
+  },
+];
+
 const memberBenefits: { number: number; title: string }[] = [
   { number: 1, title: "Legal Aid Assistance (Criminal/Disciplinary)" },
   { number: 2, title: "Optical & Dental Grant for SRP's & Municipal" },
@@ -89,9 +104,41 @@ export default function MembershipServicesPage() {
           </div>
         </section>
 
+        {/* Dark “Strategic focus” band — matches reference layout */}
+        <section className="border-b border-line bg-[#0a0f18] py-20 text-white dark:bg-[#050810]">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">
+                Strategic focus
+              </p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+                Where we focus
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-slate-400">
+                Three pillars you can rename—or replace with metrics and partner
+                logos.
+              </p>
+            </div>
+            <ul className="mt-14 grid list-none gap-6 p-0 sm:grid-cols-3">
+              {focusPillars.map((item) => (
+                <li
+                  key={item.title}
+                  className="flex flex-col rounded-xl border border-white/10 bg-slate-900/60 p-8 shadow-lg shadow-black/20 backdrop-blur-sm"
+                >
+                  <div className="mb-4 h-1 w-10 rounded-full bg-brand" />
+                  <h3 className="text-lg font-bold text-white">{item.title}</h3>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-400">
+                    {item.body}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
         <section
           className="border-b border-line bg-surface py-12 dark:bg-canvas"
-          aria-label="Membership content"
+          aria-label="Membership benefits list"
         >
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-brand">
