@@ -1,13 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-const nav: {
-  href: string;
-  label: string;
-  uppercase?: boolean;
-  /** Extra-long all-caps label — smaller type */
-  longUppercase?: boolean;
-}[] = [
+const nav = [
   { href: "/#about", label: "About" },
   { href: "/membership-services", label: "Membership Services" },
   { href: "/#focus", label: "Focus" },
@@ -15,11 +9,12 @@ const nav: {
   { href: "/executive", label: "Executive" },
   {
     href: "/central-committee-representatives",
-    label: "CENTRAL COMMITTEE REPRESENTATIVES",
-    uppercase: true,
-    longUppercase: true,
+    label: "Central Committee Representative",
   },
 ];
+
+const linkClass =
+  "rounded-md px-2.5 py-2 text-sm font-medium text-muted transition hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted sm:px-3";
 
 export default function SiteHeader() {
   return (
@@ -46,17 +41,7 @@ export default function SiteHeader() {
           aria-label="Primary"
         >
           {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={
-                item.longUppercase
-                  ? "rounded-md px-1 py-1.5 text-[7px] font-semibold leading-tight tracking-wide text-muted transition hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted sm:px-1.5 sm:text-[8px] md:text-[9px]"
-                  : item.uppercase
-                    ? "rounded-md px-1.5 py-2 text-[9px] font-semibold leading-tight tracking-wide text-muted transition hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted sm:px-2 sm:text-[10px]"
-                    : "rounded-md px-2.5 py-2 text-sm font-medium text-muted transition hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted sm:px-3"
-              }
-            >
+            <Link key={item.href} href={item.href} className={linkClass}>
               {item.label}
             </Link>
           ))}

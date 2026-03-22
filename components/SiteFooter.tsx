@@ -44,7 +44,7 @@ export default function SiteFooter() {
                   href="/central-committee-representatives"
                   className="transition hover:text-white"
                 >
-                  Central committee representatives
+                  Central Committee Representative
                 </Link>
               </li>
               <li>

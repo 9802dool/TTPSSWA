@@ -3,7 +3,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
-  title: "CENTRAL COMMITTEE REPRESENTATIVES | TTPSSWA",
+  title: "Central Committee Representative | TTPSSWA",
   description:
     "TTPSSWA central committee representatives — regional and division liaisons.",
 };
@@ -32,8 +32,8 @@ export default function CentralCommitteePage() {
             <p className="mb-4 inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
               Governance
             </p>
-            <h1 className="text-2xl font-bold tracking-wide sm:text-3xl md:text-4xl lg:text-5xl">
-              CENTRAL COMMITTEE REPRESENTATIVES
+            <h1 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-[2.75rem]">
+              Central Committee Representative
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
               Use this page to list representatives by region, station, or committee.
