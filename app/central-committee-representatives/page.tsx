@@ -1,18 +1,16 @@
 import type { Metadata } from "next";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import {
+  TTPS_STATIONS_SOURCE,
+  ttpsDivisions,
+} from "@/lib/ttps-police-stations";
 
 export const metadata: Metadata = {
   title: "Central Committee Representative | TTPSSWA",
   description:
-    "TTPSSWA central committee representatives — regional and division liaisons.",
+    "TTPSSWA — TTPS police stations by division (reference from TTPS).",
 };
-
-const placeholderRows = [
-  "Representative role or division (add names and photos in this file).",
-  "Duplicate or remove rows to match your roster.",
-  "Each line can be replaced with a full card grid when you are ready.",
-];
 
 export default function CentralCommitteePage() {
   return (
@@ -30,34 +28,85 @@ export default function CentralCommitteePage() {
           />
           <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
             <p className="mb-4 inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
-              Governance
+              Reference
             </p>
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-[2.75rem]">
               Central Committee Representative
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              Use this page to list representatives by region, station, or committee.
-              Edit copy and layout in{" "}
-              <code className="rounded bg-white/10 px-1.5 py-0.5 text-sm text-slate-200">
-                app/central-committee-representatives/page.tsx
-              </code>
-              .
+            <p className="mt-6 max-w-3xl text-lg leading-relaxed text-slate-300">
+              Police stations and posts across Trinidad and Tobago by division,
+              reproduced from the{" "}
+              <a
+                href={TTPS_STATIONS_SOURCE}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-sky-200 underline underline-offset-2 hover:text-white"
+              >
+                Trinidad &amp; Tobago Police Service
+              </a>{" "}
+              contact listing. Emergency:{" "}
+              <span className="font-medium text-white">999</span>. Crime Stoppers:{" "}
+              <span className="font-medium text-white">555</span>. Confirm
+              addresses and numbers on the official site before relying on them.
             </p>
           </div>
         </section>
 
-        <section className="border-b border-line bg-surface py-16 dark:bg-canvas">
+        <section className="border-b border-line bg-surface py-12 dark:bg-canvas">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <ul className="space-y-4">
-              {placeholderRows.map((line, i) => (
-                <li
-                  key={i}
-                  className="rounded-xl border border-line bg-canvas p-6 text-sm text-muted shadow-corp dark:bg-surface"
+            <h2 className="text-lg font-bold text-ink md:text-xl">
+              Police stations by division
+            </h2>
+            <p className="mt-2 text-sm text-muted">
+              Source:{" "}
+              <a
+                href={TTPS_STATIONS_SOURCE}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand hover:text-brand-hover"
+              >
+                ttps.gov.tt/contact/stations/
+              </a>
+            </p>
+
+            <div className="mt-12 space-y-16">
+              {ttpsDivisions.map((div) => (
+                <div
+                  key={div.name}
+                  id={div.name
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-|-$/g, "")}
+                  className="scroll-mt-28"
                 >
-                  {line}
-                </li>
+                  <h3 className="border-b border-line pb-3 text-base font-bold text-ink md:text-lg">
+                    {div.name}
+                    <span className="ml-2 text-sm font-normal text-muted">
+                      ({div.summary})
+                    </span>
+                  </h3>
+                  <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                    {div.stations.map((s) => (
+                      <article
+                        key={`${div.name}-${s.name}-${s.address}`}
+                        className="rounded-xl border border-line bg-canvas p-5 shadow-corp dark:bg-surface"
+                      >
+                        <h4 className="text-sm font-bold text-ink md:text-base">
+                          {s.name}
+                        </h4>
+                        <p className="mt-2 text-sm leading-relaxed text-muted">
+                          {s.address}
+                        </p>
+                        <p className="mt-3 text-sm">
+                          <span className="text-muted">Phone: </span>
+                          <span className="font-semibold text-ink">{s.phones}</span>
+                        </p>
+                      </article>
+                    ))}
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </section>
       </main>
