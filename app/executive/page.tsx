@@ -79,7 +79,7 @@ export default function ExecutivePage() {
                         fill
                         priority
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-contain object-top"
+                        className="object-cover object-top"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center p-6 text-center">
