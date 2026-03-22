@@ -3,7 +3,7 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
-  title: "Meet our executive | TTPSSWA",
+  title: "OUR EXECUTIVE TEAM | TTPSSWA",
   description: "TTPSSWA executive committee — leadership and representatives.",
 };
 
@@ -47,8 +47,8 @@ export default function ExecutivePage() {
             <p className="mb-4 inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
               Leadership
             </p>
-            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
-              Meet our executive
+            <h1 className="text-3xl font-bold tracking-wide sm:text-4xl md:text-5xl">
+              OUR EXECUTIVE TEAM
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
               Names and photos can be added below. Each role has a dedicated seat on
