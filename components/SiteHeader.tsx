@@ -1,22 +1,26 @@
 import Link from "next/link";
 
 const nav = [
-  { href: "#about", label: "About" },
-  { href: "#focus", label: "Focus" },
-  { href: "#contact", label: "Contact" },
+  { href: "/#about", label: "About" },
+  { href: "/#focus", label: "Focus" },
+  { href: "/#contact", label: "Contact" },
+  { href: "/executive", label: "Executive" },
 ];
 
 export default function SiteHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-stone-200/80 bg-canvas/90 backdrop-blur-md dark:border-stone-700/80">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link
-          href="#top"
-          className="font-display text-lg font-semibold tracking-tight text-ink"
+          href="/"
+          className="font-display text-lg font-semibold tracking-tight text-ink shrink-0"
         >
           TTPSSWA
         </Link>
-        <nav className="flex items-center gap-1 sm:gap-4" aria-label="Primary">
+        <nav
+          className="flex flex-wrap items-center justify-end gap-x-1 gap-y-1 sm:gap-x-3"
+          aria-label="Primary"
+        >
           {nav.map((item) => (
             <Link
               key={item.href}
