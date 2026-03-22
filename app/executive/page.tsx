@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+
+const PRESIDENT_PHOTO = "/executive/p1.png";
 
 export const metadata: Metadata = {
   title: "OUR EXECUTIVE TEAM | TTPSSWA",
@@ -66,14 +69,25 @@ export default function ExecutivePage() {
                   className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-corp transition hover:shadow-corp-md dark:bg-surface"
                 >
                   <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
-                    <span className="absolute left-3 top-3 flex h-8 w-8 items-center justify-center rounded-md bg-navy text-xs font-bold text-white">
+                    <span className="absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md bg-navy text-xs font-bold text-white">
                       {index + 1}
                     </span>
-                    <div className="flex h-full w-full items-center justify-center p-6 text-center">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                        Photo
-                      </span>
-                    </div>
+                    {index === 0 ? (
+                      <Image
+                        src={PRESIDENT_PHOTO}
+                        alt="President"
+                        fill
+                        priority
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-contain object-top"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center p-6 text-center">
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                          Photo
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-1 flex-col p-6">
                     <p className="text-xs font-semibold uppercase tracking-wider text-brand">
