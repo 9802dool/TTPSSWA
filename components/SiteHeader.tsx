@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 const nav: {
@@ -20,8 +21,15 @@ export default function SiteHeader() {
           href="/"
           className="flex shrink-0 items-center gap-2 text-lg font-bold tracking-tight text-navy dark:text-ink"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded bg-brand text-xs font-bold text-white">
-            T
+          <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-md ring-1 ring-line shadow-corp">
+            <Image
+              src="/icon.png"
+              alt="TTPSSWA"
+              width={32}
+              height={32}
+              className="h-full w-full object-cover"
+              priority
+            />
           </span>
           <span>TTPSSWA</span>
         </Link>
