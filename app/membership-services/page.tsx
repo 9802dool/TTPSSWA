@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
+/** Avoid stale HTML from edge/CDN after deploys */
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Membership services | TTPSSWA",
   description:
@@ -97,7 +100,17 @@ export default function MembershipServicesPage() {
               ))}
             </ul>
 
-            <div className="mt-12 space-y-0 border-t border-line pt-10">
+            <div className="mt-14 rounded-xl border border-line bg-canvas p-6 dark:bg-surface/80 sm:p-8">
+              <h3 className="text-sm font-bold uppercase tracking-[0.15em] text-brand">
+                Benefit information
+              </h3>
+              <p className="mt-2 text-sm text-muted">
+                Details for each benefit are below—scroll down or click a benefit
+                above to jump here.
+              </p>
+            </div>
+
+            <div className="mt-10 space-y-0 border-t border-line pt-10">
               {benefits.map((b) => (
                 <article
                   key={b.id}
