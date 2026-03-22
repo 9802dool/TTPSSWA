@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ExpandableBenefit from "@/components/ExpandableBenefit";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -39,17 +40,25 @@ export default function MembershipServicesPage() {
             <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-brand">
               Member benefits
             </h2>
-            <ul className="mt-8 list-none space-y-3 p-0">
-              <li>
-                <div className="flex gap-4 rounded-lg border border-line bg-canvas px-4 py-4 shadow-corp dark:bg-surface">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-navy text-sm font-bold text-white">
-                    1
-                  </span>
-                  <span className="min-w-0 flex-1 pt-1 text-base font-bold leading-snug text-ink">
-                    Legal Aid Assistance (Criminal/Disciplinary)
-                  </span>
-                </div>
-              </li>
+            <p className="mt-2 text-sm text-muted">
+              Click a benefit to open details.
+            </p>
+            <ul className="mt-6 list-none space-y-3 p-0">
+              <ExpandableBenefit
+                number={1}
+                title="Legal Aid Assistance (Criminal/Disciplinary)"
+              >
+                <p className="text-sm font-semibold text-ink">Information</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  Describe how members access legal aid for criminal or disciplinary
+                  matters: eligibility, how to apply, required documents, and office
+                  contact. Replace this text in{" "}
+                  <code className="rounded bg-line/80 px-1 py-0.5 text-xs">
+                    app/membership-services/page.tsx
+                  </code>
+                  .
+                </p>
+              </ExpandableBenefit>
             </ul>
           </div>
         </section>
