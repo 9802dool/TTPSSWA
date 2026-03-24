@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ExpandableBenefit from "@/components/ExpandableBenefit";
+import MemberSessionBar from "@/components/MemberSessionBar";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -85,6 +86,7 @@ export default function MembershipServicesPage() {
     <>
       <SiteHeader />
       <main className="pt-[4.25rem]">
+        <MemberSessionBar />
         <section className="relative overflow-hidden border-b border-line bg-navy text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-50"
