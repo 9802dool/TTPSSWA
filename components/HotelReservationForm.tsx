@@ -55,6 +55,7 @@ export default function HotelReservationForm() {
     if (!form.email.trim()) e.email = "Enter an email address.";
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim()))
       e.email = "Enter a valid email address.";
+    if (!form.phone.trim()) e.phone = "Enter a phone number.";
     if (!form.checkInDate) e.checkInDate = "Choose a check-in date.";
     if (!form.checkOutDate) e.checkOutDate = "Choose a check-out date.";
     if (!form.checkInTime) e.checkInTime = "Choose a check-in time.";
@@ -88,7 +89,7 @@ export default function HotelReservationForm() {
     return [
       `Guest: ${form.fullName}`,
       `Email: ${form.email}`,
-      `Phone: ${form.phone || "—"}`,
+      `Phone: ${form.phone}`,
       `Check-in: ${form.checkInDate} at ${form.checkInTime}`,
       `Check-out: ${form.checkOutDate} at ${form.checkOutTime}`,
       `Rooms: ${form.rooms}`,
@@ -189,7 +190,7 @@ export default function HotelReservationForm() {
         </div>
         <div>
           <label htmlFor="hr-phone" className="text-sm font-semibold text-ink">
-            Phone
+            Phone <span className="text-red-600">*</span>
           </label>
           <input
             id="hr-phone"
@@ -199,8 +200,15 @@ export default function HotelReservationForm() {
             value={form.phone}
             onChange={(e) => update("phone", e.target.value)}
             className={inputClass}
-            placeholder="Optional"
+            placeholder="Include area code"
+            aria-invalid={!!errors.phone}
+            aria-describedby={errors.phone ? "err-phone" : undefined}
           />
+          {errors.phone ? (
+            <p id="err-phone" className="mt-1 text-xs text-red-600">
+              {errors.phone}
+            </p>
+          ) : null}
         </div>
       </div>
 
