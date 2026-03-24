@@ -13,6 +13,7 @@ type FormState = {
   checkOutDate: string;
   checkInTime: string;
   checkOutTime: string;
+  rooms: string;
   guests: string;
   notes: string;
 };
@@ -25,6 +26,7 @@ const initial: FormState = {
   checkOutDate: "",
   checkInTime: "15:00",
   checkOutTime: "11:00",
+  rooms: "1",
   guests: "1",
   notes: "",
 };
@@ -89,6 +91,7 @@ export default function HotelReservationForm() {
       `Phone: ${form.phone || "—"}`,
       `Check-in: ${form.checkInDate} at ${form.checkInTime}`,
       `Check-out: ${form.checkOutDate} at ${form.checkOutTime}`,
+      `Rooms: ${form.rooms}`,
       `Guests: ${form.guests}`,
       form.notes.trim() ? `Notes: ${form.notes.trim()}` : "",
     ].filter(Boolean);
@@ -290,24 +293,47 @@ export default function HotelReservationForm() {
         </div>
       </div>
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-2">
-        <div>
-          <label htmlFor="hr-guests" className="text-sm font-semibold text-ink">
-            Guests
-          </label>
-          <select
-            id="hr-guests"
-            name="guests"
-            value={form.guests}
-            onChange={(e) => update("guests", e.target.value)}
-            className={inputClass}
-          >
-            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-              <option key={n} value={String(n)}>
-                {n}
-              </option>
-            ))}
-          </select>
+      <div className="mt-8 border-t border-line pt-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+          Rooms & guests
+        </p>
+        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+          <div>
+            <label htmlFor="hr-rooms" className="text-sm font-semibold text-ink">
+              Rooms
+            </label>
+            <select
+              id="hr-rooms"
+              name="rooms"
+              value={form.rooms}
+              onChange={(e) => update("rooms", e.target.value)}
+              className={inputClass}
+            >
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={String(n)}>
+                  {n} {n === 1 ? "room" : "rooms"}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="hr-guests" className="text-sm font-semibold text-ink">
+              Guests
+            </label>
+            <select
+              id="hr-guests"
+              name="guests"
+              value={form.guests}
+              onChange={(e) => update("guests", e.target.value)}
+              className={inputClass}
+            >
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                <option key={n} value={String(n)}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
