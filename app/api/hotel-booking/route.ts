@@ -131,36 +131,121 @@ async function sendViaResend(d: ValidData): Promise<{ ok: true } | { ok: false }
   return { ok: true };
 }
 
-/** Fallback when RESEND_API_KEY is not set (no env setup on Vercel). */
-async function sendViaFormSubmit(d: ValidData): Promise<boolean> {
-  const notify = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim() || NOTIFY_DEFAULT;
+/** FormSubmit returns success as boolean or string; message explains activation / errors. */
+function formSubmitSucceeded(data: unknown): boolean {
+  if (typeof data !== "object" || data === null) return false;
+  const o = data as { success?: unknown };
+  const s = o.success;
+  return s === true || s === "true" || s === 1 || s === "1";
+}
+
+function formSubmitPayload(d: ValidData, message: string, subject: string) {
+  const params = new URLSearchParams();
+  params.set("name", d.fullName);
+  params.set("email", d.email);
+  params.set("message", message);
+  params.set("_subject", subject);
+  params.set("_replyto", d.email);
+  params.set("_captcha", "false");
+  return params;
+}
+
+/** Prefer URL-encoded POST (matches FormSubmit’s own jQuery AJAX examples). */
+async function sendViaFormSubmitAjax(
+  notify: string,
+  d: ValidData,
+  message: string,
+  subject: string,
+  contentType: "urlencoded" | "json",
+): Promise<{ ok: boolean; raw: string }> {
   const url = `https://formsubmit.co/ajax/${encodeURIComponent(notify)}`;
 
+  const init: RequestInit =
+    contentType === "urlencoded"
+      ? {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Accept: "application/json",
+          },
+          body: formSubmitPayload(d, message, subject).toString(),
+        }
+      : {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            name: d.fullName,
+            email: d.email,
+            message,
+            _subject: subject,
+            _replyto: d.email,
+            _captcha: false,
+          }),
+        };
+
+  const res = await fetch(url, init);
+  const raw = await res.text();
+  let data: unknown;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return { ok: false, raw };
+  }
+  if (formSubmitSucceeded(data)) return { ok: true, raw };
+  console.error("FormSubmit AJAX response:", raw.slice(0, 800));
+  return { ok: false, raw };
+}
+
+/**
+ * Classic form POST (non-AJAX) — often succeeds when /ajax/ JSON handling differs.
+ * Success is usually a redirect to the thank-you page.
+ */
+async function sendViaFormSubmitClassic(
+  notify: string,
+  d: ValidData,
+  message: string,
+  subject: string,
+): Promise<boolean> {
+  const url = `https://formsubmit.co/${encodeURIComponent(notify)}`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: JSON.stringify({
-      name: d.fullName,
-      email: d.email,
-      message: buildBookingText(d),
-      _subject: `Hotel booking request — ${d.fullName}`,
-    }),
+    body: formSubmitPayload(d, message, subject).toString(),
+    redirect: "manual",
   });
 
-  let data: unknown;
-  try {
-    data = await res.json();
-  } catch {
-    return false;
+  if (res.status === 302 || res.status === 303 || res.status === 307 || res.status === 308)
+    return true;
+  if (res.status === 200) {
+    const text = await res.text();
+    if (/thank you|submission received|success/i.test(text)) return true;
   }
+  return false;
+}
 
-  if (typeof data === "object" && data !== null && "success" in data) {
-    return (data as { success?: boolean }).success === true;
-  }
-  return res.ok;
+async function sendViaFormSubmit(d: ValidData): Promise<boolean> {
+  const notify = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim() || NOTIFY_DEFAULT;
+  const message = buildBookingText(d);
+  const subject = `Hotel booking request — ${d.fullName}`;
+
+  const ajaxEncoded = await sendViaFormSubmitAjax(
+    notify,
+    d,
+    message,
+    subject,
+    "urlencoded",
+  );
+  if (ajaxEncoded.ok) return true;
+
+  const ajaxJson = await sendViaFormSubmitAjax(notify, d, message, subject, "json");
+  if (ajaxJson.ok) return true;
+
+  return sendViaFormSubmitClassic(notify, d, message, subject);
 }
 
 export async function POST(request: Request) {
@@ -190,11 +275,11 @@ export async function POST(request: Request) {
   const formOk = await sendViaFormSubmit(d);
   if (formOk) return Response.json({ ok: true });
 
-  console.error("Hotel booking: FormSubmit failed or returned error");
+  console.error("Hotel booking: all FormSubmit strategies failed");
   return Response.json(
     {
       error:
-        "Could not deliver your request. If this keeps happening, ask the site owner to add RESEND_API_KEY or confirm the FormSubmit inbox.",
+        "We could not deliver your booking request. Confirm the FormSubmit inbox (check spam for the activation link from FormSubmit), or add RESEND_API_KEY in Vercel for reliable delivery.",
     },
     { status: 502 },
   );
