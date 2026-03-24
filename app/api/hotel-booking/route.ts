@@ -106,8 +106,15 @@ function buildBookingText(d: ValidData): string {
   return textLines.join("\n");
 }
 
+function buildMailtoHref(d: ValidData): string {
+  const to = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim() || NOTIFY_DEFAULT;
+  const subject = `Hotel booking request — ${d.fullName}`;
+  const body = buildBookingText(d);
+  return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
 async function sendViaResend(d: ValidData): Promise<{ ok: true } | { ok: false }> {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) return { ok: false };
 
   const to = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim() || NOTIFY_DEFAULT;
@@ -263,11 +270,19 @@ export async function POST(request: Request) {
 
   const d = parsed.data;
 
-  if (process.env.RESEND_API_KEY) {
+  const deliveryFailedMessage =
+    "Automatic delivery did not complete. Use the button below to open your email app with your booking details, or try again in a few minutes.";
+
+  const resendKey = process.env.RESEND_API_KEY?.trim();
+  if (resendKey) {
     const r = await sendViaResend(d);
     if (r.ok) return Response.json({ ok: true });
+    console.error("Hotel booking: Resend failed");
     return Response.json(
-      { error: "Could not send your request. Please try again later." },
+      {
+        error: deliveryFailedMessage,
+        mailtoHref: buildMailtoHref(d),
+      },
       { status: 502 },
     );
   }
@@ -278,8 +293,8 @@ export async function POST(request: Request) {
   console.error("Hotel booking: all FormSubmit strategies failed");
   return Response.json(
     {
-      error:
-        "We could not deliver your booking request. Confirm the FormSubmit inbox (check spam for the activation link from FormSubmit), or add RESEND_API_KEY in Vercel for reliable delivery.",
+      error: deliveryFailedMessage,
+      mailtoHref: buildMailtoHref(d),
     },
     { status: 502 },
   );

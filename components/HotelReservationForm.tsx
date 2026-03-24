@@ -37,6 +37,9 @@ export default function HotelReservationForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [mailtoFallbackHref, setMailtoFallbackHref] = useState<string | null>(
+    null,
+  );
 
   const update = useCallback(
     (key: keyof FormState, value: string) => {
@@ -103,6 +106,7 @@ export default function HotelReservationForm() {
     ev.preventDefault();
     if (!validate()) return;
     setSubmitError(null);
+    setMailtoFallbackHref(null);
     setSubmitting(true);
     try {
       const res = await fetch("/api/hotel-booking", {
@@ -112,11 +116,15 @@ export default function HotelReservationForm() {
       });
       const data = (await res.json().catch(() => ({}))) as {
         error?: string;
+        mailtoHref?: string;
       };
       if (!res.ok) {
         setSubmitError(
           data.error ||
             "Something went wrong. Please try again in a few minutes.",
+        );
+        setMailtoFallbackHref(
+          typeof data.mailtoHref === "string" ? data.mailtoHref : null,
         );
         return;
       }
@@ -135,6 +143,7 @@ export default function HotelReservationForm() {
     setErrors({});
     setSubmitted(false);
     setSubmitError(null);
+    setMailtoFallbackHref(null);
   };
 
   if (submitted) {
@@ -395,9 +404,17 @@ export default function HotelReservationForm() {
         </p>
       </div>
       {submitError ? (
-        <p className="mt-4 text-sm text-red-600" role="alert">
-          {submitError}
-        </p>
+        <div className="mt-4 rounded-lg border border-line bg-canvas p-4 dark:bg-canvas" role="alert">
+          <p className="text-sm text-ink">{submitError}</p>
+          {mailtoFallbackHref ? (
+            <a
+              href={mailtoFallbackHref}
+              className="mt-3 inline-flex rounded-md bg-navy px-5 py-2.5 text-sm font-semibold text-white shadow-corp transition hover:opacity-90"
+            >
+              Open email app with this booking
+            </a>
+          ) : null}
+        </div>
       ) : null}
     </form>
   );
