@@ -4,7 +4,6 @@ import Link from "next/link";
 const nav = [
   { href: "/#about", label: "About" },
   { href: "/hotel-reservations", label: "Hotel reservations" },
-  { href: "/login", label: "Member login" },
   { href: "/membership-services", label: "Membership Services" },
   { href: "/#focus", label: "Focus" },
   { href: "/#contact", label: "Contact" },

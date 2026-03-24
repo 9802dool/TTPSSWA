@@ -68,7 +68,7 @@ export default function ExecutivePage() {
                   key={`${role.title}-${index}`}
                   className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-corp transition hover:shadow-corp-md dark:bg-surface"
                 >
-                  <div className="relative aspect-[5/7] bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
+                  <div className="relative aspect-[3/4] bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
                     <span className="absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md bg-navy text-xs font-bold text-white">
                       {index + 1}
                     </span>
