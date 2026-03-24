@@ -48,8 +48,7 @@ export default function HotelReservationsPage() {
                 Request a stay
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-muted">
-                Replace placeholder copy and connect this form to your hotel
-                partner, PMS, or email automation when ready. Fields marked{" "}
+                Your request is sent to our team by email. Fields marked{" "}
                 <span className="text-red-600">*</span> are required.
               </p>
             </div>

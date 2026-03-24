@@ -36,6 +36,7 @@ export default function HotelReservationForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const update = useCallback(
     (key: keyof FormState, value: string) => {
@@ -98,20 +99,42 @@ export default function HotelReservationForm() {
     ].filter(Boolean);
   }, [submitted, form]);
 
-  const handleSubmit = (ev: React.FormEvent) => {
+  const handleSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
     if (!validate()) return;
+    setSubmitError(null);
     setSubmitting(true);
-    window.setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const res = await fetch("/api/hotel-booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+      };
+      if (!res.ok) {
+        setSubmitError(
+          data.error ||
+            "Something went wrong. Please try again in a few minutes.",
+        );
+        return;
+      }
       setSubmitted(true);
-    }, 400);
+    } catch {
+      setSubmitError(
+        "Could not reach the server. Check your connection and try again.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const reset = () => {
     setForm(initial);
     setErrors({});
     setSubmitted(false);
+    setSubmitError(null);
   };
 
   if (submitted) {
@@ -122,10 +145,9 @@ export default function HotelReservationForm() {
         </p>
         <h3 className="mt-2 text-xl font-bold text-ink">Thank you</h3>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Your hotel reservation request has been recorded. A coordinator will
-          confirm availability and rates by email. This demo does not charge a
-          card or guarantee a room until you connect a backend or email
-          workflow.
+          Your request has been emailed to our team. A coordinator will confirm
+          availability and rates. Submitting this form does not charge a card or
+          guarantee a room until we confirm with you.
         </p>
         <ul className="mt-6 space-y-2 rounded-lg border border-line bg-canvas p-4 text-sm text-ink dark:bg-canvas">
           {summaryLines.map((line) => (
@@ -372,6 +394,11 @@ export default function HotelReservationForm() {
           By submitting, you agree we may contact you about this request.
         </p>
       </div>
+      {submitError ? (
+        <p className="mt-4 text-sm text-red-600" role="alert">
+          {submitError}
+        </p>
+      ) : null}
     </form>
   );
 }
