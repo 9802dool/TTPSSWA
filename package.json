@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "expo": "npm --prefix mobile start",
+    "expo:tunnel": "npm --prefix mobile start -- --tunnel"
   },
   "dependencies": {
     "react": "^18",

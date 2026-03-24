@@ -28,6 +28,14 @@ export default function SiteFooter() {
               </li>
               <li>
                 <Link
+                  href="/hotel-reservations"
+                  className="transition hover:text-white"
+                >
+                  Hotel reservations
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/membership-services"
                   className="transition hover:text-white"
                 >

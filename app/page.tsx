@@ -1,7 +1,12 @@
+import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
-const pillars = [
+const pillars: {
+  title: string;
+  body: string;
+  href?: string;
+}[] = [
   {
     title: "Members Benefits",
     body:
@@ -15,6 +20,12 @@ const pillars = [
   {
     title: "Action",
     body: "Describe programs, fundraisers, or partnerships that turn plans into results.",
+  },
+  {
+    title: "Hotel Reservations",
+    body:
+      "Request accommodation with your check-in and check-out dates and times. Our team will confirm availability and follow up by email.",
+    href: "/hotel-reservations",
   },
 ];
 
@@ -38,9 +49,8 @@ export default function Home() {
             <p className="mb-4 inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
               Official site
             </p>
-            <h1 className="max-w-3xl text-4xl font-bold leading-[1.12] tracking-tight sm:text-5xl md:text-[3.25rem]">
-              Governance and service for{" "}
-              <span className="text-sky-200">TTPSSWA</span>
+            <h1 className="max-w-5xl text-balance text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-[2.65rem]">
+              TRINIDAD AND TOBAGO POLICE SERVICE SOCIAL AND WELFARE ASSOCIATION
             </h1>
             <p className="mt-8 max-w-2xl text-lg leading-relaxed text-slate-300">
               A modern channel for your mission statement, announcements, and member
@@ -109,10 +119,10 @@ export default function Home() {
                 Where we focus
               </h2>
               <p className="mt-4 text-muted">
-                Three pillars you can rename—or replace with metrics and partner logos.
+                Four pillars you can rename—or replace with metrics and partner logos.
               </p>
             </div>
-            <ul className="mt-14 grid gap-6 sm:grid-cols-3">
+            <ul className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
               {pillars.map((item) => (
                 <li
                   key={item.title}
@@ -123,6 +133,14 @@ export default function Home() {
                   <p className="mt-3 flex-1 text-sm leading-relaxed text-muted">
                     {item.body}
                   </p>
+                  {item.href ? (
+                    <Link
+                      href={item.href}
+                      className="mt-4 inline-flex text-sm font-semibold text-brand transition hover:text-brand-hover"
+                    >
+                      Open hotel reservations →
+                    </Link>
+                  ) : null}
                 </li>
               ))}
             </ul>
