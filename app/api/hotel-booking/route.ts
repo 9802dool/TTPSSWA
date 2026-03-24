@@ -113,29 +113,46 @@ function buildMailtoHref(d: ValidData): string {
   return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
+/** Tries verified sender first, then Resend’s shared test address (see BOOKING_FROM_EMAIL in .env.example). */
+function resendFromCandidates(): string[] {
+  const fromEnv = process.env.BOOKING_FROM_EMAIL?.trim();
+  const ordered = [
+    fromEnv,
+    "TTPSSWA Bookings <onboarding@resend.dev>",
+    "onboarding@resend.dev",
+  ].filter((x): x is string => Boolean(x));
+  const seen = new Set<string>();
+  const unique: string[] = [];
+  for (const f of ordered) {
+    if (!seen.has(f)) {
+      seen.add(f);
+      unique.push(f);
+    }
+  }
+  return unique;
+}
+
 async function sendViaResend(d: ValidData): Promise<{ ok: true } | { ok: false }> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) return { ok: false };
 
   const to = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim() || NOTIFY_DEFAULT;
-  const from =
-    process.env.BOOKING_FROM_EMAIL?.trim() ||
-    "TTPSSWA Bookings <onboarding@resend.dev>";
-
   const resend = new Resend(apiKey);
-  const { error } = await resend.emails.send({
-    from,
-    to: [to],
-    replyTo: d.email,
-    subject: `Hotel booking request — ${d.fullName}`,
-    text: buildBookingText(d),
-  });
+  const subject = `Hotel booking request — ${d.fullName}`;
+  const text = buildBookingText(d);
 
-  if (error) {
-    console.error("Resend error:", error);
-    return { ok: false };
+  for (const from of resendFromCandidates()) {
+    const { error } = await resend.emails.send({
+      from,
+      to: [to],
+      replyTo: d.email,
+      subject,
+      text,
+    });
+    if (!error) return { ok: true };
+    console.error("Resend send failed", { from, error });
   }
-  return { ok: true };
+  return { ok: false };
 }
 
 /** FormSubmit returns success as boolean or string; message explains activation / errors. */
@@ -274,23 +291,22 @@ export async function POST(request: Request) {
     "Automatic delivery did not complete. Use the button below to open your email app with your booking details, or try again in a few minutes.";
 
   const resendKey = process.env.RESEND_API_KEY?.trim();
+  let delivered = false;
+
   if (resendKey) {
     const r = await sendViaResend(d);
-    if (r.ok) return Response.json({ ok: true });
-    console.error("Hotel booking: Resend failed");
-    return Response.json(
-      {
-        error: deliveryFailedMessage,
-        mailtoHref: buildMailtoHref(d),
-      },
-      { status: 502 },
-    );
+    if (r.ok) delivered = true;
+    else console.error("Hotel booking: all Resend from-address attempts failed; trying FormSubmit");
   }
 
-  const formOk = await sendViaFormSubmit(d);
-  if (formOk) return Response.json({ ok: true });
+  if (!delivered) {
+    const formOk = await sendViaFormSubmit(d);
+    if (formOk) delivered = true;
+  }
 
-  console.error("Hotel booking: all FormSubmit strategies failed");
+  if (delivered) return Response.json({ ok: true });
+
+  console.error("Hotel booking: Resend and FormSubmit both failed");
   return Response.json(
     {
       error: deliveryFailedMessage,
