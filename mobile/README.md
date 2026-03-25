@@ -44,7 +44,28 @@ eas build --platform android
 eas build --platform ios
 ```
 
-Update `app.json` `ios.bundleIdentifier` and `android.package` if you publish under a different id.
+Or from `mobile`:
+
+- **`npm run build:ios`** — production iPhone/iPad build (installable IPA / TestFlight / App Store).
+- **`npm run build:ios:sim`** — iOS **Simulator** build (preview profile; good for quick Mac testing, not for devices).
+
+### iPhone (iOS) notes
+
+- **Apple Developer Program** (paid) is required for TestFlight and App Store; EAS can manage signing certificates when you follow the prompts.
+- `app.json` sets `ios.bundleIdentifier` to `org.ttpsswa.app` and export compliance via `ITSAppUsesNonExemptEncryption` for App Store Connect.
+- Update `ios.bundleIdentifier` and `android.package` if you publish under different IDs.
+
+### Monorepo + GitHub / EAS (“package.json does not exist in …/mobile”)
+
+This repo is **Next.js at the root** and **Expo in `mobile/`**.
+
+1. **Expo dashboard → your project → [GitHub settings](https://expo.dev)**  
+   Set **Base directory** to **`mobile`** (not empty, not `/`). That tells EAS where `package.json` and `app.json` live after the repo is cloned.
+
+2. **Push `mobile/` to GitHub**  
+   EAS clones your remote; anything not committed/pushed is missing on the builder. Run `git status` and push `main` (or your build branch).
+
+3. **Confirm the linked repo** is **`TTPSSWA`** (or whichever repo actually contains the `mobile` folder).
 
 ## Project layout
 

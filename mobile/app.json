@@ -13,7 +13,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "org.ttpsswa.app"
+      "bundleIdentifier": "org.ttpsswa.app",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -27,6 +30,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "3d58d6f4-6276-43c3-a08c-2a134fe1160d"
+      }
+    },
+    "owner": "dool9892"
   }
 }
