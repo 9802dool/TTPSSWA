@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 const memberBenefitsPillar = {
   title: "Members Benefits",
   body:
-    "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Open the list below to browse all 19 items; expand any row for details.",
+    "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Open the list below to browse all 19 items.",
 } as const;
 
 const memberBenefits: { number: number; title: string }[] = [
@@ -126,7 +126,7 @@ export default function MembershipServicesPage() {
                         All benefits
                       </span>
                       <span className="mt-1 block text-xs text-slate-500">
-                        19 items — tap to expand
+                        19 items
                       </span>
                     </span>
                     <span
@@ -150,7 +150,7 @@ export default function MembershipServicesPage() {
                   <div className="border-t border-white/10 px-1 pb-3 pt-2 sm:px-2">
                     <ul
                       className="list-none space-y-2.5 p-0"
-                      aria-label="Member benefits (expandable)"
+                      aria-label="Member benefits list"
                     >
                       {memberBenefits.map((b) => (
                         <ExpandableBenefit
