@@ -8,20 +8,11 @@ export const metadata: Metadata = {
   description: "TTPSSWA membership services.",
 };
 
-const focusPillars = [
-  {
-    title: "Members Benefits",
-    body:
-      "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Open the list below to browse all 19 items; expand any row for details.",
-  },
-  {
-    title: "Entrepreneurship Corner",
-    body:
-      "Highlight member businesses, training, and resources so entrepreneurs can connect, learn, and grow—replace with your programs and contacts.",
-  },
-] as const;
-
-const [memberBenefitsPillar, ...otherFocusPillars] = focusPillars;
+const memberBenefitsPillar = {
+  title: "Members Benefits",
+  body:
+    "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Open the list below to browse all 19 items; expand any row for details.",
+} as const;
 
 const memberBenefits: { number: number; title: string }[] = [
   { number: 1, title: "Legal Aid Assistance (Criminal/Disciplinary)" },
@@ -115,11 +106,11 @@ export default function MembershipServicesPage() {
                 Where we focus
               </h2>
               <p className="mt-4 text-base leading-relaxed text-slate-400">
-                Two pillars you can rename—or replace with metrics and partner
-                logos.
+                Member benefits and programs—replace with metrics and partner logos
+                when ready.
               </p>
             </div>
-            <ul className="mt-14 grid list-none gap-6 p-0 sm:grid-cols-2 sm:items-start">
+            <ul className="mt-14 grid list-none gap-6 p-0 sm:max-w-3xl">
               <li className="flex flex-col rounded-xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-sm sm:p-8">
                 <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
                 <h3 className="text-lg font-bold text-white">
@@ -174,18 +165,6 @@ export default function MembershipServicesPage() {
                   </div>
                 </details>
               </li>
-              {otherFocusPillars.map((item) => (
-                <li
-                  key={item.title}
-                  className="flex flex-col rounded-xl border border-white/10 bg-slate-900/60 p-8 shadow-lg shadow-black/20 backdrop-blur-sm"
-                >
-                  <div className="mb-4 h-1 w-10 rounded-full bg-brand" />
-                  <h3 className="text-lg font-bold text-white">{item.title}</h3>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-400">
-                    {item.body}
-                  </p>
-                </li>
-              ))}
             </ul>
           </div>
         </section>

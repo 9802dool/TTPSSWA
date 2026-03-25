@@ -13,11 +13,6 @@ const pillars: {
       "Legal aid, health and education support, housing programs, scholarships, and more—designed to serve members. See Membership services for the full list.",
   },
   {
-    title: "Entrepreneurship Corner",
-    body:
-      "Spotlight member-owned businesses, workshops, and networking—edit this text to describe how TTPSSWA supports entrepreneurs.",
-  },
-  {
     title: "Action",
     body: "Describe programs, fundraisers, or partnerships that turn plans into results.",
   },
@@ -119,10 +114,10 @@ export default function Home() {
                 Where we focus
               </h2>
               <p className="mt-4 text-muted">
-                Four pillars you can rename—or replace with metrics and partner logos.
+                Three pillars you can rename—or replace with metrics and partner logos.
               </p>
             </div>
-            <ul className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            <ul className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {pillars.map((item) => (
                 <li
                   key={item.title}
