@@ -8,14 +8,16 @@ import {
   getRegionBySlug,
 } from "@/lib/central-committee-regions";
 
-type Props = { params: { slug: string } };
+/** Next 15 passes `params` as a Promise; Next 14 uses a plain object. */
+type Props = { params: Promise<{ slug: string }> | { slug: string } };
 
 export function generateStaticParams() {
   return CENTRAL_COMMITTEE_REGIONS.map((r) => ({ slug: r.slug }));
 }
 
-export function generateMetadata({ params }: Props): Metadata {
-  const region = getRegionBySlug(params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await Promise.resolve(params);
+  const region = getRegionBySlug(slug);
   if (!region) {
     return { title: "Region | TTPSSWA" };
   }
@@ -25,8 +27,9 @@ export function generateMetadata({ params }: Props): Metadata {
   };
 }
 
-export default function CentralCommitteeRegionPage({ params }: Props) {
-  const region = getRegionBySlug(params.slug);
+export default async function CentralCommitteeRegionPage({ params }: Props) {
+  const { slug } = await Promise.resolve(params);
+  const region = getRegionBySlug(slug);
   if (!region) {
     notFound();
   }

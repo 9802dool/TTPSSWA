@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getAdminCookieName, signAdminSession } from "@/lib/admin-session";
 
+export const runtime = "nodejs";
+
 export async function POST(request: Request) {
   let password = "";
   try {

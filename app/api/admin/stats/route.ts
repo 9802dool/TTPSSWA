@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
 import { getAdminStats } from "@/lib/analytics-storage";
 
+export const runtime = "nodejs";
+
 export async function GET() {
   const cookieStore = await cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
