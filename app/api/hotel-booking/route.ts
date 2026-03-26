@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { recordServiceRequest } from "@/lib/analytics-storage";
 
 const NOTIFY_DEFAULT = "simeondoolarsingh@hotmail.com";
 
@@ -304,7 +305,21 @@ export async function POST(request: Request) {
     if (formOk) delivered = true;
   }
 
-  if (delivered) return Response.json({ ok: true });
+  if (delivered) {
+    void recordServiceRequest("hotel_booking", {
+      fullName: d.fullName,
+      email: d.email,
+      phone: d.phone,
+      checkInDate: d.checkInDate,
+      checkOutDate: d.checkOutDate,
+      checkInTime: d.checkInTime,
+      checkOutTime: d.checkOutTime,
+      rooms: d.rooms,
+      guests: d.guests,
+      notes: d.notes || undefined,
+    });
+    return Response.json({ ok: true });
+  }
 
   console.error("Hotel booking: Resend and FormSubmit both failed");
   return Response.json(

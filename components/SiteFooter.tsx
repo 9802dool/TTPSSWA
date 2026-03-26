@@ -60,6 +60,14 @@ export default function SiteFooter() {
                   Contact
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/admin/login"
+                  className="transition hover:text-white"
+                >
+                  Admin login
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
