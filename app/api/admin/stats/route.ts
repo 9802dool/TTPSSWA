@@ -6,7 +6,7 @@ import { getAdminStats } from "@/lib/analytics-storage";
 export const runtime = "nodejs";
 
 export async function GET() {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
   if (!token || !verifyAdminSession(token)) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });

@@ -83,11 +83,16 @@ export async function getAdminStats(): Promise<AdminStats> {
     const rawList = await redis.lrange(SERVICE_LOG, 0, 199);
     const serviceRequests: ServiceRequestRecord[] = [];
     for (const item of rawList) {
-      if (typeof item !== "string") continue;
       try {
-        serviceRequests.push(JSON.parse(item) as ServiceRequestRecord);
+        const record =
+          typeof item === "string"
+            ? (JSON.parse(item) as ServiceRequestRecord)
+            : (item as ServiceRequestRecord);
+        if (record && record.id && record.serviceType) {
+          serviceRequests.push(record);
+        }
       } catch {
-        /* skip */
+        /* skip unparseable */
       }
     }
     return {

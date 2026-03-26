@@ -7,13 +7,24 @@ import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
 import { getAdminStats } from "@/lib/analytics-storage";
 
 export default async function AdminPage() {
-  const cookieStore = await cookies();
+  const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
   if (!token || !verifyAdminSession(token)) {
     redirect("/admin/login");
   }
 
-  const stats = await getAdminStats();
+  let stats;
+  try {
+    stats = await getAdminStats();
+  } catch (e) {
+    console.error("AdminPage getAdminStats error:", e);
+    stats = {
+      storageConfigured: false,
+      totalVisits: null,
+      visitsByPath: null,
+      serviceRequests: [],
+    };
+  }
   const pathEntries = stats.visitsByPath
     ? Object.entries(stats.visitsByPath).sort((a, b) => b[1] - a[1])
     : [];
