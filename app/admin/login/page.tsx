@@ -23,19 +23,38 @@ export default function AdminLoginPage() {
             >
               <p className="font-medium">Admin sign-in is not ready</p>
               <p className="mt-2 text-sm opacity-90">
-                Add{" "}
-                <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
-                  ADMIN_PASSWORD
-                </code>{" "}
-                (at least 8 characters) to{" "}
-                <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
-                  .env.local
-                </code>{" "}
-                in the TTPSSWA project folder, then restart{" "}
-                <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
-                  npm run dev
-                </code>
-                .
+                {process.env.VERCEL ? (
+                  <>
+                    Add{" "}
+                    <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
+                      ADMIN_PASSWORD
+                    </code>{" "}
+                    (at least 8 characters) in{" "}
+                    <strong>Vercel → Project → Settings → Environment Variables</strong>
+                    , enable it for Production (and Preview if needed), then{" "}
+                    <strong>Redeploy</strong>.{" "}
+                    <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
+                      .env.local
+                    </code>{" "}
+                    is not deployed to Vercel.
+                  </>
+                ) : (
+                  <>
+                    Add{" "}
+                    <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
+                      ADMIN_PASSWORD
+                    </code>{" "}
+                    (at least 8 characters) to{" "}
+                    <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
+                      .env.local
+                    </code>{" "}
+                    in the TTPSSWA project folder, then restart{" "}
+                    <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
+                      npm run dev
+                    </code>
+                    .
+                  </>
+                )}
               </p>
             </div>
           ) : null}
