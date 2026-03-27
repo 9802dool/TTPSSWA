@@ -4,7 +4,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AdminMemberApplicationActions } from "@/components/AdminMemberApplicationActions";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
+import { MemberServiceRequestsSection } from "@/components/MemberServiceRequestsSection";
 import SiteHeader from "@/components/SiteHeader";
+import { getServiceRequestsForEmail } from "@/lib/analytics-storage";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
 import { getPendingMemberSignupById } from "@/lib/member-signup-storage";
 
@@ -38,6 +40,8 @@ export default async function AdminMemberProfilePage({ params }: Props) {
   if (!member) {
     notFound();
   }
+
+  const serviceRequests = await getServiceRequestsForEmail(member.email);
 
   const photoSrc = `data:${member.photoMimeType};base64,${member.photoBase64}`;
 
@@ -209,6 +213,11 @@ export default async function AdminMemberProfilePage({ params }: Props) {
             </dl>
           </div>
         </div>
+
+        <MemberServiceRequestsSection
+          requests={serviceRequests}
+          variant="admin"
+        />
       </main>
     </div>
   );

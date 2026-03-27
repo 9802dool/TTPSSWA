@@ -3,9 +3,11 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberLogoutButton } from "@/components/MemberLogoutButton";
+import { MemberServiceRequestsSection } from "@/components/MemberServiceRequestsSection";
 import { MembersLoginForm } from "@/components/MembersLoginForm";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { getServiceRequestsForEmail } from "@/lib/analytics-storage";
 import { getMemberCookieName, verifyMemberSession } from "@/lib/member-session";
 import { getPendingMemberSignupById } from "@/lib/member-signup-storage";
 import { safeInternalNextPath } from "@/lib/safe-next-path";
@@ -40,6 +42,11 @@ export default async function MembersLoginPage({ searchParams }: Props) {
     redirect(nextPath);
   }
 
+  const serviceRequests =
+    sessionActive && member
+      ? await getServiceRequestsForEmail(member.email)
+      : [];
+
   return (
     <>
       <SiteHeader />
@@ -64,9 +71,15 @@ export default async function MembersLoginPage({ searchParams }: Props) {
                   </p>
                 ) : null}
                 <p className="mt-4 text-sm text-muted">
-                  Your application has been approved. Member services will expand
-                  here as they become available.
+                  Your application has been approved. Below are service requests
+                  tied to your email (for example hotel reservations).
                 </p>
+                <div className="mt-8">
+                  <MemberServiceRequestsSection
+                    requests={serviceRequests}
+                    variant="member"
+                  />
+                </div>
                 <div className="mt-6 flex flex-wrap items-center gap-3">
                   <MemberLogoutButton />
                   <Link

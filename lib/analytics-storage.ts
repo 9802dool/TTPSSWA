@@ -111,3 +111,89 @@ export async function getAdminStats(): Promise<AdminStats> {
     };
   }
 }
+
+function extractEmailFromPayload(payload: Record<string, unknown>): string | null {
+  const e = payload.email ?? payload.Email;
+  if (typeof e === "string" && e.trim()) return e.trim().toLowerCase();
+  return null;
+}
+
+/**
+ * Service requests (hotel booking, etc.) whose stored payload email matches the member.
+ * Scans the same Redis list as the admin service log (newest-first trim).
+ */
+export async function getServiceRequestsForEmail(
+  email: string,
+): Promise<ServiceRequestRecord[]> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return [];
+  const redis = getRedis();
+  if (!redis) return [];
+  try {
+    const rawList = await redis.lrange(SERVICE_LOG, 0, 499);
+    const out: ServiceRequestRecord[] = [];
+    for (const item of rawList) {
+      try {
+        const record =
+          typeof item === "string"
+            ? (JSON.parse(item) as ServiceRequestRecord)
+            : (item as ServiceRequestRecord);
+        if (!record?.id || !record.serviceType || !record.payload) continue;
+        const p = record.payload as Record<string, unknown>;
+        if (extractEmailFromPayload(p) === normalized) {
+          out.push(record);
+        }
+      } catch {
+        /* skip */
+      }
+    }
+    out.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return out;
+  } catch (e) {
+    console.error("getServiceRequestsForEmail:", e);
+    return [];
+  }
+}
+
+export type HotelReservationDatabase = {
+  storageConfigured: boolean;
+  records: ServiceRequestRecord[];
+};
+
+/**
+ * All hotel booking rows from the service log (Redis), newest first.
+ * Same source as successful submissions on the public hotel form.
+ */
+export async function getHotelReservationRecords(): Promise<HotelReservationDatabase> {
+  const redis = getRedis();
+  if (!redis) {
+    return { storageConfigured: false, records: [] };
+  }
+  try {
+    const rawList = await redis.lrange(SERVICE_LOG, 0, 499);
+    const out: ServiceRequestRecord[] = [];
+    for (const item of rawList) {
+      try {
+        const record =
+          typeof item === "string"
+            ? (JSON.parse(item) as ServiceRequestRecord)
+            : (item as ServiceRequestRecord);
+        if (
+          !record?.id ||
+          record.serviceType !== "hotel_booking" ||
+          !record.payload
+        ) {
+          continue;
+        }
+        out.push(record);
+      } catch {
+        /* skip */
+      }
+    }
+    out.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    return { storageConfigured: true, records: out };
+  } catch (e) {
+    console.error("getHotelReservationRecords:", e);
+    return { storageConfigured: true, records: [] };
+  }
+}

@@ -85,7 +85,13 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
               {allMembers.length === 1 ? "" : "s"})
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/admin/hotel-reservations"
+              className="text-sm text-[var(--brand)] hover:underline"
+            >
+              Hotel reservations
+            </Link>
             <Link
               href="/"
               className="text-sm text-[var(--brand)] hover:underline"

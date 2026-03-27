@@ -81,6 +81,12 @@ export default async function AdminPage({ searchParams }: Props) {
               Members database
             </Link>
             <Link
+              href="/admin/hotel-reservations"
+              className="text-sm text-[var(--brand)] hover:underline"
+            >
+              Hotel reservations
+            </Link>
+            <Link
               href="/"
               className="text-sm text-[var(--brand)] hover:underline"
             >
@@ -326,10 +332,20 @@ export default async function AdminPage({ searchParams }: Props) {
         </section>
 
         <section>
-          <h2 className="text-base font-semibold">Service requests</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            Successful submissions (hotel bookings and future services).
-          </p>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-base font-semibold">Service requests</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">
+                Successful submissions (hotel bookings and future services).
+              </p>
+            </div>
+            <Link
+              href="/admin/hotel-reservations"
+              className="shrink-0 text-sm font-medium text-[var(--brand)] hover:underline"
+            >
+              Hotel reservation database →
+            </Link>
+          </div>
           <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
             {stats.serviceRequests.length === 0 ? (
               <p className="p-6 text-sm text-[var(--muted)]">
