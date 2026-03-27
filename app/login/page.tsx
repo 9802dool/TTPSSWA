@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MemberSignupForm } from "@/components/MemberSignupForm";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -15,7 +16,7 @@ export default function LoginPage() {
       <SiteHeader />
       <main className="min-h-[calc(100vh-4.25rem)] bg-canvas pt-[4.25rem]">
         <section className="border-b border-line bg-surface py-16 dark:bg-canvas">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
               Account
             </p>
@@ -23,22 +24,18 @@ export default function LoginPage() {
               Signup / Login
             </h1>
             <p className="mt-4 text-muted">
-              Choose an option below. Member sign-up is handled through our contact
-              channels; members can use the member login when available.
+              Complete the member sign-up form below, or use members login when
+              available.
             </p>
-            <div className="mt-10 grid gap-6 sm:grid-cols-2">
-              <div className="flex flex-col rounded-xl border border-line bg-canvas p-8 shadow-corp dark:bg-surface">
+            <div className="mt-10 grid gap-8 lg:grid-cols-2 lg:items-start">
+              <div className="flex flex-col rounded-xl border border-line bg-canvas p-6 shadow-corp sm:p-8 dark:bg-surface">
                 <div className="mb-4 h-1 w-10 rounded-full bg-brand" />
                 <h2 className="text-lg font-bold text-ink">Sign up</h2>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-muted">
-                  Get in touch to register or learn about membership.
+                <p className="mt-2 text-sm leading-relaxed text-muted">
+                  Submit your details and a facial photo. Fields marked * are
+                  required.
                 </p>
-                <Link
-                  href="/#contact"
-                  className="mt-6 inline-flex min-h-[44px] items-center justify-center rounded-md bg-brand px-6 text-sm font-semibold text-white shadow-corp-md transition hover:bg-brand-hover"
-                >
-                  Contact us
-                </Link>
+                <MemberSignupForm />
               </div>
               <div className="flex flex-col rounded-xl border border-line bg-canvas p-8 shadow-corp dark:bg-surface">
                 <div className="mb-4 h-1 w-10 rounded-full bg-brand" />
