@@ -166,6 +166,30 @@ export default function Home() {
           </div>
         </section>
 
+        <section
+          id="partnership"
+          className="scroll-mt-24 border-b border-line bg-surface py-20 dark:bg-canvas"
+        >
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                Partnership
+              </p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink md:text-4xl">
+                Working together
+              </h2>
+              <p className="mt-4 text-muted">
+                Add details about corporate partners, sponsors, and collaborative
+                programs—edit this copy in{" "}
+                <code className="rounded bg-brand-subtle px-1.5 py-0.5 text-sm text-slate-700 dark:bg-navy-muted dark:text-slate-200">
+                  app/page.tsx
+                </code>
+                .
+              </p>
+            </div>
+          </div>
+        </section>
+
         <section id="contact" className="scroll-mt-24 bg-surface py-20 dark:bg-canvas">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
