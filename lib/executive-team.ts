@@ -69,7 +69,17 @@ Beyond his operational duties, ACP Subero serves as a Trustee of the TTPS Social
 
 Respected for his disciplined leadership and community focus, ACP Subero continues to drive positive change in policing, ensuring that the Trinidad and Tobago Police Service remains a pillar of safety, trust, and empowerment for all citizens.`,
   },
-  { title: "Special Reserve Police Representative", name: "Kevin Nicholls" },
+  {
+    title: "Special Reserve Police Representative",
+    name: "Kevin Nicholls",
+    bio: `Known affectionately as \u201cCold in d Ice,\u201d Police Constable (PC) Kevin Nicholls is a respected and passionate advocate within the Trinidad and Tobago Police Service. With over 19 years of service as a Special Reserve Police (SRP) Officer, he has become widely recognized for championing SRP rights, focusing on improved working conditions, job security, and recognition.
+
+Renowned for his leadership and outspoken advocacy, PC Nicholls has played a pivotal role in the SRP ratification process, striving to become the first SRP elected to the Executive of the TTPS Social and Welfare Association. His efforts reflect a broader push for equality, inclusion, and representation within the service.
+
+Beyond policing, PC Nicholls brings a background in engineering and a strong focus on entrepreneurship, encouraging officers to pursue financial independence and personal growth. His work continues to inspire change, both within the police force and across the wider community.
+
+Respected for his dedication and vision, PC Nicholls remains a powerful voice for SRP officers, committed to advancing welfare, fairness, and empowerment in the Trinidad and Tobago Police Service.`,
+  },
   { title: "Municipal Police Representative", name: "McGuirk" },
   { title: "Trustee", name: "Adrian Andrews" },
   { title: "Trustee", name: "Jason Johnson" },
