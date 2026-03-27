@@ -2,12 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 const nav = [
-  { href: "/#about", label: "About" },
+  { href: "/", label: "Home" },
   { href: "/membership-services", label: "Membership Services" },
   { href: "/#subsidiaries", label: "Subsidiaries" },
   { href: "/#contact", label: "Contact" },
-  { href: "/hotel-reservations", label: "Hotel reservations" },
-  { href: "/executive", label: "Executive Team" },
   {
     href: "/central-committee-representatives",
     label: "Central Committee Representative",
