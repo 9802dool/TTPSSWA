@@ -18,8 +18,8 @@ type ExecutiveRole = {
 
 const roles: ExecutiveRole[] = [
   { title: "President", name: "Ishmael Pitt" },
-  { title: "Vice President" },
-  { title: "Secretary" },
+  { title: "Vice President", name: "Owie Russell" },
+  { title: "Secretary", name: "Natalie John" },
   { title: "Assistant Secretary" },
   { title: "Treasurer" },
   { title: "Special Reserve Police Representative" },
