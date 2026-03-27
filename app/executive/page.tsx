@@ -33,13 +33,18 @@ const roles = [
   { title: "Trustee", subtitle: "Board of trustees — seat 2" },
 ] as const;
 
-/** p1–p5 → President through Treasurer (same order as `roles`). */
+/** p1–p10 match `roles` order (President … both Trustees). No crop: `object-contain`. */
 const EXEC_PHOTOS = [
   `${EX_PICS}/p1.JPG`,
   `${EX_PICS}/p2.JPG`,
   `${EX_PICS}/p3.JPG`,
   `${EX_PICS}/p4.JPG`,
   `${EX_PICS}/p5.JPG`,
+  `${EX_PICS}/p6.JPG`,
+  `${EX_PICS}/p7.JPG`,
+  `${EX_PICS}/p8.JPG`,
+  `${EX_PICS}/p9.JPG`,
+  `${EX_PICS}/p10.JPG`,
 ] as const;
 
 export default function ExecutivePage() {
