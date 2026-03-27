@@ -7,7 +7,14 @@ import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
 import { getAdminStats } from "@/lib/analytics-storage";
 import { getPendingMemberSignups } from "@/lib/member-signup-storage";
 
-export default async function AdminPage() {
+type Props = {
+  searchParams: Promise<{ q?: string }> | { q?: string };
+};
+
+export default async function AdminPage({ searchParams }: Props) {
+  const sp = await Promise.resolve(searchParams);
+  const nameQuery = (sp.q ?? "").trim();
+
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
   if (!token || !verifyAdminSession(token)) {
@@ -36,6 +43,16 @@ export default async function AdminPage() {
   const pathEntries = stats.visitsByPath
     ? Object.entries(stats.visitsByPath).sort((a, b) => b[1] - a[1])
     : [];
+
+  const qLower = nameQuery.toLowerCase();
+  const filteredSignups =
+    nameQuery.length > 0
+      ? pendingSignups.filter((m) => {
+          const name = m.fullName.toLowerCase();
+          const reg = m.regimentalNumber.toLowerCase();
+          return name.includes(qLower) || reg.includes(qLower);
+        })
+      : pendingSignups;
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
@@ -109,12 +126,63 @@ export default async function AdminPage() {
             </Link>
             . Requires the same Upstash Redis variables as analytics.
           </p>
+          {pendingSignups.length > 0 ? (
+            <form
+              method="get"
+              action="/admin"
+              className="mt-4 flex flex-wrap items-end gap-2"
+              role="search"
+            >
+              <div className="min-w-[min(100%,16rem)] flex-1">
+                <label
+                  htmlFor="member-name-search"
+                  className="block text-xs font-medium text-[var(--muted)]"
+                >
+                  Search members
+                </label>
+                <input
+                  id="member-name-search"
+                  name="q"
+                  type="search"
+                  defaultValue={nameQuery}
+                  placeholder="Name or regimental number"
+                  autoComplete="off"
+                  className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--fg)] outline-none ring-[var(--brand)] placeholder:text-[var(--muted)] focus:ring-2"
+                />
+              </div>
+              <button
+                type="submit"
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--fg)] shadow-sm transition hover:bg-[var(--bg)]"
+              >
+                Search
+              </button>
+              {nameQuery ? (
+                <Link
+                  href="/admin"
+                  className="rounded-lg px-3 py-2 text-sm text-[var(--brand)] hover:underline"
+                >
+                  Clear
+                </Link>
+              ) : null}
+            </form>
+          ) : null}
           <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
             {pendingSignups.length === 0 ? (
               <p className="p-6 text-sm text-[var(--muted)]">
                 {stats.storageConfigured
                   ? "No pending signups yet."
                   : "Redis not configured — signups cannot be queued until environment variables are set."}
+              </p>
+            ) : filteredSignups.length === 0 ? (
+              <p className="p-6 text-sm text-[var(--muted)]">
+                No members match{" "}
+                <span className="font-medium text-[var(--fg)]">
+                  &quot;{nameQuery}&quot;
+                </span>
+                .{" "}
+                <Link href="/admin" className="text-[var(--brand)] hover:underline">
+                  Clear search
+                </Link>
               </p>
             ) : (
               <table className="w-full min-w-[1040px] text-left text-sm">
@@ -133,7 +201,7 @@ export default async function AdminPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pendingSignups.map((row) => (
+                  {filteredSignups.map((row) => (
                     <tr
                       key={row.id}
                       className="border-b border-[var(--border)] align-top last:border-0"
