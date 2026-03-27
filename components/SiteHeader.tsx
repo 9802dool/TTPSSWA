@@ -7,6 +7,7 @@ const nav = [
   { href: "/#subsidiaries", label: "Subsidiaries" },
   { href: "/#partnership", label: "Partnership" },
   { href: "/#contact", label: "Contact" },
+  { href: "/login", label: "Signup / Login" },
 ];
 
 const linkClass =
