@@ -53,7 +53,7 @@ export default function CentralCommitteePage() {
                 Divisions
               </p>
               <h2 className="mt-3 text-2xl font-bold tracking-tight text-white md:text-3xl">
-                Divisions and sections
+                Divisions and Sections
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-300">
                 Select a division to open its page.
