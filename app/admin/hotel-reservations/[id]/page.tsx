@@ -165,14 +165,6 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
                 {str(p, "notes") || "—"}
               </dd>
             </div>
-            <div className="border-t border-[var(--border)] pt-4">
-              <dt className="text-[var(--muted)]">Raw payload</dt>
-              <dd className="mt-2">
-                <pre className="max-h-64 overflow-auto rounded-lg border border-[var(--border)] bg-[var(--bg)] p-3 font-mono text-xs text-[var(--fg)]">
-                  {JSON.stringify(record.payload, null, 2)}
-                </pre>
-              </dd>
-            </div>
           </dl>
         </div>
       </main>
