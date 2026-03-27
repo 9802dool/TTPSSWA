@@ -88,6 +88,12 @@ export default function Home() {
               >
                 Executive Team
               </a>
+              <Link
+                href="/central-committee-representatives"
+                className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-4 text-center text-sm font-semibold leading-snug text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto sm:px-8"
+              >
+                Central Committee Representative
+              </Link>
             </div>
           </div>
         </section>
