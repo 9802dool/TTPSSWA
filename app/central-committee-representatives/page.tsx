@@ -48,17 +48,9 @@ export default function CentralCommitteePage() {
             }}
           />
           <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Divisions
-              </p>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight text-white md:text-3xl">
-                Divisions and Sections
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                Select a division to open its page.
-              </p>
-            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+              Divisions and Sections
+            </h2>
             <ul className="mt-10 flex list-none flex-col items-stretch gap-4 p-0 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
               {CENTRAL_COMMITTEE_REGIONS.map((region) => (
                 <li key={region.slug}>
