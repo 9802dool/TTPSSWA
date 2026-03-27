@@ -1,3 +1,4 @@
+import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import { AdminLoginForm } from "@/components/AdminLoginForm";
 
@@ -59,6 +60,17 @@ export default function AdminLoginPage() {
             </div>
           ) : null}
           <AdminLoginForm />
+          {configured ? (
+            <p className="text-center text-sm text-[var(--muted)]">
+              After sign-in you can open{" "}
+              <strong className="text-[var(--fg)]">Signup pending</strong> and{" "}
+              <strong className="text-[var(--fg)]">View profile</strong> for each
+              member.{" "}
+              <Link href="/login" className="text-[var(--brand)] hover:underline">
+                Public signup form
+              </Link>
+            </p>
+          ) : null}
         </div>
       </div>
     </>
