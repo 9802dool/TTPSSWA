@@ -53,6 +53,25 @@ export async function getPendingMemberSignupById(
   return all.find((r) => r.id === id) ?? null;
 }
 
+/** Match username (case-insensitive) or email (case-insensitive). Requires passwordHash on record. */
+export async function findPendingMemberByUsernameOrEmail(
+  identifier: string,
+): Promise<PendingMemberSignup | null> {
+  const q = identifier.trim();
+  if (!q) return null;
+  const qLower = q.toLowerCase();
+  const all = await getPendingMemberSignups();
+  for (const r of all) {
+    if (!r.passwordHash) continue;
+    const user = (r.username ?? "").trim().toLowerCase();
+    const mail = (r.email ?? "").trim().toLowerCase();
+    if (user === qLower || mail === qLower) {
+      return r;
+    }
+  }
+  return null;
+}
+
 export async function getPendingMemberSignups(): Promise<PendingMemberSignup[]> {
   const redis = getRedis();
   if (!redis) return [];
