@@ -6,7 +6,7 @@ import SiteHeader from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Signup / Login | TTPSSWA",
   description:
-    "Sign up or log in to TTPSSWA member and admin services.",
+    "Sign up or log in to TTPSSWA member services.",
 };
 
 export default function LoginPage() {
@@ -24,7 +24,7 @@ export default function LoginPage() {
             </h1>
             <p className="mt-4 text-muted">
               Choose an option below. Member sign-up is handled through our contact
-              channels; administrators use the secure admin sign-in.
+              channels; members can use the member login when available.
             </p>
             <div className="mt-10 grid gap-6 sm:grid-cols-2">
               <div className="flex flex-col rounded-xl border border-line bg-canvas p-8 shadow-corp dark:bg-surface">
@@ -42,15 +42,15 @@ export default function LoginPage() {
               </div>
               <div className="flex flex-col rounded-xl border border-line bg-canvas p-8 shadow-corp dark:bg-surface">
                 <div className="mb-4 h-1 w-10 rounded-full bg-brand" />
-                <h2 className="text-lg font-bold text-ink">Log in</h2>
+                <h2 className="text-lg font-bold text-ink">Members login</h2>
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-muted">
-                  Administrators can access the dashboard with a password.
+                  Access member resources and updates when sign-in is enabled.
                 </p>
                 <Link
-                  href="/admin/login"
+                  href="/members/login"
                   className="mt-6 inline-flex min-h-[44px] items-center justify-center rounded-md border border-line bg-surface px-6 text-sm font-semibold text-ink shadow-corp transition hover:border-brand/40 hover:bg-brand-subtle dark:bg-canvas"
                 >
-                  Admin login
+                  Members login
                 </Link>
               </div>
             </div>
