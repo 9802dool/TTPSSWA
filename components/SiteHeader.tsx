@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 const nav = [
@@ -16,25 +15,7 @@ const linkClass =
 export default function SiteHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-line bg-surface/95 shadow-corp backdrop-blur-md dark:bg-surface/90">
-      <div className="mx-auto flex min-h-[4.25rem] max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
-        <div className="flex min-w-0 shrink-0 items-center gap-3 sm:gap-4">
-          <Link
-            href="/"
-            className="flex min-w-0 items-center gap-2 text-lg font-bold tracking-tight text-navy dark:text-ink"
-          >
-            <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-md ring-1 ring-line shadow-corp">
-              <Image
-                src="/icon1.png"
-                alt="TTPSSWA"
-                width={32}
-                height={32}
-                className="h-full w-full object-cover"
-                priority
-              />
-            </span>
-            <span className="truncate">TTPSSWA</span>
-          </Link>
-        </div>
+      <div className="mx-auto flex min-h-[4.25rem] max-w-6xl flex-wrap items-center justify-end gap-x-4 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
         <nav
           className="flex max-w-[min(100%,52rem)] flex-wrap items-center justify-end gap-x-0.5 gap-y-1 sm:gap-x-1"
           aria-label="Primary"
