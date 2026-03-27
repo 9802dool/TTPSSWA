@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { AdminQuickAcceptButton } from "@/components/AdminQuickAcceptButton";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
 import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
@@ -123,13 +124,14 @@ export default async function AdminPage({ searchParams }: Props) {
         ) : null}
 
         <section>
-          <h2 className="text-base font-semibold">Signup pending</h2>
+          <h2 className="text-base font-semibold">Applications pending review</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Member applications submitted through the{" "}
+            New submissions from{" "}
             <Link href="/login" className="text-[var(--brand)] hover:underline">
               Signup / Login
-            </Link>{" "}
-            page.
+            </Link>
+            . Accept an applicant to allow members login. Pending applicants
+            cannot sign in.
           </p>
           {pendingSignups.length > 0 ? (
             <form
@@ -190,9 +192,10 @@ export default async function AdminPage({ searchParams }: Props) {
                 </Link>
               </p>
             ) : (
-              <table className="w-full min-w-[1200px] text-left text-sm">
+              <table className="w-full min-w-[1280px] text-left text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--bg)]">
                   <tr>
+                    <th className="px-4 py-3 font-medium">Accept</th>
                     <th className="px-4 py-3 font-medium">Profile</th>
                     <th className="px-4 py-3 font-medium">Submitted (UTC)</th>
                     <th className="px-4 py-3 font-medium">Photo</th>
@@ -213,6 +216,9 @@ export default async function AdminPage({ searchParams }: Props) {
                       key={row.id}
                       className="border-b border-[var(--border)] align-top last:border-0"
                     >
+                      <td className="whitespace-nowrap px-4 py-3 align-middle">
+                        <AdminQuickAcceptButton memberId={row.id} />
+                      </td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <Link
                           href={`/admin/members/${encodeURIComponent(row.id)}`}

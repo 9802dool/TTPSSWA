@@ -11,7 +11,7 @@ import { getPendingMemberSignupById } from "@/lib/member-signup-storage";
 export const metadata: Metadata = {
   title: "Members login | TTPSSWA",
   description:
-    "Sign in with your username or email and password after submitting a membership application.",
+    "Sign in after your membership application has been approved by an administrator.",
 };
 
 export default async function MembersLoginPage() {
@@ -21,6 +21,9 @@ export default async function MembersLoginPage() {
   const member = memberId
     ? await getPendingMemberSignupById(memberId)
     : null;
+
+  const sessionActive =
+    member && member.applicationStatus === "accepted";
 
   return (
     <>
@@ -34,7 +37,7 @@ export default async function MembersLoginPage() {
             <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink md:text-4xl">
               Members login
             </h1>
-            {member ? (
+            {sessionActive ? (
               <div className="mt-8 rounded-xl border border-line bg-canvas p-6 shadow-corp dark:bg-surface">
                 <p className="text-sm text-muted">Signed in as</p>
                 <p className="mt-1 text-lg font-semibold text-ink">
@@ -46,7 +49,7 @@ export default async function MembersLoginPage() {
                   </p>
                 ) : null}
                 <p className="mt-4 text-sm text-muted">
-                  Your application is pending review. Member services will expand
+                  Your application has been approved. Member services will expand
                   here as they become available.
                 </p>
                 <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -65,17 +68,43 @@ export default async function MembersLoginPage() {
                   </Link>
                 </div>
               </div>
+            ) : memberId && member && member.applicationStatus !== "accepted" ? (
+              <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-900 dark:bg-amber-950/30">
+                <p className="font-medium text-amber-950 dark:text-amber-100">
+                  Members area not available for this account
+                </p>
+                <p className="mt-2 text-sm text-amber-900/90 dark:text-amber-100/90">
+                  {member.applicationStatus === "pending"
+                    ? "Your application is still under review. You will be able to sign in here after an administrator accepts it."
+                    : "This application was not approved for online member access."}
+                </p>
+                <div className="mt-6">
+                  <MemberLogoutButton />
+                </div>
+              </div>
+            ) : memberId && !member ? (
+              <div className="mt-8 rounded-xl border border-line bg-canvas p-6 dark:bg-surface">
+                <p className="text-sm text-muted">
+                  Your session is no longer valid. Please sign in again.
+                </p>
+                <div className="mt-4">
+                  <MemberLogoutButton />
+                </div>
+              </div>
             ) : (
               <>
                 <p className="mt-4 text-muted">
-                  Use the <strong className="text-ink">username or email</strong>{" "}
-                  and <strong className="text-ink">password</strong> from your
-                  membership application. Need an account?{" "}
+                  Only applicants whose membership has been{" "}
+                  <strong className="text-ink">accepted by an administrator</strong>{" "}
+                  can sign in. Use your{" "}
+                  <strong className="text-ink">username or email</strong> and{" "}
+                  <strong className="text-ink">password</strong> from your
+                  application.{" "}
                   <Link
                     href="/login"
                     className="font-medium text-brand hover:text-brand-hover"
                   >
-                    Apply here
+                    Submit an application
                   </Link>
                   .
                 </p>

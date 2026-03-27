@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { findPendingMemberByUsernameOrEmail } from "@/lib/member-signup-storage";
+import { findAcceptedMemberByUsernameOrEmail } from "@/lib/member-signup-storage";
 import {
   getMemberCookieName,
   isMemberSessionConfigured,
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const member = await findPendingMemberByUsernameOrEmail(identifier);
+  const member = await findAcceptedMemberByUsernameOrEmail(identifier);
   if (!member || !member.passwordHash) {
     return NextResponse.json(
       { ok: false, error: "Invalid username or password." },

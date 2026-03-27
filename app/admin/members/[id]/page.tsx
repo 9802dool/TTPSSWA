@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { AdminMemberApplicationActions } from "@/components/AdminMemberApplicationActions";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
@@ -54,7 +55,7 @@ export default async function AdminMemberProfilePage({ params }: Props) {
               Member profile
             </h1>
             <p className="text-sm text-[var(--muted)]">
-              Pending signup · Submitted {member.createdAt} (UTC)
+              Submitted {member.createdAt} (UTC)
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -101,9 +102,28 @@ export default async function AdminMemberProfilePage({ params }: Props) {
             <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
               Status
             </p>
-            <p className="mt-1 font-medium capitalize text-amber-700 dark:text-amber-400">
-              {member.status}
+            <p
+              className={`mt-1 font-medium capitalize ${
+                member.applicationStatus === "accepted"
+                  ? "text-green-700 dark:text-green-400"
+                  : member.applicationStatus === "rejected"
+                    ? "text-red-700 dark:text-red-400"
+                    : "text-amber-700 dark:text-amber-400"
+              }`}
+            >
+              {member.applicationStatus}
             </p>
+            <div className="mt-4 border-t border-[var(--border)] pt-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+                Admin actions
+              </p>
+              <div className="mt-2">
+                <AdminMemberApplicationActions
+                  memberId={member.id}
+                  applicationStatus={member.applicationStatus}
+                />
+              </div>
+            </div>
           </div>
           <div className="grid gap-8 p-6 sm:grid-cols-[minmax(0,220px)_1fr] sm:items-start">
             <div className="mx-auto w-full max-w-[220px]">
