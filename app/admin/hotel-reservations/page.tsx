@@ -176,9 +176,10 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
                   : "No records match your search."}
             </p>
           ) : (
-            <table className="w-full min-w-[1100px] text-left text-sm">
+            <table className="w-full min-w-[1180px] text-left text-sm">
               <thead className="border-b border-[var(--border)] bg-[var(--bg)]">
                 <tr>
+                  <th className="px-4 py-3 font-medium">Details</th>
                   <th className="px-4 py-3 font-medium">Submitted (UTC)</th>
                   <th className="px-4 py-3 font-medium">Name</th>
                   <th className="px-4 py-3 font-medium">Email</th>
@@ -198,6 +199,14 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
                       key={row.id}
                       className="border-b border-[var(--border)] align-top last:border-0"
                     >
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <Link
+                          href={`/admin/hotel-reservations/${encodeURIComponent(row.id)}`}
+                          className="font-medium text-[var(--brand)] hover:underline"
+                        >
+                          View
+                        </Link>
+                      </td>
                       <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[var(--muted)]">
                         {row.createdAt.replace("T", " ").replace(/\.\d{3}Z$/, "")}
                       </td>

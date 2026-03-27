@@ -197,3 +197,48 @@ export async function getHotelReservationRecords(): Promise<HotelReservationData
     return { storageConfigured: true, records: [] };
   }
 }
+
+export type HotelReservationLookup = {
+  storageConfigured: boolean;
+  record: ServiceRequestRecord | null;
+};
+
+/**
+ * Single hotel booking row by record id, or null if not in the current log window.
+ */
+export async function getHotelReservationById(
+  id: string,
+): Promise<HotelReservationLookup> {
+  const decoded = decodeURIComponent(id).trim();
+  if (!decoded) {
+    return { storageConfigured: false, record: null };
+  }
+  const redis = getRedis();
+  if (!redis) {
+    return { storageConfigured: false, record: null };
+  }
+  try {
+    const rawList = await redis.lrange(SERVICE_LOG, 0, 499);
+    for (const item of rawList) {
+      try {
+        const record =
+          typeof item === "string"
+            ? (JSON.parse(item) as ServiceRequestRecord)
+            : (item as ServiceRequestRecord);
+        if (
+          record?.id === decoded &&
+          record.serviceType === "hotel_booking" &&
+          record.payload
+        ) {
+          return { storageConfigured: true, record };
+        }
+      } catch {
+        /* skip */
+      }
+    }
+    return { storageConfigured: true, record: null };
+  } catch (e) {
+    console.error("getHotelReservationById:", e);
+    return { storageConfigured: true, record: null };
+  }
+}
