@@ -2,11 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeInternalNextPath } from "@/lib/safe-next-path";
 
 const inputClass =
   "mt-1 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink shadow-sm outline-none ring-brand placeholder:text-muted focus:ring-2 dark:bg-canvas";
 
-export function MembersLoginForm() {
+type Props = {
+  /** Server-validated path (e.g. from ?next=) to open after successful sign-in. */
+  redirectAfterLogin?: string | null;
+};
+
+export function MembersLoginForm({ redirectAfterLogin }: Props) {
   const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -34,6 +40,8 @@ export function MembersLoginForm() {
         setMessage(data.error ?? "Sign-in failed. Please try again.");
         return;
       }
+      const dest = safeInternalNextPath(redirectAfterLogin ?? null) ?? "/";
+      router.replace(dest);
       router.refresh();
       form.reset();
     } catch {

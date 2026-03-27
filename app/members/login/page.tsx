@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { MemberLogoutButton } from "@/components/MemberLogoutButton";
 import { MembersLoginForm } from "@/components/MembersLoginForm";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { getMemberCookieName, verifyMemberSession } from "@/lib/member-session";
 import { getPendingMemberSignupById } from "@/lib/member-signup-storage";
+import { safeInternalNextPath } from "@/lib/safe-next-path";
 
 export const metadata: Metadata = {
   title: "Members login | TTPSSWA",
@@ -14,7 +16,16 @@ export const metadata: Metadata = {
     "Sign in after your membership application has been approved by an administrator.",
 };
 
-export default async function MembersLoginPage() {
+type Props = {
+  searchParams: Promise<{ next?: string }> | { next?: string };
+};
+
+export default async function MembersLoginPage({ searchParams }: Props) {
+  const sp = await Promise.resolve(searchParams);
+  const nextPath = safeInternalNextPath(
+    typeof sp.next === "string" ? sp.next : null,
+  );
+
   const cookieStore = cookies();
   const token = cookieStore.get(getMemberCookieName())?.value;
   const memberId = token ? verifyMemberSession(token) : null;
@@ -24,6 +35,10 @@ export default async function MembersLoginPage() {
 
   const sessionActive =
     member && member.applicationStatus === "accepted";
+
+  if (sessionActive && nextPath) {
+    redirect(nextPath);
+  }
 
   return (
     <>
@@ -108,7 +123,7 @@ export default async function MembersLoginPage() {
                   </Link>
                   .
                 </p>
-                <MembersLoginForm />
+                <MembersLoginForm redirectAfterLogin={nextPath} />
                 <p className="mt-8 text-center text-sm text-muted">
                   <Link href="/#contact" className="text-brand hover:underline">
                     Contact
