@@ -140,7 +140,9 @@ export function ExecutiveTeamGrid() {
             >
               {displayName}
             </h2>
-            <p className="mt-5 text-base leading-relaxed text-muted">{bioText}</p>
+            <p className="mt-5 whitespace-pre-line text-base leading-relaxed text-muted">
+              {bioText}
+            </p>
           </div>
         </div>
       ) : null}
