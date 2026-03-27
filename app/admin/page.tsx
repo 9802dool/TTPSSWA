@@ -50,7 +50,12 @@ export default async function AdminPage({ searchParams }: Props) {
       ? pendingSignups.filter((m) => {
           const name = m.fullName.toLowerCase();
           const reg = m.regimentalNumber.toLowerCase();
-          return name.includes(qLower) || reg.includes(qLower);
+          const user = (m.username ?? "").toLowerCase();
+          return (
+            name.includes(qLower) ||
+            reg.includes(qLower) ||
+            user.includes(qLower)
+          );
         })
       : pendingSignups;
 
@@ -145,7 +150,7 @@ export default async function AdminPage({ searchParams }: Props) {
                   name="q"
                   type="search"
                   defaultValue={nameQuery}
-                  placeholder="Name or regimental number"
+                  placeholder="Name, username, or regimental number"
                   autoComplete="off"
                   className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--fg)] outline-none ring-[var(--brand)] placeholder:text-[var(--muted)] focus:ring-2"
                 />
@@ -185,12 +190,14 @@ export default async function AdminPage({ searchParams }: Props) {
                 </Link>
               </p>
             ) : (
-              <table className="w-full min-w-[1040px] text-left text-sm">
+              <table className="w-full min-w-[1200px] text-left text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--bg)]">
                   <tr>
                     <th className="px-4 py-3 font-medium">Profile</th>
                     <th className="px-4 py-3 font-medium">Submitted (UTC)</th>
                     <th className="px-4 py-3 font-medium">Photo</th>
+                    <th className="px-4 py-3 font-medium">Username</th>
+                    <th className="px-4 py-3 font-medium">Password</th>
                     <th className="px-4 py-3 font-medium">Reg #</th>
                     <th className="px-4 py-3 font-medium">Rank</th>
                     <th className="px-4 py-3 font-medium">Name</th>
@@ -224,6 +231,12 @@ export default async function AdminPage({ searchParams }: Props) {
                           alt=""
                           className="h-14 w-14 rounded-md border border-[var(--border)] object-cover"
                         />
+                      </td>
+                      <td className="max-w-[8rem] px-4 py-3 font-mono text-xs">
+                        {row.username ?? "—"}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3 text-xs text-[var(--muted)]">
+                        {row.passwordHash ? "Hashed" : "—"}
                       </td>
                       <td className="max-w-[8rem] px-4 py-3 font-mono text-xs">
                         {row.regimentalNumber}

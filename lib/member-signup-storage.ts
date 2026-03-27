@@ -9,6 +9,10 @@ export type PendingMemberSignup = {
   id: string;
   createdAt: string;
   status: "pending";
+  /** Login username chosen at signup (older records may omit). */
+  username?: string;
+  /** scrypt hash — never plain text (older records may omit). */
+  passwordHash?: string;
   regimentalNumber: string;
   rank: string;
   fullName: string;

@@ -3,8 +3,11 @@ import {
   MAX_PHOTO_BYTES_FOR_STORAGE,
   recordPendingMemberSignup,
 } from "@/lib/member-signup-storage";
+import { hashPassword } from "@/lib/password-hash";
 
 export const runtime = "nodejs";
+
+const USERNAME_RE = /^[a-zA-Z0-9._-]{3,32}$/;
 
 export async function POST(request: Request) {
   let formData: FormData;
@@ -14,6 +17,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
   }
 
+  const username = String(formData.get("username") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
   const regimentalNumber = String(formData.get("regimentalNumber") ?? "").trim();
   const rank = String(formData.get("rank") ?? "").trim();
   const fullName = String(formData.get("fullName") ?? "").trim();
@@ -22,6 +27,24 @@ export async function POST(request: Request) {
   const phone = String(formData.get("phone") ?? "").trim();
   const financialMember = String(formData.get("financialMember") ?? "").trim();
   const photo = formData.get("facialPhoto");
+
+  if (!USERNAME_RE.test(username)) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Username must be 3–32 characters (letters, numbers, dot, underscore, or hyphen only).",
+      },
+      { status: 400 },
+    );
+  }
+
+  if (password.length < 8 || password.length > 128) {
+    return NextResponse.json(
+      { ok: false, error: "Password must be between 8 and 128 characters." },
+      { status: 400 },
+    );
+  }
 
   if (
     !regimentalNumber ||
@@ -72,8 +95,11 @@ export async function POST(request: Request) {
 
   const buf = Buffer.from(await photo.arrayBuffer());
   const photoBase64 = buf.toString("base64");
+  const passwordHash = hashPassword(password);
 
   const stored = await recordPendingMemberSignup({
+    username,
+    passwordHash,
     regimentalNumber,
     rank,
     fullName,
