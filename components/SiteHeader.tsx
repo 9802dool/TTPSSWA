@@ -7,10 +7,6 @@ const nav = [
   { href: "/#subsidiaries", label: "Subsidiaries" },
   { href: "/#partnership", label: "Partnership" },
   { href: "/#contact", label: "Contact" },
-  {
-    href: "/central-committee-representatives",
-    label: "Central Committee Representative",
-  },
 ];
 
 const linkClass =
