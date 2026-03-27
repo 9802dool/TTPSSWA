@@ -60,17 +60,10 @@ export default function Home() {
               </div>
               <Link
                 href="/hotel-reservations"
-                className="group flex min-h-0 w-full flex-col rounded-xl border border-white/25 bg-white/5 p-8 shadow-corp transition hover:border-white/40 hover:shadow-corp-md lg:min-w-0 lg:flex-1"
+                className="flex min-h-0 w-full flex-col justify-center rounded-xl border border-white/25 bg-white/5 p-8 shadow-corp transition hover:border-white/40 hover:shadow-corp-md lg:min-w-0 lg:flex-1"
               >
                 <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
-                <p className="text-lg font-bold text-white">Hotel reservations</p>
-                <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-300">
-                  Request accommodation with your check-in and check-out dates and times. Our
-                  team will confirm availability and follow up by email.
-                </p>
-                <span className="mt-4 inline-flex text-sm font-semibold text-brand transition group-hover:text-brand-hover">
-                  Open hotel reservations →
-                </span>
+                <p className="text-lg font-bold text-white">Hotel Reservation</p>
               </Link>
               <div className="flex justify-center lg:flex-1 lg:items-center lg:justify-center">
                 <a
