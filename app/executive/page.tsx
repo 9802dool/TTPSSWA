@@ -3,8 +3,8 @@ import Image from "next/image";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
-/** Public folder: `public/ex pics/` — use encoded path for URLs. */
-const EX_PICS = "/ex%20pics";
+/** Public folder: `public/ex-pics/` (no spaces — Next/Image breaks on %20 paths). */
+const EX_PICS = "/ex-pics";
 
 export const metadata: Metadata = {
   title: "OUR EXECUTIVE TEAM | TTPSSWA",
