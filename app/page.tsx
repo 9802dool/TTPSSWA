@@ -49,30 +49,25 @@ export default function Home() {
               </code>{" "}
               when ready.
             </p>
-            <div className="mt-10 flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-6">
-              <div className="flex justify-center lg:flex-1 lg:items-center lg:justify-center">
-                <a
-                  href="#contact"
-                  className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto"
-                >
-                  Contact us
-                </a>
-              </div>
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
+              <a
+                href="#contact"
+                className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto"
+              >
+                Contact us
+              </a>
               <Link
                 href="/hotel-reservations"
-                className="flex min-h-0 w-full flex-col justify-center rounded-xl border border-white/25 bg-white/5 p-8 shadow-corp transition hover:border-white/40 hover:shadow-corp-md lg:min-w-0 lg:flex-1"
+                className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto"
               >
-                <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
-                <p className="text-lg font-bold text-white">Hotel Reservation</p>
+                Hotel Reservation
               </Link>
-              <div className="flex justify-center lg:flex-1 lg:items-center lg:justify-center">
-                <a
-                  href="/executive"
-                  className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md border border-white/30 bg-transparent px-8 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
-                >
-                  Executive committee
-                </a>
-              </div>
+              <a
+                href="/executive"
+                className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md border border-white/30 bg-transparent px-8 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
+              >
+                Executive committee
+              </a>
             </div>
           </div>
         </section>
