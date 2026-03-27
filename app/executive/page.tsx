@@ -3,7 +3,8 @@ import Image from "next/image";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
-const PRESIDENT_PHOTO = "/executive/p1.png";
+/** Public folder: `public/ex pics/` — use encoded path for URLs. */
+const EX_PICS = "/ex%20pics";
 
 export const metadata: Metadata = {
   title: "OUR EXECUTIVE TEAM | TTPSSWA",
@@ -30,6 +31,15 @@ const roles = [
   },
   { title: "Trustee", subtitle: "Board of trustees — seat 1" },
   { title: "Trustee", subtitle: "Board of trustees — seat 2" },
+] as const;
+
+/** p1–p5 → President through Treasurer (same order as `roles`). */
+const EXEC_PHOTOS = [
+  `${EX_PICS}/p1.JPG`,
+  `${EX_PICS}/p2.JPG`,
+  `${EX_PICS}/p3.JPG`,
+  `${EX_PICS}/p4.JPG`,
+  `${EX_PICS}/p5.JPG`,
 ] as const;
 
 export default function ExecutivePage() {
@@ -72,14 +82,14 @@ export default function ExecutivePage() {
                     <span className="absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md bg-navy text-xs font-bold text-white">
                       {index + 1}
                     </span>
-                    {index === 0 ? (
+                    {index < EXEC_PHOTOS.length ? (
                       <Image
-                        src={PRESIDENT_PHOTO}
-                        alt="President"
+                        src={EXEC_PHOTOS[index]}
+                        alt={`${role.title} portrait`}
                         fill
-                        priority
+                        priority={index < 2}
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover object-center"
+                        className="object-contain object-center"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center p-6 text-center">
