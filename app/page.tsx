@@ -4,13 +4,14 @@ import SiteHeader from "@/components/SiteHeader";
 
 const pillars: {
   title: string;
-  body: string;
+  body?: string;
   href?: string;
+  linkLabel?: string;
 }[] = [
   {
-    title: "Members Benefits",
-    body:
-      "Legal aid, health and education support, housing programs, scholarships, and more—designed to serve members. See Membership services for the full list.",
+    title: "Noel Chase Hotel and Conference Center Tobago",
+    href: "/hotel-reservations",
+    linkLabel: "Hotel reservations →",
   },
   {
     title: "Action",
@@ -131,15 +132,19 @@ export default function Home() {
                 >
                   <div className="mb-4 h-1 w-10 rounded-full bg-brand" />
                   <h3 className="text-lg font-bold text-ink">{item.title}</h3>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-muted">
-                    {item.body}
-                  </p>
+                  {item.body ? (
+                    <p className="mt-3 flex-1 text-sm leading-relaxed text-muted">
+                      {item.body}
+                    </p>
+                  ) : (
+                    <div className="flex-1" aria-hidden />
+                  )}
                   {item.href ? (
                     <Link
                       href={item.href}
                       className="mt-4 inline-flex text-sm font-semibold text-brand transition hover:text-brand-hover"
                     >
-                      Open hotel reservations →
+                      {item.linkLabel ?? "Learn more →"}
                     </Link>
                   ) : null}
                 </li>
