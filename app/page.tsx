@@ -5,21 +5,25 @@ import SiteHeader from "@/components/SiteHeader";
 const pillars: {
   title: string;
   body?: string;
-  href?: string;
+  href: string;
   linkLabel?: string;
 }[] = [
   {
     title: "Noel Chase Hotel and Conference Center Tobago",
     href: "/hotel-reservations",
-    linkLabel: "Hotel reservations →",
+    linkLabel: "More information →",
   },
   {
     title: "TTPSSWA Service Station Beetham Highway",
+    href: "/membership-services",
+    linkLabel: "More information →",
   },
   {
     title: "Community programs",
     body:
       "Outreach initiatives, member events, and partnerships that extend the association’s work across Trinidad and Tobago.",
+    href: "/#contact",
+    linkLabel: "More information →",
   },
 ];
 
@@ -123,29 +127,28 @@ export default function Home() {
                 partner logos.
               </p>
             </div>
-            <ul className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="mt-14 grid list-none gap-6 p-0 sm:grid-cols-2 xl:grid-cols-3">
               {pillars.map((item) => (
-                <li
-                  key={item.title}
-                  className="flex flex-col rounded-xl border border-line bg-surface p-8 shadow-corp transition hover:shadow-corp-md dark:bg-surface"
-                >
-                  <div className="mb-4 h-1 w-10 rounded-full bg-brand" />
-                  <h3 className="text-lg font-bold text-ink">{item.title}</h3>
-                  {item.body ? (
-                    <p className="mt-3 flex-1 text-sm leading-relaxed text-muted">
-                      {item.body}
-                    </p>
-                  ) : (
-                    <div className="flex-1" aria-hidden />
-                  )}
-                  {item.href ? (
-                    <Link
-                      href={item.href}
-                      className="mt-4 inline-flex text-sm font-semibold text-brand transition hover:text-brand-hover"
-                    >
-                      {item.linkLabel ?? "Learn more →"}
-                    </Link>
-                  ) : null}
+                <li key={item.title} className="h-full">
+                  <Link
+                    href={item.href}
+                    className="group flex h-full flex-col rounded-xl border border-line bg-surface p-8 shadow-corp outline-none transition hover:border-brand/35 hover:shadow-corp-md focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:bg-surface"
+                  >
+                    <div className="mb-4 h-1 w-10 rounded-full bg-brand" />
+                    <h3 className="text-lg font-bold text-ink transition group-hover:text-brand">
+                      {item.title}
+                    </h3>
+                    {item.body ? (
+                      <p className="mt-3 flex-1 text-sm leading-relaxed text-muted">
+                        {item.body}
+                      </p>
+                    ) : (
+                      <div className="flex-1" aria-hidden />
+                    )}
+                    <span className="mt-4 inline-flex text-sm font-semibold text-brand transition group-hover:text-brand-hover">
+                      {item.linkLabel ?? "More information →"}
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>
