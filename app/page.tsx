@@ -102,19 +102,20 @@ export default function Home() {
         </section>
 
         <section
-          id="focus"
+          id="subsidiaries"
           className="scroll-mt-24 border-b border-line bg-canvas py-20"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                Strategic focus
+                Subsidiaries
               </p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink md:text-4xl">
-                Where we focus
+                Our subsidiaries
               </h2>
               <p className="mt-4 text-muted">
-                Two pillars you can rename—or replace with metrics and partner logos.
+                Highlight subsidiary bodies and programs here—or replace with metrics
+                and partner logos.
               </p>
             </div>
             <ul className="mt-14 grid gap-6 sm:grid-cols-2">
