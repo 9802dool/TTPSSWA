@@ -35,7 +35,19 @@ As Executive Chair of the Events and Education Committee, she has successfully l
 Secretary John holds an MBA with distinction, a Diploma in Law, and certifications in Facilities and Human Resource Management. Known for her dependability and persistence, she continues to inspire progress and advocate for the well-being of her colleagues.`,
   },
   { title: "Assistant Secretary", name: "Tricia Durant-Charles" },
-  { title: "Treasurer", name: "Selwyn Marcano" },
+  {
+    title: "Treasurer",
+    name: "Selwyn Marcano",
+    bio: `Police Constable (PC) Selwyn Marcano is a trusted financial steward and ethical leader, dedicated to strengthening police welfare through accountability and sound financial management. With 14 years of service in the Trinidad and Tobago Police Service, he has built a reputation for integrity, discipline, and commitment to officer advocacy.
+
+PC Marcano has served as an investigator in the Special Investigations Unit and contributed to critical operations within the Organized Crime, Narcotics, and Firearm Bureau, where he demonstrated investigative excellence and operational effectiveness.
+
+In his current role as Treasurer of the Trinidad and Tobago Police Service Social and Welfare Association, PC Marcano ensures financial transparency, resource protection, and responsible stewardship of funds for the benefit of officers. His work reflects a deep commitment to accountability and the welfare of his colleagues.
+
+Academically, he holds a certificate in Industrial Relations and is pursuing a Law Degree, further solidifying his dedication to legal and financial excellence. Known for his ethical, intuitive leadership, PC Marcano is passionate about mentorship, community service, and prioritizing officer welfare.
+
+Respected by peers and colleagues, PC Marcano continues to champion transparency, accountability, and empowerment within the Trinidad and Tobago Police Service.`,
+  },
   {
     title: "First Division Officer Representative",
     name: "Oswain Subero",
