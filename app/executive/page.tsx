@@ -13,30 +13,20 @@ export const metadata: Metadata = {
 
 type ExecutiveRole = {
   title: string;
-  subtitle: string;
   name?: string;
 };
 
 const roles: ExecutiveRole[] = [
-  { title: "President", subtitle: "Executive lead", name: "Ishmael Pitt" },
-  { title: "Vice President", subtitle: "Deputy executive lead" },
-  { title: "Secretary", subtitle: "Records & correspondence" },
-  { title: "Assistant Secretary", subtitle: "Supports the Secretary" },
-  { title: "Treasurer", subtitle: "Finance & accounts" },
-  {
-    title: "Special Reserve Police Representative",
-    subtitle: "SRP liaison",
-  },
-  {
-    title: "Municipal Police Representative",
-    subtitle: "Municipal police liaison",
-  },
-  {
-    title: "First Division Officer Representative",
-    subtitle: "First Division liaison",
-  },
-  { title: "Trustee", subtitle: "Board of trustees — seat 1" },
-  { title: "Trustee", subtitle: "Board of trustees — seat 2" },
+  { title: "President", name: "Ishmael Pitt" },
+  { title: "Vice President" },
+  { title: "Secretary" },
+  { title: "Assistant Secretary" },
+  { title: "Treasurer" },
+  { title: "Special Reserve Police Representative" },
+  { title: "Municipal Police Representative" },
+  { title: "First Division Officer Representative" },
+  { title: "Trustee" },
+  { title: "Trustee" },
 ];
 
 /** p1–p10 match `roles` order (President … both Trustees). No crop: `object-contain`. */
@@ -110,12 +100,11 @@ export default function ExecutivePage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-1 flex-col p-6">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-brand">
-                      {role.subtitle}
-                    </p>
-                    <h2 className="mt-2 text-lg font-bold text-ink">{role.title}</h2>
-                    <p className="mt-4 text-sm text-muted">
+                  <div className="flex flex-1 flex-col justify-center p-6">
+                    <h2 className="text-base font-bold text-ink md:text-lg">
+                      {role.title}
+                    </h2>
+                    <p className="mt-3 text-xl font-semibold leading-snug text-ink md:text-2xl">
                       {role.name ?? "Name to be announced"}
                     </p>
                   </div>
