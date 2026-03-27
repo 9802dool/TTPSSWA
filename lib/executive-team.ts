@@ -25,7 +25,15 @@ As Chairman of the Housing Committee for the TTPSSWA, he has advanced initiative
 
 Vice President Russell holds a Master's in Security and Risk Management and has specialized training in crime prevention, crisis response, and gang prosecution. Beyond his credentials, he is a leader of action—fostering collaboration, inspiring team spirit, and advocating for policies that elevate officer welfare and strengthen the Police Service.`,
   },
-  { title: "Secretary", name: "Natalie John" },
+  {
+    title: "Secretary",
+    name: "Nathalie John",
+    bio: `Secretary Nathalie John has dedicated 26 years to law enforcement, serving with distinction across several divisions, including Special Branch, and holding leadership roles such as Senior Woman Inspector in the Eastern Division. She currently serves as Secretary of the TTPSSWA, where her focus is on advancing officer welfare and organizational development.
+
+As Executive Chair of the Events and Education Committee, she has successfully led initiatives such as the TTPSSWA Diwali ceremony and the Protective Arms Monarch competition. She also made history as the first woman to serve as 2nd Vice President of the Caribbean Federation of Police Welfare Associations.
+
+Secretary John holds an MBA with distinction, a Diploma in Law, and certifications in Facilities and Human Resource Management. Known for her dependability and persistence, she continues to inspire progress and advocate for the well-being of her colleagues.`,
+  },
   { title: "Assistant Secretary", name: "Tricia Durant-Charles" },
   { title: "Treasurer", name: "Selwyn Marcano" },
   { title: "Special Reserve Police Representative", name: "Kevin Nicholls" },

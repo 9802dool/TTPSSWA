@@ -63,9 +63,6 @@ export function ExecutiveTeamGrid() {
                   className="group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-200 to-slate-300 p-0 text-left ring-line transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:from-slate-800 dark:to-slate-900"
                   aria-label={`Open biography: ${role.name ?? role.title}`}
                 >
-                  <span className="pointer-events-none absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md bg-brand text-xs font-bold text-white shadow-sm">
-                    {index + 1}
-                  </span>
                   {index < EXEC_PHOTOS.length ? (
                     <Image
                       src={EXEC_PHOTOS[index]}
