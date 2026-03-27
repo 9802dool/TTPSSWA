@@ -34,12 +34,6 @@ export default function SiteHeader() {
             </span>
             <span className="truncate">TTPSSWA</span>
           </Link>
-          <Link
-            href="/admin/login"
-            className="shrink-0 rounded-md border border-brand/30 bg-brand-subtle px-2.5 py-1.5 text-xs font-bold text-brand hover:bg-brand hover:text-white dark:border-brand/40 dark:hover:bg-brand sm:px-3 sm:text-sm"
-          >
-            Admin login
-          </Link>
         </div>
         <nav
           className="flex max-w-[min(100%,52rem)] flex-wrap items-center justify-end gap-x-0.5 gap-y-1 sm:gap-x-1"
