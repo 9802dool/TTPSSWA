@@ -49,33 +49,37 @@ export default function Home() {
               </code>{" "}
               when ready.
             </p>
-            <div className="mt-10 flex flex-wrap items-stretch gap-4">
-              <a
-                href="#contact"
-                className="inline-flex min-h-[48px] items-center justify-center self-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100"
-              >
-                Contact us
-              </a>
+            <div className="mt-10 flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-6">
+              <div className="flex justify-center lg:flex-1 lg:items-center lg:justify-center">
+                <a
+                  href="#contact"
+                  className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto"
+                >
+                  Contact us
+                </a>
+              </div>
               <Link
                 href="/hotel-reservations"
-                className="group flex max-w-md min-w-[min(100%,18rem)] flex-col rounded-xl border border-white/25 bg-white/5 p-5 shadow-corp-md transition hover:border-white/40 hover:bg-white/10 sm:p-6"
+                className="group flex min-h-0 w-full flex-col rounded-xl border border-white/25 bg-white/5 p-8 shadow-corp transition hover:border-white/40 hover:shadow-corp-md lg:min-w-0 lg:flex-1"
               >
-                <div className="mb-3 h-1 w-10 shrink-0 rounded-full bg-brand" />
-                <p className="text-base font-bold text-white">Hotel reservations</p>
-                <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-300">
+                <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
+                <p className="text-lg font-bold text-white">Hotel reservations</p>
+                <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-300">
                   Request accommodation with your check-in and check-out dates and times. Our
                   team will confirm availability and follow up by email.
                 </p>
-                <span className="mt-4 inline-flex text-sm font-semibold text-white transition group-hover:text-slate-100">
+                <span className="mt-4 inline-flex text-sm font-semibold text-brand transition group-hover:text-brand-hover">
                   Open hotel reservations →
                 </span>
               </Link>
-              <a
-                href="/executive"
-                className="inline-flex min-h-[48px] items-center justify-center self-center rounded-md border border-white/30 bg-transparent px-8 text-sm font-semibold text-white transition hover:bg-white/10"
-              >
-                Executive committee
-              </a>
+              <div className="flex justify-center lg:flex-1 lg:items-center lg:justify-center">
+                <a
+                  href="/executive"
+                  className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md border border-white/30 bg-transparent px-8 text-sm font-semibold text-white transition hover:bg-white/10 sm:w-auto"
+                >
+                  Executive committee
+                </a>
+              </div>
             </div>
           </div>
         </section>
