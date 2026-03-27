@@ -26,7 +26,7 @@ export default function SiteHeader() {
           >
             <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-md ring-1 ring-line shadow-corp">
               <Image
-                src="/icon.png"
+                src="/icon1.png"
                 alt="TTPSSWA"
                 width={32}
                 height={32}
