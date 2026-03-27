@@ -16,7 +16,7 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "notf", name: "NOTF" },
   { slug: "mops", name: "MOPS" },
   { slug: "mounted-and-k9", name: "Mounted and K9" },
-  { slug: "e99", name: "E99" },
+  { slug: "e999", name: "E999" },
 ] as const;
 
 export type CentralCommitteeRegionSlug =
