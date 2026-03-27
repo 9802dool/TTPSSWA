@@ -15,7 +15,7 @@ const pillars: {
     linkLabel: "More information →",
   },
   {
-    title: "TTPSSWA Service Station Beetham Highway",
+    title: "Service Station Beetham Highway",
     href: "/membership-services",
     linkLabel: "More information →",
   },
