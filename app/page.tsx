@@ -45,7 +45,7 @@ export default function Home() {
               Official site
             </p>
             <h1 className="max-w-5xl text-balance text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl md:text-4xl lg:text-[2.65rem]">
-              TRINIDAD AND TOBAGO POLICE SERVICE SOCIAL AND WELFARE ASSOCIATION
+              Trinidad and Tobago Police Service Social Welfare Association
             </h1>
             <p className="mt-8 max-w-2xl text-lg leading-relaxed text-slate-300">
               A modern channel for your mission statement, announcements, and member

@@ -10,9 +10,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "TTPSSWA — Trinidad and Tobago Police Service Social and Welfare Association",
+  title: "TTPSSWA — Trinidad and Tobago Police Service Social Welfare Association",
   description:
-    "Trinidad and Tobago Police Service Social and Welfare Association (TTPSSWA) — official information, programs, and community updates.",
+    "Trinidad and Tobago Police Service Social Welfare Association (TTPSSWA) — official information, programs, and community updates.",
 };
 
 export default function RootLayout({
