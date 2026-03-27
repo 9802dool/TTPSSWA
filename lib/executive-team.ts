@@ -16,7 +16,15 @@ export const EXECUTIVE_TEAM: ExecutiveMember[] = [
 
 Beyond policing, President Pitt has served as a TTPS Media Ambassador and now leads the TTPSSWA, advocating for officers' rights and improved working conditions. Holding a Master's in Criminology and a Bachelor's in Security Administration, he combines academic expertise with practical leadership, driving ethical policing and progressive reform for the benefit of officers and the wider community.`,
   },
-  { title: "Vice President", name: "Owie Russell" },
+  {
+    title: "Vice President",
+    name: "Owie Russell",
+    bio: `Vice President Owie Russell is a dedicated leader with 26 years of distinguished service in law enforcement. He has served in key divisions including Port of Spain, Organized Crime, and Police Complaints, and currently leads the Western Division with integrity and a strong focus on officer welfare.
+
+As Chairman of the Housing Committee for the TTPSSWA, he has advanced initiatives to improve officers' living conditions, while his role as a Central Committee Representative for the Police Complaints Division highlights his commitment to fairness and accountability.
+
+Vice President Russell holds a Master's in Security and Risk Management and has specialized training in crime prevention, crisis response, and gang prosecution. Beyond his credentials, he is a leader of action—fostering collaboration, inspiring team spirit, and advocating for policies that elevate officer welfare and strengthen the Police Service.`,
+  },
   { title: "Secretary", name: "Natalie John" },
   { title: "Assistant Secretary", name: "Tricia Durant-Charles" },
   { title: "Treasurer", name: "Selwyn Marcano" },
