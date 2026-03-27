@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { safeInternalNextPath } from "@/lib/safe-next-path";
 
 export function AdminLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -28,7 +30,9 @@ export function AdminLoginForm() {
         setError(data.error ?? "Sign-in failed.");
         return;
       }
-      router.push("/admin");
+      const nextRaw = searchParams.get("next");
+      const dest = safeInternalNextPath(nextRaw) ?? "/admin";
+      router.push(dest);
       router.refresh();
     } finally {
       setBusy(false);
@@ -39,7 +43,7 @@ export function AdminLoginForm() {
     <div className="mx-auto w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
       <h1 className="text-xl font-semibold tracking-tight">Administration</h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        Sign in to view site analytics and service requests.
+        Sign in for analytics, service requests, and the members profile database.
       </p>
       <form onSubmit={(e) => void onSubmit(e)} className="mt-8 space-y-4">
         <div>

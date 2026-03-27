@@ -19,7 +19,7 @@ export default async function AdminPage({ searchParams }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
   if (!token || !verifyAdminSession(token)) {
-    redirect("/admin/login");
+    redirect("/admin/login?next=/admin");
   }
 
   let stats: Awaited<ReturnType<typeof getAdminStats>>;
@@ -73,7 +73,13 @@ export default async function AdminPage({ searchParams }: Props) {
               Traffic, service requests, and pending member signups
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/admin/members"
+              className="text-sm text-[var(--brand)] hover:underline"
+            >
+              Members database
+            </Link>
             <Link
               href="/"
               className="text-sm text-[var(--brand)] hover:underline"

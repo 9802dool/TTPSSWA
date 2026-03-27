@@ -23,14 +23,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function AdminMemberProfilePage({ params }: Props) {
+  const { id } = await Promise.resolve(params);
+  const decodedId = decodeURIComponent(id);
+
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
   if (!token || !verifyAdminSession(token)) {
-    redirect("/admin/login");
+    redirect(
+      `/admin/login?next=${encodeURIComponent(`/admin/members/${decodedId}`)}`,
+    );
   }
 
-  const { id } = await Promise.resolve(params);
-  const member = await getPendingMemberSignupById(decodeURIComponent(id));
+  const member = await getPendingMemberSignupById(decodedId);
   if (!member) {
     notFound();
   }
