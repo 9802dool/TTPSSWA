@@ -22,11 +22,14 @@ const roles: ExecutiveRole[] = [
   { title: "Secretary", name: "Natalie John" },
   { title: "Assistant Secretary", name: "Tricia Durant-Charles" },
   { title: "Treasurer", name: "Selwyn Marcano" },
-  { title: "Special Reserve Police Representative" },
-  { title: "Municipal Police Representative" },
-  { title: "First Division Officer Representative" },
-  { title: "Trustee" },
-  { title: "Trustee" },
+  { title: "Special Reserve Police Representative", name: "Kevin Nicholls" },
+  { title: "Municipal Police Representative", name: "McGuirk" },
+  {
+    title: "First Division Officer Representative",
+    name: "Oswain Subero",
+  },
+  { title: "Trustee", name: "Adrian Andrews" },
+  { title: "Trustee", name: "Jason Johnson" },
 ];
 
 /** p1–p10 match `roles` order (President … both Trustees). No crop: `object-contain`. */
