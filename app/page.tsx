@@ -14,8 +14,7 @@ const pillars: {
     linkLabel: "Hotel reservations →",
   },
   {
-    title: "Action",
-    body: "Describe programs, fundraisers, or partnerships that turn plans into results.",
+    title: "TTPSSWA Service Station Beetham Highway",
   },
   {
     title: "Community programs",
