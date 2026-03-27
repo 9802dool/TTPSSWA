@@ -7,7 +7,7 @@ const nav = [
   { href: "/#subsidiaries", label: "Subsidiaries" },
   { href: "/#contact", label: "Contact" },
   { href: "/hotel-reservations", label: "Hotel reservations" },
-  { href: "/executive", label: "Executive" },
+  { href: "/executive", label: "Executive Team" },
   {
     href: "/central-committee-representatives",
     label: "Central Committee Representative",
