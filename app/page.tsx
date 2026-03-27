@@ -20,9 +20,7 @@ const pillars: {
     linkLabel: "More information →",
   },
   {
-    title: "Community programs",
-    body:
-      "Outreach initiatives, member events, and partnerships that extend the association’s work across Trinidad and Tobago.",
+    title: "Service Station Old Road",
     href: "/#contact",
     linkLabel: "More information →",
   },
