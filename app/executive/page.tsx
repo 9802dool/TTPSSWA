@@ -11,8 +11,14 @@ export const metadata: Metadata = {
   description: "TTPSSWA executive committee — leadership and representatives.",
 };
 
-const roles = [
-  { title: "President", subtitle: "Executive lead" },
+type ExecutiveRole = {
+  title: string;
+  subtitle: string;
+  name?: string;
+};
+
+const roles: ExecutiveRole[] = [
+  { title: "President", subtitle: "Executive lead", name: "Ishmael Pitt" },
   { title: "Vice President", subtitle: "Deputy executive lead" },
   { title: "Secretary", subtitle: "Records & correspondence" },
   { title: "Assistant Secretary", subtitle: "Supports the Secretary" },
@@ -31,7 +37,7 @@ const roles = [
   },
   { title: "Trustee", subtitle: "Board of trustees — seat 1" },
   { title: "Trustee", subtitle: "Board of trustees — seat 2" },
-] as const;
+];
 
 /** p1–p10 match `roles` order (President … both Trustees). No crop: `object-contain`. */
 const EXEC_PHOTOS = [
@@ -109,7 +115,9 @@ export default function ExecutivePage() {
                       {role.subtitle}
                     </p>
                     <h2 className="mt-2 text-lg font-bold text-ink">{role.title}</h2>
-                    <p className="mt-4 text-sm text-muted">Name to be announced</p>
+                    <p className="mt-4 text-sm text-muted">
+                      {role.name ?? "Name to be announced"}
+                    </p>
                   </div>
                 </li>
               ))}
