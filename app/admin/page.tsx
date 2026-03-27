@@ -5,6 +5,7 @@ import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
 import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
 import { getAdminStats } from "@/lib/analytics-storage";
+import { getPendingMemberSignups } from "@/lib/member-signup-storage";
 
 export default async function AdminPage() {
   const cookieStore = cookies();
@@ -14,6 +15,7 @@ export default async function AdminPage() {
   }
 
   let stats;
+  let pendingSignups;
   try {
     stats = await getAdminStats();
   } catch (e) {
@@ -24,6 +26,12 @@ export default async function AdminPage() {
       visitsByPath: null,
       serviceRequests: [],
     };
+  }
+  try {
+    pendingSignups = await getPendingMemberSignups();
+  } catch (e) {
+    console.error("AdminPage getPendingMemberSignups error:", e);
+    pendingSignups = [];
   }
   const pathEntries = stats.visitsByPath
     ? Object.entries(stats.visitsByPath).sort((a, b) => b[1] - a[1])
@@ -39,7 +47,7 @@ export default async function AdminPage() {
               Site administration
             </h1>
             <p className="text-sm text-[var(--muted)]">
-              Traffic and service request records
+              Traffic, service requests, and pending member signups
             </p>
           </div>
           <div className="flex items-center gap-3">
@@ -91,6 +99,75 @@ export default async function AdminPage() {
             </p>
           </div>
         ) : null}
+
+        <section>
+          <h2 className="text-base font-semibold">Signup pending</h2>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            Member applications from{" "}
+            <Link href="/login" className="text-[var(--brand)] hover:underline">
+              Signup / Login
+            </Link>
+            . Requires the same Upstash Redis variables as analytics.
+          </p>
+          <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+            {pendingSignups.length === 0 ? (
+              <p className="p-6 text-sm text-[var(--muted)]">
+                {stats.storageConfigured
+                  ? "No pending signups yet."
+                  : "Redis not configured — signups cannot be queued until environment variables are set."}
+              </p>
+            ) : (
+              <table className="w-full min-w-[960px] text-left text-sm">
+                <thead className="border-b border-[var(--border)] bg-[var(--bg)]">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Submitted (UTC)</th>
+                    <th className="px-4 py-3 font-medium">Photo</th>
+                    <th className="px-4 py-3 font-medium">Reg #</th>
+                    <th className="px-4 py-3 font-medium">Rank</th>
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Financial</th>
+                    <th className="px-4 py-3 font-medium">Email</th>
+                    <th className="px-4 py-3 font-medium">Phone</th>
+                    <th className="px-4 py-3 font-medium">Address</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingSignups.map((row) => (
+                    <tr
+                      key={row.id}
+                      className="border-b border-[var(--border)] align-top last:border-0"
+                    >
+                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[var(--muted)]">
+                        {row.createdAt}
+                      </td>
+                      <td className="px-4 py-3">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`data:${row.photoMimeType};base64,${row.photoBase64}`}
+                          alt=""
+                          className="h-14 w-14 rounded-md border border-[var(--border)] object-cover"
+                        />
+                      </td>
+                      <td className="max-w-[8rem] px-4 py-3 font-mono text-xs">
+                        {row.regimentalNumber}
+                      </td>
+                      <td className="px-4 py-3">{row.rank}</td>
+                      <td className="px-4 py-3 font-medium">{row.fullName}</td>
+                      <td className="px-4 py-3 capitalize">{row.financialMember}</td>
+                      <td className="max-w-[12rem] break-all px-4 py-3 text-xs">
+                        {row.email}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-3">{row.phone}</td>
+                      <td className="max-w-[14rem] px-4 py-3 text-xs leading-relaxed text-[var(--muted)]">
+                        {row.address}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </section>
 
         <section>
           <h2 className="text-base font-semibold">Visits</h2>

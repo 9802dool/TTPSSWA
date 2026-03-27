@@ -157,7 +157,9 @@ export function MemberSignupForm() {
           Facial photo <span className="text-red-600">*</span>
         </label>
         <p className="mt-0.5 text-xs text-muted">
-          Clear, recent face photo. JPG, PNG, or WebP. Max 5 MB.
+          Clear, recent face photo. JPG, PNG, or WebP. Max{" "}
+          <span className="font-medium text-ink">900 KB</span> (required for admin
+          review queue).
         </p>
         <input
           id="facialPhoto"

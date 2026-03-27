@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
+import {
+  MAX_PHOTO_BYTES_FOR_STORAGE,
+  recordPendingMemberSignup,
+} from "@/lib/member-signup-storage";
 
-const MAX_BYTES = 5 * 1024 * 1024; // 5 MB
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   let formData: FormData;
@@ -47,13 +51,6 @@ export async function POST(request: Request) {
     );
   }
 
-  if (photo.size > MAX_BYTES) {
-    return NextResponse.json(
-      { ok: false, error: "Photo must be 5 MB or smaller." },
-      { status: 400 },
-    );
-  }
-
   const type = photo.type;
   if (!["image/jpeg", "image/png", "image/webp"].includes(type)) {
     return NextResponse.json(
@@ -62,8 +59,42 @@ export async function POST(request: Request) {
     );
   }
 
-  // TODO: persist submissions (email, database, blob storage for `photo`).
-  // Accepted payload validated above; photo size was `photo.size` bytes, type `{type}`.
+  if (photo.size > MAX_PHOTO_BYTES_FOR_STORAGE) {
+    const kb = Math.round(MAX_PHOTO_BYTES_FOR_STORAGE / 1024);
+    return NextResponse.json(
+      {
+        ok: false,
+        error: `Photo must be ${kb} KB or smaller so it can be queued for admin review.`,
+      },
+      { status: 400 },
+    );
+  }
+
+  const buf = Buffer.from(await photo.arrayBuffer());
+  const photoBase64 = buf.toString("base64");
+
+  const stored = await recordPendingMemberSignup({
+    regimentalNumber,
+    rank,
+    fullName,
+    address,
+    email,
+    phone,
+    financialMember: financialMember as "yes" | "no",
+    photoMimeType: type,
+    photoBase64,
+  });
+
+  if (!stored) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Signup storage is not configured. Add Upstash Redis (same as analytics) or try again later.",
+      },
+      { status: 503 },
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }
