@@ -16,12 +16,6 @@ const pillars: {
     title: "Action",
     body: "Describe programs, fundraisers, or partnerships that turn plans into results.",
   },
-  {
-    title: "Hotel Reservations",
-    body:
-      "Request accommodation with your check-in and check-out dates and times. Our team will confirm availability and follow up by email.",
-    href: "/hotel-reservations",
-  },
 ];
 
 export default function Home() {
@@ -55,16 +49,30 @@ export default function Home() {
               </code>{" "}
               when ready.
             </p>
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div className="mt-10 flex flex-wrap items-stretch gap-4">
               <a
                 href="#contact"
-                className="inline-flex min-h-[48px] items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100"
+                className="inline-flex min-h-[48px] items-center justify-center self-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100"
               >
                 Contact us
               </a>
+              <Link
+                href="/hotel-reservations"
+                className="group flex max-w-md min-w-[min(100%,18rem)] flex-col rounded-xl border border-white/25 bg-white/5 p-5 shadow-corp-md transition hover:border-white/40 hover:bg-white/10 sm:p-6"
+              >
+                <div className="mb-3 h-1 w-10 shrink-0 rounded-full bg-brand" />
+                <p className="text-base font-bold text-white">Hotel reservations</p>
+                <p className="mt-2 flex-1 text-sm leading-relaxed text-slate-300">
+                  Request accommodation with your check-in and check-out dates and times. Our
+                  team will confirm availability and follow up by email.
+                </p>
+                <span className="mt-4 inline-flex text-sm font-semibold text-white transition group-hover:text-slate-100">
+                  Open hotel reservations →
+                </span>
+              </Link>
               <a
                 href="/executive"
-                className="inline-flex min-h-[48px] items-center justify-center rounded-md border border-white/30 bg-transparent px-8 text-sm font-semibold text-white transition hover:bg-white/10"
+                className="inline-flex min-h-[48px] items-center justify-center self-center rounded-md border border-white/30 bg-transparent px-8 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 Executive committee
               </a>
@@ -114,10 +122,10 @@ export default function Home() {
                 Where we focus
               </h2>
               <p className="mt-4 text-muted">
-                Three pillars you can rename—or replace with metrics and partner logos.
+                Two pillars you can rename—or replace with metrics and partner logos.
               </p>
             </div>
-            <ul className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            <ul className="mt-14 grid gap-6 sm:grid-cols-2">
               {pillars.map((item) => (
                 <li
                   key={item.title}
