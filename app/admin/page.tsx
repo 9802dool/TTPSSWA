@@ -120,11 +120,11 @@ export default async function AdminPage({ searchParams }: Props) {
         <section>
           <h2 className="text-base font-semibold">Signup pending</h2>
           <p className="mt-1 text-sm text-[var(--muted)]">
-            Member applications from{" "}
+            Member applications submitted through the{" "}
             <Link href="/login" className="text-[var(--brand)] hover:underline">
               Signup / Login
-            </Link>
-            . Requires the same Upstash Redis variables as analytics.
+            </Link>{" "}
+            page.
           </p>
           {pendingSignups.length > 0 ? (
             <form
