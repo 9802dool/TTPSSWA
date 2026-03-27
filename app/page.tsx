@@ -16,6 +16,11 @@ const pillars: {
     title: "Action",
     body: "Describe programs, fundraisers, or partnerships that turn plans into results.",
   },
+  {
+    title: "Community programs",
+    body:
+      "Outreach initiatives, member events, and partnerships that extend the association’s work across Trinidad and Tobago.",
+  },
 ];
 
 export default function Home() {
@@ -114,11 +119,11 @@ export default function Home() {
                 Our subsidiaries
               </h2>
               <p className="mt-4 text-muted">
-                Highlight subsidiary bodies and programs here—or replace with metrics
-                and partner logos.
+                Three subsidiary areas you can rename—or replace with metrics and
+                partner logos.
               </p>
             </div>
-            <ul className="mt-14 grid gap-6 sm:grid-cols-2">
+            <ul className="mt-14 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {pillars.map((item) => (
                 <li
                   key={item.title}
