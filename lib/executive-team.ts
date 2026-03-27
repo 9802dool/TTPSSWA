@@ -98,7 +98,15 @@ He is presently pursuing a Law Degree at the University of London, further stren
 
 Respected for his professionalism and integrity, Sergeant Andrews continues to drive positive change, ensuring that the Trinidad and Tobago Police Service remains rooted in justice, accountability, and officer empowerment.`,
   },
-  { title: "Trustee", name: "Jason Johnson" },
+  {
+    title: "Trustee",
+    name: "Jason Johnson",
+    bio: `With 22 years of dedicated service, Sergeant Jason Johnson is recognized for his professionalism, integrity, and steadfast commitment to police welfare. Currently assigned to the Inter Agency Task Force, he has also served in the Western Division, demonstrating leadership, adaptability, and operational excellence.
+
+As a Trustee of the TTPS Social and Welfare Association and former Treasurer and Central Committee Representative, Sergeant Johnson has played a key role in financial management and officer advocacy. His academic achievements include a BSc in Political Science with a minor in Criminology, and he is presently pursuing a Law Degree, complementing certifications in Radiological Security, Heavy Equipment Operations, and Emergency Medical Training.
+
+Respected for his critical thinking, accountability, and practical leadership style, Sergeant Johnson continues to be a strong, service-driven advocate for officers. His vision and experience guide his efforts to foster fairness, empowerment, and progress within the Trinidad and Tobago Police Service.`,
+  },
 ];
 
 /** Image files aligned with `EXECUTIVE_TEAM` order (FDO between Treasurer and SRP). */
