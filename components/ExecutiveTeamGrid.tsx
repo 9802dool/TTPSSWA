@@ -48,7 +48,7 @@ export function ExecutiveTeamGrid() {
     <>
       <section className="bg-canvas py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <p className="mb-8 max-w-2xl text-sm text-muted">
+          <p className="mb-8 max-w-2xl text-sm font-medium text-brand">
             Tap or click a photo to open a short biography.
           </p>
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -63,7 +63,7 @@ export function ExecutiveTeamGrid() {
                   className="group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-200 to-slate-300 p-0 text-left ring-line transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:from-slate-800 dark:to-slate-900"
                   aria-label={`Open biography: ${role.name ?? role.title}`}
                 >
-                  <span className="pointer-events-none absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md bg-navy text-xs font-bold text-white">
+                  <span className="pointer-events-none absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md bg-brand text-xs font-bold text-white shadow-sm">
                     {index + 1}
                   </span>
                   {index < EXEC_PHOTOS.length ? (
@@ -77,14 +77,14 @@ export function ExecutiveTeamGrid() {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center p-6 text-center">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-brand">
                         Photo
                       </span>
                     </div>
                   )}
                 </button>
                 <div className="flex flex-1 flex-col justify-center p-6">
-                  <h2 className="text-base font-bold text-ink md:text-lg">
+                  <h2 className="text-base font-bold text-brand md:text-lg">
                     {role.title}
                   </h2>
                   <p className="mt-3 text-xl font-semibold leading-snug text-ink md:text-2xl">
@@ -131,7 +131,7 @@ export function ExecutiveTeamGrid() {
                 />
               </div>
             ) : null}
-            <p className="pr-14 text-xs font-semibold uppercase tracking-wider text-brand">
+            <p className="pr-14 text-xs font-semibold uppercase tracking-[0.12em] text-brand">
               {member.title}
             </p>
             <h2
