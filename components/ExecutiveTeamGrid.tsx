@@ -39,6 +39,11 @@ export function ExecutiveTeamGrid() {
       ? member.bio.trim()
       : DEFAULT_BIO;
 
+  const modalPhotoSrc =
+    openIndex !== null && openIndex < EXEC_PHOTOS.length
+      ? EXEC_PHOTOS[openIndex]
+      : null;
+
   return (
     <>
       <section className="bg-canvas py-16">
@@ -106,15 +111,26 @@ export function ExecutiveTeamGrid() {
             onClick={close}
           />
           <div
-            className="relative z-10 max-h-[min(90vh,32rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-surface p-6 shadow-corp-md dark:bg-surface"
+            className="relative z-10 max-h-[min(92vh,40rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-surface p-6 pt-12 shadow-corp-md dark:bg-surface"
           >
             <button
               type="button"
               onClick={close}
-              className="absolute right-3 top-3 rounded-lg px-2 py-1 text-sm font-medium text-muted hover:bg-line/60 hover:text-ink"
+              className="absolute right-3 top-3 z-20 rounded-lg px-2 py-1 text-sm font-medium text-muted hover:bg-line/60 hover:text-ink"
             >
               Close
             </button>
+            {modalPhotoSrc ? (
+              <div className="relative mb-5 aspect-square w-full max-w-[16rem] overflow-hidden rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
+                <Image
+                  src={modalPhotoSrc}
+                  alt={`Portrait of ${displayName}`}
+                  fill
+                  sizes="256px"
+                  className="object-contain object-center"
+                />
+              </div>
+            ) : null}
             <p className="pr-14 text-xs font-semibold uppercase tracking-wider text-brand">
               {member.title}
             </p>
