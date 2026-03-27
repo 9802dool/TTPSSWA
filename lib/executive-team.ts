@@ -34,7 +34,15 @@ As Executive Chair of the Events and Education Committee, she has successfully l
 
 Secretary John holds an MBA with distinction, a Diploma in Law, and certifications in Facilities and Human Resource Management. Known for her dependability and persistence, she continues to inspire progress and advocate for the well-being of her colleagues.`,
   },
-  { title: "Assistant Secretary", name: "Tricia Durant-Charles" },
+  {
+    title: "Assistant Secretary",
+    name: "Tricia Durant-Charles",
+    bio: `Woman Police Corporal (WPC) Tricia Durant-Charles is a strategic and compassionate leader with 19 years of service in the Trinidad and Tobago Police Service. She has served in the Special Victims Department, Community Policing, and Court and Process, demonstrating expertise in complex social and legal matters.
+
+As Assistant Secretary of the TTPS Social and Welfare Association, she helps shape policies that enhance officer welfare and professional growth. She also advocates for regional collaboration as Public Relations Officer of the Caribbean Federation of Police Welfare Associations.
+
+Tricia holds a Master's in Strategic Leadership, a Postgraduate Diploma in Mediation Studies, and a Bachelor's in Behavioral Science, Cum Laude. Respected for her integrity and vision, she is committed to fairness, empowerment, and advancing welfare initiatives across the police service.`,
+  },
   {
     title: "Treasurer",
     name: "Selwyn Marcano",
