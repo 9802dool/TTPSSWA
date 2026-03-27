@@ -80,7 +80,13 @@ Beyond policing, PC Nicholls brings a background in engineering and a strong foc
 
 Respected for his dedication and vision, PC Nicholls remains a powerful voice for SRP officers, committed to advancing welfare, fairness, and empowerment in the Trinidad and Tobago Police Service.`,
   },
-  { title: "Municipal Police Representative", name: "McGuirk" },
+  {
+    title: "Municipal Police Representative",
+    name: "David Mc Guirk",
+    bio: `Police Constable (PC) David Mc Guirk has served with dedication in the Port of Spain City Police for six years, gaining experience in the Street Patrol Unit, Multi-Operational Task Force, and Strike Team. Certified in VIP Protection, Defensive Tactics, and Firearm Training, he brings specialized expertise to municipal policing.
+
+As Municipal Representative of the TTPS Social and Welfare Association, PC Mc Guirk is a strong advocate for officer welfare and rights. Known for his integrity and approachable leadership style, he promotes mentorship, unity, and continuous learning. His focus on fairness, wellness initiatives, and open dialogue helps strengthen both internal cohesion and public trust, making him a driving force for positive change within the service.`,
+  },
   { title: "Trustee", name: "Adrian Andrews" },
   { title: "Trustee", name: "Jason Johnson" },
 ];
