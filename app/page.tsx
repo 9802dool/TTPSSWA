@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
@@ -47,9 +48,21 @@ export default function Home() {
             <p className="mb-4 inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
               Official site
             </p>
-            <h1 className="max-w-6xl text-balance text-2xl font-bold leading-snug tracking-normal text-white sm:text-3xl sm:leading-[1.3] md:text-4xl md:leading-[1.28] lg:text-[2.65rem] lg:leading-[1.25]">
-              Trinidad and Tobago Police Service Social Welfare Association
-            </h1>
+            <div className="flex max-w-6xl flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
+              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-white/5 ring-1 ring-white/20 shadow-corp sm:h-28 sm:w-28 md:h-32 md:w-32">
+                <Image
+                  src="/icon1.png"
+                  alt="Trinidad and Tobago Police Service Social Welfare Association"
+                  fill
+                  className="object-contain p-1.5"
+                  sizes="(max-width: 640px) 96px, 128px"
+                  priority
+                />
+              </div>
+              <h1 className="min-w-0 flex-1 text-balance text-center text-2xl font-bold leading-snug tracking-normal text-white sm:text-left sm:text-3xl sm:leading-[1.3] md:text-4xl md:leading-[1.28] lg:text-[2.65rem] lg:leading-[1.25]">
+                Trinidad and Tobago Police Service Social Welfare Association
+              </h1>
+            </div>
             <p className="mt-8 max-w-2xl text-lg leading-relaxed text-slate-300">
               A modern channel for your mission statement, announcements, and member
               communications. Replace placeholder copy in{" "}
