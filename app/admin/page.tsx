@@ -21,8 +21,8 @@ export default async function AdminPage({ searchParams }: Props) {
     redirect("/admin/login");
   }
 
-  let stats;
-  let pendingSignups;
+  let stats: Awaited<ReturnType<typeof getAdminStats>>;
+  let pendingSignups: Awaited<ReturnType<typeof getPendingMemberSignups>>;
   try {
     stats = await getAdminStats();
   } catch (e) {
