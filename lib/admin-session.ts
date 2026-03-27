@@ -7,7 +7,7 @@ export function getAdminCookieName(): string {
 }
 
 function secret(): string {
-  const p = process.env.ADMIN_PASSWORD;
+  const p = process.env.ADMIN_PASSWORD?.trim();
   if (!p || p.length < 8) return "";
   return createHmac("sha256", "ttpsswa-admin-session").update(p).digest("hex");
 }
