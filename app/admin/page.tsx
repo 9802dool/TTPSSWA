@@ -117,9 +117,10 @@ export default async function AdminPage() {
                   : "Redis not configured — signups cannot be queued until environment variables are set."}
               </p>
             ) : (
-              <table className="w-full min-w-[960px] text-left text-sm">
+              <table className="w-full min-w-[1040px] text-left text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--bg)]">
                   <tr>
+                    <th className="px-4 py-3 font-medium">Profile</th>
                     <th className="px-4 py-3 font-medium">Submitted (UTC)</th>
                     <th className="px-4 py-3 font-medium">Photo</th>
                     <th className="px-4 py-3 font-medium">Reg #</th>
@@ -137,6 +138,14 @@ export default async function AdminPage() {
                       key={row.id}
                       className="border-b border-[var(--border)] align-top last:border-0"
                     >
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <Link
+                          href={`/admin/members/${encodeURIComponent(row.id)}`}
+                          className="font-medium text-[var(--brand)] hover:underline"
+                        >
+                          View profile
+                        </Link>
+                      </td>
                       <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[var(--muted)]">
                         {row.createdAt}
                       </td>

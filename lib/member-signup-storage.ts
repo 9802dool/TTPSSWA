@@ -41,6 +41,14 @@ export async function recordPendingMemberSignup(
   }
 }
 
+export async function getPendingMemberSignupById(
+  id: string,
+): Promise<PendingMemberSignup | null> {
+  if (!id || id.length > 96) return null;
+  const all = await getPendingMemberSignups();
+  return all.find((r) => r.id === id) ?? null;
+}
+
 export async function getPendingMemberSignups(): Promise<PendingMemberSignup[]> {
   const redis = getRedis();
   if (!redis) return [];
