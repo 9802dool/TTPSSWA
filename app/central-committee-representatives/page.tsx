@@ -38,32 +38,32 @@ export default function CentralCommitteePage() {
           </div>
         </section>
 
-        <section className="border-b border-line bg-[#0a0f18] py-14 text-white dark:bg-[#050810]">
+        <section className="border-b border-line bg-canvas py-16 dark:bg-canvas">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
                 Divisions
               </p>
-              <h2 className="mt-3 text-2xl font-bold tracking-tight md:text-3xl">
+              <h2 className="mt-3 text-2xl font-bold tracking-tight text-ink md:text-3xl">
                 Divisions and sections
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-400">
-                Click a pillar to open that division&apos;s page.
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                Select a card to open that division&apos;s page.
               </p>
             </div>
-            <ul className="mt-10 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <ul className="mt-12 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {CENTRAL_COMMITTEE_REGIONS.map((region) => (
-                <li key={region.slug}>
+                <li key={region.slug} className="h-full">
                   <Link
                     href={`/central-committee-representatives/${region.slug}`}
-                    className="flex min-h-[5.5rem] flex-col items-center justify-center rounded-xl border border-white/10 bg-slate-900/60 px-3 py-4 text-center shadow-lg shadow-black/20 backdrop-blur-sm transition hover:border-sky-400/40 hover:bg-slate-800/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                    className="group flex h-full min-h-[10rem] flex-col rounded-xl border border-line bg-surface p-8 shadow-corp outline-none transition hover:border-brand/35 hover:shadow-corp-md focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 dark:bg-surface"
                   >
-                    <span className="mb-2 h-1 w-8 shrink-0 rounded-full bg-brand" />
-                    <span className="text-sm font-bold leading-snug text-white">
+                    <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
+                    <span className="text-lg font-bold leading-snug text-ink transition group-hover:text-brand">
                       {region.name}
                     </span>
-                    <span className="mt-1.5 text-[11px] font-medium uppercase tracking-wider text-slate-500">
-                      View
+                    <span className="mt-auto pt-6 text-sm font-semibold text-brand transition group-hover:text-brand-hover">
+                      View division →
                     </span>
                   </Link>
                 </li>
