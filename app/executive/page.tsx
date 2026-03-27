@@ -68,7 +68,7 @@ export default function ExecutivePage() {
                   key={`${role.title}-${index}`}
                   className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-corp transition hover:shadow-corp-md dark:bg-surface"
                 >
-                  <div className="relative aspect-[3/4] bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
+                  <div className="relative aspect-square bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
                     <span className="absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-md bg-navy text-xs font-bold text-white">
                       {index + 1}
                     </span>
@@ -79,7 +79,7 @@ export default function ExecutivePage() {
                         fill
                         priority
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="object-cover object-top origin-top scale-[1.06]"
+                        className="object-cover object-center"
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center p-6 text-center">
