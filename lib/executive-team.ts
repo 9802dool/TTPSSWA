@@ -87,7 +87,17 @@ Respected for his dedication and vision, PC Nicholls remains a powerful voice fo
 
 As Municipal Representative of the TTPS Social and Welfare Association, PC Mc Guirk is a strong advocate for officer welfare and rights. Known for his integrity and approachable leadership style, he promotes mentorship, unity, and continuous learning. His focus on fairness, wellness initiatives, and open dialogue helps strengthen both internal cohesion and public trust, making him a driving force for positive change within the service.`,
   },
-  { title: "Trustee", name: "Adrian Andrews" },
+  {
+    title: "Trustee",
+    name: "Adrian Andrews",
+    bio: `With 30 years of distinguished service in law enforcement, Sergeant Adrian Andrews is a dedicated advocate for justice, integrity, and police welfare. Currently serving in the Central Division, he has also contributed to the South Western Division, Task Forces, and the E999 Unit, demonstrating operational versatility and commitment to public safety.
+
+As a Trustee of the TTPS Social and Welfare Association, Sergeant Andrews is a strong voice for officers' rights and welfare. His extensive training includes crime-fighting tactics, first aid, and train-the-trainer programs, equipping him to lead with both skill and compassion.
+
+He is presently pursuing a Law Degree at the University of London, further strengthening his capacity as an advocate for fairness and accountability. Known for his calm yet firm leadership, Sergeant Andrews fosters unity, encourages mentorship, and promotes wellness, creating a supportive environment where officers feel valued, heard, and empowered to succeed.
+
+Respected for his professionalism and integrity, Sergeant Andrews continues to drive positive change, ensuring that the Trinidad and Tobago Police Service remains rooted in justice, accountability, and officer empowerment.`,
+  },
   { title: "Trustee", name: "Jason Johnson" },
 ];
 
