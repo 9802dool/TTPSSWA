@@ -36,26 +36,26 @@ Secretary John holds an MBA with distinction, a Diploma in Law, and certificatio
   },
   { title: "Assistant Secretary", name: "Tricia Durant-Charles" },
   { title: "Treasurer", name: "Selwyn Marcano" },
-  { title: "Special Reserve Police Representative", name: "Kevin Nicholls" },
-  { title: "Municipal Police Representative", name: "McGuirk" },
   {
     title: "First Division Officer Representative",
     name: "Oswain Subero",
   },
+  { title: "Special Reserve Police Representative", name: "Kevin Nicholls" },
+  { title: "Municipal Police Representative", name: "McGuirk" },
   { title: "Trustee", name: "Adrian Andrews" },
   { title: "Trustee", name: "Jason Johnson" },
 ];
 
-/** p1–p10 match `EXECUTIVE_TEAM` order. */
+/** Image files aligned with `EXECUTIVE_TEAM` order (FDO between Treasurer and SRP). */
 export const EXEC_PHOTOS = [
   `${EX_PICS}/p1.JPG`,
   `${EX_PICS}/p2.JPG`,
   `${EX_PICS}/p3.JPG`,
   `${EX_PICS}/p4.JPG`,
   `${EX_PICS}/p5.JPG`,
+  `${EX_PICS}/p8.JPG`,
   `${EX_PICS}/p6.JPG`,
   `${EX_PICS}/p7.JPG`,
-  `${EX_PICS}/p8.JPG`,
   `${EX_PICS}/p9.JPG`,
   `${EX_PICS}/p10.JPG`,
 ] as const;
