@@ -39,6 +39,15 @@ Secretary John holds an MBA with distinction, a Diploma in Law, and certificatio
   {
     title: "First Division Officer Representative",
     name: "Oswain Subero",
+    bio: `Acting Assistant Commissioner of Police (ACP) Oswain Subero is a visionary leader with over 37 years of distinguished service in law enforcement. Currently serving as the First Division Officer Representative, ACP Subero brings a wealth of experience, strategic insight, and unwavering dedication to the Trinidad and Tobago Police Service.
+
+As former head of the Tobago and Eastern Division, he championed operational excellence, officer welfare, and community-driven policing. His leadership extended to the Inter-Agency Task Force, where he spearheaded initiatives to strengthen interdepartmental collaboration, and to the Hearts and Minds Programme Foundation, which he chaired to promote crime prevention and community empowerment.
+
+ACP Subero's commitment to policing excellence has earned him multiple awards, including recognition as 1st Runner-Up for Top Caribbean Community Policing Officer in 2017. His academic credentials include an MBA in Leadership, Entrepreneurship, and Innovation from Anglia Ruskin University, alongside certifications in Human Resource Management and Public Service.
+
+Beyond his operational duties, ACP Subero serves as a Trustee of the TTPS Social and Welfare Association and is an active member of the International Police Association, reflecting his dedication to officer advocacy and strengthening global law enforcement networks.
+
+Respected for his disciplined leadership and community focus, ACP Subero continues to drive positive change in policing, ensuring that the Trinidad and Tobago Police Service remains a pillar of safety, trust, and empowerment for all citizens.`,
   },
   { title: "Special Reserve Police Representative", name: "Kevin Nicholls" },
   { title: "Municipal Police Representative", name: "McGuirk" },
