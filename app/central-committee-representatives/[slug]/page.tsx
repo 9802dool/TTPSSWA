@@ -7,6 +7,7 @@ import {
   CENTRAL_COMMITTEE_REGIONS,
   getRegionBySlug,
 } from "@/lib/central-committee-regions";
+import { CommitteeRepPhotoFrame } from "@/components/CommitteeRepPhotoFrame";
 import { COMMITTEE_REPRESENTATIVES } from "@/lib/central-committee-representatives-data";
 
 /** Build a usable tel: URL for TT numbers; supports optional ext. (e.g. ext. 75412). */
@@ -94,41 +95,53 @@ export default async function CentralCommitteeRegionPage({ params }: Props) {
               Representatives
             </h2>
             {content?.representatives?.length ? (
-              <ul className="mt-8 space-y-4">
+              <ul className="mt-8 space-y-6">
                 {content.representatives.map((rep) => (
                   <li
                     key={rep.name}
-                    className="rounded-xl border border-line bg-canvas p-5 text-sm shadow-corp dark:bg-surface"
+                    className="flex flex-col gap-5 rounded-xl border border-line bg-canvas p-5 text-sm shadow-corp dark:bg-surface sm:flex-row sm:items-start sm:gap-6"
                   >
-                    <p className="text-base font-bold text-ink">{rep.name}</p>
-                    <p className="mt-1 font-medium text-brand">{rep.role}</p>
-                    <p className="mt-3 leading-relaxed text-muted">{rep.summary}</p>
-                    {rep.phone || rep.email ? (
-                      <div className="mt-4 space-y-1 border-t border-line pt-4 text-muted">
-                        {rep.phone ? (
-                          <p>
-                            <span className="font-semibold text-ink">Phone:</span>{" "}
-                            <a
-                              href={telHref(rep.phone)}
-                              className="text-brand underline-offset-4 hover:underline"
-                            >
-                              {rep.phone}
-                            </a>
-                          </p>
-                        ) : null}
-                        {rep.email ? (
-                          <p>
-                            <span className="font-semibold text-ink">Email:</span>{" "}
-                            <a
-                              href={`mailto:${rep.email}`}
-                              className="text-brand underline-offset-4 hover:underline"
-                            >
-                              {rep.email}
-                            </a>
-                          </p>
-                        ) : null}
-                      </div>
-                    ) : null}
+                    <CommitteeRepPhotoFrame
+                      name={rep.name}
+                      photoSrc={rep.photoSrc}
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-base font-bold text-ink">{rep.name}</p>
+                      {rep.role ? (
+                        <p className="mt-1 font-medium text-brand">{rep.role}</p>
+                      ) : null}
+                      <p
+                        className={`leading-relaxed text-muted ${rep.role ? "mt-3" : "mt-1"}`}
+                      >
+                        {rep.summary}
+                      </p>
+                      {rep.phone || rep.email ? (
+                        <div className="mt-4 space-y-1 border-t border-line pt-4 text-muted">
+                          {rep.phone ? (
+                            <p>
+                              <span className="font-semibold text-ink">Phone:</span>{" "}
+                              <a
+                                href={telHref(rep.phone)}
+                                className="text-brand underline-offset-4 hover:underline"
+                              >
+                                {rep.phone}
+                              </a>
+                            </p>
+                          ) : null}
+                          {rep.email ? (
+                            <p>
+                              <span className="font-semibold text-ink">Email:</span>{" "}
+                              <a
+                                href={`mailto:${rep.email}`}
+                                className="text-brand underline-offset-4 hover:underline"
+                              >
+                                {rep.email}
+                              </a>
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
                   </li>
                 ))}
               </ul>
