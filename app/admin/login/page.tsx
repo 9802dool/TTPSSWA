@@ -68,30 +68,6 @@ export default function AdminLoginPage() {
             <AdminLoginForm />
           </Suspense>
           {configured ? (
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm">
-              <h2 className="text-base font-semibold text-[var(--fg)]">
-                Members profile database
-              </h2>
-              <p className="mt-2 text-sm text-[var(--muted)]">
-                After you sign in, open the full database of member applications
-                (pending, accepted, and rejected): search, filter by status, and
-                open each profile for photos and full details. Data is stored in
-                Redis with the same credentials as site analytics.
-              </p>
-              <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
-                <Link
-                  href="/admin/members"
-                  className="font-medium text-[var(--brand)] hover:underline"
-                >
-                  Members profile database →
-                </Link>
-                <span className="text-[var(--muted)]">
-                  (you will be asked to sign in if needed)
-                </span>
-              </p>
-            </div>
-          ) : null}
-          {configured ? (
             <p className="text-center text-sm text-[var(--muted)]">
               Dashboard also includes{" "}
               <strong className="text-[var(--fg)]">applications pending review</strong>
