@@ -23,13 +23,28 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
 > = {
   iatf: {
     intro:
-      "The Inter-Agency Task Force (IATF) is a specialized TTPS unit focused on joint operations and interdepartmental collaboration. Your Central Committee Representative for this section is listed below.",
+      "The Inter-Agency Task Force (IATF) is a specialized TTPS unit focused on joint operations and interdepartmental collaboration. Central Committee Representatives for this section are listed below.",
     representatives: [
       {
-        name: "Sergeant Jason Johnson",
+        name: "PC Darnel David",
         role: "Central Committee Representative — IATF",
-        summary:
-          "Sergeant Johnson is currently assigned to the Inter Agency Task Force and has also served in the Western Division. He is a Trustee of the TTPS Social and Welfare Association and a former Treasurer and Central Committee Representative, with a strong record in financial stewardship and officer advocacy. He holds a BSc in Political Science (minor in Criminology), is pursuing a Law Degree, and holds certifications including Radiological Security, Heavy Equipment Operations, and Emergency Medical Training.",
+        summary: "Reg. No. 10364",
+        phone: "(868) 612-0102",
+        email: "darneldavid@live.com",
+      },
+      {
+        name: "PC Nolan Tash",
+        role: "Central Committee Representative — IATF",
+        summary: "Reg. No. 10428",
+        phone: "(868) 789-7497",
+        email: "n_tash@hotmail.com",
+      },
+      {
+        name: "PC Khamael Benoit",
+        role: "Central Committee Representative — IATF",
+        summary: "Reg. No. 20964",
+        phone: "(868) 612-0102 ext. 75412",
+        email: "Khamael24@gmail.com",
       },
     ],
   },
