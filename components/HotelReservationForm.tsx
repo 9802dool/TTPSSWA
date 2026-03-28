@@ -568,10 +568,13 @@ export default function HotelReservationForm() {
         <div className="mt-4 rounded-lg border border-line bg-surface/80 px-4 py-3 text-sm leading-relaxed text-muted dark:bg-canvas/50">
           <p className="font-medium text-ink">Room inventory ({HOTEL_NIGHT_CAPACITY} rooms total)</p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
-            <li>2 presidential suites (max 2 per booking)</li>
-            <li>2 full bed rooms (max 2 per booking)</li>
-            <li>4 double bed rooms (max 4 per booking)</li>
+            <li>2 presidential suites (max 2 per room)</li>
+            <li>2 full bed rooms (max 2 per room)</li>
+            <li>4 double bed rooms (max 4 per room)</li>
           </ul>
+          <p className="mt-3 text-sm text-ink">
+            Rooms can be adjusted to accommodate more persons based on request.
+          </p>
         </div>
         <p className="mt-3 text-sm text-ink">
           Selected:{" "}
