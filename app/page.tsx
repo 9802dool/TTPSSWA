@@ -105,7 +105,7 @@ export default function Home() {
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl">
               <h2 className="text-3xl font-bold tracking-tight text-ink md:text-4xl">
-                About
+                About Us
               </h2>
               <div className="mt-8 space-y-6 border-t border-line pt-12">
                 <p className="text-[17px] leading-[1.75] text-muted">
