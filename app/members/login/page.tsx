@@ -138,10 +138,10 @@ export default async function MembersLoginPage({ searchParams }: Props) {
                 </p>
                 <MembersLoginForm redirectAfterLogin={nextPath} />
                 <p className="mt-8 text-center text-sm text-muted">
-                  <Link href="/#contact" className="text-brand hover:underline">
-                    Contact
+                  <Link href="/#members-services" className="text-brand hover:underline">
+                    Members services
                   </Link>{" "}
-                  for membership assistance.
+                  for sign-in help and application links.
                 </p>
               </>
             )}

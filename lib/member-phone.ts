@@ -23,3 +23,13 @@ export function memberPhoneTelHref(m: {
   }
   return `tel:${m.phone.replace(/\s/g, "")}`;
 }
+
+/** E.164 string e.g. +18681234567 for APIs (WhatsApp, SMS). */
+export function memberPhoneE164(m: {
+  phone: string;
+  phoneCountryCode: string;
+}): string {
+  const localDigits = m.phone.replace(/\D/g, "");
+  const ccDigits = m.phoneCountryCode.replace(/\D/g, "");
+  return `+${ccDigits}${localDigits}`;
+}

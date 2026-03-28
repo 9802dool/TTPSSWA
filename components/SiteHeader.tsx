@@ -5,7 +5,7 @@ const nav = [
   { href: "/membership-services", label: "Membership Services" },
   { href: "/#subsidiaries", label: "Subsidiaries" },
   { href: "/#partnership", label: "Partnership" },
-  { href: "/#contact", label: "Contact" },
+  { href: "/#members-services", label: "Members services" },
   { href: "/login", label: "Signup / Login" },
 ];
 

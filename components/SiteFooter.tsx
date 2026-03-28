@@ -56,8 +56,11 @@ export default function SiteFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/#contact" className="transition hover:text-white">
-                  Contact
+                <Link
+                  href="/#members-services"
+                  className="transition hover:text-white"
+                >
+                  Members services
                 </Link>
               </li>
               <li>

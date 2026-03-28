@@ -3,6 +3,7 @@ import {
   MAX_PHOTO_BYTES_FOR_STORAGE,
   recordPendingMemberSignup,
 } from "@/lib/member-signup-storage";
+import { notifyMembershipApplicationPending } from "@/lib/member-application-notify";
 import { hashPassword } from "@/lib/password-hash";
 import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
 
@@ -144,6 +145,15 @@ export async function POST(request: Request) {
       { status: 503 },
     );
   }
+
+  void notifyMembershipApplicationPending({
+    fullName,
+    email,
+    username,
+    regimentalNumber,
+    phoneCountryCode,
+    phone,
+  });
 
   return NextResponse.json({ ok: true });
 }

@@ -20,9 +20,9 @@ const pillars: {
     linkLabel: "More information →",
   },
   {
-    title: "Service Station Old Road",
-    href: "/#contact",
-    linkLabel: "More information →",
+    title: "Members services",
+    href: "/members/login",
+    linkLabel: "Sign in →",
   },
 ];
 
@@ -71,10 +71,10 @@ export default function Home() {
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
               <a
-                href="#contact"
+                href="#members-services"
                 className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto"
               >
-                Contact us
+                Members services
               </a>
               <Link
                 href="/hotel-reservations"
@@ -196,41 +196,59 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="contact" className="scroll-mt-24 bg-surface py-20 dark:bg-canvas">
+        <section
+          id="members-services"
+          className="scroll-mt-24 bg-surface py-20 dark:bg-canvas"
+        >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                Contact
+                Members
               </p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink md:text-4xl">
-                Get in touch
+                Members services
               </h2>
               <p className="mt-4 text-muted">
-                Connect your form service or list official channels below.
+                Approved members can sign in for online services. New applicants can
+                submit a membership application and browse what we offer.
               </p>
             </div>
             <div className="mt-10 max-w-lg rounded-xl border border-line bg-canvas p-8 shadow-corp dark:bg-surface">
-              <dl className="space-y-6 text-sm">
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wider text-muted">
-                    Email
-                  </dt>
-                  <dd className="mt-1.5">
-                    <a
-                      href="mailto:hello@example.com"
-                      className="font-medium text-brand hover:text-brand-hover"
-                    >
-                      hello@example.com
-                    </a>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs font-semibold uppercase tracking-wider text-muted">
-                    Phone
-                  </dt>
-                  <dd className="mt-1.5 font-medium text-ink">+1 (000) 000-0000</dd>
-                </div>
-              </dl>
+              <ul className="space-y-4 text-sm">
+                <li>
+                  <Link
+                    href="/members/login"
+                    className="font-semibold text-brand transition hover:text-brand-hover"
+                  >
+                    Members login
+                  </Link>
+                  <p className="mt-1 text-muted">
+                    Sign in after your application has been accepted by an administrator.
+                  </p>
+                </li>
+                <li className="border-t border-line pt-4">
+                  <Link
+                    href="/login"
+                    className="font-semibold text-brand transition hover:text-brand-hover"
+                  >
+                    Membership application
+                  </Link>
+                  <p className="mt-1 text-muted">
+                    Apply for membership or create login credentials as directed.
+                  </p>
+                </li>
+                <li className="border-t border-line pt-4">
+                  <Link
+                    href="/membership-services"
+                    className="font-semibold text-brand transition hover:text-brand-hover"
+                  >
+                    Membership services overview
+                  </Link>
+                  <p className="mt-1 text-muted">
+                    Programs, stations, and benefits—edit this page to match your org.
+                  </p>
+                </li>
+              </ul>
             </div>
           </div>
         </section>
