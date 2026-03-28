@@ -33,7 +33,9 @@ export default function LoginPage() {
           <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
             <div className="rounded-sm border border-line bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.08),0_8px_24px_rgba(15,23,42,0.06)] ring-1 ring-black/5 dark:border-line dark:bg-surface dark:shadow-corp dark:ring-white/5">
               <div className="border-b border-line bg-brand-subtle/30 px-5 py-4 dark:bg-brand-subtle/15">
-                <h2 className="text-base font-bold text-ink">Membership application</h2>
+                <h2 className="text-base font-bold text-ink">
+                  Signup to access members portal
+                </h2>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-muted">
                   Application form
                 </p>
