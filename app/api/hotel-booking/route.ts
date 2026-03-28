@@ -12,6 +12,9 @@ type Body = {
   checkInTime?: string;
   checkOutTime?: string;
   rooms?: string;
+  presidentialSuite?: string;
+  fullBedRoom?: string;
+  doubleBedRoom?: string;
   guests?: string;
   notes?: string;
 };
@@ -25,9 +28,41 @@ type ValidData = {
   checkInTime: string;
   checkOutTime: string;
   rooms: string;
+  presidentialSuite: number;
+  fullBedRoom: number;
+  doubleBedRoom: number;
   guests: string;
   notes: string;
 };
+
+function parseRoomInt(v: unknown, min: number, max: number): number | null {
+  const n = parseInt(String(v ?? "0"), 10);
+  if (!Number.isFinite(n) || n < min || n > max) return null;
+  return n;
+}
+
+function roomMixDescription(d: ValidData): string {
+  if (d.presidentialSuite + d.fullBedRoom + d.doubleBedRoom === 0) {
+    return `${d.rooms} room(s) total`;
+  }
+  const parts: string[] = [];
+  if (d.presidentialSuite > 0) {
+    parts.push(
+      `${d.presidentialSuite} presidential suite${d.presidentialSuite === 1 ? "" : "s"}`,
+    );
+  }
+  if (d.fullBedRoom > 0) {
+    parts.push(
+      `${d.fullBedRoom} full bed room${d.fullBedRoom === 1 ? "" : "s"}`,
+    );
+  }
+  if (d.doubleBedRoom > 0) {
+    parts.push(
+      `${d.doubleBedRoom} double bed room${d.doubleBedRoom === 1 ? "" : "s"}`,
+    );
+  }
+  return `${parts.join(", ")} (${d.rooms} total)`;
+}
 
 function validate(body: Body): { ok: true; data: ValidData } | { ok: false; message: string } {
   const fullName = String(body.fullName ?? "").trim();
@@ -37,9 +72,44 @@ function validate(body: Body): { ok: true; data: ValidData } | { ok: false; mess
   const checkOutDate = String(body.checkOutDate ?? "").trim();
   const checkInTime = String(body.checkInTime ?? "").trim();
   const checkOutTime = String(body.checkOutTime ?? "").trim();
-  const rooms = String(body.rooms ?? "1").trim();
   const guests = String(body.guests ?? "1").trim();
   const notes = String(body.notes ?? "").trim();
+
+  const hasTypedRoomFields =
+    body.presidentialSuite !== undefined ||
+    body.fullBedRoom !== undefined ||
+    body.doubleBedRoom !== undefined;
+
+  let presidentialSuite = 0;
+  let fullBedRoom = 0;
+  let doubleBedRoom = 0;
+  let rooms: string;
+
+  if (!hasTypedRoomFields) {
+    const r = parseInt(String(body.rooms ?? "1"), 10);
+    if (!Number.isFinite(r) || r < 1 || r > 8) {
+      return { ok: false, message: "Rooms must be between 1 and 8." };
+    }
+    rooms = String(r);
+  } else {
+    const p = parseRoomInt(body.presidentialSuite, 0, 2);
+    const f = parseRoomInt(body.fullBedRoom, 0, 2);
+    const d = parseRoomInt(body.doubleBedRoom, 0, 4);
+    if (p === null || f === null || d === null) {
+      return { ok: false, message: "Invalid room selection." };
+    }
+    presidentialSuite = p;
+    fullBedRoom = f;
+    doubleBedRoom = d;
+    const sum = p + f + d;
+    if (sum < 1) {
+      return { ok: false, message: "Select at least one room." };
+    }
+    if (sum > 8) {
+      return { ok: false, message: "Room count cannot exceed 8." };
+    }
+    rooms = String(sum);
+  }
 
   if (!fullName) return { ok: false, message: "Full name is required." };
   if (!email) return { ok: false, message: "Email is required." };
@@ -85,6 +155,9 @@ function validate(body: Body): { ok: true; data: ValidData } | { ok: false; mess
       checkInTime,
       checkOutTime,
       rooms,
+      presidentialSuite,
+      fullBedRoom,
+      doubleBedRoom,
       guests,
       notes,
     },
@@ -100,7 +173,7 @@ function buildBookingText(d: ValidData): string {
     `Phone: ${d.phone}`,
     `Check-in: ${d.checkInDate} at ${d.checkInTime}`,
     `Check-out: ${d.checkOutDate} at ${d.checkOutTime}`,
-    `Rooms: ${d.rooms}`,
+    `Room mix: ${roomMixDescription(d)}`,
     `Guests: ${d.guests}`,
   ];
   if (d.notes) textLines.push("", "Special requests:", d.notes);
@@ -315,6 +388,9 @@ export async function POST(request: Request) {
       checkInTime: d.checkInTime,
       checkOutTime: d.checkOutTime,
       rooms: d.rooms,
+      presidentialSuite: d.presidentialSuite,
+      fullBedRoom: d.fullBedRoom,
+      doubleBedRoom: d.doubleBedRoom,
       guests: d.guests,
       notes: d.notes || undefined,
     });

@@ -39,9 +39,22 @@ function HotelBookingDetails({
         .join(" "),
     ]);
   }
+  const pres = Number(payload.presidentialSuite ?? 0);
+  const fullB = Number(payload.fullBedRoom ?? 0);
+  const dbl = Number(payload.doubleBedRoom ?? 0);
+  const hasMix =
+    [pres, fullB, dbl].some((n) => Number.isFinite(n) && n > 0);
+  if (hasMix) {
+    const parts: string[] = [];
+    if (pres > 0)
+      parts.push(`presidential ×${pres}`);
+    if (fullB > 0) parts.push(`full bed ×${fullB}`);
+    if (dbl > 0) parts.push(`double ×${dbl}`);
+    rows.push(["Room mix", parts.join(", ")]);
+  }
   const rooms = str("rooms");
   const guests = str("guests");
-  if (rooms) rows.push(["Rooms", rooms]);
+  if (!hasMix && rooms) rows.push(["Rooms", rooms]);
   if (guests) rows.push(["Guests", guests]);
   const notes = str("notes");
   if (notes) rows.push(["Notes", notes]);

@@ -16,6 +16,21 @@ function str(p: Record<string, unknown>, key: string): string {
   return String(v);
 }
 
+function roomMixOrRooms(p: Record<string, unknown>): string {
+  const pres = Number(p.presidentialSuite ?? 0);
+  const fb = Number(p.fullBedRoom ?? 0);
+  const db = Number(p.doubleBedRoom ?? 0);
+  const hasMix = [pres, fb, db].some((n) => Number.isFinite(n) && n > 0);
+  if (hasMix) {
+    const parts: string[] = [];
+    if (pres > 0) parts.push(`presidential ${pres}`);
+    if (fb > 0) parts.push(`full bed ${fb}`);
+    if (db > 0) parts.push(`double ${db}`);
+    return `${parts.join(", ")} (${str(p, "rooms") || "?"} total)`;
+  }
+  return str(p, "rooms") || "—";
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await Promise.resolve(params);
   const decoded = decodeURIComponent(id);
@@ -152,8 +167,8 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
               </dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Rooms</dt>
-              <dd className="mt-0.5 tabular-nums">{str(p, "rooms") || "—"}</dd>
+              <dt className="text-[var(--muted)]">Room mix</dt>
+              <dd className="mt-0.5 leading-relaxed">{roomMixOrRooms(p)}</dd>
             </div>
             <div>
               <dt className="text-[var(--muted)]">Guests</dt>
