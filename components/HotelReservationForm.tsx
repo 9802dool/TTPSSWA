@@ -336,6 +336,14 @@ export default function HotelReservationForm() {
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
           Rooms & guests
         </p>
+        <div className="mt-4 rounded-lg border border-line bg-surface/80 px-4 py-3 text-sm leading-relaxed text-muted dark:bg-canvas/50">
+          <p className="font-medium text-ink">Room inventory (8 rooms total)</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            <li>2 presidential suites</li>
+            <li>2 full bed rooms</li>
+            <li>4 double bed rooms</li>
+          </ul>
+        </div>
         <div className="mt-6 grid gap-6 sm:grid-cols-2">
           <div>
             <label htmlFor="hr-rooms" className="text-sm font-semibold text-ink">
