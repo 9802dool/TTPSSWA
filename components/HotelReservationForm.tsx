@@ -158,6 +158,220 @@ function RoomCard({
   );
 }
 
+/* ── Inline date range picker ── */
+const PICKER_WEEKDAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"] as const;
+
+function pickerMonthCells(year: number, monthIndex: number): (string | null)[] {
+  const first = new Date(year, monthIndex, 1);
+  const startPad = first.getDay();
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const cells: (string | null)[] = [];
+  for (let i = 0; i < startPad; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push(`${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
+  }
+  while (cells.length % 7 !== 0) cells.push(null);
+  return cells;
+}
+
+function formatDisplayDate(ymd: string): string {
+  if (!ymd) return "";
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function DateRangePicker({
+  checkIn,
+  checkOut,
+  onCheckInChange,
+  onCheckOutChange,
+  open,
+  onClose,
+  pickingField,
+  onPickingFieldChange,
+}: {
+  checkIn: string;
+  checkOut: string;
+  onCheckInChange: (v: string) => void;
+  onCheckOutChange: (v: string) => void;
+  open: boolean;
+  onClose: () => void;
+  pickingField: "checkIn" | "checkOut";
+  onPickingFieldChange: (f: "checkIn" | "checkOut") => void;
+}) {
+  const todayStr = useMemo(() => {
+    const t = new Date();
+    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
+  }, []);
+
+  const initial = useMemo(() => {
+    if (checkIn) {
+      const [y, m] = checkIn.split("-").map(Number);
+      return { y, m: m - 1 };
+    }
+    const t = new Date();
+    return { y: t.getFullYear(), m: t.getMonth() };
+  }, [checkIn]);
+
+  const [viewY, setViewY] = useState(initial.y);
+  const [viewM, setViewM] = useState(initial.m);
+  const [hovered, setHovered] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (open && checkIn) {
+      const [y, m] = checkIn.split("-").map(Number);
+      setViewY(y);
+      setViewM(m - 1);
+    } else if (open) {
+      const t = new Date();
+      setViewY(t.getFullYear());
+      setViewM(t.getMonth());
+    }
+  }, [open, checkIn]);
+
+  const monthLabel = useMemo(
+    () => new Date(viewY, viewM, 1).toLocaleString(undefined, { month: "long", year: "numeric" }),
+    [viewY, viewM],
+  );
+  const month2Label = useMemo(() => {
+    const m2 = viewM === 11 ? 0 : viewM + 1;
+    const y2 = viewM === 11 ? viewY + 1 : viewY;
+    return new Date(y2, m2, 1).toLocaleString(undefined, { month: "long", year: "numeric" });
+  }, [viewY, viewM]);
+
+  const cells1 = useMemo(() => pickerMonthCells(viewY, viewM), [viewY, viewM]);
+  const cells2 = useMemo(() => {
+    const m2 = viewM === 11 ? 0 : viewM + 1;
+    const y2 = viewM === 11 ? viewY + 1 : viewY;
+    return pickerMonthCells(y2, m2);
+  }, [viewY, viewM]);
+
+  function prevMonth() {
+    if (viewM === 0) { setViewY((y) => y - 1); setViewM(11); } else setViewM((m) => m - 1);
+  }
+  function nextMonth() {
+    if (viewM === 11) { setViewY((y) => y + 1); setViewM(0); } else setViewM((m) => m + 1);
+  }
+
+  function handleDayClick(ymd: string) {
+    if (ymd < todayStr) return;
+    if (pickingField === "checkIn") {
+      onCheckInChange(ymd);
+      if (checkOut && ymd >= checkOut) onCheckOutChange("");
+      onPickingFieldChange("checkOut");
+    } else {
+      if (ymd <= checkIn) {
+        onCheckInChange(ymd);
+        onCheckOutChange("");
+        onPickingFieldChange("checkOut");
+      } else {
+        onCheckOutChange(ymd);
+        onClose();
+      }
+    }
+  }
+
+  function dayClasses(ymd: string): string {
+    const isPast = ymd < todayStr;
+    const isCheckIn = ymd === checkIn;
+    const isCheckOut = ymd === checkOut;
+    const effectiveEnd = pickingField === "checkOut" && !checkOut && hovered && hovered > checkIn ? hovered : checkOut;
+    const inRange = checkIn && effectiveEnd && ymd > checkIn && ymd < effectiveEnd;
+    const isRangeStart = ymd === checkIn && !!effectiveEnd && effectiveEnd > checkIn;
+    const isRangeEnd = ymd === effectiveEnd && !!checkIn && effectiveEnd > checkIn;
+
+    let base = "relative flex h-10 w-10 items-center justify-center text-[14px] font-medium tabular-nums transition-all duration-100 ";
+
+    if (isPast) return base + "cursor-default text-[#ccc] dark:text-[#444]";
+    if (isCheckIn || isCheckOut) return base + "z-10 rounded-full bg-[#222] text-white shadow-md cursor-pointer dark:bg-white dark:text-[#222]";
+    if (inRange) return base + "bg-[#f0f0f0] text-[#222] cursor-pointer dark:bg-[#2a2a2a] dark:text-white " + (isRangeStart ? "rounded-l-full" : "") + (isRangeEnd ? "rounded-r-full" : "");
+    return base + "rounded-full cursor-pointer text-[#222] hover:bg-[#f7f7f7] dark:text-[#e8e8e8] dark:hover:bg-[#2a2a2a]";
+  }
+
+  function rangeBg(ymd: string): string | null {
+    const effectiveEnd = pickingField === "checkOut" && !checkOut && hovered && hovered > checkIn ? hovered : checkOut;
+    if (!checkIn || !effectiveEnd || effectiveEnd <= checkIn) return null;
+    if (ymd === checkIn) return "rounded-l-full bg-[#f0f0f0] dark:bg-[#2a2a2a]";
+    if (ymd === effectiveEnd) return "rounded-r-full bg-[#f0f0f0] dark:bg-[#2a2a2a]";
+    if (ymd > checkIn && ymd < effectiveEnd) return "bg-[#f0f0f0] dark:bg-[#2a2a2a]";
+    return null;
+  }
+
+  if (!open) return null;
+
+  function renderMonth(cells: (string | null)[], label: string) {
+    return (
+      <div className="min-w-0 flex-1">
+        <p className="text-center text-[14px] font-semibold text-[#222] dark:text-white">{label}</p>
+        <div className="mt-3 grid grid-cols-7 text-center text-[12px] font-semibold text-[#717171]">
+          {PICKER_WEEKDAYS.map((d) => <div key={d} className="py-1">{d}</div>)}
+        </div>
+        <div className="mt-1 grid grid-cols-7">
+          {cells.map((ymd, i) => {
+            if (!ymd) return <div key={`e-${i}`} className="h-10 w-10" />;
+            const dayNum = Number(ymd.slice(8, 10));
+            const bg = rangeBg(ymd);
+            return (
+              <div key={ymd} className={`flex items-center justify-center ${bg ?? ""}`}>
+                <button
+                  type="button"
+                  onClick={() => handleDayClick(ymd)}
+                  onMouseEnter={() => setHovered(ymd)}
+                  onMouseLeave={() => setHovered(null)}
+                  className={dayClasses(ymd)}
+                  disabled={ymd < todayStr}
+                >
+                  {dayNum}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3 overflow-hidden rounded-2xl border border-[#ddd] bg-white p-5 shadow-xl dark:border-[#444] dark:bg-[#1a1a1a]">
+      {/* Picking indicator */}
+      <div className="mb-4 flex gap-2">
+        <button type="button" onClick={() => onPickingFieldChange("checkIn")} className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition ${pickingField === "checkIn" ? "bg-[#222] text-white dark:bg-white dark:text-[#222]" : "bg-[#f7f7f7] text-[#717171] hover:bg-[#ebebeb] dark:bg-[#333] dark:text-[#aaa] dark:hover:bg-[#444]"}`}>
+          Check-in{checkIn ? `: ${formatDisplayDate(checkIn)}` : ""}
+        </button>
+        <button type="button" onClick={() => onPickingFieldChange("checkOut")} className={`rounded-full px-4 py-1.5 text-[13px] font-semibold transition ${pickingField === "checkOut" ? "bg-[#222] text-white dark:bg-white dark:text-[#222]" : "bg-[#f7f7f7] text-[#717171] hover:bg-[#ebebeb] dark:bg-[#333] dark:text-[#aaa] dark:hover:bg-[#444]"}`}>
+          Check-out{checkOut ? `: ${formatDisplayDate(checkOut)}` : ""}
+        </button>
+      </div>
+
+      {/* Month nav + grids */}
+      <div className="flex items-start justify-between">
+        <button type="button" onClick={prevMonth} className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#717171] transition hover:bg-[#f7f7f7] dark:hover:bg-[#2a2a2a]" aria-label="Previous month">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M9.78 4.22a.75.75 0 0 1 0 1.06L7.06 8l2.72 2.72a.75.75 0 1 1-1.06 1.06L5.22 8.53a.75.75 0 0 1 0-1.06l3.5-3.5a.75.75 0 0 1 1.06 0Z" /></svg>
+        </button>
+        <div className="flex min-w-0 flex-1 gap-6">
+          {renderMonth(cells1, monthLabel)}
+          <div className="hidden min-w-0 flex-1 md:block">
+            {renderMonth(cells2, month2Label)}
+          </div>
+        </div>
+        <button type="button" onClick={nextMonth} className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[#717171] transition hover:bg-[#f7f7f7] dark:hover:bg-[#2a2a2a]" aria-label="Next month">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="h-4 w-4"><path fillRule="evenodd" d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.5 3.5a.75.75 0 0 1 0 1.06l-3.5 3.5a.75.75 0 0 1-1.06-1.06L8.94 8 6.22 5.28a.75.75 0 0 1 0-1.06Z" /></svg>
+        </button>
+      </div>
+
+      {/* Clear + close */}
+      <div className="mt-4 flex items-center justify-between border-t border-[#ebebeb] pt-3 dark:border-[#333]">
+        <button type="button" onClick={() => { onCheckInChange(""); onCheckOutChange(""); onPickingFieldChange("checkIn"); }} className="text-[13px] font-semibold text-[#222] underline underline-offset-4 dark:text-white">
+          Clear dates
+        </button>
+        <button type="button" onClick={onClose} className="rounded-lg bg-[#222] px-4 py-2 text-[13px] font-semibold text-white transition hover:bg-[#000] dark:bg-white dark:text-[#222] dark:hover:bg-[#e8e8e8]">
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ── ErrorLine ── */
 function Err({ msg }: { msg: string | undefined }) {
   if (!msg) return null;
@@ -175,6 +389,8 @@ export default function HotelReservationForm() {
   const [byNight, setByNight] = useState<Record<string, NightAvailability>>({});
   const [availLoading, setAvailLoading] = useState(true);
   const [availError, setAvailError] = useState<string | null>(null);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [pickingField, setPickingField] = useState<"checkIn" | "checkOut">("checkIn");
 
   const update = useCallback((key: keyof FormState, value: string) => {
     setForm((prev) => {
@@ -390,45 +606,85 @@ export default function HotelReservationForm() {
               When are you staying?
             </h2>
             <p className="mt-1 text-[14px] text-[#717171]">
-              Select check-in and check-out dates. Click a date on the calendar to check room availability.
+              Pick your dates on the calendar, then set arrival &amp; departure times.
             </p>
             {availError ? (
               <p className="mt-2 text-[13px] text-amber-700 dark:text-amber-300">{availError}</p>
             ) : null}
+
+            {/* Clickable date cards */}
             <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="relative overflow-hidden rounded-2xl border border-[#b0b0b0] dark:border-[#555]">
+              <button
+                type="button"
+                onClick={() => { setPickingField("checkIn"); setCalendarOpen(true); }}
+                className={`group relative overflow-hidden rounded-2xl border text-left transition hover:shadow-md ${calendarOpen && pickingField === "checkIn" ? "border-[#222] ring-2 ring-[#222] dark:border-white dark:ring-white" : "border-[#b0b0b0] dark:border-[#555]"}`}
+              >
                 <div className="border-b border-[#ebebeb] px-4 pb-2 pt-3 dark:border-[#333]">
-                  <label htmlFor="hr-checkin-date" className="text-[10px] font-bold uppercase tracking-widest text-[#717171]">
-                    Check-in
-                  </label>
-                  <input id="hr-checkin-date" name="checkInDate" type="date" value={form.checkInDate} onChange={(e) => update("checkInDate", e.target.value)} className="w-full border-0 bg-transparent p-0 pt-1 text-[15px] font-semibold text-[#222] outline-none dark:text-white" aria-invalid={!!errors.checkInDate} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#717171]">Check-in</span>
+                  <p className={`pt-1 text-[15px] font-semibold ${form.checkInDate ? "text-[#222] dark:text-white" : "text-[#b0b0b0] dark:text-[#555]"}`}>
+                    {form.checkInDate ? formatDisplayDate(form.checkInDate) : "Add date"}
+                  </p>
                 </div>
                 <div className="px-4 pb-3 pt-2">
-                  <label htmlFor="hr-checkin-time" className="text-[10px] font-bold uppercase tracking-widest text-[#717171]">
-                    Time
-                  </label>
-                  <input id="hr-checkin-time" name="checkInTime" type="time" value={form.checkInTime} onChange={(e) => update("checkInTime", e.target.value)} className="w-full border-0 bg-transparent p-0 pt-1 text-[15px] font-semibold text-[#222] outline-none dark:text-white" aria-invalid={!!errors.checkInTime} />
+                  <label htmlFor="hr-checkin-time" className="text-[10px] font-bold uppercase tracking-widest text-[#717171]">Time</label>
+                  <input
+                    id="hr-checkin-time"
+                    name="checkInTime"
+                    type="time"
+                    value={form.checkInTime}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => update("checkInTime", e.target.value)}
+                    className="w-full border-0 bg-transparent p-0 pt-1 text-[15px] font-semibold text-[#222] outline-none dark:text-white"
+                    aria-invalid={!!errors.checkInTime}
+                  />
                 </div>
-              </div>
-              <div className="relative overflow-hidden rounded-2xl border border-[#b0b0b0] dark:border-[#555]">
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { setPickingField("checkOut"); setCalendarOpen(true); }}
+                className={`group relative overflow-hidden rounded-2xl border text-left transition hover:shadow-md ${calendarOpen && pickingField === "checkOut" ? "border-[#222] ring-2 ring-[#222] dark:border-white dark:ring-white" : "border-[#b0b0b0] dark:border-[#555]"}`}
+              >
                 <div className="border-b border-[#ebebeb] px-4 pb-2 pt-3 dark:border-[#333]">
-                  <label htmlFor="hr-checkout-date" className="text-[10px] font-bold uppercase tracking-widest text-[#717171]">
-                    Check-out
-                  </label>
-                  <input id="hr-checkout-date" name="checkOutDate" type="date" value={form.checkOutDate} min={form.checkInDate || undefined} onChange={(e) => update("checkOutDate", e.target.value)} className="w-full border-0 bg-transparent p-0 pt-1 text-[15px] font-semibold text-[#222] outline-none dark:text-white" aria-invalid={!!errors.checkOutDate} />
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-[#717171]">Check-out</span>
+                  <p className={`pt-1 text-[15px] font-semibold ${form.checkOutDate ? "text-[#222] dark:text-white" : "text-[#b0b0b0] dark:text-[#555]"}`}>
+                    {form.checkOutDate ? formatDisplayDate(form.checkOutDate) : "Add date"}
+                  </p>
                 </div>
                 <div className="px-4 pb-3 pt-2">
-                  <label htmlFor="hr-checkout-time" className="text-[10px] font-bold uppercase tracking-widest text-[#717171]">
-                    Time
-                  </label>
-                  <input id="hr-checkout-time" name="checkOutTime" type="time" value={form.checkOutTime} onChange={(e) => update("checkOutTime", e.target.value)} className="w-full border-0 bg-transparent p-0 pt-1 text-[15px] font-semibold text-[#222] outline-none dark:text-white" aria-invalid={!!errors.checkOutTime} />
+                  <label htmlFor="hr-checkout-time" className="text-[10px] font-bold uppercase tracking-widest text-[#717171]">Time</label>
+                  <input
+                    id="hr-checkout-time"
+                    name="checkOutTime"
+                    type="time"
+                    value={form.checkOutTime}
+                    onClick={(e) => e.stopPropagation()}
+                    onChange={(e) => update("checkOutTime", e.target.value)}
+                    className="w-full border-0 bg-transparent p-0 pt-1 text-[15px] font-semibold text-[#222] outline-none dark:text-white"
+                    aria-invalid={!!errors.checkOutTime}
+                  />
                 </div>
-              </div>
+              </button>
             </div>
+
+            {/* Inline date range calendar */}
+            <DateRangePicker
+              checkIn={form.checkInDate}
+              checkOut={form.checkOutDate}
+              onCheckInChange={(v) => update("checkInDate", v)}
+              onCheckOutChange={(v) => update("checkOutDate", v)}
+              open={calendarOpen}
+              onClose={() => setCalendarOpen(false)}
+              pickingField={pickingField}
+              onPickingFieldChange={setPickingField}
+            />
+
             <Err msg={errors.checkInDate} />
             <Err msg={errors.checkOutDate} />
             <Err msg={errors.checkInTime} />
             <Err msg={errors.checkOutTime} />
+
+            {/* Availability calendar */}
             <div className="mt-6">
               <HotelAvailabilityCalendar byNight={byNight} checkInDate={form.checkInDate} checkOutDate={form.checkOutDate} loading={availLoading} />
             </div>
