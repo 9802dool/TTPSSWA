@@ -39,6 +39,7 @@ function rowSearchBlob(row: ServiceRequestRecord): string {
     str(p, "checkOutTime"),
     str(p, "rooms"),
     str(p, "guests"),
+    str(p, "children"),
     str(p, "notes"),
     row.id,
     row.createdAt,
@@ -187,7 +188,8 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
                   <th className="px-4 py-3 font-medium">Check-in</th>
                   <th className="px-4 py-3 font-medium">Check-out</th>
                   <th className="px-4 py-3 font-medium tabular-nums">Rooms</th>
-                  <th className="px-4 py-3 font-medium tabular-nums">Guests</th>
+                  <th className="px-4 py-3 font-medium tabular-nums">Adults</th>
+                  <th className="px-4 py-3 font-medium tabular-nums">Children</th>
                   <th className="min-w-[12rem] px-4 py-3 font-medium">Notes</th>
                 </tr>
               </thead>
@@ -247,6 +249,7 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
                       </td>
                       <td className="px-4 py-3 tabular-nums">{str(p, "rooms") || "—"}</td>
                       <td className="px-4 py-3 tabular-nums">{str(p, "guests") || "—"}</td>
+                      <td className="px-4 py-3 tabular-nums">{str(p, "children") && str(p, "children") !== "0" ? str(p, "children") : "—"}</td>
                       <td className="max-w-[18rem] px-4 py-3 text-xs leading-relaxed text-[var(--muted)]">
                         {str(p, "notes") || "—"}
                       </td>

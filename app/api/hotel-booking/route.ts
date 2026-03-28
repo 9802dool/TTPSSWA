@@ -21,6 +21,7 @@ type Body = {
   fullBedRoom?: string;
   doubleBedRoom?: string;
   guests?: string;
+  children?: string;
   notes?: string;
 };
 
@@ -37,6 +38,7 @@ type ValidData = {
   fullBedRoom: number;
   doubleBedRoom: number;
   guests: string;
+  children: string;
   notes: string;
 };
 
@@ -78,6 +80,7 @@ function validate(body: Body): { ok: true; data: ValidData } | { ok: false; mess
   const checkInTime = String(body.checkInTime ?? "").trim();
   const checkOutTime = String(body.checkOutTime ?? "").trim();
   const guests = String(body.guests ?? "1").trim();
+  const children = String(body.children ?? "0").trim();
   const notes = String(body.notes ?? "").trim();
 
   const hasTypedRoomFields =
@@ -164,9 +167,16 @@ function validate(body: Body): { ok: true; data: ValidData } | { ok: false; mess
       fullBedRoom,
       doubleBedRoom,
       guests,
+      children,
       notes,
     },
   };
+}
+
+function guestLine(d: ValidData): string {
+  const parts = [`${d.guests} adult${Number(d.guests) === 1 ? "" : "s"}`];
+  if (Number(d.children) > 0) parts.push(`${d.children} child${Number(d.children) === 1 ? "" : "ren"}`);
+  return parts.join(", ");
 }
 
 function buildBookingText(d: ValidData): string {
@@ -179,7 +189,7 @@ function buildBookingText(d: ValidData): string {
     `Check-in: ${d.checkInDate} at ${d.checkInTime}`,
     `Check-out: ${d.checkOutDate} at ${d.checkOutTime}`,
     `Room mix: ${roomMixDescription(d)}`,
-    `Guests: ${d.guests}`,
+    `Guests: ${guestLine(d)}`,
   ];
   if (d.notes) textLines.push("", "Special requests:", d.notes);
   return textLines.join("\n");
@@ -262,7 +272,7 @@ function buildQuotationEmailText(d: ValidData, recordId: string): string {
     "",
     `Stay: check-in ${d.checkInDate} at ${d.checkInTime} → check-out ${d.checkOutDate} at ${d.checkOutTime}`,
     `Room mix: ${roomMixDescription(d)}`,
-    `Guests: ${d.guests}`,
+    `Guests: ${guestLine(d)}`,
   ];
   if (d.notes) {
     lines.push("", "Special requests (from your form):", d.notes);
@@ -505,6 +515,7 @@ export async function POST(request: Request) {
       fullBedRoom: d.fullBedRoom,
       doubleBedRoom: d.doubleBedRoom,
       guests: d.guests,
+      children: d.children,
       notes: d.notes || undefined,
     });
 

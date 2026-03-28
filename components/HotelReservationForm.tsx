@@ -24,6 +24,7 @@ type FormState = {
   fullBedRoom: string;
   doubleBedRoom: string;
   guests: string;
+  children: string;
   notes: string;
 };
 
@@ -39,6 +40,7 @@ const initial: FormState = {
   fullBedRoom: "0",
   doubleBedRoom: "1",
   guests: "1",
+  children: "0",
   notes: "",
 };
 
@@ -76,7 +78,7 @@ function buildStayIcs(f: FormState): string {
   const dEnd = f.checkOutDate.replace(/-/g, "");
   const total = sumRooms(f);
   const desc = icsEscape(
-    [`Rooms (${total}): ${roomMixLine(f)}`, `Guests: ${f.guests}`, f.notes.trim() ? `Notes: ${f.notes.trim()}` : ""].filter(Boolean).join("\\n"),
+    [`Rooms (${total}): ${roomMixLine(f)}`, `Guests: ${f.guests} adult${Number(f.guests) === 1 ? "" : "s"}${Number(f.children) > 0 ? `, ${f.children} child${Number(f.children) === 1 ? "" : "ren"}` : ""}`, f.notes.trim() ? `Notes: ${f.notes.trim()}` : ""].filter(Boolean).join("\\n"),
   );
   return [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//TTPSSWA//Hotel Stay//EN", "CALSCALE:GREGORIAN",
@@ -91,7 +93,7 @@ function googleCalendarStayUrl(f: FormState): string {
     action: "TEMPLATE",
     text: "TTPSSWA hotel stay",
     dates: `${f.checkInDate.replace(/-/g, "")}/${f.checkOutDate.replace(/-/g, "")}`,
-    details: [`Rooms (${sumRooms(f)}): ${roomMixLine(f)}`, `Guests: ${f.guests}`, f.notes.trim() ? `Notes: ${f.notes.trim()}` : ""].filter(Boolean).join("\n"),
+    details: [`Rooms (${sumRooms(f)}): ${roomMixLine(f)}`, `Guests: ${f.guests} adult${Number(f.guests) === 1 ? "" : "s"}${Number(f.children) > 0 ? `, ${f.children} child${Number(f.children) === 1 ? "" : "ren"}` : ""}`, f.notes.trim() ? `Notes: ${f.notes.trim()}` : ""].filter(Boolean).join("\n"),
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
@@ -261,7 +263,8 @@ export default function HotelReservationForm() {
       `Check-in: ${form.checkInDate} at ${form.checkInTime}`,
       `Check-out: ${form.checkOutDate} at ${form.checkOutTime}`,
       `Rooms (${total}): ${roomMixLine(form)}`,
-      `Guests: ${form.guests}`,
+      `Adults: ${form.guests}`,
+      Number(form.children) > 0 ? `Children: ${form.children}` : "",
       form.notes.trim() ? `Notes: ${form.notes.trim()}` : "",
     ].filter(Boolean);
   }, [submitted, form]);
@@ -438,12 +441,29 @@ export default function HotelReservationForm() {
             <h2 className="text-[22px] font-bold text-[#222] dark:text-white">
               Guests
             </h2>
-            <div className="mt-4 max-w-xs">
-              <select id="hr-guests" name="guests" value={form.guests} onChange={(e) => update("guests", e.target.value)} className={fieldClass}>
-                {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
-                  <option key={n} value={String(n)}>{n} guest{n > 1 ? "s" : ""}</option>
-                ))}
-              </select>
+            <div className="mt-5 space-y-3">
+              <div className="flex items-center justify-between rounded-2xl border border-[#ddd] bg-white p-5 dark:border-[#333] dark:bg-[#1a1a1a]">
+                <div>
+                  <p className="text-[15px] font-semibold text-[#222] dark:text-white">Adults</p>
+                  <p className="text-xs text-[#717171]">Age 13+</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => update("guests", String(Math.max(1, (parseInt(form.guests, 10) || 1) - 1)))} disabled={(parseInt(form.guests, 10) || 1) <= 1} className="flex h-8 w-8 items-center justify-center rounded-full border border-[#b0b0b0] text-sm text-[#717171] transition hover:border-[#222] hover:text-[#222] disabled:cursor-not-allowed disabled:border-[#ebebeb] disabled:text-[#ebebeb] dark:border-[#555] dark:hover:border-white dark:hover:text-white dark:disabled:border-[#333] dark:disabled:text-[#333]" aria-label="Decrease adults">−</button>
+                  <span id="hr-guests" className="w-6 text-center font-mono text-[15px] font-semibold text-[#222] tabular-nums dark:text-white">{parseInt(form.guests, 10) || 1}</span>
+                  <button type="button" onClick={() => update("guests", String(Math.min(10, (parseInt(form.guests, 10) || 1) + 1)))} disabled={(parseInt(form.guests, 10) || 1) >= 10} className="flex h-8 w-8 items-center justify-center rounded-full border border-[#b0b0b0] text-sm text-[#717171] transition hover:border-[#222] hover:text-[#222] disabled:cursor-not-allowed disabled:border-[#ebebeb] disabled:text-[#ebebeb] dark:border-[#555] dark:hover:border-white dark:hover:text-white dark:disabled:border-[#333] dark:disabled:text-[#333]" aria-label="Increase adults">+</button>
+                </div>
+              </div>
+              <div className="flex items-center justify-between rounded-2xl border border-[#ddd] bg-white p-5 dark:border-[#333] dark:bg-[#1a1a1a]">
+                <div>
+                  <p className="text-[15px] font-semibold text-[#222] dark:text-white">Children</p>
+                  <p className="text-xs text-[#717171]">Ages 0–12</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => update("children", String(Math.max(0, (parseInt(form.children, 10) || 0) - 1)))} disabled={(parseInt(form.children, 10) || 0) <= 0} className="flex h-8 w-8 items-center justify-center rounded-full border border-[#b0b0b0] text-sm text-[#717171] transition hover:border-[#222] hover:text-[#222] disabled:cursor-not-allowed disabled:border-[#ebebeb] disabled:text-[#ebebeb] dark:border-[#555] dark:hover:border-white dark:hover:text-white dark:disabled:border-[#333] dark:disabled:text-[#333]" aria-label="Decrease children">−</button>
+                  <span id="hr-children" className="w-6 text-center font-mono text-[15px] font-semibold text-[#222] tabular-nums dark:text-white">{parseInt(form.children, 10) || 0}</span>
+                  <button type="button" onClick={() => update("children", String(Math.min(10, (parseInt(form.children, 10) || 0) + 1)))} disabled={(parseInt(form.children, 10) || 0) >= 10} className="flex h-8 w-8 items-center justify-center rounded-full border border-[#b0b0b0] text-sm text-[#717171] transition hover:border-[#222] hover:text-[#222] disabled:cursor-not-allowed disabled:border-[#ebebeb] disabled:text-[#ebebeb] dark:border-[#555] dark:hover:border-white dark:hover:text-white dark:disabled:border-[#333] dark:disabled:text-[#333]" aria-label="Increase children">+</button>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -510,9 +530,15 @@ export default function HotelReservationForm() {
               <p className="text-[13px] text-[#717171]">{roomMixLine(form)}</p>
             ) : null}
             <div className="flex justify-between">
-              <span className="text-[#717171]">Guests</span>
+              <span className="text-[#717171]">Adults</span>
               <span className="font-semibold tabular-nums">{form.guests}</span>
             </div>
+            {Number(form.children) > 0 ? (
+              <div className="flex justify-between">
+                <span className="text-[#717171]">Children</span>
+                <span className="font-semibold tabular-nums">{form.children}</span>
+              </div>
+            ) : null}
             {nightCount > 0 ? (
               <div className="flex justify-between">
                 <span className="text-[#717171]">Nights</span>

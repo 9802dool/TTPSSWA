@@ -175,9 +175,15 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
               <dd className="mt-0.5 leading-relaxed">{roomMixOrRooms(p)}</dd>
             </div>
             <div>
-              <dt className="text-[var(--muted)]">Guests</dt>
+              <dt className="text-[var(--muted)]">Adults</dt>
               <dd className="mt-0.5 tabular-nums">{str(p, "guests") || "—"}</dd>
             </div>
+            {str(p, "children") && str(p, "children") !== "0" ? (
+              <div>
+                <dt className="text-[var(--muted)]">Children</dt>
+                <dd className="mt-0.5 tabular-nums">{str(p, "children")}</dd>
+              </div>
+            ) : null}
             <div>
               <dt className="text-[var(--muted)]">Notes</dt>
               <dd className="mt-0.5 whitespace-pre-wrap leading-relaxed">

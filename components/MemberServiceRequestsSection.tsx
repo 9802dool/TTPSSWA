@@ -55,7 +55,9 @@ function HotelBookingDetails({
   const rooms = str("rooms");
   const guests = str("guests");
   if (!hasMix && rooms) rows.push(["Rooms", rooms]);
-  if (guests) rows.push(["Guests", guests]);
+  if (guests) rows.push(["Adults", guests]);
+  const children = str("children");
+  if (children && children !== "0") rows.push(["Children", children]);
   const notes = str("notes");
   if (notes) rows.push(["Notes", notes]);
 
