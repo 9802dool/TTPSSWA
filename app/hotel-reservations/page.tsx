@@ -14,44 +14,55 @@ export default function HotelReservationsPage() {
     <>
       <SiteHeader />
       <main className="pt-[4.25rem]">
-        <section className="relative overflow-hidden border-b border-line bg-navy text-white">
+        {/* ── Hero ── */}
+        <section className="relative overflow-hidden bg-navy text-white">
           <div
-            className="pointer-events-none absolute inset-0 opacity-50"
+            className="pointer-events-none absolute inset-0"
             aria-hidden
             style={{
               backgroundImage:
-                "linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)",
+                "linear-gradient(160deg, rgb(12 25 41) 0%, rgb(30 58 95 / .8) 55%, rgb(30 64 175 / .2) 100%)",
             }}
           />
-          <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 lg:px-8">
-            <p className="mb-4 inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
-              Travel
-            </p>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              Hotel reservations
-            </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              Submit a reservation request with your stay dates, check-in and
-              check-out times, and guest details. Confirmation is subject to
-              availability.
-            </p>
+          <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-end lg:px-8 lg:py-28">
+            <div>
+              <div className="flex items-center gap-2 text-xs text-slate-300">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                Accommodation
+              </div>
+              <h1 className="mt-4 max-w-xl text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-[3.4rem] lg:leading-[1.1]">
+                Stay with TTPSSWA
+              </h1>
+              <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-slate-300">
+                8 rooms across three categories. Choose your dates, pick rooms,
+                and submit a request — our coordinator confirms rates and
+                availability.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-6 text-sm text-white/70">
+                <span className="flex items-center gap-2"><span className="text-lg">🏨</span> 8 rooms</span>
+                <span className="flex items-center gap-2"><span className="text-lg">👤</span> Up to 10 guests</span>
+                <span className="flex items-center gap-2"><span className="text-lg">📧</span> Email confirmation</span>
+              </div>
+            </div>
+            <div className="hidden rounded-2xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur-sm lg:block">
+              <p className="text-xs font-semibold uppercase tracking-widest text-white/50">
+                Room types
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-white/80">
+                <li>2 &times; Presidential suite</li>
+                <li>2 &times; Full bed room</li>
+                <li>4 &times; Double bed room</li>
+              </ul>
+              <p className="mt-4 text-xs text-white/40">
+                Rooms adjustable on request.
+              </p>
+            </div>
           </div>
         </section>
 
-        <section className="border-b border-line bg-canvas py-14 dark:bg-canvas">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-            <div className="mb-10 max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                Booking
-              </p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-ink md:text-3xl">
-                Request a stay
-              </h2>
-              <p className="mt-3 text-sm leading-relaxed text-muted">
-                Your request is sent to our team by email. Fields marked{" "}
-                <span className="text-red-600">*</span> are required.
-              </p>
-            </div>
+        {/* ── Booking form section ── */}
+        <section className="bg-canvas py-12 dark:bg-canvas lg:py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <HotelReservationForm />
           </div>
         </section>
