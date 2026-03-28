@@ -80,6 +80,15 @@ export default async function MembersLoginPage({ searchParams }: Props) {
                     variant="member"
                   />
                 </div>
+                <p className="mt-6 text-sm text-muted">
+                  <Link
+                    href="/membership-services#members-benefits"
+                    className="font-medium text-brand hover:underline"
+                  >
+                    Members Benefits
+                  </Link>{" "}
+                  — full list on the membership services page.
+                </p>
                 <div className="mt-6 flex flex-wrap items-center gap-3">
                   <MemberLogoutButton />
                   <Link
@@ -138,10 +147,17 @@ export default async function MembersLoginPage({ searchParams }: Props) {
                 </p>
                 <MembersLoginForm redirectAfterLogin={nextPath} />
                 <p className="mt-8 text-center text-sm text-muted">
+                  <Link
+                    href="/membership-services#members-benefits"
+                    className="text-brand hover:underline"
+                  >
+                    Members Benefits
+                  </Link>{" "}
+                  on the membership services page, or{" "}
                   <Link href="/#members-services" className="text-brand hover:underline">
                     Members services
                   </Link>{" "}
-                  for sign-in help and application links.
+                  on the home page.
                 </p>
               </>
             )}

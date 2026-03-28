@@ -31,42 +31,26 @@ export default function MembershipServicesPage() {
               Membership services
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              Member programs, stations, and the full{" "}
+              Member programs, stations, and your full{" "}
               <strong className="font-semibold text-white">Members Benefits</strong>{" "}
-              list with all 19 items—open{" "}
-              <strong className="font-semibold text-white">All benefits</strong> below.
+              list—use <strong className="font-semibold text-white">All benefits</strong>{" "}
+              in the next section to open all 19 items.
             </p>
             <div className="mt-8">
               <a
                 href="#members-benefits"
                 className="inline-flex min-h-[48px] items-center justify-center rounded-md bg-white px-6 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100"
               >
-                Jump to member benefits
+                Jump to Members Benefits
               </a>
             </div>
           </div>
         </section>
 
-        <section className="border-b border-line bg-[#0a0f18] py-20 text-white dark:bg-[#050810]">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">
-                Strategic focus
-              </p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
-                Where we focus
-              </h2>
-              <p className="mt-4 text-base leading-relaxed text-slate-400">
-                Replace this band with metrics, partner logos, or subsidiary highlights
-                when ready.
-              </p>
-            </div>
-          </div>
-        </section>
-
+        {/* Members services: benefits pillar lives here */}
         <section
           id="members-services"
-          className="scroll-mt-24 border-b border-line bg-[#0a0f18] py-20 text-white dark:bg-[#050810]"
+          className="scroll-mt-24 border-b border-line bg-[#0a0f18] py-16 text-white dark:bg-[#050810] sm:py-20"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
@@ -77,7 +61,8 @@ export default function MembershipServicesPage() {
                 Members Benefits
               </h2>
               <p className="mt-4 text-base leading-relaxed text-slate-400">
-                Expand each item for placeholder details you can edit in the codebase.
+                The complete list of association benefits. Expand each row for details
+                you can customize in the project.
               </p>
             </div>
             <div id="members-benefits" className="scroll-mt-24">
@@ -96,6 +81,23 @@ export default function MembershipServicesPage() {
                 Back to home — Members services
               </Link>
             </p>
+          </div>
+        </section>
+
+        <section className="border-b border-line bg-[#0a0f18] py-20 text-white dark:bg-[#050810]">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">
+                Strategic focus
+              </p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+                Where we focus
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-slate-400">
+                Replace this band with metrics, partner logos, or subsidiary highlights
+                when ready.
+              </p>
+            </div>
           </div>
         </section>
       </main>
