@@ -103,26 +103,24 @@ export default function Home() {
           className="scroll-mt-24 border-b border-line bg-surface py-20 dark:bg-canvas"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <div className="max-w-2xl">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+            <div className="max-w-3xl">
+              <h2 className="text-3xl font-bold tracking-tight text-ink md:text-4xl">
                 About
-              </p>
-              <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink md:text-4xl">
-                Who we are
               </h2>
-              <p className="mt-4 text-muted">
-                A concise introduction visitors see first—edit to match your charter.
-              </p>
-            </div>
-            <div className="mt-12 grid gap-10 border-t border-line pt-12 md:grid-cols-2 md:gap-16">
-              <p className="text-[17px] leading-[1.75] text-muted">
-                Replace this paragraph with your organization’s story—who you serve,
-                when you were founded, and what success looks like for your members.
-              </p>
-              <p className="text-[17px] leading-[1.75] text-muted">
-                Add a second column for milestones, leadership, or a short timeline.
-                Short sections scan well on mobile and desktop.
-              </p>
+              <div className="mt-8 space-y-6 border-t border-line pt-12">
+                <p className="text-[17px] leading-[1.75] text-muted">
+                  The Trinidad and Tobago Police Service Social and Welfare Association
+                  is dedicated to supporting the men and women of the Police Service,
+                  Special Reserve Police (SRP), and Municipal Police by enhancing their
+                  quality of life and providing meaningful assistance throughout their
+                  careers and beyond.
+                </p>
+                <p className="text-[17px] leading-[1.75] text-muted">
+                  We believe that service to country deserves strong support, and our
+                  mission is to ensure that every member has access to resources that
+                  promote well-being, security, and opportunity.
+                </p>
+              </div>
             </div>
           </div>
         </section>
