@@ -72,6 +72,12 @@ export function HotelBookingAdminActions({
           </dd>
         </div>
         <div className="flex flex-wrap justify-between gap-2">
+          <dt className="text-[var(--muted)]">Quotation email opened</dt>
+          <dd className="text-right font-medium text-[var(--fg)]">
+            {formatIso(meta.quotationEmailOpenedAt)}
+          </dd>
+        </div>
+        <div className="flex flex-wrap justify-between gap-2">
           <dt className="text-[var(--muted)]">Booking status</dt>
           <dd className="text-right font-medium text-[var(--fg)]">
             {meta.confirmed ? "Confirmed" : "Not confirmed"}

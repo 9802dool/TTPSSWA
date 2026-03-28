@@ -1,6 +1,8 @@
 import { Resend } from "resend";
 import { recordServiceRequest } from "@/lib/analytics-storage";
 import { mergeHotelBookingMeta } from "@/lib/hotel-booking-meta";
+import { getPublicSiteUrl } from "@/lib/public-site-url";
+import { signQuotationOpenToken } from "@/lib/hotel-quotation-open-token";
 
 export const runtime = "nodejs";
 
@@ -209,6 +211,45 @@ function resendFromCandidates(): string[] {
   return unique;
 }
 
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function buildQuotationOpenPixelUrl(recordId: string): string | null {
+  const base = getPublicSiteUrl();
+  const sig = signQuotationOpenToken(recordId);
+  if (!base || !sig) return null;
+  const url = new URL(`${base}/api/hotel-booking/quotation-open`);
+  url.searchParams.set("id", recordId);
+  url.searchParams.set("sig", sig);
+  return url.toString();
+}
+
+function buildQuotationEmailHtml(
+  d: ValidData,
+  recordId: string,
+  notifyEmail: string,
+  trackingPixelUrl: string | null,
+): string {
+  const text = buildQuotationEmailText(d, recordId);
+  const lines = text.split("\n");
+  const paragraphs = lines.map((line) => {
+    if (!line.trim()) return "<br />";
+    return `<p style="margin:0 0 0.65em 0;line-height:1.5;">${escapeHtml(line)}</p>`;
+  });
+  const mailtoHref = `mailto:${encodeURIComponent(notifyEmail)}?subject=${encodeURIComponent(`Re: Hotel quotation ${recordId}`)}`;
+  const mailtoBlock = `<p style="margin:1.25em 0 0 0;"><a href="${escapeHtml(mailtoHref)}" style="color:#1a56db;">Email us about this quotation</a></p>`;
+  const pixel =
+    trackingPixelUrl !== null
+      ? `<img src="${escapeHtml(trackingPixelUrl)}" width="1" height="1" alt="" style="display:block;border:0;width:1px;height:1px;" />`
+      : "";
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"/></head><body style="font-family:system-ui,-apple-system,sans-serif;font-size:15px;color:#1a1a1a;">${paragraphs.join("\n")}${mailtoBlock}${pixel}</body></html>`;
+}
+
 function buildQuotationEmailText(d: ValidData, recordId: string): string {
   const lines = [
     `Hello ${d.fullName},`,
@@ -256,7 +297,12 @@ async function sendGuestQuotationEmail(
   const notify = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim() || NOTIFY_DEFAULT;
   const resend = new Resend(apiKey);
   const subject = `Your hotel quotation — TTPSSWA (${d.checkInDate})`;
-  const text = buildQuotationEmailText(d, recordId);
+  const mailtoHref = `mailto:${encodeURIComponent(notify)}?subject=${encodeURIComponent(`Re: Hotel quotation ${recordId}`)}`;
+  const text =
+    buildQuotationEmailText(d, recordId) +
+    `\n\nEmail us (opens your mail app): ${mailtoHref}`;
+  const pixelUrl = buildQuotationOpenPixelUrl(recordId);
+  const html = buildQuotationEmailHtml(d, recordId, notify, pixelUrl);
 
   for (const from of resendFromCandidates()) {
     const { error } = await resend.emails.send({
@@ -265,6 +311,7 @@ async function sendGuestQuotationEmail(
       replyTo: notify,
       subject,
       text,
+      html,
     });
     if (!error) return true;
     console.error("Guest quotation Resend failed", { from, error });

@@ -4,6 +4,8 @@ const KEY_PREFIX = "hotel:booking:";
 
 export type HotelBookingMeta = {
   quotationEmailSentAt?: string;
+  /** Set when the guest’s HTML quotation is first opened (tracking pixel). */
+  quotationEmailOpenedAt?: string;
   confirmed?: boolean;
   confirmedAt?: string;
   repliedEmailAt?: string;
