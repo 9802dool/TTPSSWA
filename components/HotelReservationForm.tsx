@@ -348,7 +348,7 @@ export default function HotelReservationForm() {
               onChange={(e) => update("rooms", e.target.value)}
               className={inputClass}
             >
-              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+              {Array.from({ length: 8 }, (_, i) => i + 1).map((n) => (
                 <option key={n} value={String(n)}>
                   {n} {n === 1 ? "room" : "rooms"}
                 </option>
