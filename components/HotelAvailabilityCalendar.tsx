@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { HOTEL_NIGHT_CAPACITY } from "@/lib/hotel-availability";
+import {
+  HOTEL_NIGHT_CAPACITY,
+  ROOM_TYPE_CAPS,
+  type NightAvailability,
+} from "@/lib/hotel-availability";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-type NightInfo = { booked: number; available: number };
 
 /** Days to show in grid (leading/trailing blanks as null). */
 function monthGridCells(
@@ -35,7 +37,7 @@ function inStayRange(
 }
 
 function cellStyle(
-  info: NightInfo | undefined,
+  info: NightAvailability | undefined,
   isInStay: boolean,
   isSelected: boolean,
 ): string {
@@ -72,7 +74,7 @@ export default function HotelAvailabilityCalendar({
   checkOutDate,
   loading,
 }: {
-  byNight: Record<string, NightInfo>;
+  byNight: Record<string, NightAvailability>;
   checkInDate: string;
   checkOutDate: string;
   loading?: boolean;
@@ -118,11 +120,18 @@ export default function HotelAvailabilityCalendar({
     const info = byNight[selectedYmd];
     const booked = info?.booked ?? 0;
     const available = info?.available ?? HOTEL_NIGHT_CAPACITY;
+    const pres =
+      info?.presidentialAvailable ?? ROOM_TYPE_CAPS.presidential;
+    const full = info?.fullBedAvailable ?? ROOM_TYPE_CAPS.fullBed;
+    const dbl = info?.doubleBedAvailable ?? ROOM_TYPE_CAPS.doubleBed;
     return {
       ymd: selectedYmd,
       label: formatSelectedLabel(selectedYmd),
       booked,
       available,
+      presidentialAvailable: pres,
+      fullBedAvailable: full,
+      doubleBedAvailable: dbl,
     };
   }, [selectedYmd, byNight]);
 
@@ -172,9 +181,13 @@ export default function HotelAvailabilityCalendar({
           const info = byNight[ymd];
           const stay = inStayRange(ymd, checkInDate, checkOutDate);
           const isSelected = selectedYmd === ymd;
+          const presA =
+            info?.presidentialAvailable ?? ROOM_TYPE_CAPS.presidential;
+          const fullA = info?.fullBedAvailable ?? ROOM_TYPE_CAPS.fullBed;
+          const dblA = info?.doubleBedAvailable ?? ROOM_TYPE_CAPS.doubleBed;
           const availHint = info
-            ? `${info.available} free, ${info.booked} booked`
-            : `${HOTEL_NIGHT_CAPACITY} free`;
+            ? `${info.available} free total; presidential ${presA}, full ${fullA}, double ${dblA}`
+            : `${HOTEL_NIGHT_CAPACITY} free total; all room types open`;
           return (
             <button
               key={ymd}
@@ -205,18 +218,43 @@ export default function HotelAvailabilityCalendar({
               <span className="tabular-nums text-lg font-bold text-brand">
                 {selectedInfo.available}
               </span>{" "}
-              of {HOTEL_NIGHT_CAPACITY} rooms available this night
+              of {HOTEL_NIGHT_CAPACITY} rooms available this night (all types
+              combined)
             </p>
-            <p className="mt-1 text-xs text-muted">
+            <ul className="mt-3 space-y-2 border-t border-line pt-3 text-ink">
+              <li className="flex justify-between gap-3 text-sm">
+                <span className="text-muted">Presidential suites</span>
+                <span className="tabular-nums font-medium">
+                  {selectedInfo.presidentialAvailable} of{" "}
+                  {ROOM_TYPE_CAPS.presidential} available
+                </span>
+              </li>
+              <li className="flex justify-between gap-3 text-sm">
+                <span className="text-muted">Full bed rooms</span>
+                <span className="tabular-nums font-medium">
+                  {selectedInfo.fullBedAvailable} of {ROOM_TYPE_CAPS.fullBed}{" "}
+                  available
+                </span>
+              </li>
+              <li className="flex justify-between gap-3 text-sm">
+                <span className="text-muted">Double bed rooms</span>
+                <span className="tabular-nums font-medium">
+                  {selectedInfo.doubleBedAvailable} of{" "}
+                  {ROOM_TYPE_CAPS.doubleBed} available
+                </span>
+              </li>
+            </ul>
+            <p className="mt-3 text-xs text-muted">
               {selectedInfo.booked} room
-              {selectedInfo.booked === 1 ? "" : "s"} booked (from requests
-              received on the site)
+              {selectedInfo.booked === 1 ? "" : "s"} booked in total from
+              requests received on the site. Requests without a room type count
+              toward the total and are spread across types for this estimate.
             </p>
           </>
         ) : (
           <p className="text-xs text-muted">
-            Click a date in the calendar to see how many rooms are free that
-            night.
+            Click a date in the calendar to see total availability and how many
+            presidential, full bed, and double bed rooms are still free.
           </p>
         )}
       </div>

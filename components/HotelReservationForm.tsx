@@ -5,6 +5,7 @@ import HotelAvailabilityCalendar from "@/components/HotelAvailabilityCalendar";
 import {
   eachNight,
   HOTEL_NIGHT_CAPACITY,
+  type NightAvailability,
 } from "@/lib/hotel-availability";
 
 const inputClass =
@@ -39,8 +40,6 @@ const initial: FormState = {
   guests: "1",
   notes: "",
 };
-
-type NightInfo = { booked: number; available: number };
 
 function sumRooms(f: FormState): number {
   const p = Math.min(2, Math.max(0, parseInt(f.presidentialSuite, 10) || 0));
@@ -134,7 +133,7 @@ export default function HotelReservationForm() {
   const [mailtoFallbackHref, setMailtoFallbackHref] = useState<string | null>(
     null,
   );
-  const [byNight, setByNight] = useState<Record<string, NightInfo>>({});
+  const [byNight, setByNight] = useState<Record<string, NightAvailability>>({});
   const [availLoading, setAvailLoading] = useState(true);
   const [availError, setAvailError] = useState<string | null>(null);
 
@@ -184,7 +183,7 @@ export default function HotelReservationForm() {
       .then(async (res) => {
         const data = (await res.json().catch(() => ({}))) as {
           error?: string;
-          byNight?: Record<string, NightInfo>;
+          byNight?: Record<string, NightAvailability>;
         };
         if (!res.ok) {
           throw new Error(data.error || "Could not load availability.");
