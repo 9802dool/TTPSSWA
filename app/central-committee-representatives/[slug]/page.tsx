@@ -7,6 +7,7 @@ import {
   CENTRAL_COMMITTEE_REGIONS,
   getRegionBySlug,
 } from "@/lib/central-committee-regions";
+import { COMMITTEE_REPRESENTATIVES } from "@/lib/central-committee-representatives-data";
 
 /** Next 15 passes `params` as a Promise; Next 14 uses a plain object. */
 type Props = { params: Promise<{ slug: string }> | { slug: string } };
@@ -21,9 +22,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!region) {
     return { title: "Region | TTPSSWA" };
   }
+  const custom = COMMITTEE_REPRESENTATIVES[region.slug];
+  const desc =
+    custom?.intro?.slice(0, 155) ??
+    `Central Committee Representative — ${region.name}.`;
   return {
     title: `${region.name} | Central Committee Representative | TTPSSWA`,
-    description: `Central Committee Representative — ${region.name}.`,
+    description: desc,
   };
 }
 
@@ -33,6 +38,8 @@ export default async function CentralCommitteeRegionPage({ params }: Props) {
   if (!region) {
     notFound();
   }
+
+  const content = COMMITTEE_REPRESENTATIVES[region.slug];
 
   return (
     <>
@@ -63,8 +70,8 @@ export default async function CentralCommitteeRegionPage({ params }: Props) {
               {region.name}
             </h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              Central Committee Representative — add names, roles, and contact
-              details for this division below.
+              {content?.intro ??
+                "Central Committee Representative — add names, roles, and contact details for this division below."}
             </p>
           </div>
         </section>
@@ -74,20 +81,63 @@ export default async function CentralCommitteeRegionPage({ params }: Props) {
             <h2 className="text-lg font-bold text-ink md:text-xl">
               Representatives
             </h2>
-            <p className="mt-3 text-sm leading-relaxed text-muted">
-              Replace this placeholder with your roster for{" "}
-              <span className="font-medium text-ink">{region.name}</span>. Edit
-              in{" "}
-              <code className="rounded bg-line/80 px-1.5 py-0.5 text-xs">
-                app/central-committee-representatives/[slug]/page.tsx
-              </code>
-              .
-            </p>
-            <ul className="mt-8 space-y-4">
-              <li className="rounded-xl border border-line bg-canvas p-5 text-sm text-muted shadow-corp dark:bg-surface">
-                Representative name — role — contact (placeholder)
-              </li>
-            </ul>
+            {content?.representatives?.length ? (
+              <ul className="mt-8 space-y-4">
+                {content.representatives.map((rep) => (
+                  <li
+                    key={rep.name}
+                    className="rounded-xl border border-line bg-canvas p-5 text-sm shadow-corp dark:bg-surface"
+                  >
+                    <p className="text-base font-bold text-ink">{rep.name}</p>
+                    <p className="mt-1 font-medium text-brand">{rep.role}</p>
+                    <p className="mt-3 leading-relaxed text-muted">{rep.summary}</p>
+                    {rep.phone || rep.email ? (
+                      <div className="mt-4 space-y-1 border-t border-line pt-4 text-muted">
+                        {rep.phone ? (
+                          <p>
+                            <span className="font-semibold text-ink">Phone:</span>{" "}
+                            <a
+                              href={`tel:${rep.phone.replace(/\s/g, "")}`}
+                              className="text-brand underline-offset-4 hover:underline"
+                            >
+                              {rep.phone}
+                            </a>
+                          </p>
+                        ) : null}
+                        {rep.email ? (
+                          <p>
+                            <span className="font-semibold text-ink">Email:</span>{" "}
+                            <a
+                              href={`mailto:${rep.email}`}
+                              className="text-brand underline-offset-4 hover:underline"
+                            >
+                              {rep.email}
+                            </a>
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <>
+                <p className="mt-3 text-sm leading-relaxed text-muted">
+                  Replace this placeholder with your roster for{" "}
+                  <span className="font-medium text-ink">{region.name}</span>.
+                  Edit data in{" "}
+                  <code className="rounded bg-line/80 px-1.5 py-0.5 text-xs">
+                    lib/central-committee-representatives-data.ts
+                  </code>
+                  .
+                </p>
+                <ul className="mt-8 space-y-4">
+                  <li className="rounded-xl border border-line bg-canvas p-5 text-sm text-muted shadow-corp dark:bg-surface">
+                    Representative name — role — contact (placeholder)
+                  </li>
+                </ul>
+              </>
+            )}
           </div>
         </section>
       </main>
