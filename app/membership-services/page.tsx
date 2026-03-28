@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MembersBenefitsBlock } from "@/components/MembersBenefitsBlock";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Membership services | TTPSSWA",
-  description: "TTPSSWA membership services.",
+  description: "TTPSSWA membership services and member benefits.",
 };
 
 export default function MembershipServicesPage() {
@@ -30,19 +31,18 @@ export default function MembershipServicesPage() {
               Membership services
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
-              The full{" "}
+              Member programs, stations, and the full{" "}
               <strong className="font-semibold text-white">Members Benefits</strong>{" "}
-              list with all 19 items now lives on the home page under{" "}
-              <strong className="font-semibold text-white">Members services</strong>, so
-              visitors can browse benefits next to login and application links.
+              list with all 19 items—open{" "}
+              <strong className="font-semibold text-white">All benefits</strong> below.
             </p>
             <div className="mt-8">
-              <Link
-                href="/#members-benefits"
+              <a
+                href="#members-benefits"
                 className="inline-flex min-h-[48px] items-center justify-center rounded-md bg-white px-6 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100"
               >
-                Open member benefits
-              </Link>
+                Jump to member benefits
+              </a>
             </div>
           </div>
         </section>
@@ -61,6 +61,41 @@ export default function MembershipServicesPage() {
                 when ready.
               </p>
             </div>
+          </div>
+        </section>
+
+        <section
+          id="members-services"
+          className="scroll-mt-24 border-b border-line bg-[#0a0f18] py-20 text-white dark:bg-[#050810]"
+        >
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">
+                Members services
+              </p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
+                Members Benefits
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-slate-400">
+                Expand each item for placeholder details you can edit in the codebase.
+              </p>
+            </div>
+            <div id="members-benefits" className="scroll-mt-24">
+              <MembersBenefitsBlock variant="dark" />
+            </div>
+            <p className="mt-12 text-sm text-slate-500">
+              <Link href="/members/login" className="font-medium text-sky-400 hover:underline">
+                Members login
+              </Link>
+              {" · "}
+              <Link href="/login" className="font-medium text-sky-400 hover:underline">
+                Membership application
+              </Link>
+              {" · "}
+              <Link href="/#members-services" className="font-medium text-sky-400 hover:underline">
+                Back to home — Members services
+              </Link>
+            </p>
           </div>
         </section>
       </main>

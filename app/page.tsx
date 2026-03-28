@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { MembersBenefitsBlock } from "@/components/MembersBenefitsBlock";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -21,9 +20,9 @@ const pillars: {
     linkLabel: "More information →",
   },
   {
-    title: "Members services",
-    href: "/members/login",
-    linkLabel: "Sign in →",
+    title: "Members Benefits",
+    href: "/membership-services#members-benefits",
+    linkLabel: "All benefits →",
   },
 ];
 
@@ -239,14 +238,15 @@ export default function Home() {
                   </p>
                 </li>
                 <li className="border-t border-line pt-4">
-                  <a
-                    href="#members-benefits"
+                  <Link
+                    href="/membership-services#members-benefits"
                     className="font-semibold text-brand transition hover:text-brand-hover"
                   >
-                    Member benefits
-                  </a>
+                    Members Benefits
+                  </Link>
                   <p className="mt-1 text-muted">
-                    Full list of all 19 benefits—expand each item for details (below).
+                    Full pillar with all 19 benefits and expandable details on the
+                    membership services page.
                   </p>
                 </li>
                 <li className="border-t border-line pt-4">
@@ -254,17 +254,13 @@ export default function Home() {
                     href="/membership-services"
                     className="font-semibold text-brand transition hover:text-brand-hover"
                   >
-                    Membership services page
+                    Membership services overview
                   </Link>
                   <p className="mt-1 text-muted">
-                    Stations, strategic focus, and more about our membership programs.
+                    Stations, strategic focus, and the benefits section above.
                   </p>
                 </li>
               </ul>
-            </div>
-
-            <div id="members-benefits" className="scroll-mt-24">
-              <MembersBenefitsBlock />
             </div>
           </div>
         </section>
