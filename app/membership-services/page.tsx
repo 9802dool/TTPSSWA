@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import ExpandableBenefit from "@/components/ExpandableBenefit";
+import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -7,69 +7,6 @@ export const metadata: Metadata = {
   title: "Membership services | TTPSSWA",
   description: "TTPSSWA membership services.",
 };
-
-const memberBenefitsPillar = {
-  title: "Members Benefits",
-  body:
-    "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Open the list below to browse all 19 items.",
-} as const;
-
-const memberBenefits: { number: number; title: string }[] = [
-  { number: 1, title: "Legal Aid Assistance (Criminal/Disciplinary)" },
-  { number: 2, title: "Optical & Dental Grant for SRP's & Municipal" },
-  { number: 3, title: "Death Benefit" },
-  { number: 4, title: "Guardian Life Health Plan" },
-  { number: 5, title: "Retirement Benefit" },
-  { number: 6, title: "Merit Facility" },
-  { number: 7, title: "Food Hampers, Fruit Baskets" },
-  {
-    number: 8,
-    title: "Financial Assistance for Medical, Natural Disasters etc.",
-  },
-  { number: 9, title: "Hardware & Beyond home improvement loan facility" },
-  { number: 10, title: "Tertiary Education Grant" },
-  { number: 11, title: "Full Time Scholarship" },
-  { number: 12, title: "Part time Scholarship" },
-  { number: 13, title: "SEA Tokens/Awards" },
-  { number: 14, title: "Promote and utilizes members businesses" },
-  { number: 15, title: "CXC & Cape Tokens" },
-  { number: 16, title: "Rent to Own" },
-  { number: 17, title: "Land for the Landless" },
-  { number: 18, title: "Membership Discount Card" },
-  { number: 19, title: "End of Year Membership Token" },
-];
-
-function BenefitDetails({ number, title }: { number: number; title: string }) {
-  if (number === 1) {
-    return (
-      <>
-        <p className="text-sm font-semibold text-ink">Information</p>
-        <p className="mt-2 text-sm leading-relaxed text-muted">
-          Describe how members access legal aid for criminal or disciplinary
-          matters: eligibility, how to apply, required documents, and office
-          contact. Replace this text in{" "}
-          <code className="rounded bg-line/80 px-1 py-0.5 text-xs">
-            app/membership-services/page.tsx
-          </code>
-          .
-        </p>
-      </>
-    );
-  }
-  return (
-    <>
-      <p className="text-sm font-semibold text-ink">Information</p>
-      <p className="mt-2 text-sm leading-relaxed text-muted">
-        Add eligibility criteria, how to apply, contacts, and links for{" "}
-        <span className="font-medium text-ink">{title}</span>. Edit this block in{" "}
-        <code className="rounded bg-line/80 px-1 py-0.5 text-xs">
-          app/membership-services/page.tsx
-        </code>
-        .
-      </p>
-    </>
-  );
-}
 
 export default function MembershipServicesPage() {
   return (
@@ -92,10 +29,24 @@ export default function MembershipServicesPage() {
             <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
               Membership services
             </h1>
+            <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-300">
+              The full{" "}
+              <strong className="font-semibold text-white">Members Benefits</strong>{" "}
+              list with all 19 items now lives on the home page under{" "}
+              <strong className="font-semibold text-white">Members services</strong>, so
+              visitors can browse benefits next to login and application links.
+            </p>
+            <div className="mt-8">
+              <Link
+                href="/#members-benefits"
+                className="inline-flex min-h-[48px] items-center justify-center rounded-md bg-white px-6 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100"
+              >
+                Open member benefits
+              </Link>
+            </div>
           </div>
         </section>
 
-        {/* Dark “Strategic focus” band — matches reference layout */}
         <section className="border-b border-line bg-[#0a0f18] py-20 text-white dark:bg-[#050810]">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="max-w-2xl">
@@ -106,66 +57,10 @@ export default function MembershipServicesPage() {
                 Where we focus
               </h2>
               <p className="mt-4 text-base leading-relaxed text-slate-400">
-                Member benefits and programs—replace with metrics and partner logos
+                Replace this band with metrics, partner logos, or subsidiary highlights
                 when ready.
               </p>
             </div>
-            <ul className="mt-14 grid list-none gap-6 p-0 sm:max-w-3xl">
-              <li className="flex flex-col rounded-xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-sm sm:p-8">
-                <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
-                <h3 className="text-lg font-bold text-white">
-                  {memberBenefitsPillar.title}
-                </h3>
-                <p className="mt-3 text-sm leading-relaxed text-slate-400">
-                  {memberBenefitsPillar.body}
-                </p>
-                <details className="mt-6 rounded-xl border border-white/10 bg-black/20 open:[&_summary_.mb-chevron]:rotate-180">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-left transition hover:bg-white/5 [&::-webkit-details-marker]:hidden">
-                    <span>
-                      <span className="block text-xs font-bold uppercase tracking-[0.2em] text-sky-400">
-                        All benefits
-                      </span>
-                      <span className="mt-1 block text-xs text-slate-500">
-                        19 items
-                      </span>
-                    </span>
-                    <span
-                      className="mb-chevron flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/15 text-sky-400 transition-transform duration-200"
-                      aria-hidden
-                    >
-                      <svg
-                        width="18"
-                        height="18"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.25"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="m6 9 6 6 6-6" />
-                      </svg>
-                    </span>
-                  </summary>
-                  <div className="border-t border-white/10 px-1 pb-3 pt-2 sm:px-2">
-                    <ul
-                      className="list-none space-y-2.5 p-0"
-                      aria-label="Member benefits list"
-                    >
-                      {memberBenefits.map((b) => (
-                        <ExpandableBenefit
-                          key={b.number}
-                          number={b.number}
-                          title={b.title}
-                        >
-                          <BenefitDetails number={b.number} title={b.title} />
-                        </ExpandableBenefit>
-                      ))}
-                    </ul>
-                  </div>
-                </details>
-              </li>
-            </ul>
           </div>
         </section>
       </main>

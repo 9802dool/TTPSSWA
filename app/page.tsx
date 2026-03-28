@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { MembersBenefitsBlock } from "@/components/MembersBenefitsBlock";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -238,17 +239,32 @@ export default function Home() {
                   </p>
                 </li>
                 <li className="border-t border-line pt-4">
+                  <a
+                    href="#members-benefits"
+                    className="font-semibold text-brand transition hover:text-brand-hover"
+                  >
+                    Member benefits
+                  </a>
+                  <p className="mt-1 text-muted">
+                    Full list of all 19 benefits—expand each item for details (below).
+                  </p>
+                </li>
+                <li className="border-t border-line pt-4">
                   <Link
                     href="/membership-services"
                     className="font-semibold text-brand transition hover:text-brand-hover"
                   >
-                    Membership services overview
+                    Membership services page
                   </Link>
                   <p className="mt-1 text-muted">
-                    Programs, stations, and benefits—edit this page to match your org.
+                    Stations, strategic focus, and more about our membership programs.
                   </p>
                 </li>
               </ul>
+            </div>
+
+            <div id="members-benefits" className="scroll-mt-24">
+              <MembersBenefitsBlock />
             </div>
           </div>
         </section>
