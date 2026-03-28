@@ -37,15 +37,33 @@ function inStayRange(
 function cellStyle(
   info: NightInfo | undefined,
   isInStay: boolean,
+  isSelected: boolean,
 ): string {
   const avail = info?.available ?? HOTEL_NIGHT_CAPACITY;
   let base =
-    "relative flex aspect-square max-h-10 items-center justify-center rounded-md text-xs font-medium tabular-nums ";
-  if (isInStay) base += "ring-2 ring-brand ring-offset-1 ring-offset-canvas dark:ring-offset-surface ";
+    "relative flex aspect-square max-h-10 w-full min-w-0 items-center justify-center rounded-md text-xs font-medium tabular-nums transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-canvas dark:focus-visible:ring-offset-surface ";
+  if (isSelected) {
+    base +=
+      "z-[1] ring-2 ring-navy ring-offset-1 ring-offset-canvas dark:ring-offset-surface ";
+  } else if (isInStay) {
+    base +=
+      "ring-2 ring-brand ring-offset-1 ring-offset-canvas dark:ring-offset-surface ";
+  }
   if (avail <= 0) return base + "bg-red-500/25 text-red-800 dark:text-red-200";
   if (avail <= 2) return base + "bg-amber-500/20 text-amber-900 dark:text-amber-100";
   if (avail <= 5) return base + "bg-yellow-500/15 text-ink";
   return base + "bg-emerald-500/15 text-ink";
+}
+
+function formatSelectedLabel(ymd: string): string {
+  const [y, m, d] = ymd.split("-").map(Number);
+  if (!y || !m || !d) return ymd;
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
 }
 
 export default function HotelAvailabilityCalendar({
@@ -65,6 +83,7 @@ export default function HotelAvailabilityCalendar({
   }, []);
   const [viewY, setViewY] = useState(initial.y);
   const [viewM, setViewM] = useState(initial.m);
+  const [selectedYmd, setSelectedYmd] = useState<string | null>(null);
 
   const label = useMemo(
     () =>
@@ -94,6 +113,19 @@ export default function HotelAvailabilityCalendar({
     } else setViewM((m) => m + 1);
   }
 
+  const selectedInfo = useMemo(() => {
+    if (!selectedYmd) return null;
+    const info = byNight[selectedYmd];
+    const booked = info?.booked ?? 0;
+    const available = info?.available ?? HOTEL_NIGHT_CAPACITY;
+    return {
+      ymd: selectedYmd,
+      label: formatSelectedLabel(selectedYmd),
+      booked,
+      available,
+    };
+  }, [selectedYmd, byNight]);
+
   return (
     <div className="rounded-lg border border-line bg-canvas/80 p-4 dark:bg-canvas/50">
       <div className="flex items-center justify-between gap-2">
@@ -104,7 +136,7 @@ export default function HotelAvailabilityCalendar({
       </div>
       <p className="mt-1 text-xs leading-relaxed text-muted">
         Nights show how many rooms are still free based on submitted requests.
-        Confirm with the coordinator before travel.
+        Click a date for details. Confirm with the coordinator before travel.
       </p>
       <div className="mt-3 flex items-center justify-between gap-2">
         <button
@@ -139,20 +171,54 @@ export default function HotelAvailabilityCalendar({
           const dayNum = Number(ymd.slice(8, 10));
           const info = byNight[ymd];
           const stay = inStayRange(ymd, checkInDate, checkOutDate);
+          const isSelected = selectedYmd === ymd;
+          const availHint = info
+            ? `${info.available} free, ${info.booked} booked`
+            : `${HOTEL_NIGHT_CAPACITY} free`;
           return (
-            <div
+            <button
               key={ymd}
-              className={cellStyle(info, stay)}
-              title={
-                info
-                  ? `${ymd}: ${info.available} free (${info.booked} booked)`
-                  : `${ymd}: ${HOTEL_NIGHT_CAPACITY} free`
+              type="button"
+              onClick={() =>
+                setSelectedYmd((prev) => (prev === ymd ? null : ymd))
               }
+              className={cellStyle(info, stay, isSelected)}
+              title={`${ymd}: ${availHint}. Click for details.`}
+              aria-pressed={isSelected}
+              aria-label={`${formatSelectedLabel(ymd)}, ${availHint}`}
             >
               {dayNum}
-            </div>
+            </button>
           );
         })}
+      </div>
+      <div
+        className="mt-4 rounded-lg border border-line bg-surface px-4 py-3 text-sm dark:bg-surface"
+        role="region"
+        aria-live="polite"
+        aria-label="Selected night availability"
+      >
+        {selectedInfo ? (
+          <>
+            <p className="font-semibold text-ink">{selectedInfo.label}</p>
+            <p className="mt-2 text-ink">
+              <span className="tabular-nums text-lg font-bold text-brand">
+                {selectedInfo.available}
+              </span>{" "}
+              of {HOTEL_NIGHT_CAPACITY} rooms available this night
+            </p>
+            <p className="mt-1 text-xs text-muted">
+              {selectedInfo.booked} room
+              {selectedInfo.booked === 1 ? "" : "s"} booked (from requests
+              received on the site)
+            </p>
+          </>
+        ) : (
+          <p className="text-xs text-muted">
+            Click a date in the calendar to see how many rooms are free that
+            night.
+          </p>
+        )}
       </div>
       <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-muted">
         <span className="inline-flex items-center gap-1.5">
