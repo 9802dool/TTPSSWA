@@ -62,12 +62,10 @@ export default function Home() {
               </h1>
             </div>
             <p className="mt-8 max-w-2xl text-lg leading-relaxed text-slate-300">
-              A modern channel for your mission statement, announcements, and member
-              communications. Replace placeholder copy in{" "}
-              <code className="rounded bg-white/10 px-1.5 py-0.5 text-sm text-slate-200">
-                app/page.tsx
-              </code>{" "}
-              when ready.
+              We are more than an association—we are a family. By providing financial,
+              educational, health, and welfare support, we ensure that our members can
+              focus on their duty to protect and serve, knowing that their well-being
+              and future are secure.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
               <Link
