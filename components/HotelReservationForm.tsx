@@ -455,7 +455,7 @@ export default function HotelReservationForm() {
               Your details
             </h2>
             <p className="mt-1 text-[14px] text-[#717171]">
-              We'll use this to send you a quotation and confirmation.
+              We&apos;ll use this to send you a quotation and confirmation.
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -491,7 +491,7 @@ export default function HotelReservationForm() {
             <button type="submit" disabled={submitting} className="w-full rounded-xl bg-gradient-to-r from-[#e41d56] to-[#d70466] px-6 py-4 text-[16px] font-bold text-white shadow-lg transition hover:opacity-90 disabled:opacity-60">
               {submitting ? "Sending…" : "Reserve"}
             </button>
-            <p className="mt-3 text-center text-[12px] text-[#717171]">You won't be charged — we confirm availability first.</p>
+            <p className="mt-3 text-center text-[12px] text-[#717171]">You won&apos;t be charged — we confirm availability first.</p>
           </div>
         </div>
 
@@ -543,7 +543,7 @@ export default function HotelReservationForm() {
             {submitting ? "Sending…" : "Reserve"}
           </button>
           <p className="mt-3 text-center text-[12px] text-[#717171]">
-            You won't be charged yet.
+            You won&apos;t be charged yet.
           </p>
 
           {submitError ? (
