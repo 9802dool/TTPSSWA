@@ -57,7 +57,7 @@ export default function SiteFooter() {
               </li>
               <li>
                 <Link
-                  href="/#members-services"
+                  href="/membership-services"
                   className="transition hover:text-white"
                 >
                   Members services

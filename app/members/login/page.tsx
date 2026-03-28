@@ -153,11 +153,11 @@ export default async function MembersLoginPage({ searchParams }: Props) {
                   >
                     Members Benefits
                   </Link>{" "}
-                  on the membership services page, or{" "}
-                  <Link href="/#members-services" className="text-brand hover:underline">
-                    Members services
+                  on the{" "}
+                  <Link href="/membership-services" className="text-brand hover:underline">
+                    membership services
                   </Link>{" "}
-                  on the home page.
+                  page.
                 </p>
               </>
             )}
