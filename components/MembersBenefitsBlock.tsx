@@ -10,7 +10,7 @@ type Variant = "light" | "dark";
 export function MembersBenefitsBlock({ variant = "light" }: { variant?: Variant }) {
   if (variant === "dark") {
     return (
-      <ul className="mt-14 grid list-none gap-6 p-0 sm:max-w-3xl">
+      <ul className="mt-0 grid list-none gap-6 p-0 sm:max-w-3xl">
         <li className="flex flex-col rounded-xl border border-white/10 bg-slate-900/60 p-6 shadow-lg shadow-black/20 backdrop-blur-sm sm:p-8">
           <div className="mb-4 h-1 w-10 shrink-0 rounded-full bg-brand" />
           <h3 className="text-lg font-bold text-white">{MEMBER_BENEFITS_PILLAR.title}</h3>
