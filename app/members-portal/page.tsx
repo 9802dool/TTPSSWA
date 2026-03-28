@@ -32,6 +32,12 @@ const portalLinks: { href: string; title: string; description: string }[] = [
     title: "Membership services",
     description: "Overview of services and resources for members.",
   },
+  {
+    href: "/central-committee-representatives",
+    title: "Central Committee Representative",
+    description:
+      "Find representatives by region and view committee information.",
+  },
 ];
 
 export default function MembersPortalPage() {
