@@ -8,6 +8,10 @@ import { MemberServiceRequestsSection } from "@/components/MemberServiceRequests
 import SiteHeader from "@/components/SiteHeader";
 import { getServiceRequestsForEmail } from "@/lib/analytics-storage";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import {
+  formatMemberPhoneDisplay,
+  memberPhoneTelHref,
+} from "@/lib/member-phone";
 import { getPendingMemberSignupById } from "@/lib/member-signup-storage";
 
 type Props = { params: Promise<{ id: string }> | { id: string } };
@@ -193,10 +197,10 @@ export default async function AdminMemberProfilePage({ params }: Props) {
                 <dt className="text-[var(--muted)]">Phone</dt>
                 <dd className="mt-0.5">
                   <a
-                    href={`tel:${member.phone.replace(/\s/g, "")}`}
+                    href={memberPhoneTelHref(member)}
                     className="text-[var(--brand)] hover:underline"
                   >
-                    {member.phone}
+                    {formatMemberPhoneDisplay(member)}
                   </a>
                 </dd>
               </div>

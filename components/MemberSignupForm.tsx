@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import {
+  MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE,
+  MEMBERSHIP_PHONE_COUNTRY_CODES,
+} from "@/lib/phone-country-codes";
 
 const inputClass =
   "mt-1 w-full rounded border border-line bg-white px-3 py-2 text-sm text-ink shadow-sm outline-none ring-brand placeholder:text-muted focus:ring-2 dark:border-line dark:bg-canvas";
@@ -236,7 +240,7 @@ export function MemberSignupForm() {
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <div>
+          <div className="sm:col-span-2">
             <label htmlFor="email" className={labelClass}>
               Email <span className="text-red-600">*</span>
             </label>
@@ -250,17 +254,41 @@ export function MemberSignupForm() {
             />
           </div>
           <div>
+            <label htmlFor="phoneCountryCode" className={labelClass}>
+              Country code <span className="text-red-600">*</span>
+            </label>
+            <select
+              id="phoneCountryCode"
+              name="phoneCountryCode"
+              required
+              defaultValue={MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE}
+              autoComplete="tel-country-code"
+              className={inputClass}
+            >
+              {MEMBERSHIP_PHONE_COUNTRY_CODES.map((c) => (
+                <option key={c.value} value={c.value}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <label htmlFor="phone" className={labelClass}>
-              Phone <span className="text-red-600">*</span>
+              Phone number <span className="text-red-600">*</span>
             </label>
             <input
               id="phone"
               name="phone"
               type="tel"
-              autoComplete="tel"
+              inputMode="tel"
+              autoComplete="tel-national"
               required
               className={inputClass}
+              placeholder="Local number only (no country code)"
             />
+            <p className="mt-1 text-xs text-muted">
+              Enter digits for your line; country code is selected separately.
+            </p>
           </div>
         </div>
       </Section>

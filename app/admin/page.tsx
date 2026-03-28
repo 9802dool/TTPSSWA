@@ -5,6 +5,7 @@ import { AdminQuickAcceptButton } from "@/components/AdminQuickAcceptButton";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
 import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
+import { formatMemberPhoneDisplay } from "@/lib/member-phone";
 import { getAdminStats } from "@/lib/analytics-storage";
 import { getPendingMemberSignups } from "@/lib/member-signup-storage";
 
@@ -265,7 +266,9 @@ export default async function AdminPage({ searchParams }: Props) {
                       <td className="max-w-[12rem] break-all px-4 py-3 text-xs">
                         {row.email}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3">{row.phone}</td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        {formatMemberPhoneDisplay(row)}
+                      </td>
                       <td className="max-w-[14rem] px-4 py-3 text-xs leading-relaxed text-[var(--muted)]">
                         {row.address}
                       </td>

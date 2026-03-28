@@ -23,6 +23,8 @@ export type PendingMemberSignup = {
   address: string;
   email: string;
   phone: string;
+  /** ITU dial prefix, e.g. +1868 (optional on older records). */
+  phoneCountryCode?: string;
   financialMember: "yes" | "no";
   photoMimeType: string;
   photoBase64: string;

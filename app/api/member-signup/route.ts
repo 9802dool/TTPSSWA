@@ -4,6 +4,7 @@ import {
   recordPendingMemberSignup,
 } from "@/lib/member-signup-storage";
 import { hashPassword } from "@/lib/password-hash";
+import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
 
 export const runtime = "nodejs";
 
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
   const fullName = String(formData.get("fullName") ?? "").trim();
   const address = String(formData.get("address") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
+  const phoneCountryCode = String(formData.get("phoneCountryCode") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const financialMember = String(formData.get("financialMember") ?? "").trim();
   const photo = formData.get("facialPhoto");
@@ -52,10 +54,30 @@ export async function POST(request: Request) {
     !fullName ||
     !address ||
     !email ||
+    !phoneCountryCode ||
     !phone
   ) {
     return NextResponse.json(
       { ok: false, error: "Please fill in all required fields." },
+      { status: 400 },
+    );
+  }
+
+  if (!isAllowedMembershipPhoneCountryCode(phoneCountryCode)) {
+    return NextResponse.json(
+      { ok: false, error: "Please choose a valid country code." },
+      { status: 400 },
+    );
+  }
+
+  const phoneDigitsOnly = phone.replace(/\D/g, "");
+  if (phoneDigitsOnly.length < 6 || phoneDigitsOnly.length > 15) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Enter your local phone number (6–15 digits) without the country code.",
+      },
       { status: 400 },
     );
   }
@@ -105,6 +127,7 @@ export async function POST(request: Request) {
     fullName,
     address,
     email,
+    phoneCountryCode,
     phone,
     financialMember: financialMember as "yes" | "no",
     photoMimeType: type,
