@@ -1,5 +1,8 @@
 import { Resend } from "resend";
 import { recordServiceRequest } from "@/lib/analytics-storage";
+import { mergeHotelBookingMeta } from "@/lib/hotel-booking-meta";
+
+export const runtime = "nodejs";
 
 const NOTIFY_DEFAULT = "simeondoolarsingh@hotmail.com";
 
@@ -206,6 +209,69 @@ function resendFromCandidates(): string[] {
   return unique;
 }
 
+function buildQuotationEmailText(d: ValidData, recordId: string): string {
+  const lines = [
+    `Hello ${d.fullName},`,
+    "",
+    "Thank you for your hotel reservation request with TTPSSWA.",
+    "",
+    "Below is a provisional quotation based on your request. Final rates and taxes will be confirmed by our coordinator.",
+    "",
+    `Reference: ${recordId}`,
+    "",
+    `Stay: check-in ${d.checkInDate} at ${d.checkInTime} → check-out ${d.checkOutDate} at ${d.checkOutTime}`,
+    `Room mix: ${roomMixDescription(d)}`,
+    `Guests: ${d.guests}`,
+  ];
+  if (d.notes) {
+    lines.push("", "Special requests (from your form):", d.notes);
+  }
+  lines.push(
+    "",
+    "Estimated room rates (per night — subject to confirmation):",
+    "- Presidential suite: TBD",
+    "- Full bed room: TBD",
+    "- Double bed room: TBD",
+    "",
+    "Total estimated stay: TBD",
+    "",
+    "Rooms can be adjusted to accommodate more persons based on request.",
+    "",
+    "To confirm this booking or request changes, reply to this email or contact us using the phone number on our website.",
+    "",
+    "Best regards,",
+    "TTPSSWA accommodations team",
+  );
+  return lines.join("\n");
+}
+
+/** Sends a provisional quotation to the guest’s email (Resend only). */
+async function sendGuestQuotationEmail(
+  d: ValidData,
+  recordId: string,
+): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  if (!apiKey) return false;
+
+  const notify = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim() || NOTIFY_DEFAULT;
+  const resend = new Resend(apiKey);
+  const subject = `Your hotel quotation — TTPSSWA (${d.checkInDate})`;
+  const text = buildQuotationEmailText(d, recordId);
+
+  for (const from of resendFromCandidates()) {
+    const { error } = await resend.emails.send({
+      from,
+      to: [d.email],
+      replyTo: notify,
+      subject,
+      text,
+    });
+    if (!error) return true;
+    console.error("Guest quotation Resend failed", { from, error });
+  }
+  return false;
+}
+
 async function sendViaResend(d: ValidData): Promise<{ ok: true } | { ok: false }> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   if (!apiKey) return { ok: false };
@@ -379,7 +445,7 @@ export async function POST(request: Request) {
   }
 
   if (delivered) {
-    void recordServiceRequest("hotel_booking", {
+    const recordId = await recordServiceRequest("hotel_booking", {
       fullName: d.fullName,
       email: d.email,
       phone: d.phone,
@@ -394,6 +460,16 @@ export async function POST(request: Request) {
       guests: d.guests,
       notes: d.notes || undefined,
     });
+
+    if (recordId && resendKey) {
+      const quotationOk = await sendGuestQuotationEmail(d, recordId);
+      if (quotationOk) {
+        await mergeHotelBookingMeta(recordId, {
+          quotationEmailSentAt: new Date().toISOString(),
+        });
+      }
+    }
+
     return Response.json({ ok: true });
   }
 

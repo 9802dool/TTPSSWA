@@ -25,12 +25,13 @@ export async function recordPageVisit(pathname: string): Promise<boolean> {
   }
 }
 
+/** Returns the new record id when stored, or null if Redis is unavailable or the write failed. */
 export async function recordServiceRequest(
   serviceType: ServiceRequestRecord["serviceType"],
   payload: Record<string, unknown>,
-): Promise<boolean> {
+): Promise<string | null> {
   const redis = getRedis();
-  if (!redis) return false;
+  if (!redis) return null;
   const record: ServiceRequestRecord = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     serviceType,
@@ -41,10 +42,10 @@ export async function recordServiceRequest(
     const json = JSON.stringify(record);
     await redis.lpush(SERVICE_LOG, json);
     await redis.ltrim(SERVICE_LOG, 0, 499);
-    return true;
+    return record.id;
   } catch (e) {
     console.error("analytics recordServiceRequest:", e);
-    return false;
+    return null;
   }
 }
 

@@ -4,8 +4,10 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
+import { HotelBookingAdminActions } from "@/components/HotelBookingAdminActions";
 import { getHotelReservationById } from "@/lib/analytics-storage";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import { getHotelBookingMeta } from "@/lib/hotel-booking-meta";
 
 type Props = { params: Promise<{ id: string }> | { id: string } };
 
@@ -64,6 +66,8 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
   if (!record) {
     notFound();
   }
+
+  const bookingMeta = await getHotelBookingMeta(decodedId);
 
   const p = record.payload;
   const emailVal = str(p, "email");
@@ -181,6 +185,21 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
               </dd>
             </div>
           </dl>
+        </div>
+
+        <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+          <div className="border-b border-[var(--border)] bg-[var(--bg)] px-6 py-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+              Quotation & follow-up
+            </p>
+          </div>
+          <div className="p-6">
+            <HotelBookingAdminActions
+              recordId={record.id}
+              initialMeta={bookingMeta}
+              storageConfigured={storageConfigured}
+            />
+          </div>
         </div>
       </main>
     </div>
