@@ -10,14 +10,19 @@ import {
 import { CommitteeRepPhotoFrame } from "@/components/CommitteeRepPhotoFrame";
 import { COMMITTEE_REPRESENTATIVES } from "@/lib/central-committee-representatives-data";
 
-/** Build a usable tel: URL for TT numbers; supports optional ext. (e.g. ext. 75412). */
+/** Build a usable tel: URL for TT numbers; supports optional ext. (e.g. 71004-10, 30050-60/30100). */
 function telHref(raw: string): string {
-  const ext = raw.match(/ext\.?\s*(\d+)/i);
-  const digits = raw.replace(/\D/g, "");
+  const extMatch = raw.match(/ext\.?\s*([^\s]+)/i);
+  const beforeExt = extMatch ? raw.slice(0, extMatch.index).trim() : raw;
+  const digits = beforeExt.replace(/\D/g, "");
   const base = digits.slice(0, 10);
   if (base.length === 10 && base.startsWith("868")) {
     const e164 = `+1${base}`;
-    return ext ? `tel:${e164};ext=${ext[1]}` : `tel:${e164}`;
+    if (extMatch?.[1]) {
+      const extDigits = extMatch[1].replace(/\D/g, "");
+      if (extDigits) return `tel:${e164};ext=${extDigits}`;
+    }
+    return `tel:${e164}`;
   }
   return `tel:${raw.replace(/\s/g, "")}`;
 }

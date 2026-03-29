@@ -51,4 +51,58 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  geb: {
+    intro:
+      "Central Committee Representatives for GEB are listed below.",
+    representatives: [
+      {
+        name: "Sgt Ricardo Williams",
+        summary: "Reg. No. 16116",
+        photoSrc: "/ex-pics/cc-rep/geb-16116.jpg",
+        phone: "(868) 668-2502 ext. 71004-10",
+        email: "rwilliams17@hotmail.com",
+      },
+      {
+        name: "WPC Janelle Stephen-Sammy",
+        summary: "Reg. No. 18071",
+        photoSrc: "/ex-pics/cc-rep/geb-18071.jpg",
+        phone: "(868) 612-2470 ext. 71002/5",
+        email: "janelle.sammy1010@gmail.com",
+      },
+      {
+        name: "PC Selwyn Yee Shong",
+        summary: "Reg. No. 9087",
+        photoSrc: "/ex-pics/cc-rep/geb-9087.jpg",
+        phone: "(868) 789-2901 ext. 71070",
+        email: "selwyn_34@yahoo.co",
+      },
+    ],
+  },
+  central: {
+    intro:
+      "Central Committee Representatives for the Central division are listed below.",
+    representatives: [
+      {
+        name: "Sgt Jacey Small",
+        summary: "Reg. No. 16589",
+        photoSrc: "/ex-pics/cc-rep/central-16589.jpg",
+        phone: "(868) 612-2470 ext. 30050-60/30100",
+        email: "jaceysmall@hotmail.com",
+      },
+      {
+        name: "Sgt Marlon King",
+        summary: "Reg. No. 13137",
+        photoSrc: "/ex-pics/cc-rep/central-13137.jpg",
+        phone: "(868) 384-1919 ext. 30030",
+        email: "maklaf@hotmail.com",
+      },
+      {
+        name: "WPC Shimerle Sampson",
+        summary: "Reg. No. 5769",
+        photoSrc: "/ex-pics/cc-rep/central-5769.jpg",
+        phone: "(868) 612-0301 ext. 30255",
+        email: "Glamempress@proton.me",
+      },
+    ],
+  },
 };
