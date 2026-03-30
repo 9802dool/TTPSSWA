@@ -43,4 +43,8 @@ Tobago:
 Transport & Telecom:
   transport-telecom-16964.jpg — Cpl Jason Pascall
 
+South Western:
+  sw-19252.jpg — PC Aelon Andrews
+  sw-17225.jpg — Ag Sgt Avelon Monsegue
+
 Until files exist, the site shows initials in each frame.
