@@ -5,7 +5,7 @@
 /* Modern corporate theme — light-first, optional system dark */
 :root {
   /* Fixed site chrome: promo strip + main nav (see SiteHeader) */
-  --promo-banner-height: 2.75rem;
+  --promo-banner-height: 3rem;
   --site-header-height: 4.25rem;
   --site-header-stack: calc(
     var(--promo-banner-height) + var(--site-header-height)
