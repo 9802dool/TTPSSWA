@@ -8,7 +8,11 @@ export type CommitteeRepresentative = {
   summary: string;
   /** Square photo under `public/` — e.g. `/ex-pics/cc-rep/iatf-10364.jpg`. */
   photoSrc?: string;
+  /** Single line when only one number is shown. */
   phone?: string;
+  /** Optional work / cell split (e.g. both shown with labels). */
+  workPhone?: string;
+  cellPhone?: string;
   email?: string;
 };
 
@@ -93,7 +97,8 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
         name: "Sgt Marlon King",
         summary: "Reg. No. 13137",
         photoSrc: "/ex-pics/cc-rep/central-13137.jpg",
-        phone: "(868) 384-1919 ext. 30030",
+        workPhone: "(868) 612-2470 ext. 30030",
+        cellPhone: "(868) 384-1919",
         email: "maklaf@hotmail.com",
       },
       {

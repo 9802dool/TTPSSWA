@@ -120,9 +120,34 @@ export default async function CentralCommitteeRegionPage({ params }: Props) {
                       >
                         {rep.summary}
                       </p>
-                      {rep.phone || rep.email ? (
+                      {rep.phone ||
+                      rep.workPhone ||
+                      rep.cellPhone ||
+                      rep.email ? (
                         <div className="mt-4 space-y-1 border-t border-line pt-4 text-muted">
-                          {rep.phone ? (
+                          {rep.workPhone ? (
+                            <p>
+                              <span className="font-semibold text-ink">Work:</span>{" "}
+                              <a
+                                href={telHref(rep.workPhone)}
+                                className="text-brand underline-offset-4 hover:underline"
+                              >
+                                {rep.workPhone}
+                              </a>
+                            </p>
+                          ) : null}
+                          {rep.cellPhone ? (
+                            <p>
+                              <span className="font-semibold text-ink">Cell:</span>{" "}
+                              <a
+                                href={telHref(rep.cellPhone)}
+                                className="text-brand underline-offset-4 hover:underline"
+                              >
+                                {rep.cellPhone}
+                              </a>
+                            </p>
+                          ) : null}
+                          {rep.phone && !rep.workPhone && !rep.cellPhone ? (
                             <p>
                               <span className="font-semibold text-ink">Phone:</span>{" "}
                               <a
