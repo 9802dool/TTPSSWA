@@ -55,30 +55,31 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
-  geb: {
+  eastern: {
     intro:
-      "Central Committee Representatives for GEB are listed below.",
+      "Central Committee Representatives for the Eastern division are listed below.",
     representatives: [
       {
         name: "Sgt Ricardo Williams",
         summary: "Reg. No. 16116",
-        photoSrc: "/ex-pics/cc-rep/geb-16116.jpg",
-        phone: "(868) 668-2502 ext. 71004-10",
+        photoSrc: "/ex-pics/cc-rep/eastern-16116.jpg",
+        workPhone: "(868) 668-2502 ext. 71004-10",
         email: "rwilliams17@hotmail.com",
       },
       {
         name: "WPC Janelle Stephen-Sammy",
         summary: "Reg. No. 18071",
-        photoSrc: "/ex-pics/cc-rep/geb-18071.jpg",
-        phone: "(868) 612-2470 ext. 71002/5",
+        photoSrc: "/ex-pics/cc-rep/eastern-18071.jpg",
+        workPhone: "(868) 612-2470 ext. 71002/5",
         email: "janelle.sammy1010@gmail.com",
       },
       {
         name: "PC Selwyn Yee Shong",
         summary: "Reg. No. 9087",
-        photoSrc: "/ex-pics/cc-rep/geb-9087.jpg",
-        phone: "(868) 789-2901 ext. 71070",
-        email: "selwyn_34@yahoo.co",
+        photoSrc: "/ex-pics/cc-rep/eastern-9087.jpg",
+        workPhone: "(868) 612-2470 ext. 71070",
+        cellPhone: "(868) 789-2901",
+        email: "selwyn_34@yahoo.com",
       },
     ],
   },

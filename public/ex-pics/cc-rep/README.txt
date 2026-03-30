@@ -5,10 +5,10 @@ IATF:
   iatf-10428.jpg  — PC Nolan Tash
   iatf-20964.jpg  — PC Khamael Benoit
 
-GEB:
-  geb-16116.jpg   — Sgt Ricardo Williams
-  geb-18071.jpg   — WPC Janelle Stephen-Sammy
-  geb-9087.jpg    — PC Selwyn Yee Shong
+Eastern:
+  eastern-16116.jpg — Sgt Ricardo Williams
+  eastern-18071.jpg — WPC Janelle Stephen-Sammy
+  eastern-9087.jpg  — PC Selwyn Yee Shong
 
 Central:
   central-16589.jpg — Sgt Jacey Small
