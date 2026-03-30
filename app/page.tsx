@@ -26,6 +26,35 @@ const pillars: {
   },
 ];
 
+const noticeBoardItems: {
+  id: string;
+  date: string;
+  title: string;
+  body: string;
+}[] = [
+  {
+    id: "1",
+    date: "28 Mar 2026",
+    title: "Welcome to the official TTPSSWA site",
+    body:
+      "This notice board will carry announcements for members. Replace these entries in app/page.tsx when you have updates.",
+  },
+  {
+    id: "2",
+    date: "28 Mar 2026",
+    title: "Members portal & services",
+    body:
+      "Use the members portal for login after your application is approved. Membership services and benefits are listed under Members services.",
+  },
+  {
+    id: "3",
+    date: "28 Mar 2026",
+    title: "Partnership programs",
+    body:
+      "View our partnership pillars—including Hardware and Beyond and more—on the Partnership page.",
+  },
+];
+
 export default function Home() {
   return (
     <>
@@ -93,6 +122,45 @@ export default function Home() {
                 Executive Team
               </a>
             </div>
+          </div>
+        </section>
+
+        <section
+          id="notice-board"
+          className="scroll-mt-24 border-b border-line bg-gradient-to-b from-amber-50/90 via-surface to-surface py-16 dark:from-slate-900/90 dark:via-canvas dark:to-canvas"
+        >
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                Announcements
+              </p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-ink md:text-4xl">
+                Notice board
+              </h2>
+              <p className="mt-3 text-muted">
+                Official notices and updates for members. Check back periodically for
+                new information.
+              </p>
+            </div>
+            <ul className="mt-10 grid list-none gap-4 p-0 sm:grid-cols-2 lg:grid-cols-3">
+              {noticeBoardItems.map((n) => (
+                <li key={n.id}>
+                  <article className="relative h-full rounded-xl border border-line bg-surface p-5 shadow-corp transition hover:border-brand/30 hover:shadow-corp-md dark:bg-surface">
+                    <span
+                      className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-red-600 ring-2 ring-surface dark:ring-surface"
+                      aria-hidden
+                    />
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                      {n.date}
+                    </p>
+                    <h3 className="mt-3 text-sm font-bold leading-snug text-ink md:text-base">
+                      {n.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted">{n.body}</p>
+                  </article>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
 
