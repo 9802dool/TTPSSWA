@@ -22,6 +22,9 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "complaints", name: "Complaints" },
   { slug: "police-band", name: "Police Band" },
   { slug: "municipal", name: "Municipal" },
+  { slug: "court-process", name: "Court & Process" },
+  { slug: "community-oriented-policing", name: "Community Oriented Policing" },
+  { slug: "traffic-highway-patrol", name: "Traffic & Highway Patrol" },
   { slug: "e999", name: "E999" },
 ] as const;
 

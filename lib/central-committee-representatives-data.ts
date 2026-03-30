@@ -365,4 +365,70 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  "court-process": {
+    intro:
+      "Central Committee Representatives for Court & Process are listed below.",
+    representatives: [
+      {
+        name: "Sgt Anthony Pierre",
+        summary: "Reg. No. 16102",
+        photoSrc: "/ex-pics/cc-rep/court-process-16102.jpg",
+        workPhone: "(868) 612-2470 ext. 13937",
+        email: "anthonyjpierre@gmail.com",
+      },
+      {
+        name: "WPC Kamaria Guy",
+        summary: "Reg. No. 7245",
+        photoSrc: "/ex-pics/cc-rep/court-process-7245.jpg",
+        workPhone: "(868) 387-8313 ext. 13940",
+        email: "fayolakguy@gmail.com",
+      },
+    ],
+  },
+  "community-oriented-policing": {
+    intro:
+      "Central Committee Representatives for Community Oriented Policing are listed below.",
+    representatives: [
+      {
+        name: "WPC Linda Alleyne",
+        summary: "Reg. No. 20005",
+        photoSrc: "/ex-pics/cc-rep/cop-20005.jpg",
+        workPhone: "(868) 333-3071 ext. 13100",
+        email: "alleynelinda@yahoo.com",
+      },
+      {
+        name: "PC Lawrence Bradshaw",
+        summary: "Reg. No. 21082",
+        photoSrc: "/ex-pics/cc-rep/cop-21082.jpg",
+        workPhone: "(868) 612-0301 ext. 13100",
+        email: "lawrencebradshaw75@gmail.com",
+      },
+    ],
+  },
+  "traffic-highway-patrol": {
+    intro:
+      "Central Committee Representatives for Traffic & Highway Patrol are listed below.",
+    representatives: [
+      {
+        name: "A/Sgt Kizzie Marcelle",
+        summary: "Reg. No. 17180",
+        photoSrc: "/ex-pics/cc-rep/thp-17180.jpg",
+        workPhone: "(868) 674-1822 ext. 75262",
+        email: "michellemarcelle@hotmail.com",
+      },
+      {
+        name: "W/Cpl Giselle Lakhan",
+        summary: "Reg. No. 17553",
+        photoSrc: "/ex-pics/cc-rep/thp-17553.jpg",
+        workPhone: "(868) 674-1822 ext. 75262",
+        email: "gisellelakhan27@gmail.com",
+      },
+      {
+        name: "WPC Patrice Williams",
+        summary: "Reg. No. 9795",
+        photoSrc: "/ex-pics/cc-rep/thp-9795.jpg",
+        workPhone: "(868) 674-1822",
+      },
+    ],
+  },
 };

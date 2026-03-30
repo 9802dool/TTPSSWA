@@ -66,4 +66,17 @@ Municipal:
   municipal-12345.jpg — WPC Shivonne Baptiste
   municipal-12361.jpg — WPC Dashia Luke
 
+Court & Process:
+  court-process-16102.jpg — Sgt Anthony Pierre
+  court-process-7245.jpg — WPC Kamaria Guy
+
+Community Oriented Policing:
+  cop-20005.jpg — WPC Linda Alleyne
+  cop-21082.jpg — PC Lawrence Bradshaw
+
+Traffic & Highway Patrol:
+  thp-17180.jpg — A/Sgt Kizzie Marcelle
+  thp-17553.jpg — W/Cpl Giselle Lakhan
+  thp-9795.jpg  — WPC Patrice Williams (no email on file)
+
 Until files exist, the site shows initials in each frame.
