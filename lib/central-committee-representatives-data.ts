@@ -105,7 +105,7 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
         name: "WPC Shimerle Sampson",
         summary: "Reg. No. 5769",
         photoSrc: "/ex-pics/cc-rep/central-5769.jpg",
-        phone: "(868) 612-0301 ext. 30255",
+        workPhone: "(868) 612-0301 ext 30255",
         email: "Glamempress@proton.me",
       },
     ],
