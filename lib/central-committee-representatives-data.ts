@@ -311,4 +311,58 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  complaints: {
+    intro:
+      "Central Committee Representatives for Complaints are listed below.",
+    representatives: [
+      {
+        name: "W/Sgt Ria Montique-Clement",
+        summary: "Reg. No. 14657",
+        photoSrc: "/ex-pics/cc-rep/complaints-14657.jpg",
+        workPhone: "(868) 653-8110",
+        cellPhone: "(868) 352-9324",
+        email: "Ria.Montique-Clement@ttps.gov.tt",
+      },
+    ],
+  },
+  "police-band": {
+    intro:
+      "Central Committee Representatives for Police Band are listed below.",
+    representatives: [
+      {
+        name: "Ag Sgt Derick Thomas",
+        summary: "Reg. No. 17206",
+        photoSrc: "/ex-pics/cc-rep/police-band-17206.jpg",
+        workPhone: "(868) 612-2470 ext. 13560",
+        email: "derickthomas2@hotmail.com",
+      },
+    ],
+  },
+  municipal: {
+    intro:
+      "Central Committee Representatives for Municipal are listed below.",
+    representatives: [
+      {
+        name: "Ag Sgt Vanessa Williams",
+        summary: "Reg. No. 3206",
+        photoSrc: "/ex-pics/cc-rep/municipal-3206.jpg",
+        workPhone: "(868) 299-0870 ext. 2326",
+        email: "vmelville64@gmail.com",
+      },
+      {
+        name: "WPC Shivonne Baptiste",
+        summary: "Reg. No. 12345",
+        photoSrc: "/ex-pics/cc-rep/municipal-12345.jpg",
+        workPhone: "(868) 299-0870 ext. 4",
+        email: "shivonnebapiste7@gmail.com",
+      },
+      {
+        name: "WPC Dashia Luke",
+        summary: "Reg. No. 12361",
+        photoSrc: "/ex-pics/cc-rep/municipal-12361.jpg",
+        workPhone: "(868) 299-0870 ext. 2804/2806/2807",
+        email: "dashialuke364@yahoo.com",
+      },
+    ],
+  },
 };

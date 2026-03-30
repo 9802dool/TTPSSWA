@@ -55,4 +55,15 @@ Southern:
 Mounted & Canine:
   mounted-k9-18542.jpg — Cpl Tamika Tannis
 
+Complaints:
+  complaints-14657.jpg — W/Sgt Ria Montique-Clement
+
+Police Band:
+  police-band-17206.jpg — Ag Sgt Derick Thomas
+
+Municipal:
+  municipal-3206.jpg  — Ag Sgt Vanessa Williams
+  municipal-12345.jpg — WPC Shivonne Baptiste
+  municipal-12361.jpg — WPC Dashia Luke
+
 Until files exist, the site shows initials in each frame.
