@@ -50,7 +50,7 @@ export default async function MembersLoginPage({ searchParams }: Props) {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-[calc(100vh-4.25rem)] bg-slate-950 pt-[4.25rem] text-slate-100">
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-slate-950 pt-[var(--site-header-stack)] text-slate-100">
         <section className="border-b border-slate-800/80 py-12 pb-16">
           <div className="mx-auto max-w-lg px-4 sm:px-6 lg:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">

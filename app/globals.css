@@ -4,6 +4,12 @@
 
 /* Modern corporate theme — light-first, optional system dark */
 :root {
+  /* Fixed site chrome: promo strip + main nav (see SiteHeader) */
+  --promo-banner-height: 2.5rem;
+  --site-header-height: 4.25rem;
+  --site-header-stack: calc(
+    var(--promo-banner-height) + var(--site-header-height)
+  );
   --bg: #f4f6f9;
   --fg: #0f172a;
   --muted: #475569;

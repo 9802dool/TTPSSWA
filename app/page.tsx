@@ -61,7 +61,7 @@ export default function Home() {
       <SiteHeader />
       <main id="top">
         {/* Corporate hero */}
-        <section className="relative overflow-hidden border-b border-line bg-navy pt-[4.25rem] text-white">
+        <section className="relative overflow-hidden border-b border-line bg-navy pt-[var(--site-header-stack)] text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-40"
             aria-hidden

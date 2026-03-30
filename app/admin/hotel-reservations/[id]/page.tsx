@@ -76,7 +76,7 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
       <SiteHeader />
-      <header className="border-b border-[var(--border)] bg-[var(--surface)] pt-[4.25rem]">
+      <header className="border-b border-[var(--border)] bg-[var(--surface)] pt-[var(--site-header-stack)]">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-4 px-4 py-4">
           <div>
             <p className="text-sm text-[var(--muted)]">

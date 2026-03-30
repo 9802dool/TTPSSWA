@@ -13,7 +13,7 @@ export default function HotelReservationsPage() {
   return (
     <>
       <SiteHeader />
-      <main className="pt-[4.25rem]">
+      <main className="pt-[var(--site-header-stack)]">
         {/* ── Hero ── */}
         <section className="relative overflow-hidden bg-navy text-white">
           <div

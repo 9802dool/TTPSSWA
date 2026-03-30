@@ -44,7 +44,7 @@ export default function MembersPortalPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-[calc(100vh-4.25rem)] bg-canvas pt-[4.25rem]">
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-canvas pt-[var(--site-header-stack)]">
         <section className="border-b border-line bg-gradient-to-b from-surface to-canvas py-12 dark:from-canvas dark:to-surface">
           <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">

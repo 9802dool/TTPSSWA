@@ -14,7 +14,7 @@ export default function LoginPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-[calc(100vh-4.25rem)] bg-[#f4f6f9] pt-[4.25rem] dark:bg-canvas">
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#f4f6f9] pt-[var(--site-header-stack)] dark:bg-canvas">
         <div className="border-b border-line bg-gradient-to-b from-surface to-canvas py-10 dark:from-canvas dark:to-surface">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-brand">

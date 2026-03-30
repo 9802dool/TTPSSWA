@@ -62,7 +62,7 @@ export default async function CentralCommitteeRegionPage({ params }: Props) {
   return (
     <>
       <SiteHeader />
-      <main className="pt-[4.25rem]">
+      <main className="pt-[var(--site-header-stack)]">
         <section className="relative overflow-hidden border-b border-line bg-navy text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-50"

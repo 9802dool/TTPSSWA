@@ -12,7 +12,7 @@ export default function MembershipServicesPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-[calc(100vh-4.25rem)] bg-[#0a0f18] pt-[4.25rem] text-white dark:bg-[#050810]">
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#0a0f18] pt-[var(--site-header-stack)] text-white dark:bg-[#050810]">
         <section
           id="members-services"
           className="scroll-mt-24 px-4 py-10 sm:px-6 lg:px-8"

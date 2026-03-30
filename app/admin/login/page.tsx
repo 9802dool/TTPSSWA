@@ -16,7 +16,7 @@ export default function AdminLoginPage() {
   return (
     <>
       <SiteHeader />
-      <div className="min-h-screen bg-[var(--bg)] px-4 pb-16 pt-[calc(4.25rem+2rem)] text-[var(--fg)]">
+      <div className="min-h-screen bg-[var(--bg)] px-4 pb-16 pt-[calc(var(--site-header-stack)+2rem)] text-[var(--fg)]">
         <div className="mx-auto flex max-w-sm flex-col gap-6">
           {!configured ? (
             <div
