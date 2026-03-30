@@ -83,6 +83,33 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  western: {
+    intro:
+      "Central Committee Representatives for the Western division are listed below.",
+    representatives: [
+      {
+        name: "WPC Afiya Plentie",
+        summary: "Reg. No. 18724",
+        photoSrc: "/ex-pics/cc-rep/western-18724.jpg",
+        workPhone: "(868) 637-3860 ext. 21370",
+        email: "afiyastarr@gmail.com",
+      },
+      {
+        name: "Ag Cpl Keishaa Duke",
+        summary: "Reg. No. 20268",
+        photoSrc: "/ex-pics/cc-rep/western-20268.jpg",
+        workPhone: "(868) 622-3695 ext. 21019",
+        email: "brewsterkd@gmail.com",
+      },
+      {
+        name: "WPC Jiselle Douglas",
+        summary: "Reg. No. 20822",
+        photoSrc: "/ex-pics/cc-rep/western-20822.jpg",
+        workPhone: "(868) 283-6754 ext. 6373123",
+        email: "jisdouglas@outlook.com",
+      },
+    ],
+  },
   central: {
     intro:
       "Central Committee Representatives for the Central division are listed below.",

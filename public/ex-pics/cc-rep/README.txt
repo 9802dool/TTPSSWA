@@ -10,6 +10,11 @@ Eastern:
   eastern-18071.jpg — WPC Janelle Stephen-Sammy
   eastern-9087.jpg  — PC Selwyn Yee Shong
 
+Western:
+  western-18724.jpg — WPC Afiya Plentie
+  western-20268.jpg — Ag Cpl Keishaa Duke
+  western-20822.jpg — WPC Jiselle Douglas
+
 Central:
   central-16589.jpg — Sgt Jacey Small
   central-13137.jpg — Sgt Marlon King
