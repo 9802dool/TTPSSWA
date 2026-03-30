@@ -110,6 +110,33 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  "north-eastern": {
+    intro:
+      "Central Committee Representatives for North Eastern (NED) are listed below.",
+    representatives: [
+      {
+        name: "W/Sgt Helen Solomon",
+        summary: "Reg. No. 14953",
+        photoSrc: "/ex-pics/cc-rep/ned-14953.jpg",
+        workPhone: "(868) 674-0100",
+        email: "helnak75@outlook.com",
+      },
+      {
+        name: "W/Cpl Sonya George",
+        summary: "Reg. No. 18586",
+        photoSrc: "/ex-pics/cc-rep/ned-18586.jpg",
+        workPhone: "(868) 627-2981",
+        email: "sonya-george@hotmail.com",
+      },
+      {
+        name: "Ag Sgt Shelley Durant",
+        summary: "Reg. No. 17164",
+        photoSrc: "/ex-pics/cc-rep/ned-17164.jpg",
+        workPhone: "(868) 674-0100 ext. 75706/75707",
+        email: "lovable-sd@live.com",
+      },
+    ],
+  },
   central: {
     intro:
       "Central Committee Representatives for the Central division are listed below.",

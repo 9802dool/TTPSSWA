@@ -15,6 +15,11 @@ Western:
   western-20268.jpg — Ag Cpl Keishaa Duke
   western-20822.jpg — WPC Jiselle Douglas
 
+North Eastern (NED):
+  ned-14953.jpg  — W/Sgt Helen Solomon
+  ned-18586.jpg  — W/Cpl Sonya George
+  ned-17164.jpg  — Ag Sgt Shelley Durant
+
 Central:
   central-16589.jpg — Sgt Jacey Small
   central-13137.jpg — Sgt Marlon King
