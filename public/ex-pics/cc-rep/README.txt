@@ -96,4 +96,16 @@ Police Academy:
   pa-16697.jpg — Sgt Zalika Mills
   pa-17057.jpg — Cpl Kevon Beatrice
 
+Coastal & Air Support:
+  cas-19618.jpg — WPC Wendy Guevara
+
+Cyber & Social Media:
+  cyber-10799.jpg — PC Vimal Boodoo
+
+Corporate Communications:
+  corpcomm-16419.jpg — W/Cpl Lovenia Warner
+
+Finance:
+  fin-19725.jpg — W/Ag Cpl Simone Skeete
+
 Until files exist, the site shows initials in each frame.

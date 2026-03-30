@@ -23,6 +23,10 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "traffic-highway-patrol", name: "Traffic & Highway Patrol" },
   { slug: "human-resource", name: "Human Resource" },
   { slug: "police-academy", name: "Police Academy" },
+  { slug: "coastal-air-support", name: "Coastal & Air Support" },
+  { slug: "cyber-social-media", name: "Cyber & Social Media" },
+  { slug: "corporate-communications", name: "Corporate Communications" },
+  { slug: "finance", name: "Finance" },
 ] as const;
 
 export type CentralCommitteeRegionSlug =

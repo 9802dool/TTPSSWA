@@ -517,4 +517,56 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  "coastal-air-support": {
+    intro:
+      "Central Committee Representatives for Coastal & Air Support are listed below.",
+    representatives: [
+      {
+        name: "WPC Wendy Guevara",
+        summary: "Reg. No. 19618",
+        photoSrc: "/ex-pics/cc-rep/cas-19618.jpg",
+        workPhone: "(868) 499-5475 ext. 21051",
+        email: "wendy.guevaratt@ttps.gov.tt",
+      },
+    ],
+  },
+  "cyber-social-media": {
+    intro:
+      "Central Committee Representatives for Cyber & Social Media are listed below.",
+    representatives: [
+      {
+        name: "PC Vimal Boodoo",
+        summary: "Reg. No. 10799",
+        photoSrc: "/ex-pics/cc-rep/cyber-10799.jpg",
+        workPhone: "(868) 715-2072 ext. 13232",
+        email: "vimal.boodoo@ttps.gov.tt",
+      },
+    ],
+  },
+  "corporate-communications": {
+    intro:
+      "Central Committee Representatives for Corporate Communications are listed below.",
+    representatives: [
+      {
+        name: "W/Cpl Lovenia Warner",
+        summary: "Reg. No. 16419",
+        photoSrc: "/ex-pics/cc-rep/corpcomm-16419.jpg",
+        workPhone: "(868) 627-5217 ext. 12210",
+        email: "reachlovenia@gmail.com",
+      },
+    ],
+  },
+  finance: {
+    intro:
+      "Central Committee Representatives for Finance are listed below.",
+    representatives: [
+      {
+        name: "W/Ag Cpl Simone Skeete",
+        summary: "Reg. No. 19725",
+        photoSrc: "/ex-pics/cc-rep/fin-19725.jpg",
+        workPhone: "(868) 612-0102 ext. 12306-12308",
+        email: "simoneskeete19@gmail.com",
+      },
+    ],
+  },
 };
