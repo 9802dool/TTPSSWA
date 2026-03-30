@@ -5,9 +5,9 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
-  title: "Signup / Login | TTPSSWA",
+  title: "Signup to access members portal | TTPSSWA",
   description:
-    "Submit a membership application or access TTPSSWA member services.",
+    "Submit the membership application form or sign in to the members area when approved.",
 };
 
 export default function LoginPage() {
@@ -21,10 +21,12 @@ export default function LoginPage() {
               Trinidad and Tobago Police Service Social Welfare Association
             </p>
             <h1 className="mt-4 text-center text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-              Signup / Login
+              Signup to access members portal
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted">
-              Apply for membership or sign in to the members area.
+              Use the <span className="font-medium text-ink">Application form</span> to
+              apply, or <span className="font-medium text-ink">Members login</span> when
+              your application has been approved.
             </p>
           </div>
         </div>
@@ -33,12 +35,7 @@ export default function LoginPage() {
           <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
             <div className="rounded-sm border border-line bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.08),0_8px_24px_rgba(15,23,42,0.06)] ring-1 ring-black/5 dark:border-line dark:bg-surface dark:shadow-corp dark:ring-white/5">
               <div className="border-b border-line bg-brand-subtle/30 px-5 py-4 dark:bg-brand-subtle/15">
-                <h2 className="text-base font-bold text-ink">
-                  Signup to access members portal
-                </h2>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-muted">
-                  Application form
-                </p>
+                <h2 className="text-base font-bold text-ink">Application form</h2>
                 <p className="mt-2 text-sm text-ink">
                   Complete each section in order. Required fields are marked with{" "}
                   <span className="text-red-600">*</span>.
@@ -62,7 +59,7 @@ export default function LoginPage() {
                   href="/members/login"
                   className="inline-flex min-h-[44px] w-full items-center justify-center rounded-md bg-brand px-6 text-sm font-semibold text-white shadow-corp-md transition hover:bg-brand-hover"
                 >
-                  Open members login
+                  Sign in
                 </Link>
               </div>
             </div>
