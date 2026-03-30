@@ -225,4 +225,30 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  tobago: {
+    intro:
+      "Central Committee Representatives for Tobago are listed below.",
+    representatives: [
+      {
+        name: "Ag Cpl Sekou Moses",
+        summary: "Reg. No. 20279",
+        photoSrc: "/ex-pics/cc-rep/tobago-20279.jpg",
+        workPhone: "(868) 639-2515",
+        email: "sekou.moses@ttps.gov.tt",
+      },
+    ],
+  },
+  "transport-telecom": {
+    intro:
+      "Central Committee Representatives for Transport & Telecom are listed below.",
+    representatives: [
+      {
+        name: "Cpl Jason Pascall",
+        summary: "Reg. No. 16964",
+        photoSrc: "/ex-pics/cc-rep/transport-telecom-16964.jpg",
+        workPhone: "(868) 675-0567",
+        email: "jason_pascall@yahoo.com",
+      },
+    ],
+  },
 };

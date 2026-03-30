@@ -10,6 +10,7 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "eastern", name: "Eastern" },
   { slug: "north-eastern", name: "North Eastern (NED)" },
   { slug: "tobago", name: "Tobago" },
+  { slug: "transport-telecom", name: "Transport & Telecom" },
   { slug: "iatf", name: "IATF" },
   { slug: "siu", name: "SIU" },
   { slug: "special-branch", name: "Special Branch" },

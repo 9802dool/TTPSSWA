@@ -37,4 +37,10 @@ Central:
   central-13137.jpg — Sgt Marlon King
   central-5769.jpg  — WPC Shimerle Sampson
 
+Tobago:
+  tobago-20279.jpg — Ag Cpl Sekou Moses
+
+Transport & Telecom:
+  transport-telecom-16964.jpg — Cpl Jason Pascall
+
 Until files exist, the site shows initials in each frame.
