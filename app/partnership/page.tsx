@@ -6,7 +6,7 @@ import SiteHeader from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Partnership | TTPSSWA",
   description:
-    "TTPSSWA corporate partners and collaborative programs — including Hardware and Beyond.",
+    "TTPSSWA corporate partners and collaborative programs — Hardware and Beyond, Dream Builder Colour Studio Ltd, and more.",
 };
 
 export default function PartnershipPage() {
@@ -46,19 +46,22 @@ export default function PartnershipPage() {
         </section>
 
         <section
-          id="hardware-and-beyond"
+          id="partnership-programs"
           className="scroll-mt-24 border-b border-line bg-surface py-12 dark:bg-canvas"
         >
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <h2 className="text-lg font-bold tracking-tight text-ink md:text-xl">
               Partnership programs
             </h2>
             <p className="mt-2 text-sm text-muted">
               Select a pillar to read more.
             </p>
-            <ul className="mt-8 list-none space-y-4 p-0">
-              <li>
-                <details className="group rounded-xl border border-line bg-canvas shadow-corp open:[&_summary_.partnership-pillar-chevron]:rotate-180 dark:bg-surface">
+            <ul className="mt-8 grid list-none gap-4 p-0 sm:grid-cols-2 sm:items-start sm:gap-6">
+              <li className="min-w-0">
+                <details
+                  id="hardware-and-beyond"
+                  className="group rounded-xl border border-line bg-canvas shadow-corp open:[&_summary_.partnership-pillar-chevron]:rotate-180 dark:bg-surface"
+                >
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-5 py-5 text-left transition hover:bg-brand-subtle/30 dark:hover:bg-navy-muted/25 [&::-webkit-details-marker]:hidden sm:px-6 sm:py-6">
                     <span className="min-w-0 flex-1">
                       <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-brand">
@@ -94,6 +97,50 @@ export default function PartnershipPage() {
                       Hardware and Beyond is a TTPSSWA partnership program. Further
                       details and contact information will be published here as they
                       become available.
+                    </p>
+                  </div>
+                </details>
+              </li>
+              <li className="min-w-0">
+                <details
+                  id="dream-builder-colour-studio-ltd"
+                  className="group rounded-xl border border-line bg-canvas shadow-corp open:[&_summary_.partnership-pillar-chevron]:rotate-180 dark:bg-surface"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-xl px-5 py-5 text-left transition hover:bg-brand-subtle/30 dark:hover:bg-navy-muted/25 [&::-webkit-details-marker]:hidden sm:px-6 sm:py-6">
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+                        Partnership pillar
+                      </span>
+                      <span className="mt-2 block text-xl font-bold tracking-tight text-ink md:text-2xl">
+                        Dream Builder Colour Studio Ltd
+                      </span>
+                      <span className="mt-1 block text-sm text-muted">
+                        Click to open for more information
+                      </span>
+                    </span>
+                    <span
+                      className="partnership-pillar-chevron flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-line text-brand transition-transform duration-200"
+                      aria-hidden
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.25"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="m6 9 6 6 6-6" />
+                      </svg>
+                    </span>
+                  </summary>
+                  <div className="border-t border-line px-5 pb-6 pt-1 sm:px-6">
+                    <p className="text-[17px] leading-relaxed text-muted">
+                      Dream Builder Colour Studio Ltd is a TTPSSWA partnership program.
+                      Further details and contact information will be published here as
+                      they become available.
                     </p>
                   </div>
                 </details>
