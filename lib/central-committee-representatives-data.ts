@@ -431,4 +431,90 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  "north-central": {
+    intro:
+      "Central Committee Representatives for North Central are listed below.",
+    representatives: [
+      {
+        name: "WPC Selma Adams",
+        summary: "Reg. No. 18541",
+        photoSrc: "/ex-pics/cc-rep/nc-18541.jpg",
+        workPhone: "(868) 662-2522 ext. 6624038",
+        email: "selma.adams@ttps.gov.tt",
+      },
+      {
+        name: "WPC Michelle Olliverrie",
+        summary: "Reg. No. 5303",
+        photoSrc: "/ex-pics/cc-rep/nc-5303.jpg",
+        workPhone: "(868) 692-6724",
+        email: "michelle1olliverrie@gmail.com",
+      },
+    ],
+  },
+  northern: {
+    intro:
+      "Central Committee Representatives for Northern are listed below.",
+    representatives: [
+      {
+        name: "Sgt Timmy Naitram",
+        summary: "Reg. No. 16555",
+        photoSrc: "/ex-pics/cc-rep/northern-16555.jpg",
+        workPhone: "(868) 720-9444 ext. 61015",
+        email: "timmynaitram@gmail.com",
+      },
+      {
+        name: "WPC Lindy Mohammed",
+        summary: "Reg. No. 19697",
+        photoSrc: "/ex-pics/cc-rep/northern-19697.jpg",
+        workPhone: "(868) 667-3563 ext. 61027 / 61041",
+      },
+      {
+        name: "WPC Kim Hamit",
+        summary: "Reg. No. 10200",
+        photoSrc: "/ex-pics/cc-rep/northern-10200.jpg",
+        workPhone: "(868) 686-6120 ext. 61031",
+        email: "kimhamit@gmail.com",
+      },
+    ],
+  },
+  "human-resource": {
+    intro:
+      "Central Committee Representatives for Human Resource are listed below.",
+    representatives: [
+      {
+        name: "Ag Insp Kevin Denny",
+        summary: "Reg. No. 14251",
+        photoSrc: "/ex-pics/cc-rep/hr-14251.jpg",
+        workPhone: "(868) 627-5217 ext. 12494/12402",
+        email: "kevindenny1973@gmail.com",
+      },
+      {
+        name: "Ag/Cpl Collin Marcelin",
+        summary: "Reg. No. 18075",
+        photoSrc: "/ex-pics/cc-rep/hr-18075.jpg",
+        workPhone: "(868) 627-5217 ext. 12409/12400",
+        email: "marcelincollin@gmail.com",
+      },
+    ],
+  },
+  "police-academy": {
+    intro:
+      "Central Committee Representatives for Police Academy are listed below.",
+    representatives: [
+      {
+        name: "Sgt Zalika Mills",
+        summary: "Reg. No. 16697",
+        photoSrc: "/ex-pics/cc-rep/pa-16697.jpg",
+        workPhone: "(868) 623-3171 ext. 22102-22106",
+        email: "zalika.mills@ttps.gov.tt",
+      },
+      {
+        name: "Cpl Kevon Beatrice",
+        summary: "Reg. No. 17057",
+        photoSrc: "/ex-pics/cc-rep/pa-17057.jpg",
+        workPhone: "(868) 622-3171 ext. 22102-22106",
+        email: "simone.thomas@ttps.gov.tt",
+      },
+    ],
+  },
 };

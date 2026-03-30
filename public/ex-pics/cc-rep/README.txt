@@ -79,4 +79,21 @@ Traffic & Highway Patrol:
   thp-17553.jpg — W/Cpl Giselle Lakhan
   thp-9795.jpg  — WPC Patrice Williams (no email on file)
 
+North Central:
+  nc-18541.jpg — WPC Selma Adams
+  nc-5303.jpg  — WPC Michelle Olliverrie
+
+Northern:
+  northern-16555.jpg — Sgt Timmy Naitram
+  northern-19697.jpg — WPC Lindy Mohammed (no email on file)
+  northern-10200.jpg — WPC Kim Hamit
+
+Human Resource:
+  hr-14251.jpg — Ag Insp Kevin Denny
+  hr-18075.jpg — Ag/Cpl Collin Marcelin
+
+Police Academy:
+  pa-16697.jpg — Sgt Zalika Mills
+  pa-17057.jpg — Cpl Kevon Beatrice
+
 Until files exist, the site shows initials in each frame.

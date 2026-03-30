@@ -7,6 +7,8 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "south-western", name: "South Western" },
   { slug: "eastern", name: "Eastern" },
   { slug: "north-eastern", name: "North Eastern (NED)" },
+  { slug: "north-central", name: "North Central" },
+  { slug: "northern", name: "Northern" },
   { slug: "tobago", name: "Tobago" },
   { slug: "transport-telecom", name: "Transport & Telecom" },
   { slug: "iatf", name: "IATF" },
@@ -19,6 +21,8 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "court-process", name: "Court & Process" },
   { slug: "community-oriented-policing", name: "Community Oriented Policing" },
   { slug: "traffic-highway-patrol", name: "Traffic & Highway Patrol" },
+  { slug: "human-resource", name: "Human Resource" },
+  { slug: "police-academy", name: "Police Academy" },
 ] as const;
 
 export type CentralCommitteeRegionSlug =
