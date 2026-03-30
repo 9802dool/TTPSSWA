@@ -11,6 +11,7 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "north-eastern", name: "North Eastern (NED)" },
   { slug: "tobago", name: "Tobago" },
   { slug: "iatf", name: "IATF" },
+  { slug: "siu", name: "SIU" },
   { slug: "geb", name: "GEB" },
   { slug: "acib", name: "ACIB" },
   { slug: "notf", name: "NOTF" },

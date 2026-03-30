@@ -1,5 +1,13 @@
 Square photos (e.g. 400×400 px). Filenames match lib/central-committee-representatives-data.ts.
 
+Port of Spain:
+  pos-19021.jpg — WPC Jamila Phillip
+  pos-18264.jpg — W/Ag Sgt Giselle Thomas
+
+SIU:
+  siu-17065.jpg — Cpl Kwesi Carmona
+  siu-18392.jpg — Cpl Matthew Ramirez
+
 IATF:
   iatf-10364.jpg  — PC Darnel David
   iatf-10428.jpg  — PC Nolan Tash

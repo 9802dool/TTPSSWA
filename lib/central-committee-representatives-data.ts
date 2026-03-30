@@ -28,6 +28,26 @@ export type CommitteeRegionContent = {
 export const COMMITTEE_REPRESENTATIVES: Partial<
   Record<CentralCommitteeRegionSlug, CommitteeRegionContent>
 > = {
+  "port-of-spain": {
+    intro:
+      "Central Committee Representatives for Port of Spain are listed below.",
+    representatives: [
+      {
+        name: "WPC Jamila Phillip",
+        summary: "Reg. No. 19021",
+        photoSrc: "/ex-pics/cc-rep/pos-19021.jpg",
+        workPhone: "(868) 366-5353 ext. 6231395",
+        email: "jamazingbeau@gmail.com",
+      },
+      {
+        name: "W/Ag Sgt Giselle Thomas",
+        summary: "Reg. No. 18264",
+        photoSrc: "/ex-pics/cc-rep/pos-18264.jpg",
+        workPhone: "(868) 281-7970",
+        email: "gisellethomas22@gmail.com",
+      },
+    ],
+  },
   iatf: {
     intro:
       "The Inter-Agency Task Force (IATF) is a specialized TTPS unit focused on joint operations and interdepartmental collaboration. Central Committee Representatives for this section are listed below.",
@@ -52,6 +72,26 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
         photoSrc: "/ex-pics/cc-rep/iatf-20964.jpg",
         phone: "(868) 612-0102 ext. 75412",
         email: "Khamael24@gmail.com",
+      },
+    ],
+  },
+  siu: {
+    intro:
+      "Central Committee Representatives for SIU are listed below.",
+    representatives: [
+      {
+        name: "Cpl Kwesi Carmona",
+        summary: "Reg. No. 17065",
+        photoSrc: "/ex-pics/cc-rep/siu-17065.jpg",
+        workPhone: "(868) 612-2470 ext. 12032",
+        email: "earlcarmona@hotmail.com",
+      },
+      {
+        name: "Cpl Matthew Ramirez",
+        summary: "Reg. No. 18392",
+        photoSrc: "/ex-pics/cc-rep/siu-18392.jpg",
+        workPhone: "(868) 740-1824",
+        email: "matthew.ramirez@ttps.gov.tt",
       },
     ],
   },
