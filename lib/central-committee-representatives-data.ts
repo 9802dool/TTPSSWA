@@ -106,7 +106,7 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
         summary: "Reg. No. 5769",
         photoSrc: "/ex-pics/cc-rep/central-5769.jpg",
         workPhone: "(868) 612-0301 ext 30255",
-        email: "Glamempress@proton.me",
+        email: "glamempress@proton.me",
       },
     ],
   },
