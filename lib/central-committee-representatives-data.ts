@@ -95,6 +95,26 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  "special-branch": {
+    intro:
+      "Central Committee Representatives for Special Branch are listed below.",
+    representatives: [
+      {
+        name: "Cpl Joshua Balfour",
+        summary: "Reg. No. 16976",
+        photoSrc: "/ex-pics/cc-rep/sb-16976.jpg",
+        workPhone: "(868) 687-5860 ext. 13090",
+        email: "joshuabalfour@yahoo.com",
+      },
+      {
+        name: "W/Cpl Donna Marshall-John",
+        summary: "Reg. No. 18551",
+        photoSrc: "/ex-pics/cc-rep/sb-18551.jpg",
+        workPhone: "(868) 627-5217 ext. 12057/12005",
+        email: "donnajohn626@gmail.com",
+      },
+    ],
+  },
   eastern: {
     intro:
       "Central Committee Representatives for the Eastern division are listed below.",

@@ -12,6 +12,7 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "tobago", name: "Tobago" },
   { slug: "iatf", name: "IATF" },
   { slug: "siu", name: "SIU" },
+  { slug: "special-branch", name: "Special Branch" },
   { slug: "geb", name: "GEB" },
   { slug: "acib", name: "ACIB" },
   { slug: "notf", name: "NOTF" },

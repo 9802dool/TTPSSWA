@@ -8,6 +8,10 @@ SIU:
   siu-17065.jpg — Cpl Kwesi Carmona
   siu-18392.jpg — Cpl Matthew Ramirez
 
+Special Branch:
+  sb-16976.jpg — Cpl Joshua Balfour
+  sb-18551.jpg — W/Cpl Donna Marshall-John
+
 IATF:
   iatf-10364.jpg  — PC Darnel David
   iatf-10428.jpg  — PC Nolan Tash
