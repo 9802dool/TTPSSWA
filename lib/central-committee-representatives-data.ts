@@ -90,7 +90,7 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
         name: "Sgt Jacey Small",
         summary: "Reg. No. 16589",
         photoSrc: "/ex-pics/cc-rep/central-16589.jpg",
-        phone: "(868) 612-2470 ext. 30050-60 / 30100",
+        workPhone: "(868) 612-2470 ext. 30050-60 / 30100",
         email: "jaceysmall@hotmail.com",
       },
       {
