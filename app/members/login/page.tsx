@@ -50,27 +50,27 @@ export default async function MembersLoginPage({ searchParams }: Props) {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-[calc(100vh-4.25rem)] bg-canvas pt-[4.25rem]">
-        <section className="border-b border-line bg-surface py-12 dark:bg-canvas">
+      <main className="min-h-[calc(100vh-4.25rem)] bg-slate-950 pt-[4.25rem] text-slate-100">
+        <section className="border-b border-slate-800/80 py-12 pb-16">
           <div className="mx-auto max-w-lg px-4 sm:px-6 lg:px-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-400">
               Members
             </p>
-            <h1 className="mt-3 text-3xl font-bold tracking-tight text-ink md:text-4xl">
+            <h1 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
               Members login
             </h1>
             {sessionActive ? (
-              <div className="mt-8 rounded-xl border border-line bg-canvas p-6 shadow-corp dark:bg-surface">
-                <p className="text-sm text-muted">Signed in as</p>
-                <p className="mt-1 text-lg font-semibold text-ink">
+              <div className="mt-8 rounded-xl border border-slate-700/80 bg-slate-900/60 p-6 shadow-corp backdrop-blur-sm">
+                <p className="text-sm text-slate-400">Signed in as</p>
+                <p className="mt-1 text-lg font-semibold text-white">
                   {member.fullName}
                 </p>
                 {member.username ? (
-                  <p className="mt-1 font-mono text-sm text-muted">
+                  <p className="mt-1 font-mono text-sm text-slate-400">
                     @{member.username}
                   </p>
                 ) : null}
-                <p className="mt-4 text-sm text-muted">
+                <p className="mt-4 text-sm text-slate-400">
                   Your application has been approved. Below are service requests
                   tied to your email (for example hotel reservations).
                 </p>
@@ -80,10 +80,10 @@ export default async function MembersLoginPage({ searchParams }: Props) {
                     variant="member"
                   />
                 </div>
-                <p className="mt-6 text-sm text-muted">
+                <p className="mt-6 text-sm text-slate-400">
                   <Link
                     href="/membership-services#members-benefits"
-                    className="font-medium text-brand hover:underline"
+                    className="font-medium text-sky-400 hover:text-sky-300 hover:underline"
                   >
                     Members Benefits
                   </Link>{" "}
@@ -93,24 +93,24 @@ export default async function MembersLoginPage({ searchParams }: Props) {
                   <MemberLogoutButton />
                   <Link
                     href="/"
-                    className="text-sm font-medium text-brand hover:underline"
+                    className="text-sm font-medium text-sky-400 hover:text-sky-300 hover:underline"
                   >
                     Back to home
                   </Link>
                   <Link
                     href="/login"
-                    className="text-sm font-medium text-brand hover:underline"
+                    className="text-sm font-medium text-sky-400 hover:text-sky-300 hover:underline"
                   >
                     Signup / Login
                   </Link>
                 </div>
               </div>
             ) : memberId && member && member.applicationStatus !== "accepted" ? (
-              <div className="mt-8 rounded-xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-900 dark:bg-amber-950/30">
-                <p className="font-medium text-amber-950 dark:text-amber-100">
+              <div className="mt-8 rounded-xl border border-amber-700/50 bg-amber-950/40 p-6">
+                <p className="font-medium text-amber-100">
                   Members area not available for this account
                 </p>
-                <p className="mt-2 text-sm text-amber-900/90 dark:text-amber-100/90">
+                <p className="mt-2 text-sm text-amber-100/85">
                   {member.applicationStatus === "pending"
                     ? "Your application is still under review. You will be able to sign in here after an administrator accepts it."
                     : "This application was not approved for online member access."}
@@ -120,8 +120,8 @@ export default async function MembersLoginPage({ searchParams }: Props) {
                 </div>
               </div>
             ) : memberId && !member ? (
-              <div className="mt-8 rounded-xl border border-line bg-canvas p-6 dark:bg-surface">
-                <p className="text-sm text-muted">
+              <div className="mt-8 rounded-xl border border-slate-700/80 bg-slate-900/60 p-6">
+                <p className="text-sm text-slate-400">
                   Your session is no longer valid. Please sign in again.
                 </p>
                 <div className="mt-4">
@@ -130,31 +130,42 @@ export default async function MembersLoginPage({ searchParams }: Props) {
               </div>
             ) : (
               <>
-                <p className="mt-4 text-muted">
+                <p className="mt-6 text-[15px] leading-relaxed text-slate-400">
                   Only applicants whose membership has been{" "}
-                  <strong className="text-ink">accepted by an administrator</strong>{" "}
+                  <strong className="font-semibold text-white">
+                    accepted by an administrator
+                  </strong>{" "}
                   can sign in. Use your{" "}
-                  <strong className="text-ink">username or email</strong> and{" "}
-                  <strong className="text-ink">password</strong> from your
-                  application.{" "}
+                  <strong className="font-semibold text-white">
+                    username or email
+                  </strong>{" "}
+                  and{" "}
+                  <strong className="font-semibold text-white">password</strong>{" "}
+                  from your application.{" "}
                   <Link
                     href="/login"
-                    className="font-medium text-brand hover:text-brand-hover"
+                    className="font-medium text-sky-400 underline-offset-2 hover:text-sky-300 hover:underline"
                   >
                     Submit an application
                   </Link>
                   .
                 </p>
-                <MembersLoginForm redirectAfterLogin={nextPath} />
-                <p className="mt-8 text-center text-sm text-muted">
+                <MembersLoginForm
+                  redirectAfterLogin={nextPath}
+                  variant="dark"
+                />
+                <p className="mt-10 text-center text-sm text-slate-400">
                   <Link
                     href="/membership-services#members-benefits"
-                    className="text-brand hover:underline"
+                    className="font-medium text-sky-400 hover:text-sky-300 hover:underline"
                   >
                     Members Benefits
                   </Link>{" "}
                   on the{" "}
-                  <Link href="/membership-services" className="text-brand hover:underline">
+                  <Link
+                    href="/membership-services"
+                    className="font-medium text-sky-400 hover:text-sky-300 hover:underline"
+                  >
                     membership services
                   </Link>{" "}
                   page.

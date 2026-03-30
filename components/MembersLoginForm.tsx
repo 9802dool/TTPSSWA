@@ -4,15 +4,26 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { safeInternalNextPath } from "@/lib/safe-next-path";
 
-const inputClass =
+const inputClassDefault =
   "mt-1 w-full rounded-md border border-line bg-surface px-3 py-2 text-sm text-ink shadow-sm outline-none ring-brand placeholder:text-muted focus:ring-2 dark:bg-canvas";
+
+const inputClassDark =
+  "mt-1 w-full rounded-md border border-slate-600/80 bg-slate-900/90 px-3 py-2.5 text-sm text-slate-100 shadow-sm outline-none ring-sky-500/40 placeholder:text-slate-500 focus:border-sky-500/50 focus:ring-2";
 
 type Props = {
   /** Server-validated path (e.g. from ?next=) to open after successful sign-in. */
   redirectAfterLogin?: string | null;
+  /** Dark inputs for members login page (dark hero layout). */
+  variant?: "default" | "dark";
 };
 
-export function MembersLoginForm({ redirectAfterLogin }: Props) {
+export function MembersLoginForm({
+  redirectAfterLogin,
+  variant = "default",
+}: Props) {
+  const inputClass = variant === "dark" ? inputClassDark : inputClassDefault;
+  const labelClass =
+    variant === "dark" ? "text-sm font-medium text-slate-200" : "text-sm font-medium text-ink";
   const router = useRouter();
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -58,8 +69,8 @@ export function MembersLoginForm({ redirectAfterLogin }: Props) {
       className="mt-8 space-y-5 text-left"
     >
       <div>
-        <label htmlFor="identifier" className="text-sm font-medium text-ink">
-          Username or email <span className="text-red-600">*</span>
+        <label htmlFor="identifier" className={labelClass}>
+          Username or email <span className="text-red-500">*</span>
         </label>
         <input
           id="identifier"
@@ -72,8 +83,8 @@ export function MembersLoginForm({ redirectAfterLogin }: Props) {
         />
       </div>
       <div>
-        <label htmlFor="password" className="text-sm font-medium text-ink">
-          Password <span className="text-red-600">*</span>
+        <label htmlFor="password" className={labelClass}>
+          Password <span className="text-red-500">*</span>
         </label>
         <input
           id="password"
@@ -88,7 +99,11 @@ export function MembersLoginForm({ redirectAfterLogin }: Props) {
       {message ? (
         <p
           role="alert"
-          className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-100"
+          className={
+            variant === "dark"
+              ? "rounded-md border border-red-800/80 bg-red-950/50 px-3 py-2 text-sm text-red-100"
+              : "rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-100"
+          }
         >
           {message}
         </p>
@@ -97,7 +112,7 @@ export function MembersLoginForm({ redirectAfterLogin }: Props) {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-md bg-brand px-6 text-sm font-semibold text-white shadow-corp-md transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg bg-brand px-6 text-sm font-semibold text-white shadow-corp-md transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {status === "loading" ? "Signing in…" : "Sign in"}
       </button>
