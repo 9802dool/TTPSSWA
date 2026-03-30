@@ -5,7 +5,7 @@
 /* Modern corporate theme — light-first, optional system dark */
 :root {
   /* Fixed site chrome: promo strip + main nav (see SiteHeader) */
-  --promo-banner-height: 2.5rem;
+  --promo-banner-height: 2.75rem;
   --site-header-height: 4.25rem;
   --site-header-stack: calc(
     var(--promo-banner-height) + var(--site-header-height)
@@ -45,5 +45,26 @@ body {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+
+/* Looping promo bar (see PromoBanner) */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes promo-marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+  .promo-marquee-animate {
+    animation: promo-marquee 50s linear infinite;
+    will-change: transform;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .promo-marquee-animate {
+    animation: none;
   }
 }
