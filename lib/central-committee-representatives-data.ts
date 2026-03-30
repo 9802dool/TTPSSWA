@@ -271,6 +271,33 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  southern: {
+    intro:
+      "Central Committee Representatives for Southern are listed below.",
+    representatives: [
+      {
+        name: "Sgt Kashmear Rosan",
+        summary: "Reg. No. 14791",
+        photoSrc: "/ex-pics/cc-rep/southern-14791.jpg",
+        workPhone: "(868) 360-1316 ext. 6530735",
+        email: "krosan54321@gmail.com",
+      },
+      {
+        name: "W/Cpl Jisselle Ballantyne",
+        summary: "Reg. No. 18084",
+        photoSrc: "/ex-pics/cc-rep/southern-18084.jpg",
+        workPhone: "(868) 652-3206 ext. 43000",
+        email: "jisselle-torres@hotmail.com",
+      },
+      {
+        name: "WPC Trisha Cupid",
+        summary: "Reg. No. 7003",
+        photoSrc: "/ex-pics/cc-rep/southern-7003.jpg",
+        workPhone: "(868) 721-1816 ext. 6552231",
+        email: "trishacupid42@gmail.com",
+      },
+    ],
+  },
   "mounted-and-k9": {
     intro:
       "Central Committee Representatives for Mounted & Canine are listed below.",

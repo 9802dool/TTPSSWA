@@ -47,6 +47,11 @@ South Western:
   sw-19252.jpg — PC Aelon Andrews
   sw-17225.jpg — Ag Sgt Avelon Monsegue
 
+Southern:
+  southern-14791.jpg — Sgt Kashmear Rosan
+  southern-18084.jpg — W/Cpl Jisselle Ballantyne
+  southern-7003.jpg  — WPC Trisha Cupid
+
 Mounted & Canine:
   mounted-k9-18542.jpg — Cpl Tamika Tannis
 
