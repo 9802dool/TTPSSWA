@@ -18,7 +18,7 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "acib", name: "ACIB" },
   { slug: "notf", name: "NOTF" },
   { slug: "mops", name: "MOPS" },
-  { slug: "mounted-and-k9", name: "Mounted and K9" },
+  { slug: "mounted-and-k9", name: "Mounted & Canine" },
   { slug: "e999", name: "E999" },
 ] as const;
 
