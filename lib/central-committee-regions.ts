@@ -27,6 +27,17 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "cyber-social-media", name: "Cyber & Social Media" },
   { slug: "corporate-communications", name: "Corporate Communications" },
   { slug: "finance", name: "Finance" },
+  { slug: "geb", name: "GEB" },
+  { slug: "fraud-squad", name: "Fraud Squad" },
+  { slug: "cid-cro", name: "CID / CRO" },
+  { slug: "special-victims", name: "Special Victims" },
+  { slug: "psb", name: "PSB" },
+  { slug: "occ", name: "OCC" },
+  { slug: "homicide", name: "Homicide" },
+  { slug: "e999-erp", name: "E999 / ERP" },
+  { slug: "capa", name: "CAPA" },
+  { slug: "acib", name: "ACIB" },
+  { slug: "fib", name: "FIB" },
 ] as const;
 
 export type CentralCommitteeRegionSlug =

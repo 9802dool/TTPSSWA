@@ -108,4 +108,42 @@ Corporate Communications:
 Finance:
   fin-19725.jpg — W/Ag Cpl Simone Skeete
 
+GEB:
+  geb-17048.jpg — Cpl Clinton Glasgow
+  geb-19415.jpg — WPC Calisha E Harry
+
+Fraud Squad:
+  fraud-14690.jpg — Sgt (Ag) Terrence Hamilton
+
+CID / CRO:
+  cid-14523.jpg — PC Che Duprey
+  cid-1709.jpg  — Cpl Ryan Ramoutar
+
+Special Victims:
+  sv-17913.jpg — Cpl Fay-Anne Worrell Lopez
+  sv-19197.jpg — Cpl Abigail Simmons
+
+PSB:
+  psb-18828.jpg — W/Ag Cpl Candice Sampson
+
+OCC:
+  occ-17129.jpg — WPC Avalon Phillip
+
+Homicide:
+  hom-13587.jpg — Ag Sgt Anika Jules
+  hom-19978.jpg — PC Johnan Salvary (Region One, Tobago Sub Office)
+  hom-20263.jpg — WPC Renee Blackman-Singh
+
+E999 / ERP:
+  e999-18506.jpg — W/Ag Cpl Michelle Greenidge
+
+CAPA:
+  capa-17929.jpg — Cpl Vanessa Phillips
+
+ACIB:
+  acib-19860.jpg — W/Cpl (Ag) Rachel George-Thomas
+
+FIB:
+  fib-16311.jpg — Sgt (Ag) Junior Nisbett
+
 Until files exist, the site shows initials in each frame.

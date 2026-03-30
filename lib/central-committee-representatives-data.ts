@@ -569,4 +569,177 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  geb: {
+    intro: "Central Committee Representatives for GEB are listed below.",
+    representatives: [
+      {
+        name: "Cpl Clinton Glasgow",
+        summary: "Reg. No. 17048",
+        photoSrc: "/ex-pics/cc-rep/geb-17048.jpg",
+        workPhone: "(868) 675-5759",
+        email: "clintonglasgow@outlook.com",
+      },
+      {
+        name: "WPC Calisha E Harry",
+        summary: "Reg. No. 19415",
+        photoSrc: "/ex-pics/cc-rep/geb-19415.jpg",
+        workPhone: "(868) 674-6316 ext. 75443",
+        email: "calishaharry98@gmail.com",
+      },
+    ],
+  },
+  "fraud-squad": {
+    intro:
+      "Central Committee Representatives for Fraud Squad are listed below.",
+    representatives: [
+      {
+        name: "Sgt (Ag) Terrence Hamilton",
+        summary: "Reg. No. 14690",
+        photoSrc: "/ex-pics/cc-rep/fraud-14690.jpg",
+        workPhone: "(868) 739-5875 ext. 15020",
+        email: "terrence2109@gmail.com",
+      },
+    ],
+  },
+  "cid-cro": {
+    intro:
+      "Central Committee Representatives for CID / CRO are listed below.",
+    representatives: [
+      {
+        name: "PC Che Duprey",
+        summary: "Reg. No. 14523",
+        photoSrc: "/ex-pics/cc-rep/cid-14523.jpg",
+        workPhone: "(868) 612-2470 ext. 12888-13870",
+        email: "cheduprey@gmail.com",
+      },
+      {
+        name: "Cpl Ryan Ramoutar",
+        summary: "Reg. No. 1709",
+        photoSrc: "/ex-pics/cc-rep/cid-1709.jpg",
+        workPhone: "(868) 768-8203 ext. 13865",
+        email: "ramoutar17090@gmail.com",
+      },
+    ],
+  },
+  "special-victims": {
+    intro:
+      "Central Committee Representatives for Special Victims are listed below.",
+    representatives: [
+      {
+        name: "Cpl Fay-Anne Worrell Lopez",
+        summary: "Reg. No. 17913",
+        photoSrc: "/ex-pics/cc-rep/sv-17913.jpg",
+        workPhone: "(868) 797-7692 ext. 16073",
+        email: "fayanneworrelllopez@gmail.com",
+      },
+      {
+        name: "Cpl Abigail Simmons",
+        summary: "Reg. No. 19197",
+        photoSrc: "/ex-pics/cc-rep/sv-19197.jpg",
+        workPhone: "(868) 612-2470 ext. 66013",
+        email: "abigail.simmons@ttps.gov.tt",
+      },
+    ],
+  },
+  psb: {
+    intro: "Central Committee Representatives for PSB are listed below.",
+    representatives: [
+      {
+        name: "W/Ag Cpl Candice Sampson",
+        summary: "Reg. No. 18828",
+        photoSrc: "/ex-pics/cc-rep/psb-18828.jpg",
+        workPhone: "(868) 612-2470 ext. 11111",
+        email: "candicejsampson@outlook.com",
+      },
+    ],
+  },
+  occ: {
+    intro: "Central Committee Representatives for OCC are listed below.",
+    representatives: [
+      {
+        name: "WPC Avalon Phillip",
+        summary: "Reg. No. 17129",
+        photoSrc: "/ex-pics/cc-rep/occ-17129.jpg",
+        workPhone: "(868) 708-0234 ext. 13522",
+        email: "hott_ava@yahoo.com",
+      },
+    ],
+  },
+  homicide: {
+    intro:
+      "Central Committee Representatives for Homicide are listed below.",
+    representatives: [
+      {
+        name: "Ag Sgt Anika Jules",
+        summary: "Reg. No. 13587",
+        photoSrc: "/ex-pics/cc-rep/hom-13587.jpg",
+        workPhone: "(868) 267-4059",
+        email: "anikajules1@gmail.com",
+      },
+      {
+        name: "PC Johnan Salvary",
+        role: "Region One, Tobago Sub Office",
+        summary: "Reg. No. 19978",
+        photoSrc: "/ex-pics/cc-rep/hom-19978.jpg",
+        workPhone: "(868) 612-2470 ext. 14085/14086",
+        email: "johnan.salvary@ttps.gov.tt",
+      },
+      {
+        name: "WPC Renee Blackman-Singh",
+        summary: "Reg. No. 20263",
+        photoSrc: "/ex-pics/cc-rep/hom-20263.jpg",
+        workPhone: "(868) 612-0102 ext. 62060",
+        email: "renee.blackman@ttps.gov.tt",
+      },
+    ],
+  },
+  "e999-erp": {
+    intro:
+      "Central Committee Representatives for E999 / ERP are listed below.",
+    representatives: [
+      {
+        name: "W/Ag Cpl Michelle Greenidge",
+        summary: "Reg. No. 18506",
+        photoSrc: "/ex-pics/cc-rep/e999-18506.jpg",
+        workPhone: "(868) 622-5412",
+        email: "michellegreenidge18506@gmail.com",
+      },
+    ],
+  },
+  capa: {
+    intro: "Central Committee Representatives for CAPA are listed below.",
+    representatives: [
+      {
+        name: "Cpl Vanessa Phillips",
+        summary: "Reg. No. 17929",
+        photoSrc: "/ex-pics/cc-rep/capa-17929.jpg",
+        workPhone: "(868) 612-2470 ext. 11086/11091/11068",
+        email: "v_phillips@live.com",
+      },
+    ],
+  },
+  acib: {
+    intro: "Central Committee Representatives for ACIB are listed below.",
+    representatives: [
+      {
+        name: "W/Cpl (Ag) Rachel George-Thomas",
+        summary: "Reg. No. 19860",
+        photoSrc: "/ex-pics/cc-rep/acib-19860.jpg",
+        workPhone: "(868) 612-2470 ext. 17006/17007",
+        email: "rachel.george-thomas@ttps.gov.tt",
+      },
+    ],
+  },
+  fib: {
+    intro: "Central Committee Representatives for FIB are listed below.",
+    representatives: [
+      {
+        name: "Sgt (Ag) Junior Nisbett",
+        summary: "Reg. No. 16311",
+        photoSrc: "/ex-pics/cc-rep/fib-16311.jpg",
+        workPhone: "(868) 612-0102 ext. 13441",
+        email: "juniornisbett@hotmail.com",
+      },
+    ],
+  },
 };
