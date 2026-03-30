@@ -271,4 +271,17 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
+  "mounted-and-k9": {
+    intro:
+      "Central Committee Representatives for Mounted & Canine are listed below.",
+    representatives: [
+      {
+        name: "Cpl Tamika Tannis",
+        summary: "Reg. No. 18542",
+        photoSrc: "/ex-pics/cc-rep/mounted-k9-18542.jpg",
+        workPhone: "(868) 612-2470 ext. 21205",
+        email: "kakatannis@yahoo.com",
+      },
+    ],
+  },
 };

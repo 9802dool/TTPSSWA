@@ -47,4 +47,7 @@ South Western:
   sw-19252.jpg — PC Aelon Andrews
   sw-17225.jpg — Ag Sgt Avelon Monsegue
 
+Mounted & Canine:
+  mounted-k9-18542.jpg — Cpl Tamika Tannis
+
 Until files exist, the site shows initials in each frame.
