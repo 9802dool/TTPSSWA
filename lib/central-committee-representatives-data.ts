@@ -581,18 +581,26 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       "Central Committee Representatives for South Western are listed below.",
     representatives: [
       {
-        name: "PC Aelon Andrews",
-        summary: "Reg. No. 19252",
-        photoSrc: "/ex-pics/cc-rep/sw-19252.jpg",
-        workPhone: "(868) 678-9748 / (868) 647-8888",
-        email: "Aelon.Andrews@ttps.gov.tt",
-      },
-      {
         name: "Ag Sgt Avelon Monsegue",
         summary: "Reg. No. 17225",
         photoSrc: "/ex-pics/cc-rep/sw-17225.jpg",
         workPhone: "(868) 649-2333",
         email: "avelondiamond@gmail.com",
+      },
+      {
+        name: "W/Corporal Liann Philandez",
+        summary: "Reg. No. 19799",
+        photoSrc: "/ex-pics/cc-rep/sw-19799.jpg",
+        workPhone: "ext. 51055",
+        cellPhone: "(868) 314-6455",
+        email: "liann.philandez@ttps.gov.tt",
+      },
+      {
+        name: "PC Aelon Andrews",
+        summary: "Reg. No. 19252",
+        photoSrc: "/ex-pics/cc-rep/sw-19252.jpg",
+        workPhone: "(868) 678-9748 / (868) 647-8888",
+        email: "Aelon.Andrews@ttps.gov.tt",
       },
     ],
   },
