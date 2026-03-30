@@ -114,12 +114,6 @@ GEB:
 
 
 
-Hardware and Beyond (partnership pillar — add photos when representatives are assigned):
-
-  (none yet)
-
-
-
 Homicide:
 
   hom-13587.jpg — Ag Sgt Anika Jules

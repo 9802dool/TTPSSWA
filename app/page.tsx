@@ -181,12 +181,16 @@ export default function Home() {
                 Working together
               </h2>
               <p className="mt-4 text-muted">
-                Add details about corporate partners, sponsors, and collaborative
-                programs—edit this copy in{" "}
-                <code className="rounded bg-brand-subtle px-1.5 py-0.5 text-sm text-slate-700 dark:bg-navy-muted dark:text-slate-200">
-                  app/page.tsx
-                </code>
-                .
+                Learn about corporate partners, sponsors, and collaborative programs
+                that support our members.
+              </p>
+              <p className="mt-6">
+                <Link
+                  href="/partnership"
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-md bg-brand px-6 text-sm font-semibold text-white shadow-corp transition hover:bg-brand-hover"
+                >
+                  View partnership programs →
+                </Link>
               </p>
             </div>
           </div>

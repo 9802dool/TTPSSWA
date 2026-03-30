@@ -291,11 +291,6 @@ export const COMMITTEE_REPRESENTATIVES: Partial<
       },
     ],
   },
-  "hardware-and-beyond": {
-    intro:
-      "Hardware and Beyond is a TTPSSWA partnership pillar. Central Committee Representative details will be listed below when available.",
-    representatives: [],
-  },
   homicide: {
     intro:
       "Central Committee Representatives for Homicide are listed below.",

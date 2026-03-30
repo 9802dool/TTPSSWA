@@ -1,4 +1,4 @@
-/** Divisions / sections for Central Committee Representative navigation (includes partnership pillars; rosters may be added in data). */
+/** Divisions / sections for Central Committee Representative navigation (only pillars with roster data). */
 export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "acib", name: "ACIB" },
   { slug: "capa", name: "CAPA" },
@@ -19,7 +19,6 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "finance", name: "Finance" },
   { slug: "fraud-squad", name: "Fraud Squad" },
   { slug: "geb", name: "GEB" },
-  { slug: "hardware-and-beyond", name: "Hardware and Beyond" },
   { slug: "homicide", name: "Homicide" },
   { slug: "human-resource", name: "Human Resource" },
   { slug: "iatf", name: "IATF" },
