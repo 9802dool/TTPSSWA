@@ -62,15 +62,24 @@ export default function Home() {
       <main id="top">
         {/* Corporate hero */}
         <section className="relative overflow-hidden border-b border-line bg-navy pt-[var(--site-header-stack)] text-white">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="pointer-events-none absolute inset-0 h-full w-full object-cover"
+            aria-hidden="true"
+          >
+            <source src="/v1.mp4" type="video/mp4" />
+          </video>
           <div
-            className="pointer-events-none absolute inset-0 opacity-40"
+            className="pointer-events-none absolute inset-0"
             aria-hidden
             style={{
               backgroundImage:
-                "linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 45%, rgb(30 64 175 / 0.35) 100%)",
+                "linear-gradient(135deg, rgb(12 25 41 / 0.82) 0%, rgb(30 58 95 / 0.75) 45%, rgb(30 64 175 / 0.6) 100%)",
             }}
           />
-          <div className="pointer-events-none absolute -right-32 top-0 h-96 w-96 rounded-full bg-brand/20 blur-3xl" aria-hidden />
           <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-20 lg:px-8">
             <p className="mb-4 inline-flex items-center rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
               Official site
