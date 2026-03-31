@@ -70,7 +70,7 @@ export default function Home() {
             className="pointer-events-none absolute inset-0 h-full w-full object-cover"
             aria-hidden="true"
           >
-            <source src="/v2.mp4" type="video/mp4" />
+            <source src="/corporate-dark-blue-bg.mp4" type="video/mp4" />
           </video>
           <div
             className="pointer-events-none absolute inset-0"
