@@ -60,6 +60,31 @@ export default function HotelReservationsPage() {
           </div>
         </section>
 
+        {/* ── Location map ── */}
+        <section className="bg-surface py-12 dark:bg-surface lg:py-16">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+              Our Location
+            </h2>
+            <p className="mt-2 text-[15px] text-muted">
+              Find us on the map below.
+            </p>
+            <div className="mt-6 overflow-hidden rounded-xl border border-line shadow-corp">
+              <iframe
+                title="TTPSSWA Hotel Location"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1962.5!2d-60.82871992401175!3d11.158669870877992!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDA5JzMxLjIiTiA2MMKwNDknNDMuNCJX!5e0!3m2!1sen!2stt!4v1700000000000"
+                width="100%"
+                height="450"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full"
+              />
+            </div>
+          </div>
+        </section>
+
         {/* ── Booking form section ── */}
         <section className="bg-canvas py-12 dark:bg-canvas lg:py-16">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
