@@ -77,7 +77,7 @@ export default function Home() {
             aria-hidden
             style={{
               backgroundImage:
-                "linear-gradient(135deg, rgb(12 25 41 / 0.82) 0%, rgb(30 58 95 / 0.75) 45%, rgb(30 64 175 / 0.6) 100%)",
+                "linear-gradient(135deg, rgb(4 10 22 / 0.88) 0%, rgb(6 18 36 / 0.82) 50%, rgb(5 14 28 / 0.78) 100%)",
             }}
           />
           <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-20 lg:px-8">
