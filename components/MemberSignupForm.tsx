@@ -7,10 +7,12 @@ import {
   MEMBERSHIP_PHONE_COUNTRY_CODES,
 } from "@/lib/phone-country-codes";
 
+/** Printed/PDF-style form: white fields, dark borders, block-style labels */
 const inputClass =
-  "mt-1 w-full rounded border border-line bg-white px-3 py-2 text-sm text-ink shadow-sm outline-none ring-brand placeholder:text-muted focus:ring-2 dark:border-line dark:bg-canvas";
+  "mt-1 w-full rounded-sm border border-slate-400 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-none outline-none placeholder:text-slate-400 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 dark:border-slate-400 dark:bg-white dark:text-slate-900";
 
-const labelClass = "text-xs font-semibold uppercase tracking-wide text-muted";
+const labelClass =
+  "block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-800";
 
 function Section({
   number,
@@ -22,14 +24,14 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="border border-line bg-surface/80 shadow-sm dark:bg-surface">
-      <div className="border-b border-line bg-brand-subtle/40 px-4 py-3 dark:bg-brand-subtle/20">
-        <h2 className="text-sm font-bold tracking-tight text-ink">
-          <span className="mr-2 font-mono text-brand">{number}</span>
+    <section className="border-2 border-slate-900 bg-white shadow-none dark:border-slate-900 dark:bg-white">
+      <div className="border-b-2 border-slate-900 bg-slate-100 px-3 py-2.5 dark:bg-slate-100">
+        <h2 className="text-left text-[11px] font-bold uppercase tracking-[0.2em] text-slate-900">
+          <span className="mr-2 inline-block min-w-[1.25rem] font-mono">{number}.</span>
           {title}
         </h2>
       </div>
-      <div className="space-y-4 p-4 sm:p-5">{children}</div>
+      <div className="space-y-4 bg-white p-4 sm:p-5">{children}</div>
     </section>
   );
 }
@@ -93,30 +95,45 @@ export function MemberSignupForm() {
   return (
     <form
       onSubmit={(e) => void onSubmit(e)}
-      className="mt-2 space-y-6 text-left"
+      className="membership-form-pdf mt-2 space-y-5 text-left"
       encType="multipart/form-data"
     >
-      <div className="rounded border border-line bg-canvas px-4 py-3 text-xs leading-relaxed text-muted dark:bg-surface/50">
+      {/* PDF-style masthead */}
+      <div className="border-b-2 border-slate-900 pb-5 text-center">
+        <p className="text-[10px] font-bold uppercase leading-relaxed tracking-[0.28em] text-slate-700">
+          Trinidad and Tobago Police Service
+        </p>
+        <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-900">
+          Social and Welfare Association
+        </p>
+        <p className="mt-4 text-sm font-bold uppercase tracking-[0.18em] text-slate-900 underline decoration-2 underline-offset-4">
+          Membership form
+        </p>
+        <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
+          Please fill out in block letters
+        </p>
+      </div>
+
+      <div className="border border-slate-400 bg-white p-4 text-xs leading-relaxed text-slate-700 dark:bg-white">
         <p>
           This online form matches the official{" "}
           <a
             href="/forms/MEMBERSHIP APPLICATION.pdf"
-            className="font-semibold text-brand hover:underline"
+            className="font-semibold text-slate-900 underline decoration-slate-400 underline-offset-2 hover:text-slate-700"
             target="_blank"
             rel="noopener noreferrer"
           >
             Membership application (PDF)
           </a>
-          . Please complete all sections in block capitals where possible. Fields
-          marked <span className="font-semibold text-red-600">*</span> are required.
-          Your password is stored securely and is not visible to administrators as plain
-          text.
+          . Complete all sections; fields marked{" "}
+          <span className="font-bold text-red-600">*</span> are required. Your password
+          is stored securely and is not visible to administrators as plain text.
         </p>
-        <p className="mt-2">
-          Salary deduction authorization: see also{" "}
+        <p className="mt-2 border-t border-slate-200 pt-2">
+          Salary deduction: see{" "}
           <a
             href="/forms/SALARY DEDUCTION membership dues.pdf"
-            className="font-semibold text-brand hover:underline"
+            className="font-semibold text-slate-900 underline decoration-slate-400 underline-offset-2 hover:text-slate-700"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -145,7 +162,7 @@ export function MemberSignupForm() {
               className={inputClass}
               placeholder="e.g. j.smith"
             />
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-slate-500">
               3–32 characters: letters, numbers, dot, underscore, or hyphen.
             </p>
           </div>
@@ -196,7 +213,7 @@ export function MemberSignupForm() {
               type="text"
               autoComplete="off"
               required
-              className={inputClass}
+              className={`${inputClass} uppercase`}
             />
           </div>
           <div>
@@ -209,7 +226,7 @@ export function MemberSignupForm() {
               type="text"
               autoComplete="organization-title"
               required
-              className={inputClass}
+              className={`${inputClass} uppercase`}
             />
           </div>
           <div className="sm:col-span-2">
@@ -222,7 +239,7 @@ export function MemberSignupForm() {
               type="text"
               autoComplete="name"
               required
-              className={inputClass}
+              className={`${inputClass} uppercase`}
             />
           </div>
           <div className="sm:col-span-2">
@@ -234,7 +251,7 @@ export function MemberSignupForm() {
               name="departmentDivision"
               type="text"
               required
-              className={inputClass}
+              className={`${inputClass} uppercase`}
             />
           </div>
           <div className="sm:col-span-2">
@@ -246,31 +263,31 @@ export function MemberSignupForm() {
               name="sectionStation"
               type="text"
               required
-              className={inputClass}
+              className={`${inputClass} uppercase`}
             />
           </div>
         </div>
-        <fieldset className="rounded border border-line bg-canvas/50 p-3 dark:bg-canvas/30">
+        <fieldset className="border border-slate-400 bg-white p-3 dark:bg-white">
           <legend className={`${labelClass} px-1`}>
             Financial member <span className="text-red-600">*</span>
           </legend>
           <div className="mt-1 flex flex-wrap gap-6">
-            <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink">
+            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
               <input
                 type="radio"
                 name="financialMember"
                 value="yes"
                 required
-                className="h-4 w-4 border-line text-brand focus:ring-brand"
+                className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
               />
               Yes
             </label>
-            <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink">
+            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
               <input
                 type="radio"
                 name="financialMember"
                 value="no"
-                className="h-4 w-4 border-line text-brand focus:ring-brand"
+                className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
               />
               No
             </label>
@@ -299,22 +316,22 @@ export function MemberSignupForm() {
               Sex <span className="text-red-600">*</span>
             </span>
             <div className="mt-2 flex flex-wrap gap-6">
-              <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink">
+              <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
                 <input
                   type="radio"
                   name="sex"
                   value="male"
                   required
-                  className="h-4 w-4 border-line text-brand focus:ring-brand"
+                  className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
                 />
                 Male
               </label>
-              <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-ink">
+              <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
                 <input
                   type="radio"
                   name="sex"
                   value="female"
-                  className="h-4 w-4 border-line text-brand focus:ring-brand"
+                  className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
                 />
                 Female
               </label>
@@ -358,7 +375,7 @@ export function MemberSignupForm() {
             rows={4}
             required
             autoComplete="street-address"
-            className={`${inputClass} resize-y min-h-[5rem]`}
+            className={`${inputClass} resize-y min-h-[5rem] uppercase`}
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -435,7 +452,7 @@ export function MemberSignupForm() {
               className={inputClass}
               placeholder="Local number only (no country code)"
             />
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-slate-500">
               Enter digits for each line; country code is selected once above.
             </p>
           </div>
@@ -443,7 +460,7 @@ export function MemberSignupForm() {
       </Section>
 
       <Section number="V" title="Declaration">
-        <div className="space-y-3 rounded border border-line bg-canvas/50 p-4 text-sm leading-relaxed text-ink dark:bg-canvas/30">
+        <div className="space-y-3 border-2 border-slate-900 bg-white p-4 font-serif text-sm leading-relaxed text-slate-900 dark:bg-white">
           <p>
             As a member of the Trinidad and Tobago Police Service I hereby apply for
             membership with the Trinidad and Tobago Police Service Social and Welfare
@@ -455,15 +472,15 @@ export function MemberSignupForm() {
             Association.
           </p>
         </div>
-        <label className="flex cursor-pointer gap-3 rounded border border-line bg-surface p-4 text-sm text-ink">
+        <label className="flex cursor-pointer gap-3 border border-slate-400 bg-white p-4 text-sm text-slate-900 dark:bg-white">
           <input
             type="checkbox"
             name="declarationMembership"
             value="yes"
             required
-            className="mt-2 h-4 w-4 shrink-0 border-line text-brand focus:ring-brand"
+            className="mt-1 h-4 w-4 shrink-0 border-slate-600 text-slate-900 focus:ring-slate-900"
           />
-          <span>
+          <span className="font-medium uppercase tracking-wide">
             I confirm that I have read and agree to the statements above regarding my
             membership application and the $140.00 monthly salary deduction.{" "}
             <span className="text-red-600">*</span>
@@ -472,7 +489,7 @@ export function MemberSignupForm() {
       </Section>
 
       <Section number="VI" title="Nomination of beneficiary">
-        <p className="text-xs text-muted">
+        <p className="border-b border-dotted border-slate-400 pb-2 text-[10px] font-bold uppercase tracking-wide text-slate-600">
           For the purpose of the Death Benefit as provided by the rules of the Trinidad
           &amp; Tobago Police Service Social Welfare Association.
         </p>
@@ -485,7 +502,7 @@ export function MemberSignupForm() {
               id="beneficiaryRegimentalNumber"
               name="beneficiaryRegimentalNumber"
               type="text"
-              className={inputClass}
+              className={`${inputClass} uppercase`}
             />
           </div>
           <div>
@@ -496,7 +513,7 @@ export function MemberSignupForm() {
               id="beneficiaryRank"
               name="beneficiaryRank"
               type="text"
-              className={inputClass}
+              className={`${inputClass} uppercase`}
             />
           </div>
           <div className="sm:col-span-2">
@@ -508,7 +525,7 @@ export function MemberSignupForm() {
               name="beneficiaryFullName"
               type="text"
               required
-              className={inputClass}
+              className={`${inputClass} uppercase`}
             />
           </div>
           <div className="sm:col-span-2">
@@ -520,8 +537,7 @@ export function MemberSignupForm() {
               name="beneficiaryRelationship"
               type="text"
               required
-              className={inputClass}
-              placeholder="e.g. Spouse"
+              className={`${inputClass} uppercase`}
             />
           </div>
           <div className="sm:col-span-2">
@@ -533,7 +549,7 @@ export function MemberSignupForm() {
               name="beneficiaryIdNumber"
               type="text"
               required
-              className={inputClass}
+              className={`${inputClass} uppercase`}
             />
           </div>
         </div>
@@ -547,7 +563,7 @@ export function MemberSignupForm() {
           id="witnessName"
           name="witnessName"
           type="text"
-          className={inputClass}
+          className={`${inputClass} uppercase`}
           placeholder="Name of witness, if applicable"
         />
       </Section>
@@ -571,9 +587,9 @@ export function MemberSignupForm() {
           <label htmlFor="facialPhoto" className={labelClass}>
             Upload photo <span className="text-red-600">*</span>
           </label>
-          <p className="mt-1 text-xs text-muted">
+          <p className="mt-1 text-[10px] uppercase tracking-wide text-slate-500">
             Clear, recent face photo. JPG, PNG, or WebP. Maximum{" "}
-            <span className="font-medium text-ink">900 KB</span>.
+            <span className="font-bold text-slate-800">900 KB</span>.
           </p>
           <input
             id="facialPhoto"
@@ -581,7 +597,7 @@ export function MemberSignupForm() {
             type="file"
             accept="image/jpeg,image/png,image/webp"
             required
-            className="mt-2 block w-full text-sm text-muted file:mr-4 file:rounded border file:border-0 file:bg-brand-subtle file:px-4 file:py-2 file:text-sm file:font-semibold file:text-brand hover:file:bg-brand hover:file:text-white"
+            className="mt-2 block w-full border border-slate-400 bg-white px-2 py-2 text-sm text-slate-700 file:mr-3 file:rounded-sm file:border file:border-slate-400 file:bg-slate-100 file:px-3 file:py-1.5 file:text-xs file:font-bold file:uppercase file:tracking-wide file:text-slate-900 hover:file:bg-slate-200"
           />
         </div>
       </Section>
@@ -591,19 +607,22 @@ export function MemberSignupForm() {
           role="status"
           className={
             status === "success"
-              ? "rounded border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-900 dark:border-green-900 dark:bg-green-950/50 dark:text-green-100"
-              : "rounded border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-100"
+              ? "rounded-sm border border-green-700 bg-green-50 px-4 py-3 text-sm text-green-950"
+              : "rounded-sm border border-red-700 bg-red-50 px-4 py-3 text-sm text-red-950"
           }
         >
           {message}
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-3 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs text-muted">
+      <div className="flex flex-col gap-4 border-t-2 border-slate-900 pt-6 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[10px] font-medium uppercase leading-relaxed tracking-wide text-slate-600">
           By submitting, you confirm that the information provided is accurate to the best
           of your knowledge. Need help? See{" "}
-          <Link href="/membership-services" className="text-brand hover:underline">
+          <Link
+            href="/membership-services"
+            className="font-bold text-slate-900 underline decoration-slate-400"
+          >
             Membership services
           </Link>
           .
@@ -611,7 +630,7 @@ export function MemberSignupForm() {
         <button
           type="submit"
           disabled={status === "loading"}
-          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-md bg-brand px-8 text-sm font-semibold text-white shadow-corp-md transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-sm border-2 border-slate-900 bg-slate-900 px-8 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {status === "loading" ? "Submitting…" : "Submit application"}
         </button>

@@ -14,8 +14,8 @@ export default function LoginPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#f4f6f9] pt-[var(--site-header-stack)] dark:bg-canvas">
-        <div className="border-b border-line bg-gradient-to-b from-surface to-canvas py-10 dark:from-canvas dark:to-surface">
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#e8ecf1] pt-[var(--site-header-stack)] dark:bg-slate-900">
+        <div className="border-b border-slate-200 bg-white py-10 shadow-sm dark:border-slate-700 dark:bg-slate-950">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-brand">
               Trinidad and Tobago Police Service Social Welfare Association
@@ -43,11 +43,9 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-3xl px-4 pb-16 pt-8 sm:px-6 lg:px-8">
-          <div className="rounded-sm border border-line bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.08),0_8px_24px_rgba(15,23,42,0.06)] ring-1 ring-black/5 dark:border-line dark:bg-surface dark:shadow-corp dark:ring-white/5">
-            <div className="px-4 pb-8 pt-6 sm:px-6">
-              <MemberSignupForm />
-            </div>
+        <div className="mx-auto max-w-4xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+          <div className="border-2 border-slate-300 bg-white px-5 py-8 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_12px_40px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10 dark:border-slate-600 dark:bg-white">
+            <MemberSignupForm />
           </div>
         </div>
       </main>
