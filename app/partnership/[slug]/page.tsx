@@ -45,7 +45,13 @@ export default async function PartnershipProgramPage({ params }: Props) {
     <>
       <SiteHeader />
       <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#e8ecf1] pt-[var(--site-header-stack)] dark:bg-slate-900">
-        <div className="border-b border-slate-200 bg-white py-10 shadow-sm dark:border-slate-700 dark:bg-slate-950">
+        <div
+          className={
+            isDreamBuilder
+              ? "border-b border-slate-300/80 bg-transparent py-10 dark:border-slate-600/80"
+              : "border-b border-slate-200 bg-white py-10 shadow-sm dark:border-slate-700 dark:bg-slate-950"
+          }
+        >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-brand">
               Trinidad and Tobago Police Service Social Welfare Association
@@ -73,7 +79,11 @@ export default async function PartnershipProgramPage({ params }: Props) {
         <div className="mx-auto max-w-4xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
           <section
             aria-labelledby="partnership-program-body"
-            className="border-2 border-slate-300 bg-white px-5 py-8 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_12px_40px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10 dark:border-slate-600 dark:bg-white"
+            className={
+              isDreamBuilder
+                ? "border-0 bg-transparent px-0 py-2 shadow-none sm:px-0 sm:py-4"
+                : "border-2 border-slate-300 bg-white px-5 py-8 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_12px_40px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10 dark:border-slate-600 dark:bg-white"
+            }
           >
             <h2 id="partnership-program-body" className="sr-only">
               Program details
