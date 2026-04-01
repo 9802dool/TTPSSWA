@@ -55,7 +55,7 @@ export default function PartnershipPage() {
               Partnership programs
             </h2>
             <p className="mt-2 text-sm text-muted">
-              Use a program button below to read more.
+              Open a program below for its full page.
             </p>
             <PartnershipPillars />
           </div>
