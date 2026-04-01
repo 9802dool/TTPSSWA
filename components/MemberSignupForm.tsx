@@ -132,7 +132,7 @@ export function MemberSignupForm() {
         <p className="mt-2 border-t border-slate-200 pt-2">
           Salary deduction: see{" "}
           <a
-            href="/forms/SALARY DEDUCTION membership dues.pdf"
+            href="/forms/SALARY DEDUCTION.pdf"
             className="font-semibold text-slate-900 underline decoration-slate-400 underline-offset-2 hover:text-slate-700"
             target="_blank"
             rel="noopener noreferrer"
