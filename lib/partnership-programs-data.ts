@@ -69,7 +69,9 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
       "From premium colour consultations and design solutions to high-quality materials and finishes, this partnership ensures you get professional expertise at a reduced cost. It's a great opportunity to elevate your projects while saving more as part of your membership benefits.",
     contact: {
       address:
-        "#33 John Shaw Ave Eastern Main Road Arima, Arima, Trinidad and Tobago",
+        "https://www.bing.com/maps?q=33+John+Shaw+Ave+Eastern+Main+Road+Arima+Arima+Trinidad+and+Tobago",
+      addressMapUrl:
+        "https://www.bing.com/maps?q=33+John+Shaw+Ave+Eastern+Main+Road+Arima+Arima+Trinidad+and+Tobago",
       phone: "+1 868-778-3039",
       email: "dreambuilderstudio@gmail.com",
       facebookUrl: "https://www.facebook.com/dreambuilderstudio/",
