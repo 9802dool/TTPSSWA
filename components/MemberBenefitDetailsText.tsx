@@ -1,4 +1,4 @@
-import { DentalOpticalGrantForm } from "@/components/DentalOpticalGrantForm";
+import { DentalOpticalGrantApplySection } from "@/components/DentalOpticalGrantApplySection";
 
 type Props = {
   number: number;
@@ -21,23 +21,7 @@ export function MemberBenefitDetailsText({
     (isDark ? "bg-white/10 text-slate-300" : "bg-line/80");
 
   if (number === 2) {
-    return (
-      <div className="space-y-4">
-        <p className={`text-sm leading-relaxed ${p}`}>
-          Submit the digital application below. You may also download the official PDF from{" "}
-          <a
-            href="/forms/DENTAL AND OPTICAL GRANT APPLICATION.pdf"
-            className="font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Dental and optical grant application (PDF)
-          </a>
-          .
-        </p>
-        <DentalOpticalGrantForm />
-      </div>
-    );
+    return <DentalOpticalGrantApplySection />;
   }
 
   if (number === 1) {
