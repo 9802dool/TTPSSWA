@@ -30,7 +30,7 @@ export default function LoginPage() {
               form below. Printable PDFs:{" "}
               <a
                 href="/forms/MEMBERSHIP APPLICATION.pdf"
-                className="font-semibold text-brand hover:underline"
+                className="text-base font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-lg"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -39,7 +39,7 @@ export default function LoginPage() {
               ,{" "}
               <a
                 href="/forms/SALARY DEDUCTION.pdf"
-                className="font-semibold text-brand hover:underline"
+                className="text-base font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-lg"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -58,7 +58,7 @@ export default function LoginPage() {
           <section aria-labelledby="membership-form-heading">
             <h2
               id="membership-form-heading"
-              className="mb-4 text-center text-sm font-bold uppercase tracking-[0.2em] text-slate-700"
+              className="mb-6 text-center text-xl font-bold uppercase tracking-[0.14em] text-slate-900 sm:text-2xl dark:text-slate-100"
             >
               Membership application
             </h2>
@@ -70,7 +70,7 @@ export default function LoginPage() {
           <section aria-labelledby="salary-deduction-heading">
             <h2
               id="salary-deduction-heading"
-              className="mb-4 text-center text-sm font-bold uppercase tracking-[0.2em] text-slate-700"
+              className="mb-6 text-center text-xl font-bold uppercase tracking-[0.14em] text-slate-900 sm:text-2xl dark:text-slate-100"
             >
               Salary deduction
             </h2>
