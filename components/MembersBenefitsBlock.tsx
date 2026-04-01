@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import ExpandableBenefit from "@/components/ExpandableBenefit";
 import { MemberBenefitDetailsText } from "@/components/MemberBenefitDetailsText";
 import {
@@ -8,6 +11,12 @@ import {
 type Variant = "light" | "dark";
 
 export function MembersBenefitsBlock({ variant = "light" }: { variant?: Variant }) {
+  const [openBenefitKey, setOpenBenefitKey] = useState<number | null>(null);
+
+  function toggleBenefit(key: number) {
+    setOpenBenefitKey((prev) => (prev === key ? null : key));
+  }
+
   if (variant === "dark") {
     return (
       <ul className="mt-0 grid list-none gap-6 p-0 sm:max-w-5xl">
@@ -22,7 +31,14 @@ export function MembersBenefitsBlock({ variant = "light" }: { variant?: Variant 
             aria-label="Member benefits list"
           >
             {MEMBER_BENEFITS.map((b) => (
-              <ExpandableBenefit key={b.number} title={b.title} variant="dark">
+              <ExpandableBenefit
+                key={b.number}
+                benefitKey={b.number}
+                title={b.title}
+                variant="dark"
+                isOpen={openBenefitKey === b.number}
+                onToggle={() => toggleBenefit(b.number)}
+              >
                 <MemberBenefitDetailsText
                   number={b.number}
                   title={b.title}
@@ -49,7 +65,13 @@ export function MembersBenefitsBlock({ variant = "light" }: { variant?: Variant 
           aria-label="Member benefits list"
         >
           {MEMBER_BENEFITS.map((b) => (
-            <ExpandableBenefit key={b.number} title={b.title}>
+            <ExpandableBenefit
+              key={b.number}
+              benefitKey={b.number}
+              title={b.title}
+              isOpen={openBenefitKey === b.number}
+              onToggle={() => toggleBenefit(b.number)}
+            >
               <MemberBenefitDetailsText number={b.number} title={b.title} />
             </ExpandableBenefit>
           ))}

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-
 type Props = {
   title: string;
+  benefitKey: number;
+  isOpen: boolean;
+  onToggle: () => void;
   children?: React.ReactNode;
   /** Dark page background (membership-services). */
   variant?: "light" | "dark";
@@ -11,11 +12,12 @@ type Props = {
 
 export default function ExpandableBenefit({
   title,
+  benefitKey,
+  isOpen,
+  onToggle,
   children,
   variant = "light",
 }: Props) {
-  const [open, setOpen] = useState(false);
-
   const isDark = variant === "dark";
 
   const shell =
@@ -40,20 +42,29 @@ export default function ExpandableBenefit({
       <div className={shell}>
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
-          aria-label={open ? `Hide details for ${title}` : `More information about ${title}`}
+          onClick={onToggle}
+          aria-expanded={isOpen}
+          aria-controls={`benefit-panel-${benefitKey}`}
+          id={`benefit-trigger-${benefitKey}`}
+          aria-label={isOpen ? `Hide details for ${title}` : `More information about ${title}`}
           className={btnBase}
         >
           <span className={titleCls}>{title}</span>
         </button>
-        {open && (
-          <div className={panel} role="region" aria-label={`Details for ${title}`}>
-            {children ?? (
-              <p className="text-sm leading-relaxed text-muted">
-                Add details, contacts, and links here.
-              </p>
-            )}
+        {isOpen && (
+          <div
+            id={`benefit-panel-${benefitKey}`}
+            role="region"
+            aria-labelledby={`benefit-trigger-${benefitKey}`}
+            aria-label={`Details for ${title}`}
+          >
+            <div className={panel}>
+              {children ?? (
+                <p className="text-sm leading-relaxed text-muted">
+                  Add details, contacts, and links here.
+                </p>
+              )}
+            </div>
           </div>
         )}
       </div>

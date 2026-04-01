@@ -1,3 +1,5 @@
+"use client";
+
 import { DentalOpticalGrantApplySection } from "@/components/DentalOpticalGrantApplySection";
 
 type Props = {
