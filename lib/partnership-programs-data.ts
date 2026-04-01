@@ -4,6 +4,8 @@ export type PartnershipContact = {
   address: string;
   phone: string;
   email: string;
+  /** Facebook page URL */
+  facebookUrl?: string;
 };
 
 export type PartnershipProgram = {
@@ -52,6 +54,7 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
         "#33 John Shaw Ave Eastern Main Road Arima, Arima, Trinidad and Tobago",
       phone: "+1 868-778-3039",
       email: "dreambuilderstudio@gmail.com",
+      facebookUrl: "https://www.facebook.com/dreambuilderstudio/",
     },
     placement: "sm:col-start-2 sm:row-span-2 sm:row-start-1",
     hasGallery: true,

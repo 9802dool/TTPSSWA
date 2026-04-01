@@ -171,6 +171,33 @@ export default async function PartnershipProgramPage({ params }: Props) {
                       {program.contact.email}
                     </a>
                   </p>
+                  {program.contact.facebookUrl ? (
+                    <>
+                      <h3
+                        className={
+                          isDreamBuilder
+                            ? "mt-6 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:text-base"
+                            : "mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink"
+                        }
+                      >
+                        Facebook
+                      </h3>
+                      <p className={isDreamBuilder ? "mt-2" : "mt-1"}>
+                        <a
+                          href={program.contact.facebookUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={
+                            isDreamBuilder
+                              ? "text-lg font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-xl break-all"
+                              : "font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover break-all"
+                          }
+                        >
+                          {program.contact.facebookUrl.replace(/^https?:\/\/(www\.)?/i, "")}
+                        </a>
+                      </p>
+                    </>
+                  ) : null}
                 </div>
               ) : null}
             </div>
