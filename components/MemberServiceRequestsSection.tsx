@@ -6,6 +6,7 @@ function serviceLabel(type: string): string {
   if (type === "dental_optical_grant") return "Dental & optical grant";
   if (type === "legal_aid_application") return "Legal aid application";
   if (type === "merit_loan_application") return "Merit loan application";
+  if (type === "retirement_benefit_application") return "Retirement benefit application";
   return type.replace(/_/g, " ");
 }
 
@@ -318,6 +319,76 @@ function MeritLoanApplicationDetails({
   );
 }
 
+function RetirementBenefitApplicationDetails({
+  payload,
+  variant,
+}: {
+  payload: Record<string, unknown>;
+  variant: "admin" | "member";
+}) {
+  const str = (k: string) => {
+    const v = payload[k];
+    return typeof v === "string" ? v : v != null ? String(v) : "";
+  };
+  const dtClass =
+    variant === "admin"
+      ? "text-[var(--muted)] sm:pt-0.5"
+      : "text-muted sm:pt-0.5";
+  const ddClass =
+    variant === "admin" ? "text-[var(--fg)] sm:col-start-2" : "text-ink sm:col-start-2";
+
+  const sex = str("sex");
+  const sexLabel = sex === "male" ? "Male" : sex === "female" ? "Female" : sex;
+  const glp = str("guardianLifeHealthPlan");
+  const glpLabel = glp === "yes" ? "Yes" : glp === "no" ? "No" : glp;
+
+  const rows: [string, string][] = [];
+  const pairs: [string, string][] = [
+    ["Application date", str("dateOfApplication")],
+    ["Reg. no.", str("regimentalNumber")],
+    ["Rank", str("rank")],
+    ["Name", str("fullName")],
+    ["Department / division", str("departmentDivision")],
+    ["Section / station", str("sectionStation")],
+    ["Email", str("email")],
+    ["Age", str("age")],
+    ["Sex", sexLabel],
+    ["Guardian Life Health Plan", glpLabel],
+    ["Effective retirement / resignation", str("effectiveRetirementDate")],
+    ["Dept. order reference", str("departmentalOrderReference")],
+    ["Applicant date", str("applicantDateSigned")],
+  ];
+  for (const [k, v] of pairs) {
+    if (v) rows.push([k, v]);
+  }
+  const addr = str("address");
+  if (addr) rows.push(["Address", addr]);
+  const cc = str("phoneCountryCode");
+  const cell = str("phone");
+  if (cc || cell) {
+    rows.push(["Cell", [cc, cell].filter(Boolean).join(" ")]);
+  }
+  const ph = str("phoneHome");
+  if (ph) rows.push(["Home phone", ph]);
+  const pw = str("phoneWork");
+  if (pw) rows.push(["Work phone", pw]);
+  const wn = str("witnessName");
+  if (wn) rows.push(["Witness", wn]);
+  const wd = str("witnessDate");
+  if (wd) rows.push(["Witness date", wd]);
+
+  return (
+    <dl className="mt-2 grid gap-1.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4">
+      {rows.map(([dt, dd]) => (
+        <div key={dt} className="contents">
+          <dt className={dtClass}>{dt}</dt>
+          <dd className={ddClass}>{dd}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 function LegalAidApplicationDetails({
   payload,
   variant,
@@ -417,6 +488,9 @@ function RequestBody({
   }
   if (row.serviceType === "merit_loan_application") {
     return <MeritLoanApplicationDetails payload={row.payload} variant={variant} />;
+  }
+  if (row.serviceType === "retirement_benefit_application") {
+    return <RetirementBenefitApplicationDetails payload={row.payload} variant={variant} />;
   }
   return (
     <pre

@@ -3,6 +3,7 @@
 import { DentalOpticalGrantApplySection } from "@/components/DentalOpticalGrantApplySection";
 import { LegalAidApplySection } from "@/components/LegalAidApplySection";
 import { MeritLoanApplySection } from "@/components/MeritLoanApplySection";
+import { RetirementBenefitApplySection } from "@/components/RetirementBenefitApplySection";
 
 type Props = {
   number: number;
@@ -30,6 +31,10 @@ export function MemberBenefitDetailsText({
 
   if (number === 2) {
     return <DentalOpticalGrantApplySection />;
+  }
+
+  if (number === 5) {
+    return <RetirementBenefitApplySection />;
   }
 
   if (number === 6) {
