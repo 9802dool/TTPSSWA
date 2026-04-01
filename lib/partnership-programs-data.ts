@@ -49,7 +49,7 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
     contact: {
       status: "Open now",
       address:
-        "#33 John Shaw Ave Eastern Main Road Arima, Arima, Trinidad and Tobago, 1 868",
+        "#33 John Shaw Ave Eastern Main Road Arima, Arima, Trinidad and Tobago",
       phone: "+1 868-778-3039",
       email: "dreambuilderstudio@gmail.com",
     },

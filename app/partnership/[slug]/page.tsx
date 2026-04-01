@@ -39,6 +39,8 @@ export default async function PartnershipProgramPage({ params }: Props) {
     notFound();
   }
 
+  const isDreamBuilder = program.slug === "dream-builder-colour-studio-ltd";
+
   return (
     <>
       <SiteHeader />
@@ -76,33 +78,85 @@ export default async function PartnershipProgramPage({ params }: Props) {
             <h2 id="partnership-program-body" className="sr-only">
               Program details
             </h2>
-            <div className="space-y-4 text-sm leading-relaxed text-muted">
-              <p>{program.body}</p>
-              {program.bodySecondary ? <p>{program.bodySecondary}</p> : null}
+            <div
+              className={
+                isDreamBuilder
+                  ? "space-y-5 text-base font-medium leading-relaxed text-ink sm:space-y-6 sm:text-lg sm:leading-relaxed"
+                  : "space-y-4 text-sm leading-relaxed text-muted"
+              }
+            >
+              <p className={isDreamBuilder ? "text-pretty" : undefined}>
+                {program.body}
+              </p>
+              {program.bodySecondary ? (
+                <p className={isDreamBuilder ? "text-pretty" : undefined}>
+                  {program.bodySecondary}
+                </p>
+              ) : null}
               {program.contact ? (
-                <div className="border-t border-line pt-4">
-                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-ink">
+                <div
+                  className={
+                    isDreamBuilder
+                      ? "border-t-2 border-slate-200 pt-6 dark:border-slate-300"
+                      : "border-t border-line pt-4"
+                  }
+                >
+                  <p
+                    className={
+                      isDreamBuilder
+                        ? "inline-flex rounded-full border border-emerald-600/50 bg-emerald-50 px-4 py-2 text-sm font-bold uppercase tracking-wide text-emerald-900 sm:text-base"
+                        : "text-xs font-bold uppercase tracking-[0.14em] text-ink"
+                    }
+                  >
                     {program.contact.status}
                   </p>
-                  <h3 className="mt-3 text-xs font-bold uppercase tracking-[0.14em] text-ink">
+                  <h3
+                    className={
+                      isDreamBuilder
+                        ? "mt-5 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:mt-6 sm:text-base"
+                        : "mt-3 text-xs font-bold uppercase tracking-[0.14em] text-ink"
+                    }
+                  >
                     Location
                   </h3>
-                  <p className="mt-1">{program.contact.address}</p>
-                  <h3 className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink">
+                  <p
+                    className={
+                      isDreamBuilder
+                        ? "mt-2 text-lg font-semibold leading-snug text-ink sm:text-xl"
+                        : "mt-1"
+                    }
+                  >
+                    {program.contact.address}
+                  </p>
+                  <h3
+                    className={
+                      isDreamBuilder
+                        ? "mt-6 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:text-base"
+                        : "mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink"
+                    }
+                  >
                     Contact info
                   </h3>
-                  <p className="mt-1">
+                  <p className={isDreamBuilder ? "mt-2" : "mt-1"}>
                     <a
                       href={`tel:${program.contact.phone.replace(/\s/g, "")}`}
-                      className="font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover"
+                      className={
+                        isDreamBuilder
+                          ? "text-lg font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-xl"
+                          : "font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover"
+                      }
                     >
                       {program.contact.phone}
                     </a>
                   </p>
-                  <p className="mt-1">
+                  <p className={isDreamBuilder ? "mt-2" : "mt-1"}>
                     <a
                       href={`mailto:${program.contact.email}`}
-                      className="font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover"
+                      className={
+                        isDreamBuilder
+                          ? "text-lg font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-xl break-all"
+                          : "font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover"
+                      }
                     >
                       {program.contact.email}
                     </a>
