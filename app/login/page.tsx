@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MembershipApplicationPhotoFrame } from "@/components/MembershipApplicationPhotoFrame";
 import { MemberSignupForm } from "@/components/MemberSignupForm";
 import { SalaryDeductionForm } from "@/components/SalaryDeductionForm";
 import SiteFooter from "@/components/SiteFooter";
@@ -62,6 +63,7 @@ export default function LoginPage() {
             >
               Membership application
             </h2>
+            <MembershipApplicationPhotoFrame />
             <div className="border-2 border-slate-300 bg-white px-5 py-8 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_12px_40px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10 dark:border-slate-600 dark:bg-white">
               <MemberSignupForm />
             </div>
