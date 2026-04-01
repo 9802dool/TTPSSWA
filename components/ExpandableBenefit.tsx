@@ -40,7 +40,9 @@ export default function ExpandableBenefit({
     isDark
       ? "min-w-0 flex-1 text-left text-sm font-semibold leading-snug text-navy"
       : "min-w-0 flex-1 pt-0.5 text-base font-bold leading-snug text-ink";
-  const chevronBorder = isDark ? "border-navy/15 text-navy" : "border-line text-brand";
+  const moreInfoCls = isDark
+    ? "shrink-0 rounded-md border border-navy/15 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-navy sm:text-sm"
+    : "shrink-0 rounded-md border border-line bg-brand-subtle/50 px-3 py-1.5 text-xs font-semibold text-brand sm:text-sm";
   const panel =
     isDark
       ? "border-t border-slate-200/90 bg-slate-50 px-4 py-5 sm:px-8"
@@ -53,32 +55,15 @@ export default function ExpandableBenefit({
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
+          aria-label={open ? `Hide details for ${title}` : `More information about ${title}`}
           className={btnBase}
         >
           <span className={numBadge}>{number}</span>
           <span className={titleCls}>{title}</span>
-          <span
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition ${chevronBorder} ${
-              open ? "rotate-180" : ""
-            }`}
-            aria-hidden
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.25"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </span>
+          <span className={moreInfoCls}>{open ? "Hide" : "More info"}</span>
         </button>
         {open && (
-          <div className={panel}>
+          <div className={panel} role="region" aria-label={`Details for ${title}`}>
             {children ?? (
               <p
                 className={
