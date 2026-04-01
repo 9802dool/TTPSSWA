@@ -9,6 +9,11 @@ import {
   getPartnershipProgram,
 } from "@/lib/partnership-programs-data";
 
+function whatsappMeHref(displayNumber: string): string {
+  const digits = displayNumber.replace(/\D/g, "");
+  return `https://wa.me/${digits}`;
+}
+
 /** Next 15 passes `params` as a Promise; Next 14 uses a plain object. */
 type Props = { params: Promise<{ slug: string }> | { slug: string } };
 
@@ -159,6 +164,33 @@ export default async function PartnershipProgramPage({ params }: Props) {
                       {program.contact.phone}
                     </a>
                   </p>
+                  {program.contact.whatsapp ? (
+                    <>
+                      <h3
+                        className={
+                          isDreamBuilder
+                            ? "mt-6 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:text-base"
+                            : "mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink"
+                        }
+                      >
+                        WhatsApp
+                      </h3>
+                      <p className={isDreamBuilder ? "mt-2" : "mt-1"}>
+                        <a
+                          href={whatsappMeHref(program.contact.whatsapp)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={
+                            isDreamBuilder
+                              ? "text-lg font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-xl"
+                              : "font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover"
+                          }
+                        >
+                          {program.contact.whatsapp}
+                        </a>
+                      </p>
+                    </>
+                  ) : null}
                   <p className={isDreamBuilder ? "mt-2" : "mt-1"}>
                     <a
                       href={`mailto:${program.contact.email}`}

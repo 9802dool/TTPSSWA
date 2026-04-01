@@ -6,6 +6,8 @@ export type PartnershipContact = {
   email: string;
   /** Facebook page URL */
   facebookUrl?: string;
+  /** WhatsApp number as shown (e.g. +1 868-620-5600); opens wa.me with digits only */
+  whatsapp?: string;
 };
 
 export type PartnershipProgram = {
@@ -55,6 +57,7 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
       phone: "+1 868-778-3039",
       email: "dreambuilderstudio@gmail.com",
       facebookUrl: "https://www.facebook.com/dreambuilderstudio/",
+      whatsapp: "+1 868-620-5600",
     },
     placement: "sm:col-start-2 sm:row-span-2 sm:row-start-1",
     hasGallery: true,
