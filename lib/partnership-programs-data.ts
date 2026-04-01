@@ -1,6 +1,6 @@
 export type PartnershipContact = {
-  /** e.g. "Open now" */
-  status: string;
+  /** e.g. "Open now" — omit to hide the status badge */
+  status?: string;
   address: string;
   /** Optional map link (e.g. Bing Maps) */
   addressMapUrl?: string;
@@ -42,11 +42,10 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
     slug: "antar-auto-repairs-and-parts",
     title: "Antar auto Repairs And Parts",
     body:
-      "Antar Auto Repairs And Parts is a TTPSSWA partnership program offering members access to trusted automotive repair and parts support in Chaguanas.",
+      "Antar Auto Repairs and Parts has partnered with the Association to bring members an exclusive benefit: 10% to 20% off on parts and services.",
     bodySecondary:
-      "Visit the shop for diagnostics, servicing, and quality parts — contact them directly using the details below.",
+      "This collaboration is designed to make vehicle maintenance more affordable while ensuring members receive quality service and genuine parts. It's a practical way to add value to your membership and keep your car running smoothly without stretching your budget.",
     contact: {
-      status: "Open now",
       address:
         "442 Lendore Village, Montrose, Chaguanas, Trinidad and Tobago",
       addressMapUrl:
@@ -69,7 +68,6 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
     bodySecondary:
       "From premium colour consultations and design solutions to high-quality materials and finishes, this partnership ensures you get professional expertise at a reduced cost. It's a great opportunity to elevate your projects while saving more as part of your membership benefits.",
     contact: {
-      status: "Open now",
       address:
         "#33 John Shaw Ave Eastern Main Road Arima, Arima, Trinidad and Tobago",
       phone: "+1 868-778-3039",

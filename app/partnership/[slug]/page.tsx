@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       "Member discounts of 5–20% on Dream Builder Colour Studio Ltd — colour consultations, materials, and finishes in Arima.";
   } else if (program.slug === "antar-auto-repairs-and-parts") {
     desc =
-      "Antar Auto Repairs And Parts — Chaguanas. Call or WhatsApp +1 868-340-0496.";
+      "10–20% off parts and services at Antar Auto Repairs And Parts, Chaguanas — TTPSSWA member benefit.";
   } else {
     desc = `${program.title} — TTPSSWA partnership program.`;
   }
@@ -57,8 +57,9 @@ export default async function PartnershipProgramPage({ params }: Props) {
 
   const isPartnerHighlight = HIGHLIGHT_SLUGS.has(program.slug);
 
-  const linkLg =
-    "text-lg font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-xl";
+  /** Highlight program detail pages — slightly smaller than before for location & contact */
+  const linkHighlight =
+    "text-base font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-lg";
   const linkSm =
     "font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover";
 
@@ -132,19 +133,23 @@ export default async function PartnershipProgramPage({ params }: Props) {
                       : "border-t border-line pt-4"
                   }
                 >
-                  <p
-                    className={
-                      isPartnerHighlight
-                        ? "inline-flex rounded-full border border-emerald-600/50 bg-emerald-50 px-4 py-2 text-sm font-bold uppercase tracking-wide text-emerald-900 sm:text-base"
-                        : "text-xs font-bold uppercase tracking-[0.14em] text-ink"
-                    }
-                  >
-                    {program.contact.status}
-                  </p>
+                  {program.contact.status ? (
+                    <p
+                      className={
+                        isPartnerHighlight
+                          ? "inline-flex rounded-full border border-emerald-600/50 bg-emerald-50 px-4 py-2 text-sm font-bold uppercase tracking-wide text-emerald-900 sm:text-base"
+                          : "text-xs font-bold uppercase tracking-[0.14em] text-ink"
+                      }
+                    >
+                      {program.contact.status}
+                    </p>
+                  ) : null}
                   <h3
                     className={
                       isPartnerHighlight
-                        ? "mt-5 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:mt-6 sm:text-base"
+                        ? program.contact.status
+                          ? "mt-5 text-xs font-bold uppercase tracking-[0.12em] text-ink sm:mt-6 sm:text-sm"
+                          : "mt-0 text-xs font-bold uppercase tracking-[0.12em] text-ink sm:text-sm"
                         : "mt-3 text-xs font-bold uppercase tracking-[0.14em] text-ink"
                     }
                   >
@@ -153,7 +158,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                   <p
                     className={
                       isPartnerHighlight
-                        ? "mt-2 text-lg font-semibold leading-snug text-ink sm:text-xl"
+                        ? "mt-2 text-base font-semibold leading-snug text-ink sm:text-lg"
                         : "mt-1"
                     }
                   >
@@ -177,7 +182,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                   <h3
                     className={
                       isPartnerHighlight
-                        ? "mt-6 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:text-base"
+                        ? "mt-5 text-xs font-bold uppercase tracking-[0.12em] text-ink sm:mt-6 sm:text-sm"
                         : "mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink"
                     }
                   >
@@ -186,7 +191,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                   <p className={isPartnerHighlight ? "mt-2" : "mt-1"}>
                     <a
                       href={`tel:${program.contact.phone.replace(/\s/g, "")}`}
-                      className={isPartnerHighlight ? linkLg : linkSm}
+                      className={isPartnerHighlight ? linkHighlight : linkSm}
                     >
                       {program.contact.phone}
                     </a>
@@ -196,7 +201,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                       <h3
                         className={
                           isPartnerHighlight
-                            ? "mt-6 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:text-base"
+                            ? "mt-5 text-xs font-bold uppercase tracking-[0.12em] text-ink sm:mt-6 sm:text-sm"
                             : "mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink"
                         }
                       >
@@ -207,7 +212,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                           href={whatsappMeHref(program.contact.whatsapp)}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={isPartnerHighlight ? linkLg : linkSm}
+                          className={isPartnerHighlight ? linkHighlight : linkSm}
                         >
                           {program.contact.whatsapp}
                         </a>
@@ -219,7 +224,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                       href={`mailto:${program.contact.email}`}
                       className={
                         isPartnerHighlight
-                          ? `${linkLg} break-all`
+                          ? `${linkHighlight} break-all`
                           : `${linkSm} break-all`
                       }
                     >
@@ -231,7 +236,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                       <h3
                         className={
                           isPartnerHighlight
-                            ? "mt-6 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:text-base"
+                            ? "mt-5 text-xs font-bold uppercase tracking-[0.12em] text-ink sm:mt-6 sm:text-sm"
                             : "mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink"
                         }
                       >
@@ -244,7 +249,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                           rel="noopener noreferrer"
                           className={
                             isPartnerHighlight
-                              ? `${linkLg} break-all`
+                              ? `${linkHighlight} break-all`
                               : `${linkSm} break-all`
                           }
                         >
@@ -261,7 +266,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                       <h3
                         className={
                           isPartnerHighlight
-                            ? "mt-6 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:text-base"
+                            ? "mt-5 text-xs font-bold uppercase tracking-[0.12em] text-ink sm:mt-6 sm:text-sm"
                             : "mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink"
                         }
                       >
@@ -274,7 +279,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                           rel="noopener noreferrer"
                           className={
                             isPartnerHighlight
-                              ? `${linkLg} break-all`
+                              ? `${linkHighlight} break-all`
                               : `${linkSm} break-all`
                           }
                         >
@@ -291,7 +296,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                       <h3
                         className={
                           isPartnerHighlight
-                            ? "mt-6 text-sm font-bold uppercase tracking-[0.12em] text-ink sm:text-base"
+                            ? "mt-5 text-xs font-bold uppercase tracking-[0.12em] text-ink sm:mt-6 sm:text-sm"
                             : "mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink"
                         }
                       >
@@ -304,7 +309,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                           rel="noopener noreferrer"
                           className={
                             isPartnerHighlight
-                              ? `${linkLg} break-all`
+                              ? `${linkHighlight} break-all`
                               : `${linkSm} break-all`
                           }
                         >
