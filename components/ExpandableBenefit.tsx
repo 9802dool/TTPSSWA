@@ -30,9 +30,6 @@ export default function ExpandableBenefit({
     isDark
       ? "min-w-0 flex-1 text-left text-sm font-semibold leading-snug text-white"
       : "min-w-0 flex-1 text-left text-sm font-semibold leading-snug text-white sm:text-base";
-  const moreInfoCls = isDark
-    ? "shrink-0 rounded-md border border-white/40 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white sm:text-sm"
-    : "shrink-0 rounded-md border border-white/40 bg-white/15 px-3 py-1.5 text-xs font-semibold text-white sm:text-sm";
   const panel =
     isDark
       ? "border-t border-white/20 bg-slate-50 px-4 py-5 sm:px-8"
@@ -49,7 +46,6 @@ export default function ExpandableBenefit({
           className={btnBase}
         >
           <span className={titleCls}>{title}</span>
-          <span className={moreInfoCls}>{open ? "Hide" : "More info"}</span>
         </button>
         {open && (
           <div className={panel} role="region" aria-label={`Details for ${title}`}>
