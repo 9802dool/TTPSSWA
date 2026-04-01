@@ -22,12 +22,7 @@ export function MembersBenefitsBlock({ variant = "light" }: { variant?: Variant 
             aria-label="Member benefits list"
           >
             {MEMBER_BENEFITS.map((b) => (
-              <ExpandableBenefit
-                key={b.number}
-                number={b.number}
-                title={b.title}
-                variant="dark"
-              >
+              <ExpandableBenefit key={b.number} title={b.title} variant="dark">
                 <MemberBenefitDetailsText
                   number={b.number}
                   title={b.title}
@@ -54,11 +49,7 @@ export function MembersBenefitsBlock({ variant = "light" }: { variant?: Variant 
           aria-label="Member benefits list"
         >
           {MEMBER_BENEFITS.map((b) => (
-            <ExpandableBenefit
-              key={b.number}
-              number={b.number}
-              title={b.title}
-            >
+            <ExpandableBenefit key={b.number} title={b.title}>
               <MemberBenefitDetailsText number={b.number} title={b.title} />
             </ExpandableBenefit>
           ))}
