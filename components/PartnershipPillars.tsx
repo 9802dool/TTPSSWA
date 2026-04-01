@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DreamBuilderPartnerGallery } from "@/components/DreamBuilderPartnerGallery";
 import ExpandableBenefit from "@/components/ExpandableBenefit";
 
 type PartnershipPillar = {
@@ -60,7 +61,10 @@ export function PartnershipPillars() {
           onToggle={() => toggle(p.key)}
           className={p.placement}
         >
-          <p className="text-sm leading-relaxed text-muted">{p.body}</p>
+          <>
+            <p className="text-sm leading-relaxed text-muted">{p.body}</p>
+            {p.key === 3 ? <DreamBuilderPartnerGallery /> : null}
+          </>
         </ExpandableBenefit>
       ))}
     </ul>
