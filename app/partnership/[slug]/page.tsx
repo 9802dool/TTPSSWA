@@ -22,9 +22,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!program) {
     return { title: "Partnership | TTPSSWA" };
   }
+  const desc =
+    program.slug === "dream-builder-colour-studio-ltd"
+      ? "Member discounts of 5–20% on Dream Builder Colour Studio Ltd — colour consultations, materials, and finishes in Arima."
+      : `${program.title} — TTPSSWA partnership program.`;
   return {
     title: `${program.title} | Partnership | TTPSSWA`,
-    description: `${program.title} — TTPSSWA partnership program.`,
+    description: desc,
   };
 }
 
@@ -72,7 +76,40 @@ export default async function PartnershipProgramPage({ params }: Props) {
             <h2 id="partnership-program-body" className="sr-only">
               Program details
             </h2>
-            <p className="text-sm leading-relaxed text-muted">{program.body}</p>
+            <div className="space-y-4 text-sm leading-relaxed text-muted">
+              <p>{program.body}</p>
+              {program.bodySecondary ? <p>{program.bodySecondary}</p> : null}
+              {program.contact ? (
+                <div className="border-t border-line pt-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.14em] text-ink">
+                    {program.contact.status}
+                  </p>
+                  <h3 className="mt-3 text-xs font-bold uppercase tracking-[0.14em] text-ink">
+                    Location
+                  </h3>
+                  <p className="mt-1">{program.contact.address}</p>
+                  <h3 className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-ink">
+                    Contact info
+                  </h3>
+                  <p className="mt-1">
+                    <a
+                      href={`tel:${program.contact.phone.replace(/\s/g, "")}`}
+                      className="font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover"
+                    >
+                      {program.contact.phone}
+                    </a>
+                  </p>
+                  <p className="mt-1">
+                    <a
+                      href={`mailto:${program.contact.email}`}
+                      className="font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover"
+                    >
+                      {program.contact.email}
+                    </a>
+                  </p>
+                </div>
+              ) : null}
+            </div>
             {program.hasGallery ? (
               <div className="mt-6">
                 <DreamBuilderPartnerGallery />
