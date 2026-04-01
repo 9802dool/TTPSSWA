@@ -6,7 +6,11 @@ const SERVICE_LOG = "analytics:service_requests";
 
 export type ServiceRequestRecord = {
   id: string;
-  serviceType: "hotel_booking" | "salary_deduction" | "dental_optical_grant";
+  serviceType:
+    | "hotel_booking"
+    | "salary_deduction"
+    | "dental_optical_grant"
+    | "legal_aid_application";
   createdAt: string;
   payload: Record<string, unknown>;
 };

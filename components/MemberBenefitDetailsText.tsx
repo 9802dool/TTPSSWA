@@ -1,6 +1,7 @@
 "use client";
 
 import { DentalOpticalGrantApplySection } from "@/components/DentalOpticalGrantApplySection";
+import { LegalAidApplySection } from "@/components/LegalAidApplySection";
 
 type Props = {
   number: number;
@@ -22,22 +23,12 @@ export function MemberBenefitDetailsText({
     "rounded px-1 py-0.5 text-xs " +
     (isDark ? "bg-white/10 text-slate-300" : "bg-line/80");
 
-  if (number === 2) {
-    return <DentalOpticalGrantApplySection />;
+  if (number === 1) {
+    return <LegalAidApplySection />;
   }
 
-  if (number === 1) {
-    return (
-      <>
-        <p className={`text-sm font-semibold ${h}`}>Information</p>
-        <p className={`mt-2 text-sm leading-relaxed ${p}`}>
-          Describe how members access legal aid for criminal or disciplinary
-          matters: eligibility, how to apply, required documents, and office
-          contact. Replace this text in{" "}
-          <code className={code}>components/MemberBenefitDetailsText.tsx</code>.
-        </p>
-      </>
-    );
+  if (number === 2) {
+    return <DentalOpticalGrantApplySection />;
   }
   return (
     <>

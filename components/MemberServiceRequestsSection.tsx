@@ -4,6 +4,7 @@ function serviceLabel(type: string): string {
   if (type === "hotel_booking") return "Hotel reservation";
   if (type === "salary_deduction") return "Salary deduction";
   if (type === "dental_optical_grant") return "Dental & optical grant";
+  if (type === "legal_aid_application") return "Legal aid application";
   return type.replace(/_/g, " ");
 }
 
@@ -223,6 +224,84 @@ function DentalOpticalGrantDetails({
   );
 }
 
+function LegalAidApplicationDetails({
+  payload,
+  variant,
+}: {
+  payload: Record<string, unknown>;
+  variant: "admin" | "member";
+}) {
+  const str = (k: string) => {
+    const v = payload[k];
+    return typeof v === "string" ? v : v != null ? String(v) : "";
+  };
+  const dtClass =
+    variant === "admin"
+      ? "text-[var(--muted)] sm:pt-0.5"
+      : "text-muted sm:pt-0.5";
+  const ddClass =
+    variant === "admin" ? "text-[var(--fg)] sm:col-start-2" : "text-ink sm:col-start-2";
+
+  const mt = str("matterType");
+  const matterLabel =
+    mt === "criminal"
+      ? "Criminal"
+      : mt === "disciplinary"
+        ? "Disciplinary"
+        : mt === "both"
+          ? "Criminal & disciplinary"
+          : mt;
+
+  const rows: [string, string][] = [];
+  const pairs: [string, string][] = [
+    ["Reg. no.", str("regimentalNumber")],
+    ["Rank", str("rank")],
+    ["Name", str("fullName")],
+    ["Department / division", str("departmentDivision")],
+    ["Section / station", str("sectionStation")],
+    ["Email", str("email")],
+    ["Matter type", matterLabel],
+    ["Applicant date", str("applicantDateSigned")],
+  ];
+  for (const [k, v] of pairs) {
+    if (v) rows.push([k, v]);
+  }
+  const addr = str("address");
+  if (addr) rows.push(["Address", addr]);
+  const cc = str("phoneCountryCode");
+  const cell = str("phone");
+  if (cc || cell) {
+    rows.push(["Cell", [cc, cell].filter(Boolean).join(" ")]);
+  }
+  const ph = str("phoneHome");
+  if (ph) rows.push(["Home phone", ph]);
+  const pw = str("phoneWork");
+  if (pw) rows.push(["Work phone", pw]);
+  const md = str("matterDescription");
+  if (md) rows.push(["Matter summary", md]);
+  const court = str("courtOrUnit");
+  if (court) rows.push(["Court / unit", court]);
+  const ref = str("matterReference");
+  if (ref) rows.push(["Reference", ref]);
+  const dr = str("dateReported");
+  if (dr) rows.push(["Date reported / charged", dr]);
+  const wn = str("witnessName");
+  if (wn) rows.push(["Witness", wn]);
+  const wd = str("witnessDate");
+  if (wd) rows.push(["Witness date", wd]);
+
+  return (
+    <dl className="mt-2 grid gap-1.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4">
+      {rows.map(([dt, dd]) => (
+        <div key={dt} className="contents">
+          <dt className={dtClass}>{dt}</dt>
+          <dd className={ddClass}>{dd}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 function RequestBody({
   row,
   variant,
@@ -238,6 +317,9 @@ function RequestBody({
   }
   if (row.serviceType === "dental_optical_grant") {
     return <DentalOpticalGrantDetails payload={row.payload} variant={variant} />;
+  }
+  if (row.serviceType === "legal_aid_application") {
+    return <LegalAidApplicationDetails payload={row.payload} variant={variant} />;
   }
   return (
     <pre
