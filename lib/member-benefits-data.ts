@@ -1,7 +1,7 @@
 export const MEMBER_BENEFITS_PILLAR = {
   title: "Members Benefits",
   body:
-    "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Open the list below to browse all 19 items.",
+    "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Use a benefit button below to read full details.",
 } as const;
 
 export const MEMBER_BENEFITS: { number: number; title: string }[] = [
