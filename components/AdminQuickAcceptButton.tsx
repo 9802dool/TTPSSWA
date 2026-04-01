@@ -26,7 +26,7 @@ export function AdminQuickAcceptButton({ memberId }: { memberId: string }) {
       type="button"
       disabled={busy}
       onClick={() => void accept()}
-      className="rounded-md bg-green-700 px-2.5 py-1 text-xs font-medium text-white hover:bg-green-800 disabled:opacity-60 dark:bg-green-800"
+      className="site-btn-admin-success-sm"
     >
       {busy ? "…" : "Accept"}
     </button>

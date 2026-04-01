@@ -121,7 +121,7 @@ export function HotelBookingAdminActions({
             type="button"
             disabled={busy}
             onClick={() => patch({ action: "confirm" })}
-            className="rounded-md bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
+            className="site-btn-admin-primary disabled:opacity-50"
           >
             {busy ? "Saving…" : "Mark confirmed"}
           </button>
@@ -152,7 +152,7 @@ export function HotelBookingAdminActions({
           onClick={() =>
             patch({ action: "replied", repliedEmailNote: replyNote })
           }
-          className="mt-3 rounded-md border border-[var(--border)] bg-[var(--surface)] px-4 py-2.5 text-sm font-semibold text-[var(--fg)] transition hover:bg-[var(--bg)] disabled:opacity-50"
+          className="site-btn-admin-muted mt-3 disabled:opacity-50"
         >
           {busy ? "Saving…" : "Save replied email"}
         </button>

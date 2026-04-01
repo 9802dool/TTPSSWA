@@ -20,14 +20,10 @@ export default function ExpandableBenefit({
 }: Props) {
   const isDark = variant === "dark";
 
-  const shell =
-    isDark
-      ? "group overflow-hidden rounded-md border-2 border-white/35 bg-brand shadow-corp-md"
-      : "overflow-hidden rounded-md border-2 border-brand/40 bg-brand shadow-corp-md";
-  const btnBase =
-    isDark
-      ? "flex w-full min-h-[48px] items-center gap-3 px-4 text-left text-white transition hover:bg-brand-hover sm:px-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0f18]"
-      : "flex w-full min-h-[48px] items-center gap-3 px-4 py-3 text-left text-white transition hover:bg-brand-hover sm:px-8 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2";
+  const btnClass = isDark
+    ? "site-btn-benefit site-btn-benefit-dark-ring"
+    : "site-btn-benefit-light";
+
   const titleCls =
     isDark
       ? "min-w-0 flex-1 text-left text-sm font-semibold leading-snug text-white"
@@ -39,7 +35,13 @@ export default function ExpandableBenefit({
 
   return (
     <li className={isDark ? "h-full" : undefined}>
-      <div className={shell}>
+      <div
+        className={
+          isDark
+            ? "overflow-hidden rounded-xl shadow-lg shadow-blue-950/25"
+            : "overflow-hidden rounded-xl shadow-md shadow-slate-900/15"
+        }
+      >
         <button
           type="button"
           onClick={onToggle}
@@ -47,7 +49,7 @@ export default function ExpandableBenefit({
           aria-controls={`benefit-panel-${benefitKey}`}
           id={`benefit-trigger-${benefitKey}`}
           aria-label={isOpen ? `Hide details for ${title}` : `More information about ${title}`}
-          className={btnBase}
+          className={btnClass}
         >
           <span className={titleCls}>{title}</span>
         </button>

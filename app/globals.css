@@ -48,6 +48,121 @@ body {
   }
 }
 
+/* Shared modern button styles — use with semantic HTML buttons / Link */
+@layer components {
+  .site-btn-primary-fluid {
+    @apply inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-sky-500 to-brand px-8 text-sm font-semibold text-white shadow-lg shadow-blue-900/25;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-900/35 hover:brightness-105 active:translate-y-0 active:scale-[0.98];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-300 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900;
+    @apply sm:w-auto;
+  }
+
+  .site-btn-hero-ring {
+    @apply border-2 border-white/50 ring-2 ring-white/20 ring-offset-2 ring-offset-transparent;
+  }
+
+  .site-btn-secondary-fluid {
+    @apply inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-xl border border-slate-200/90 bg-white px-8 text-sm font-semibold text-navy shadow-md;
+    @apply transition-all duration-200 ease-out;
+    @apply hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:shadow-lg active:scale-[0.98];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
+    @apply sm:w-auto;
+  }
+
+  .site-btn-inline-primary {
+    @apply inline-flex min-h-[48px] items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-sky-500 to-brand px-6 text-sm font-semibold text-white shadow-lg shadow-blue-900/25;
+    @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
+  }
+
+  .site-btn-submit {
+    @apply inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-950 px-8 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-lg shadow-slate-900/35;
+    @apply transition-all duration-200 ease-out hover:-translate-y-0.5 hover:from-slate-700 hover:to-slate-900 active:scale-[0.98];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2;
+    @apply disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0;
+  }
+
+  .site-btn-block-primary {
+    @apply inline-flex w-full min-h-[48px] items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-sky-500 to-brand px-6 text-sm font-semibold text-white shadow-lg shadow-blue-900/25;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.98];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
+    @apply disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0;
+  }
+
+  .site-btn-nav-pill {
+    @apply rounded-full px-2.5 py-2 text-sm font-semibold text-muted transition-all duration-200;
+    @apply hover:bg-brand-subtle hover:text-brand dark:hover:bg-navy-muted;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
+    @apply sm:px-4;
+  }
+
+  .site-btn-admin-primary {
+    @apply rounded-xl bg-gradient-to-br from-sky-600 to-brand px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-900/20;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-[0.98];
+    @apply disabled:opacity-60 disabled:hover:translate-y-0;
+  }
+
+  .site-btn-admin-muted {
+    @apply rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--fg)] shadow-sm;
+    @apply transition-all duration-200 hover:bg-[var(--brand-subtle)] active:scale-[0.98];
+    @apply disabled:opacity-60;
+  }
+
+  .site-btn-admin-success {
+    @apply rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-900/20;
+    @apply transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-60;
+  }
+
+  .site-btn-admin-success-sm {
+    @apply rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-800 px-2.5 py-1 text-xs font-semibold text-white shadow-md;
+    @apply transition-all duration-200 hover:brightness-110 active:scale-[0.98] disabled:opacity-60;
+  }
+
+  .site-btn-admin-danger-outline {
+    @apply rounded-xl border border-red-300 bg-[var(--surface)] px-4 py-2 text-sm font-semibold text-red-800 shadow-sm;
+    @apply transition-all duration-200 hover:bg-red-50 active:scale-[0.98] disabled:opacity-60;
+    @apply dark:border-red-900 dark:text-red-200 dark:hover:bg-red-950/40;
+  }
+
+  .site-btn-member-outline {
+    @apply rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink shadow-sm;
+    @apply transition-all duration-200 hover:border-sky-500 hover:bg-brand-subtle active:scale-[0.98] disabled:opacity-60 dark:bg-canvas;
+  }
+
+  .site-btn-benefit {
+    @apply flex w-full min-h-[48px] items-center gap-3 rounded-xl border-2 border-white/30 bg-gradient-to-br from-sky-600 to-brand px-4 text-left text-white shadow-lg shadow-blue-950/30;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:brightness-105 active:scale-[0.99] sm:px-8;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2;
+  }
+
+  .site-btn-benefit-dark-ring {
+    @apply focus-visible:ring-offset-[#0a0f18];
+  }
+
+  .site-btn-benefit-light {
+    @apply flex w-full min-h-[48px] items-center gap-3 rounded-xl border-2 border-sky-400/60 bg-gradient-to-br from-sky-500 to-brand px-4 py-3 text-left text-white shadow-md shadow-blue-900/20;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:brightness-105 active:scale-[0.99] sm:px-8;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
+  }
+
+  .site-btn-committee {
+    @apply inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-xl border border-slate-200/90 bg-white px-4 text-center text-sm font-semibold leading-snug text-navy shadow-md;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:bg-slate-50 hover:shadow-lg active:scale-[0.98] sm:w-auto sm:px-8;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2;
+  }
+
+  .site-btn-hotel-submit {
+    @apply w-full rounded-2xl bg-gradient-to-r from-rose-500 via-rose-600 to-pink-700 px-6 py-4 text-base font-bold text-white shadow-xl shadow-rose-900/25;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 hover:shadow-[0_20px_40px_-12px_rgba(15_23_42_/_0.35)] active:scale-[0.99] disabled:opacity-60 disabled:hover:translate-y-0;
+  }
+
+  .site-btn-modal-close {
+    @apply rounded-xl border border-transparent px-3 py-1.5 text-sm font-semibold text-muted transition-all duration-200;
+    @apply hover:bg-slate-200/80 hover:text-ink active:scale-[0.98] dark:hover:bg-slate-700/80;
+  }
+}
+
 /* Looping promo bar (see PromoBanner) */
 @media (prefers-reduced-motion: no-preference) {
   @keyframes promo-marquee {

@@ -108,32 +108,20 @@ export default function Home() {
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-4">
               <Link
                 href="/login"
-                className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md border-2 border-white/90 bg-brand px-8 text-sm font-semibold text-white shadow-corp-md transition hover:bg-brand-hover hover:border-white sm:w-auto"
+                className="site-btn-primary-fluid site-btn-hero-ring"
               >
                 Become a Member Apply Here
               </Link>
-              <Link
-                href="/members-portal"
-                className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto"
-              >
+              <Link href="/members-portal" className="site-btn-secondary-fluid">
                 Access members portal
               </Link>
-              <Link
-                href="/membership-services"
-                className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto"
-              >
+              <Link href="/membership-services" className="site-btn-secondary-fluid">
                 Members services
               </Link>
-              <Link
-                href="/hotel-reservations"
-                className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto"
-              >
+              <Link href="/hotel-reservations" className="site-btn-secondary-fluid">
                 Hotel Reservation
               </Link>
-              <a
-                href="/executive"
-                className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-navy shadow-corp-md transition hover:bg-slate-100 sm:w-auto"
-              >
+              <a href="/executive" className="site-btn-secondary-fluid">
                 Executive Team
               </a>
             </div>
@@ -268,10 +256,7 @@ export default function Home() {
                 that support our members.
               </p>
               <p className="mt-6">
-                <Link
-                  href="/partnership"
-                  className="inline-flex min-h-[48px] items-center justify-center rounded-md bg-brand px-6 text-sm font-semibold text-white shadow-corp transition hover:bg-brand-hover"
-                >
+                <Link href="/partnership" className="site-btn-inline-primary">
                   View partnership programs →
                 </Link>
               </p>

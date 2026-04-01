@@ -112,7 +112,7 @@ export function MembersLoginForm({
       <button
         type="submit"
         disabled={status === "loading"}
-        className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg bg-brand px-6 text-sm font-semibold text-white shadow-corp-md transition hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
+        className="site-btn-block-primary disabled:cursor-not-allowed"
       >
         {status === "loading" ? "Signing in…" : "Sign in"}
       </button>

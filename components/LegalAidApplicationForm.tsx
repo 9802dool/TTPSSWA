@@ -451,7 +451,7 @@ export function LegalAidApplicationForm() {
         <button
           type="submit"
           disabled={status === "loading"}
-          className="inline-flex min-h-[48px] shrink-0 items-center justify-center rounded-sm border-2 border-slate-900 bg-slate-900 px-8 text-xs font-bold uppercase tracking-[0.15em] text-white shadow-sm transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="site-btn-submit"
         >
           {status === "loading" ? "Submitting…" : "Submit legal aid application"}
         </button>

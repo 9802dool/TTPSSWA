@@ -764,7 +764,7 @@ export default function HotelReservationForm() {
 
           {/* Submit — mobile only (desktop uses sticky card) */}
           <div className="lg:hidden">
-            <button type="submit" disabled={submitting} className="w-full rounded-xl bg-gradient-to-r from-[#e41d56] to-[#d70466] px-6 py-4 text-[16px] font-bold text-white shadow-lg transition hover:opacity-90 disabled:opacity-60">
+            <button type="submit" disabled={submitting} className="site-btn-hotel-submit py-4 text-[16px] disabled:opacity-60">
               {submitting ? "Sending…" : "Reserve"}
             </button>
             <p className="mt-3 text-center text-[12px] text-[#717171]">You won&apos;t be charged — we confirm availability first.</p>
@@ -821,7 +821,7 @@ export default function HotelReservationForm() {
             Rates confirmed after submission.<br />No card required to request.
           </p>
 
-          <button type="submit" disabled={submitting} className="mt-5 w-full rounded-xl bg-gradient-to-r from-[#e41d56] to-[#d70466] px-6 py-3.5 text-[16px] font-bold text-white shadow-lg transition hover:opacity-90 disabled:opacity-60">
+          <button type="submit" disabled={submitting} className="site-btn-hotel-submit mt-5 py-3.5 text-[16px] disabled:opacity-60">
             {submitting ? "Sending…" : "Reserve"}
           </button>
           <p className="mt-3 text-center text-[12px] text-[#717171]">

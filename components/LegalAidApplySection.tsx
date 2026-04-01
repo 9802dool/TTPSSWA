@@ -19,10 +19,7 @@ export function LegalAidApplySection() {
         </a>{" "}
         for printing, or complete the digital application on a full page.
       </p>
-      <Link
-        href="/legal-aid-application"
-        className="inline-flex min-h-[48px] w-full max-w-md items-center justify-center rounded-md bg-brand px-8 text-sm font-semibold text-white shadow-corp-md transition hover:bg-brand-hover sm:w-auto"
-      >
+      <Link href="/legal-aid-application" className="site-btn-primary-fluid">
         Apply here
       </Link>
     </div>

@@ -72,7 +72,7 @@ export function AdminLoginForm() {
         <button
           type="submit"
           disabled={busy}
-          className="w-full rounded-lg bg-[var(--brand)] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[var(--brand-hover)] disabled:opacity-60"
+          className="site-btn-block-primary w-full disabled:opacity-60"
         >
           {busy ? "Signing in…" : "Sign in"}
         </button>

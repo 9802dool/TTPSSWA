@@ -61,7 +61,7 @@ export function AdminMemberApplicationActions({
           type="button"
           disabled={busy !== null}
           onClick={() => void submit("accept")}
-          className="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-800 disabled:opacity-60 dark:bg-green-800 dark:hover:bg-green-700"
+          className="site-btn-admin-success"
         >
           {busy === "accept" ? "Accepting…" : "Accept application"}
         </button>
@@ -69,7 +69,7 @@ export function AdminMemberApplicationActions({
           type="button"
           disabled={busy !== null}
           onClick={() => void submit("reject")}
-          className="rounded-lg border border-red-300 bg-[var(--surface)] px-4 py-2 text-sm font-medium text-red-800 transition hover:bg-red-50 disabled:opacity-60 dark:border-red-900 dark:text-red-200 dark:hover:bg-red-950/40"
+          className="site-btn-admin-danger-outline"
         >
           {busy === "reject" ? "Rejecting…" : "Reject"}
         </button>

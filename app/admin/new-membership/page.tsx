@@ -167,7 +167,7 @@ export default async function AdminNewMembershipDatabasePage({ searchParams }: P
             </div>
             <button
               type="submit"
-              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-4 py-2 text-sm font-medium text-[var(--fg)] shadow-sm transition hover:bg-[var(--bg)]"
+              className="site-btn-admin-muted"
             >
               Search
             </button>

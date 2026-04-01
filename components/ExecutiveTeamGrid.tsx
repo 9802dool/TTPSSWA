@@ -113,7 +113,7 @@ export function ExecutiveTeamGrid() {
             <button
               type="button"
               onClick={close}
-              className="absolute right-3 top-3 z-20 rounded-lg px-2 py-1 text-sm font-medium text-muted hover:bg-line/60 hover:text-ink"
+              className="site-btn-modal-close absolute right-3 top-3 z-20"
             >
               Close
             </button>
