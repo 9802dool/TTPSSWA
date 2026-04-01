@@ -208,6 +208,109 @@ export default async function AdminMemberProfilePage({ params }: Props) {
                 <dt className="text-[var(--muted)]">Financial member</dt>
                 <dd className="mt-0.5 capitalize">{member.financialMember}</dd>
               </div>
+              {member.departmentDivision ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Department / division</dt>
+                  <dd className="mt-0.5">{member.departmentDivision}</dd>
+                </div>
+              ) : null}
+              {member.sectionStation ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Section / station</dt>
+                  <dd className="mt-0.5">{member.sectionStation}</dd>
+                </div>
+              ) : null}
+              {member.age ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Age</dt>
+                  <dd className="mt-0.5">{member.age}</dd>
+                </div>
+              ) : null}
+              {member.sex ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Sex</dt>
+                  <dd className="mt-0.5 capitalize">{member.sex}</dd>
+                </div>
+              ) : null}
+              {member.dateOfBirth ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Date of birth</dt>
+                  <dd className="mt-0.5">{member.dateOfBirth}</dd>
+                </div>
+              ) : null}
+              {member.dateOfEnlistment ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Date of enlistment</dt>
+                  <dd className="mt-0.5">{member.dateOfEnlistment}</dd>
+                </div>
+              ) : null}
+              {member.phoneHome ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Phone (home)</dt>
+                  <dd className="mt-0.5 font-mono">{member.phoneHome}</dd>
+                </div>
+              ) : null}
+              {member.phoneWork ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Phone (work)</dt>
+                  <dd className="mt-0.5 font-mono">{member.phoneWork}</dd>
+                </div>
+              ) : null}
+              {member.applicationDateSigned ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Application date (signed)</dt>
+                  <dd className="mt-0.5">{member.applicationDateSigned}</dd>
+                </div>
+              ) : null}
+              {member.declarationAccepted ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Declaration</dt>
+                  <dd className="mt-0.5 text-green-700 dark:text-green-400">
+                    Membership &amp; $140 deduction acknowledged
+                  </dd>
+                </div>
+              ) : null}
+              {member.beneficiaryFullName ? (
+                <div className="border-t border-[var(--border)] pt-4">
+                  <dt className="text-[var(--muted)]">Beneficiary</dt>
+                  <dd className="mt-1 space-y-1 text-sm">
+                    <div>
+                      <span className="text-[var(--muted)]">Name: </span>
+                      {member.beneficiaryFullName}
+                    </div>
+                    {member.beneficiaryRegimentalNumber ? (
+                      <div>
+                        <span className="text-[var(--muted)]">Reg. no.: </span>
+                        {member.beneficiaryRegimentalNumber}
+                      </div>
+                    ) : null}
+                    {member.beneficiaryRank ? (
+                      <div>
+                        <span className="text-[var(--muted)]">Rank: </span>
+                        {member.beneficiaryRank}
+                      </div>
+                    ) : null}
+                    {member.beneficiaryRelationship ? (
+                      <div>
+                        <span className="text-[var(--muted)]">Relationship: </span>
+                        {member.beneficiaryRelationship}
+                      </div>
+                    ) : null}
+                    {member.beneficiaryIdNumber ? (
+                      <div>
+                        <span className="text-[var(--muted)]">ID / DP / PP: </span>
+                        {member.beneficiaryIdNumber}
+                      </div>
+                    ) : null}
+                  </dd>
+                </div>
+              ) : null}
+              {member.witnessName ? (
+                <div>
+                  <dt className="text-[var(--muted)]">Witness</dt>
+                  <dd className="mt-0.5">{member.witnessName}</dd>
+                </div>
+              ) : null}
               <div className="border-t border-[var(--border)] pt-4">
                 <dt className="text-[var(--muted)]">Record ID</dt>
                 <dd className="mt-0.5 font-mono text-xs break-all text-[var(--muted)]">

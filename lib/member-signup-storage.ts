@@ -25,9 +25,28 @@ export type PendingMemberSignup = {
   phone: string;
   /** ITU dial prefix, e.g. +1868 (optional on older records). */
   phoneCountryCode?: string;
+  /** Local number digits — optional (PDF HOME line). */
+  phoneHome?: string;
+  /** Local number digits — optional (PDF WORK line). */
+  phoneWork?: string;
   financialMember: "yes" | "no";
   photoMimeType: string;
   photoBase64: string;
+  /** PDF-aligned membership application (optional on older records). */
+  departmentDivision?: string;
+  sectionStation?: string;
+  age?: string;
+  sex?: "male" | "female";
+  dateOfBirth?: string;
+  dateOfEnlistment?: string;
+  declarationAccepted?: boolean;
+  beneficiaryRegimentalNumber?: string;
+  beneficiaryRank?: string;
+  beneficiaryFullName?: string;
+  beneficiaryRelationship?: string;
+  beneficiaryIdNumber?: string;
+  witnessName?: string;
+  applicationDateSigned?: string;
 };
 
 function normalizeApplicationStatus(
