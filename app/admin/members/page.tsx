@@ -87,6 +87,12 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link
+              href="/admin/new-membership"
+              className="text-sm font-medium text-[var(--brand)] hover:underline"
+            >
+              New membership database
+            </Link>
+            <Link
               href="/admin/hotel-reservations"
               className="text-sm text-[var(--brand)] hover:underline"
             >

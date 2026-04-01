@@ -55,13 +55,21 @@ export default async function AdminMemberProfilePage({ params }: Props) {
       <header className="border-b border-[var(--border)] bg-[var(--surface)] pt-[var(--site-header-stack)]">
         <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-4 px-4 py-4">
           <div>
-            <p className="text-sm text-[var(--muted)]">
+            <p className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-[var(--muted)]">
               <Link
                 href="/admin"
                 className="text-[var(--brand)] hover:underline"
               >
                 ← Site administration
               </Link>
+              {member.applicationStatus === "pending" ? (
+                <Link
+                  href="/admin/new-membership"
+                  className="text-[var(--brand)] hover:underline"
+                >
+                  ← New membership database
+                </Link>
+              ) : null}
             </p>
             <h1 className="mt-2 text-lg font-semibold tracking-tight">
               Member profile

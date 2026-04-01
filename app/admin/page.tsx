@@ -76,6 +76,12 @@ export default async function AdminPage({ searchParams }: Props) {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link
+              href="/admin/new-membership"
+              className="text-sm font-medium text-[var(--brand)] hover:underline"
+            >
+              New membership database
+            </Link>
+            <Link
               href="/admin/members"
               className="text-sm text-[var(--brand)] hover:underline"
             >
@@ -137,15 +143,32 @@ export default async function AdminPage({ searchParams }: Props) {
         ) : null}
 
         <section>
-          <h2 className="text-base font-semibold">Applications pending review</h2>
-          <p className="mt-1 text-sm text-[var(--muted)]">
-            New submissions from{" "}
-            <Link href="/login" className="text-[var(--brand)] hover:underline">
-              Signup / Login
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-base font-semibold">Applications pending review</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">
+                New submissions from{" "}
+                <Link href="/login" className="text-[var(--brand)] hover:underline">
+                  Become a Member Apply Here
+                </Link>{" "}
+                appear in the{" "}
+                <Link
+                  href="/admin/new-membership"
+                  className="font-medium text-[var(--brand)] hover:underline"
+                >
+                  New membership database
+                </Link>
+                . Accept an applicant to allow members login. Pending applicants cannot
+                sign in.
+              </p>
+            </div>
+            <Link
+              href="/admin/new-membership"
+              className="shrink-0 text-sm font-medium text-[var(--brand)] hover:underline"
+            >
+              Open full database →
             </Link>
-            . Accept an applicant to allow members login. Pending applicants
-            cannot sign in.
-          </p>
+          </div>
           {pendingSignups.length > 0 ? (
             <form
               method="get"
