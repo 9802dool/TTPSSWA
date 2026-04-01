@@ -8,6 +8,10 @@ type Props = {
   children?: React.ReactNode;
   /** Dark page background (membership-services). */
   variant?: "light" | "dark";
+  /** Optional class on the outer list item (e.g. grid placement). */
+  className?: string;
+  /** Optional id for deep links / in-page anchors. */
+  id?: string;
 };
 
 export default function ExpandableBenefit({
@@ -17,6 +21,8 @@ export default function ExpandableBenefit({
   onToggle,
   children,
   variant = "light",
+  className,
+  id,
 }: Props) {
   const isDark = variant === "dark";
 
@@ -33,8 +39,11 @@ export default function ExpandableBenefit({
       ? "border-t border-white/20 bg-slate-50 px-4 py-5 sm:px-8"
       : "border-t border-white/20 bg-slate-50 px-4 py-5 sm:px-8";
 
+  const liClass =
+    [isDark ? "h-full" : undefined, className].filter(Boolean).join(" ") || undefined;
+
   return (
-    <li className={isDark ? "h-full" : undefined}>
+    <li id={id} className={liClass}>
       <div
         className={
           isDark
