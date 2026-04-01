@@ -3,15 +3,12 @@
 import { useState } from "react";
 import ExpandableBenefit from "@/components/ExpandableBenefit";
 
-const DREAM_BUILDERS_VIDEO = "/dream%20builders.MOV";
-
 type PartnershipPillar = {
   key: number;
   id: string;
   title: string;
   body: string;
   placement: string;
-  videoSrc?: string;
 };
 
 const PILLARS: PartnershipPillar[] = [
@@ -38,7 +35,6 @@ const PILLARS: PartnershipPillar[] = [
     body:
       "Dream Builder Colour Studio Ltd is a TTPSSWA partnership program. Further details and contact information will be published here as they become available.",
     placement: "sm:col-start-2 sm:row-span-2 sm:row-start-1",
-    videoSrc: DREAM_BUILDERS_VIDEO,
   },
 ];
 
@@ -64,30 +60,7 @@ export function PartnershipPillars() {
           onToggle={() => toggle(p.key)}
           className={p.placement}
         >
-          <div className="space-y-4">
-            <p className="text-sm leading-relaxed text-muted">{p.body}</p>
-            {p.videoSrc ? (
-              <div className="overflow-hidden rounded-lg border border-line bg-black shadow-inner">
-                <video
-                  controls
-                  playsInline
-                  preload="metadata"
-                  className="h-auto w-full max-w-full object-contain"
-                  aria-label="Dream Builder Colour Studio video"
-                >
-                  <source src={p.videoSrc} type="video/quicktime" />
-                  Your browser does not support embedded video.{" "}
-                  <a
-                    href={DREAM_BUILDERS_VIDEO}
-                    className="font-semibold text-brand underline underline-offset-2"
-                  >
-                    Download the video
-                  </a>
-                  .
-                </video>
-              </div>
-            ) : null}
-          </div>
+          <p className="text-sm leading-relaxed text-muted">{p.body}</p>
         </ExpandableBenefit>
       ))}
     </ul>
