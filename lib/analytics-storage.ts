@@ -10,7 +10,8 @@ export type ServiceRequestRecord = {
     | "hotel_booking"
     | "salary_deduction"
     | "dental_optical_grant"
-    | "legal_aid_application";
+    | "legal_aid_application"
+    | "merit_loan_application";
   createdAt: string;
   payload: Record<string, unknown>;
 };

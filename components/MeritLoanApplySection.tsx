@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 const PDF_HREF = "/forms/MERIT LOAN FORM.pdf";
 
 export function MeritLoanApplySection() {
@@ -15,16 +17,11 @@ export function MeritLoanApplySection() {
         >
           Merit loan application (PDF)
         </a>{" "}
-        for printing and submission.
+        for printing, or complete the digital application on a full page.
       </p>
-      <a
-        href={PDF_HREF}
-        className="site-btn-primary-fluid"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Download Merit loan form
-      </a>
+      <Link href="/merit-loan-application" className="site-btn-primary-fluid">
+        Apply here
+      </Link>
     </div>
   );
 }
