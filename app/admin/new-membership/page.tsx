@@ -11,7 +11,7 @@ import { getAdminStats } from "@/lib/analytics-storage";
 import { getPendingMemberSignups } from "@/lib/member-signup-storage";
 
 export const metadata: Metadata = {
-  title: "New membership database | Admin | TTPSSWA",
+  title: "New Membership Applications | Admin | TTPSSWA",
   description:
     "Pending online membership applications submitted from the public site.",
 };
@@ -74,7 +74,7 @@ export default async function AdminNewMembershipDatabasePage({ searchParams }: P
               </Link>
             </p>
             <h1 className="mt-2 text-lg font-semibold tracking-tight">
-              New membership database
+              New Membership Applications
             </h1>
             <p className="text-sm text-[var(--muted)]">
               Pending applications from{" "}

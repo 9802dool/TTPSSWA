@@ -67,7 +67,7 @@ export default async function AdminMemberProfilePage({ params }: Props) {
                   href="/admin/new-membership"
                   className="text-[var(--brand)] hover:underline"
                 >
-                  ← New membership database
+                  ← New Membership Applications
                 </Link>
               ) : null}
             </p>

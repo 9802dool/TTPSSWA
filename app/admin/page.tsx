@@ -79,7 +79,7 @@ export default async function AdminPage({ searchParams }: Props) {
               href="/admin/new-membership"
               className="text-sm font-medium text-[var(--brand)] hover:underline"
             >
-              New membership database
+              New Membership Applications
             </Link>
             <Link
               href="/admin/members"
@@ -156,7 +156,7 @@ export default async function AdminPage({ searchParams }: Props) {
                   href="/admin/new-membership"
                   className="font-medium text-[var(--brand)] hover:underline"
                 >
-                  New membership database
+                  New Membership Applications
                 </Link>
                 . Accept an applicant to allow members login. Pending applicants cannot
                 sign in.
@@ -166,7 +166,7 @@ export default async function AdminPage({ searchParams }: Props) {
               href="/admin/new-membership"
               className="shrink-0 text-sm font-medium text-[var(--brand)] hover:underline"
             >
-              Open full database →
+              Open New Membership Applications →
             </Link>
           </div>
           {pendingSignups.length > 0 ? (

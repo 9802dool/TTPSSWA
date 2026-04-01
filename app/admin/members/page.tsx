@@ -90,7 +90,7 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
               href="/admin/new-membership"
               className="text-sm font-medium text-[var(--brand)] hover:underline"
             >
-              New membership database
+              New Membership Applications
             </Link>
             <Link
               href="/admin/hotel-reservations"
