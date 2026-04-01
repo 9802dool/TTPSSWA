@@ -31,7 +31,7 @@ export function MembersBenefitsBlock({ variant = "light" }: { variant?: Variant 
                 <MemberBenefitDetailsText
                   number={b.number}
                   title={b.title}
-                  variant="dark"
+                  variant="light"
                 />
               </ExpandableBenefit>
             ))}
