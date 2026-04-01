@@ -2,21 +2,30 @@
 
 import { useCallback, useState } from "react";
 
-const BASE = "/Partners/Dream%20Builders";
-const COUNT = 6;
+type Props = {
+  /** Public folder name under /Partners/ (e.g. "Antar", "Dream Builders") */
+  folder: string;
+  count: number;
+  /** Alt text prefix, e.g. "Antar Auto Repairs partner" */
+  imageAltPrefix: string;
+};
 
-const SOURCES = Array.from({ length: COUNT }, (_, i) => `${BASE}/${i + 1}.JPG`);
+export function PartnerImageGallery({ folder, count, imageAltPrefix }: Props) {
+  const base = `/Partners/${encodeURIComponent(folder)}`;
+  const sources = Array.from(
+    { length: count },
+    (_, i) => `${base}/${i + 1}.JPG`,
+  );
 
-export function DreamBuilderPartnerGallery() {
   const [index, setIndex] = useState(0);
 
   const goPrev = useCallback(() => {
-    setIndex((i) => (i - 1 + COUNT) % COUNT);
-  }, []);
+    setIndex((i) => (i - 1 + count) % count);
+  }, [count]);
 
   const goNext = useCallback(() => {
-    setIndex((i) => (i + 1) % COUNT);
-  }, []);
+    setIndex((i) => (i + 1) % count);
+  }, [count]);
 
   return (
     <div className="mt-4">
@@ -46,8 +55,8 @@ export function DreamBuilderPartnerGallery() {
 
         <div className="flex min-h-[200px] min-w-0 flex-1 flex-col items-center justify-center overflow-hidden rounded-xl border border-line bg-slate-100 px-2 py-4 shadow-inner dark:bg-slate-900/80 sm:min-h-[280px]">
           <img
-            src={SOURCES[index]}
-            alt={`Dream Builder Colour Studio partner image ${index + 1} of ${COUNT}`}
+            src={sources[index]}
+            alt={`${imageAltPrefix} image ${index + 1} of ${count}`}
             className="h-auto max-h-[min(70vh,560px)] w-full max-w-full object-contain"
             loading={index === 0 ? "eager" : "lazy"}
             decoding="async"
@@ -78,7 +87,7 @@ export function DreamBuilderPartnerGallery() {
         </button>
       </div>
       <p className="mt-2 text-center text-xs text-muted" aria-live="polite">
-        Image {index + 1} of {COUNT}
+        Image {index + 1} of {count}
       </p>
     </div>
   );

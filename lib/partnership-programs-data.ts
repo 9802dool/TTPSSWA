@@ -2,12 +2,16 @@ export type PartnershipContact = {
   /** e.g. "Open now" */
   status: string;
   address: string;
+  /** Optional map link (e.g. Bing Maps) */
+  addressMapUrl?: string;
   phone: string;
   email: string;
   /** Facebook page URL */
   facebookUrl?: string;
   /** WhatsApp number as shown (e.g. +1 868-620-5600); opens wa.me with digits only */
   whatsapp?: string;
+  websiteUrl?: string;
+  instagramUrl?: string;
 };
 
 export type PartnershipProgram = {
@@ -20,7 +24,8 @@ export type PartnershipProgram = {
   contact?: PartnershipContact;
   /** Tailwind grid placement classes (sm+), same layout as partnership index */
   placement: string;
-  hasGallery: boolean;
+  /** Image carousel: /Partners/{folder}/1..count.JPG */
+  partnerGallery?: { folder: string; count: number };
 };
 
 export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
@@ -31,16 +36,29 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
     body:
       "Hardware and Beyond is a TTPSSWA partnership program. Further details and contact information will be published here as they become available.",
     placement: "sm:col-start-1 sm:row-start-1",
-    hasGallery: false,
   },
   {
     key: 2,
     slug: "antar-auto-repairs-and-parts",
     title: "Antar auto Repairs And Parts",
     body:
-      "Antar auto Repairs And Parts is a TTPSSWA partnership program. Further details and contact information will be published here as they become available.",
+      "Antar Auto Repairs And Parts is a TTPSSWA partnership program offering members access to trusted automotive repair and parts support in Chaguanas.",
+    bodySecondary:
+      "Visit the shop for diagnostics, servicing, and quality parts — contact them directly using the details below.",
+    contact: {
+      status: "Open now",
+      address:
+        "442 Lendore Village, Montrose, Chaguanas, Trinidad and Tobago",
+      addressMapUrl:
+        "https://www.bing.com/maps?q=442+Lendore+Village+Montrose+Chaguanas+Trinidad+and+Tobago",
+      phone: "+1 868-340-0496",
+      whatsapp: "+1 868-340-0496",
+      email: "antarautorepairs@gmail.com",
+      websiteUrl: "https://www.antarauto.com/",
+      instagramUrl: "https://www.instagram.com/antarautorepairs/",
+    },
     placement: "sm:col-start-1 sm:row-start-2",
-    hasGallery: false,
+    partnerGallery: { folder: "Antar", count: 5 },
   },
   {
     key: 3,
@@ -60,7 +78,7 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
       whatsapp: "+1 868-620-5600",
     },
     placement: "sm:col-start-2 sm:row-span-2 sm:row-start-1",
-    hasGallery: true,
+    partnerGallery: { folder: "Dream Builders", count: 6 },
   },
 ];
 
