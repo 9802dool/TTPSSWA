@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MembershipApplicationPhotoFrame } from "@/components/MembershipApplicationPhotoFrame";
+import { MembershipFacialPhotoPanel } from "@/components/MembershipFacialPhotoPanel";
 import { MemberSignupForm } from "@/components/MemberSignupForm";
 import { SalaryDeductionForm } from "@/components/SalaryDeductionForm";
 import SiteFooter from "@/components/SiteFooter";
@@ -55,7 +56,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-4xl space-y-12 px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+        <div className="mx-auto w-full max-w-[min(100%,96rem)] space-y-12 px-4 pb-20 pt-10 sm:px-6 lg:px-8">
           <section aria-labelledby="membership-form-heading">
             <h2
               id="membership-form-heading"
@@ -63,14 +64,18 @@ export default function LoginPage() {
             >
               Membership application
             </h2>
-            <div className="border-2 border-slate-300 bg-white px-5 py-8 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_12px_40px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10 dark:border-slate-600 dark:bg-white">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-                <div className="flex justify-end lg:order-2 lg:shrink-0 lg:pt-0">
-                  <MembershipApplicationPhotoFrame />
-                </div>
-                <div className="min-w-0 flex-1 lg:order-1">
+            <div className="border-2 border-slate-300 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06),0_12px_40px_rgba(15,23,42,0.08)] dark:border-slate-600 dark:bg-white">
+              <div className="flex flex-col lg:flex-row lg:items-start">
+                <div className="min-w-0 flex-1 px-5 py-8 sm:px-8 sm:py-10 lg:order-1">
                   <MemberSignupForm />
                 </div>
+                <aside
+                  className="flex w-full shrink-0 flex-col border-t border-slate-200 bg-slate-50/90 px-5 py-6 sm:px-6 lg:order-2 lg:w-[min(100%,19rem)] lg:border-l lg:border-t-0 lg:border-slate-200 lg:px-5 lg:py-10"
+                  aria-label="Facial photograph upload"
+                >
+                  <MembershipApplicationPhotoFrame />
+                  <MembershipFacialPhotoPanel formId="membership-application-form" />
+                </aside>
               </div>
             </div>
           </section>
