@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { headers } from 'next/headers';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
+import { getRuleBookHtml } from '@/lib/rule-book-html';
 import { RULE_BOOK_DOC_PATH } from '@/lib/rule-book';
 
 export const metadata: Metadata = {
@@ -10,18 +10,8 @@ export const metadata: Metadata = {
   description: 'Read the TTPSSWA association rule book online or download the original document.',
 };
 
-async function absoluteDocUrl(): Promise<string> {
-  const h = await headers();
-  const host = h.get('host') ?? 'localhost:3000';
-  const forwarded = h.get('x-forwarded-proto');
-  const proto =
-    forwarded?.split(',')[0]?.trim() ?? (host.startsWith('localhost') ? 'http' : 'https');
-  return `${proto}://${host}${encodeURI(RULE_BOOK_DOC_PATH)}`;
-}
-
 export default async function RuleBookPage() {
-  const fileUrl = await absoluteDocUrl();
-  const viewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+  const { html, error } = await getRuleBookHtml();
 
   return (
     <>
@@ -51,17 +41,29 @@ export default async function RuleBookPage() {
               </Link>
             </div>
           </div>
+
           <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950">
-            <iframe
-              title="Rule Book — digital reader"
-              src={viewerUrl}
-              className="h-[min(85vh,1200px)] w-full border-0 bg-slate-100 dark:bg-slate-900"
-              allowFullScreen
-            />
+            {error ? (
+              <div className="p-8 text-center text-ink dark:text-white">
+                <p className="font-semibold">Could not display the rule book online.</p>
+                <p className="mt-2 text-sm text-muted dark:text-slate-400">{error}</p>
+                <a
+                  href={RULE_BOOK_DOC_PATH}
+                  download
+                  className="mt-6 inline-flex rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+                >
+                  Download .docx
+                </a>
+              </div>
+            ) : (
+              <article
+                className="prose prose-slate max-w-none px-6 py-8 sm:px-10 sm:py-12 prose-headings:scroll-mt-24 prose-headings:font-bold prose-a:text-brand prose-table:text-sm dark:prose-invert dark:prose-headings:text-white"
+                dangerouslySetInnerHTML={{ __html: html }}
+              />
+            )}
           </div>
           <p className="mt-4 text-center text-xs text-muted dark:text-slate-500">
-            Digital reader uses Microsoft&apos;s online viewer. The document must be reachable at a public URL (works on
-            your live site). If it does not load, use <strong>Download original</strong>.
+            Formatted from the official Word document. For printing or archival, use <strong>Download original</strong>.
           </p>
         </div>
       </main>
