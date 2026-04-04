@@ -49,13 +49,12 @@ export default function HomePage() {
               >
                 Members portal
               </Link>
-              <a
-                href="/Proof Read Rule Book  Final.docx"
-                download
+              <Link
+                href="/rule-book"
                 className="inline-flex rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 Rule Book
-              </a>
+              </Link>
             </div>
           </div>
         </section>
