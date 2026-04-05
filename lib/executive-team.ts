@@ -8,10 +8,13 @@ export type ExecutiveMember = {
   bio?: string;
 };
 
+/** Shown in the executive grid text block under the President portrait. */
+export const PRESIDENT_NAME = "Ishmael Pitt";
+
 export const EXECUTIVE_TEAM: ExecutiveMember[] = [
   {
     title: "President",
-    name: "Ishmael Pitt",
+    name: PRESIDENT_NAME,
     bio: `With 28 years of distinguished service in law enforcement, President Ishmael Pitt has earned recognition for his leadership, integrity, and commitment to community safety. He has overseen operations in the Northern Division and contributed to specialized units such as the Repeat Offenders' Programme Task Force, Firearms Interdiction Unit, and Criminal Investigations Department. His dedication was honored with 2nd place in the 2018 Crime Fighter of the Caribbean Award.
 
 Beyond policing, President Pitt has served as a TTPS Media Ambassador and now leads the TTPSSWA, advocating for officers' rights and improved working conditions. Holding a Master's in Criminology and a Bachelor's in Security Administration, he combines academic expertise with practical leadership, driving ethical policing and progressive reform for the benefit of officers and the wider community.`,
