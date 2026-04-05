@@ -22,13 +22,42 @@ type HomePageProps = {
 
 export default function HomePage({ searchParams }: HomePageProps) {
   const raw = searchParams.tab;
-  const tab =
-    raw === 'executive' || (Array.isArray(raw) && raw.includes('executive')) ? 'executive' : 'overview';
+  const servicesRequested =
+    raw === 'services' ||
+    raw === 'overview' ||
+    (Array.isArray(raw) &&
+      (raw.includes('services') || raw.includes('overview')));
+  /** Default home (`/`) shows Executive; services use `/?tab=services`. */
+  const tab = servicesRequested ? 'overview' : 'executive';
 
   return (
     <>
       <SiteHeader />
       <main className="pt-[var(--site-header-stack)]">
+        <nav
+          className="sticky top-[var(--site-header-stack)] z-40 border-b border-line bg-[#e8ecf1]/95 backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95"
+          aria-label="Home sections"
+        >
+          <div className="mx-auto flex max-w-6xl gap-1 px-4 pt-3 sm:px-6 sm:pt-4 lg:px-8">
+            <Link
+              href="/"
+              scroll={false}
+              className={tab === 'executive' ? tabActiveClass : tabIdleClass}
+              aria-current={tab === 'executive' ? 'page' : undefined}
+            >
+              Executive team
+            </Link>
+            <Link
+              href="/?tab=services"
+              scroll={false}
+              className={tab === 'overview' ? tabActiveClass : tabIdleClass}
+              aria-current={tab === 'overview' ? 'page' : undefined}
+            >
+              Services &amp; benefits
+            </Link>
+          </div>
+        </nav>
+
         <section className="relative overflow-hidden border-b border-line bg-navy text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-50"
@@ -71,30 +100,6 @@ export default function HomePage({ searchParams }: HomePageProps) {
             </div>
           </div>
         </section>
-
-        <nav
-          className="sticky top-[var(--site-header-stack)] z-40 border-b border-line bg-[#e8ecf1]/95 backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95"
-          aria-label="Home sections"
-        >
-          <div className="mx-auto flex max-w-6xl gap-1 px-4 pt-3 sm:px-6 sm:pt-4 lg:px-8">
-            <Link
-              href="/"
-              scroll={false}
-              className={tab === 'overview' ? tabActiveClass : tabIdleClass}
-              aria-current={tab === 'overview' ? 'page' : undefined}
-            >
-              Services &amp; benefits
-            </Link>
-            <Link
-              href="/?tab=executive"
-              scroll={false}
-              className={tab === 'executive' ? tabActiveClass : tabIdleClass}
-              aria-current={tab === 'executive' ? 'page' : undefined}
-            >
-              Executive team
-            </Link>
-          </div>
-        </nav>
 
         {tab === 'overview' ? (
           <>
@@ -161,7 +166,7 @@ export default function HomePage({ searchParams }: HomePageProps) {
             </section>
           </>
         ) : (
-          <section className="border-b border-line bg-[#e8ecf1] py-14 dark:bg-slate-900">
+          <section className="border-b border-line bg-slate-200 py-14 dark:border-slate-800 dark:bg-slate-950">
             <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
               <h2 className="text-center text-2xl font-bold text-ink dark:text-white">Executive team</h2>
               <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted dark:text-slate-400">

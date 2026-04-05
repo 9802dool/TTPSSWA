@@ -3,7 +3,7 @@ import { PromoBanner } from "@/components/PromoBanner";
 
 const nav = [
   { href: "/", label: "Home" },
-  { href: "/#subsidiaries", label: "Subsidiaries" },
+  { href: "/?tab=services#subsidiaries", label: "Subsidiaries" },
   { href: "/partnership", label: "Partnership" },
   { href: "/login", label: "Signup / Login" },
 ];
