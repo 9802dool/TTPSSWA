@@ -1,8 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
-import type { Cheerio } from 'cheerio';
-import type { Element } from 'domhandler';
-import * as cheerio from 'cheerio';
+import parse, { HTMLElement as HtmlElement, Node as HtmlNode, NodeType } from 'node-html-parser';
 import mammoth from 'mammoth';
 import { RULE_BOOK_DOC_FILENAME } from '@/lib/rule-book';
 
@@ -43,8 +41,8 @@ function normalizeTocMatch(text: string): string {
     .toLowerCase();
 }
 
-function isTableOfContentsTitle($el: Cheerio<Element>): boolean {
-  const t = $el.text().replace(/\s+/g, ' ').trim().toLowerCase();
+function isTableOfContentsTitle(el: HtmlElement): boolean {
+  const t = el.text.replace(/\s+/g, ' ').trim().toLowerCase();
   return t === 'table of contents' || t === 'contents' || /^table of contents\b/.test(t);
 }
 
@@ -67,19 +65,35 @@ function bestHeadingId(
   return null;
 }
 
-function serializeFragment($: cheerio.CheerioAPI): string {
-  return $.root()
-    .children()
-    .toArray()
-    .map((node) => $.html(node))
-    .join('');
+const DOC_ORDER_TAGS = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'li', 'td', 'th']);
+
+function isElement(n: HtmlNode): n is HtmlElement {
+  return n.nodeType === NodeType.ELEMENT_NODE;
+}
+
+/** Document-order list of block/TOC elements (same traversal as cheerio’s combined selector). */
+function elementsInDocumentOrder(root: HtmlElement): HtmlElement[] {
+  const ordered: HtmlElement[] = [];
+  function walk(node: HtmlNode) {
+    if (!isElement(node)) return;
+    const tag = node.rawTagName.toLowerCase();
+    if (DOC_ORDER_TAGS.has(tag)) ordered.push(node);
+    for (const c of node.childNodes) walk(c);
+  }
+  for (const c of root.childNodes) walk(c);
+  return ordered;
+}
+
+function parentIsRuleBookTocLink(el: HtmlElement): boolean {
+  const p = el.parentNode;
+  return isElement(p) && p.matches('a.rule-book-toc-link');
 }
 
 /**
  * Adds stable `id`s to headings and wraps Table of Contents lines in links to those headings.
  */
 export function addHeadingIdsAndTocLinks(html: string): string {
-  const $ = cheerio.load(html, null, false);
+  const root = parse(html, { lowerCaseTagName: true });
   const usedIds = new Set<string>();
 
   function uniqueSlug(base: string): string {
@@ -95,71 +109,70 @@ export function addHeadingIdsAndTocLinks(html: string): string {
 
   const headings: { id: string; norm: string }[] = [];
 
-  $('h1, h2, h3, h4, h5, h6').each((_, el) => {
-    const $h = $(el);
-    const text = $h.text().replace(/\u00a0/g, ' ').trim();
-    if (!text) return;
+  for (const h of root.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+    const text = h.text.replace(/\u00a0/g, ' ').trim();
+    if (!text) continue;
     const id = uniqueSlug(slugFromHeadingText(text));
-    $h.attr('id', id);
+    h.setAttribute('id', id);
     headings.push({ id, norm: normalizeTocMatch(text) });
-  });
+  }
 
   let inToc = false;
 
-  $('h1, h2, h3, h4, h5, h6, p, li, td, th').each((_, el) => {
-    const $el = $(el);
-    const tag = el.tagName.toLowerCase();
+  for (const $el of elementsInDocumentOrder(root)) {
+    const tag = $el.rawTagName.toLowerCase();
 
     if (tag === 'h1' || tag === 'h2' || tag === 'h3' || tag === 'h4' || tag === 'h5' || tag === 'h6') {
       if (isTableOfContentsTitle($el)) {
         inToc = true;
-        return;
+        continue;
       }
       if (inToc) inToc = false;
-      return;
+      continue;
     }
 
     const isTocLineEl = tag === 'p' || tag === 'li' || tag === 'td' || tag === 'th';
 
-    if (!isTocLineEl) return;
+    if (!isTocLineEl) continue;
 
     if (!inToc) {
       if (isTableOfContentsTitle($el)) inToc = true;
-      return;
+      continue;
     }
 
-    if (isTableOfContentsTitle($el)) return;
+    if (isTableOfContentsTitle($el)) continue;
 
     if (tag === 'td' || tag === 'th') {
-      if ($el.children().length > 0) return;
+      if ($el.childElementCount > 0) continue;
     }
 
-    if ((tag === 'p' || tag === 'li') && $el.parent().is('a.rule-book-toc-link')) return;
+    if ((tag === 'p' || tag === 'li') && parentIsRuleBookTocLink($el)) continue;
 
-    const rawText = $el.text().replace(/\u00a0/g, ' ').trim();
-    if (!rawText || rawText.length > 500) return;
+    const rawText = $el.text.replace(/\u00a0/g, ' ').trim();
+    if (!rawText || rawText.length > 500) continue;
 
     const lineNorm = normalizeTocMatch(rawText);
     const id = bestHeadingId(lineNorm, headings);
-    if (!id) return;
+    if (!id) continue;
 
-    const inner = $el.html();
-    if (!inner) return;
+    const inner = $el.innerHTML;
+    if (!inner) continue;
 
-    const existing = $el.find('a').first();
-    if (existing.length) {
-      existing.attr('href', `#${id}`).addClass('rule-book-toc-link');
-      return;
+    const existing = $el.querySelector('a');
+    if (existing) {
+      existing.setAttribute('href', `#${id}`);
+      existing.classList.add('rule-book-toc-link');
+      continue;
     }
 
-    const onlyLink = $el.children().length === 1 && $el.children().first().is('a.rule-book-toc-link');
-    if (onlyLink) {
-      $el.find('a.rule-book-toc-link').attr('href', `#${id}`);
-      return;
+    const first = $el.firstElementChild;
+    if ($el.childElementCount === 1 && first?.matches('a.rule-book-toc-link')) {
+      first.setAttribute('href', `#${id}`);
+      continue;
     }
 
-    $el.html(`<a href="#${id}" class="rule-book-toc-link">${inner}</a>`);
-  });
+    $el.innerHTML = `<a href="#${id}" class="rule-book-toc-link">${inner}</a>`;
+  }
 
-  return serializeFragment($);
+  return root.innerHTML;
 }
