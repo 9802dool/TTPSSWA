@@ -67,20 +67,12 @@ export function ExecutiveTeamGrid({ tone = "light" }: ExecutiveTeamGridProps) {
             {EXECUTIVE_TEAM.map((role, index) => (
               <li
                 key={`${role.title}-${index}`}
-                className={
-                  darkPage
-                    ? "flex flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-800/55 shadow-corp transition hover:shadow-corp-md"
-                    : "flex flex-col overflow-hidden rounded-xl border border-line bg-slate-200/35 shadow-corp transition hover:shadow-corp-md dark:border-slate-600 dark:bg-slate-800/50"
-                }
+                className="flex flex-col overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-corp transition hover:shadow-corp-md"
               >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(index)}
-                  className={
-                    darkPage
-                      ? "group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-800 to-slate-950 p-0 text-left ring-slate-600 transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-                      : "group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-200 to-slate-300 p-0 text-left ring-line transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:from-slate-800 dark:to-slate-900"
-                  }
+                  className="group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-800 to-slate-950 p-0 text-left ring-1 ring-slate-700 transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
                   aria-label={`Open biography: ${role.name ?? role.title}`}
                 >
                   {index < EXEC_PHOTOS.length ? (
@@ -94,35 +86,15 @@ export function ExecutiveTeamGrid({ tone = "light" }: ExecutiveTeamGridProps) {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center p-6 text-center">
-                      <span
-                        className={
-                          darkPage
-                            ? "text-xs font-semibold uppercase tracking-wider text-sky-400"
-                            : "text-xs font-semibold uppercase tracking-wider text-brand"
-                        }
-                      >
+                      <span className="text-xs font-semibold uppercase tracking-wider text-sky-400">
                         Photo
                       </span>
                     </div>
                   )}
                 </button>
-                <div className="flex flex-1 flex-col justify-center border-t border-line p-6 dark:border-slate-600">
-                  <h2
-                    className={
-                      darkPage
-                        ? "text-base font-bold text-sky-400 md:text-lg"
-                        : "text-base font-bold text-brand md:text-lg"
-                    }
-                  >
-                    {role.title}
-                  </h2>
-                  <p
-                    className={
-                      darkPage
-                        ? "mt-3 text-xl font-semibold leading-snug text-white md:text-2xl"
-                        : "mt-3 text-xl font-semibold leading-snug text-ink md:text-2xl"
-                    }
-                  >
+                <div className="flex flex-1 flex-col justify-center border-t border-slate-800 bg-slate-950 px-5 py-5 sm:px-6 sm:py-6">
+                  <h2 className="text-base font-bold text-sky-400 md:text-lg">{role.title}</h2>
+                  <p className="mt-2 text-xl font-bold leading-snug text-white md:text-2xl">
                     {role.name ?? "Name to be announced"}
                   </p>
                 </div>
