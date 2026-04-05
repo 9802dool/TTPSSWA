@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
+import RuleBookArticle from '@/components/RuleBookArticle';
 import { getRuleBookHtml } from '@/lib/rule-book-html';
 import { RULE_BOOK_DOC_PATH } from '@/lib/rule-book';
 
@@ -56,9 +57,9 @@ export default async function RuleBookPage() {
                 </a>
               </div>
             ) : (
-              <article
+              <RuleBookArticle
+                html={html}
                 className="prose prose-slate max-w-none px-6 py-8 sm:px-10 sm:py-12 prose-headings:scroll-mt-24 prose-headings:font-bold prose-a:text-brand prose-table:text-sm dark:prose-invert dark:prose-headings:text-white"
-                dangerouslySetInnerHTML={{ __html: html }}
               />
             )}
           </div>
