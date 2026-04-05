@@ -11,7 +11,13 @@ import {
 const DEFAULT_BIO =
   "A full biography will be posted here soon. Contact the association office for more information.";
 
-export function ExecutiveTeamGrid() {
+type ExecutiveTeamGridProps = {
+  /** Dark page background (e.g. /executive); default matches home tab on light slate. */
+  tone?: "light" | "dark";
+};
+
+export function ExecutiveTeamGrid({ tone = "light" }: ExecutiveTeamGridProps) {
+  const darkPage = tone === "dark";
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const dialogTitleId = useId();
 
@@ -46,21 +52,35 @@ export function ExecutiveTeamGrid() {
 
   return (
     <>
-      <section className="bg-canvas py-16">
+      <section className="bg-transparent py-8 sm:py-10">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <p className="mb-8 max-w-2xl text-sm font-medium text-brand">
+          <p
+            className={
+              darkPage
+                ? "mb-8 max-w-2xl text-sm font-medium text-sky-300"
+                : "mb-8 max-w-2xl text-sm font-medium text-brand dark:text-sky-300"
+            }
+          >
             Tap or click a photo to open a short biography.
           </p>
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {EXECUTIVE_TEAM.map((role, index) => (
               <li
                 key={`${role.title}-${index}`}
-                className="flex flex-col overflow-hidden rounded-xl border border-line bg-surface shadow-corp transition hover:shadow-corp-md dark:bg-surface"
+                className={
+                  darkPage
+                    ? "flex flex-col overflow-hidden rounded-xl border border-slate-600 bg-slate-800/55 shadow-corp transition hover:shadow-corp-md"
+                    : "flex flex-col overflow-hidden rounded-xl border border-line bg-slate-200/35 shadow-corp transition hover:shadow-corp-md dark:border-slate-600 dark:bg-slate-800/50"
+                }
               >
                 <button
                   type="button"
                   onClick={() => setOpenIndex(index)}
-                  className="group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-200 to-slate-300 p-0 text-left ring-line transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:from-slate-800 dark:to-slate-900"
+                  className={
+                    darkPage
+                      ? "group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-800 to-slate-950 p-0 text-left ring-slate-600 transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                      : "group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-200 to-slate-300 p-0 text-left ring-line transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:from-slate-800 dark:to-slate-900"
+                  }
                   aria-label={`Open biography: ${role.name ?? role.title}`}
                 >
                   {index < EXEC_PHOTOS.length ? (
@@ -74,17 +94,35 @@ export function ExecutiveTeamGrid() {
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center p-6 text-center">
-                      <span className="text-xs font-semibold uppercase tracking-wider text-brand">
+                      <span
+                        className={
+                          darkPage
+                            ? "text-xs font-semibold uppercase tracking-wider text-sky-400"
+                            : "text-xs font-semibold uppercase tracking-wider text-brand"
+                        }
+                      >
                         Photo
                       </span>
                     </div>
                   )}
                 </button>
                 <div className="flex flex-1 flex-col justify-center p-6">
-                  <h2 className="text-base font-bold text-brand md:text-lg">
+                  <h2
+                    className={
+                      darkPage
+                        ? "text-base font-bold text-sky-400 md:text-lg"
+                        : "text-base font-bold text-brand md:text-lg"
+                    }
+                  >
                     {role.title}
                   </h2>
-                  <p className="mt-3 text-xl font-semibold leading-snug text-ink md:text-2xl">
+                  <p
+                    className={
+                      darkPage
+                        ? "mt-3 text-xl font-semibold leading-snug text-white md:text-2xl"
+                        : "mt-3 text-xl font-semibold leading-snug text-ink md:text-2xl"
+                    }
+                  >
                     {role.name ?? "Name to be announced"}
                   </p>
                 </div>
@@ -108,17 +146,31 @@ export function ExecutiveTeamGrid() {
             onClick={close}
           />
           <div
-            className="relative z-10 max-h-[min(92vh,40rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-surface p-6 pt-12 shadow-corp-md dark:bg-surface"
+            className={
+              darkPage
+                ? "relative z-10 max-h-[min(92vh,40rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-slate-600 bg-slate-900 p-6 pt-12 shadow-corp-md"
+                : "relative z-10 max-h-[min(92vh,40rem)] w-full max-w-lg overflow-y-auto rounded-2xl border border-line bg-surface p-6 pt-12 shadow-corp-md dark:bg-surface"
+            }
           >
             <button
               type="button"
               onClick={close}
-              className="site-btn-modal-close absolute right-3 top-3 z-20"
+              className={
+                darkPage
+                  ? "absolute right-3 top-3 z-20 rounded-xl border border-slate-600 px-3 py-1.5 text-sm font-semibold text-slate-200 transition hover:bg-slate-800"
+                  : "site-btn-modal-close absolute right-3 top-3 z-20"
+              }
             >
               Close
             </button>
             {modalPhotoSrc ? (
-              <div className="relative mb-5 aspect-square w-full max-w-[16rem] overflow-hidden rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900">
+              <div
+                className={
+                  darkPage
+                    ? "relative mb-5 aspect-square w-full max-w-[16rem] overflow-hidden rounded-xl bg-gradient-to-br from-slate-800 to-slate-950"
+                    : "relative mb-5 aspect-square w-full max-w-[16rem] overflow-hidden rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900"
+                }
+              >
                 <Image
                   src={modalPhotoSrc}
                   alt={`Portrait of ${displayName}`}
@@ -128,16 +180,32 @@ export function ExecutiveTeamGrid() {
                 />
               </div>
             ) : null}
-            <p className="pr-14 text-xs font-semibold uppercase tracking-[0.12em] text-brand">
+            <p
+              className={
+                darkPage
+                  ? "pr-14 text-xs font-semibold uppercase tracking-[0.12em] text-sky-400"
+                  : "pr-14 text-xs font-semibold uppercase tracking-[0.12em] text-brand"
+              }
+            >
               {member.title}
             </p>
             <h2
               id={dialogTitleId}
-              className="mt-1 text-2xl font-bold tracking-tight text-ink"
+              className={
+                darkPage
+                  ? "mt-1 text-2xl font-bold tracking-tight text-white"
+                  : "mt-1 text-2xl font-bold tracking-tight text-ink"
+              }
             >
               {displayName}
             </h2>
-            <p className="mt-5 whitespace-pre-line text-base leading-relaxed text-muted">
+            <p
+              className={
+                darkPage
+                  ? "mt-5 whitespace-pre-line text-base leading-relaxed text-slate-400"
+                  : "mt-5 whitespace-pre-line text-base leading-relaxed text-muted"
+              }
+            >
               {bioText}
             </p>
           </div>
