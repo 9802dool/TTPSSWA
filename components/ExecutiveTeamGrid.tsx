@@ -5,8 +5,16 @@ import { useCallback, useEffect, useId, useState } from "react";
 import {
   EXECUTIVE_TEAM,
   EXEC_PHOTOS,
+  PRESIDENT_NAME,
   type ExecutiveMember,
 } from "@/lib/executive-team";
+
+function gridMemberName(role: ExecutiveMember): string {
+  const n = role.name?.trim();
+  if (n) return n;
+  if (role.title === "President") return PRESIDENT_NAME;
+  return "Name to be announced";
+}
 
 const DEFAULT_BIO =
   "A full biography will be posted here soon. Contact the association office for more information.";
@@ -81,7 +89,7 @@ export function ExecutiveTeamGrid({ tone = "light" }: ExecutiveTeamGridProps) {
                       ? "group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-800 to-slate-950 p-0 text-left ring-slate-600 transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
                       : "group relative aspect-square w-full cursor-pointer border-0 bg-gradient-to-br from-slate-200 to-slate-300 p-0 text-left ring-line transition hover:ring-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand dark:from-slate-800 dark:to-slate-900"
                   }
-                  aria-label={`Open biography: ${role.name ?? role.title}`}
+                  aria-label={`Open biography: ${gridMemberName(role)}, ${role.title}`}
                 >
                   {index < EXEC_PHOTOS.length ? (
                     <Image
@@ -105,6 +113,14 @@ export function ExecutiveTeamGrid({ tone = "light" }: ExecutiveTeamGridProps) {
                       </span>
                     </div>
                   )}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/88 via-black/45 to-transparent px-3 pb-3 pt-16 text-left sm:px-4 sm:pb-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-300 sm:text-[11px]">
+                      {role.title}
+                    </p>
+                    <p className="mt-0.5 text-base font-semibold leading-snug text-white drop-shadow-md sm:text-lg">
+                      {gridMemberName(role)}
+                    </p>
+                  </div>
                 </button>
                 <div className="flex flex-1 flex-col justify-center border-t border-line p-6 dark:border-slate-600">
                   <h2
@@ -123,7 +139,7 @@ export function ExecutiveTeamGrid({ tone = "light" }: ExecutiveTeamGridProps) {
                         : "mt-3 text-xl font-semibold leading-snug text-ink md:text-2xl"
                     }
                   >
-                    {role.name ?? "Name to be announced"}
+                    {gridMemberName(role)}
                   </p>
                 </div>
               </li>
