@@ -7,6 +7,9 @@ const config: Config = {
     extend: {
       colors: {
         navy: '#0c1929',
+        /** Hover / tint surfaces (matches app/globals.css :root tokens). */
+        'navy-muted': '#1e3a5f',
+        'brand-subtle': '#eff6ff',
         brand: '#1e40af',
         'brand-hover': '#1d4ed8',
         gold: '#c9a227',
