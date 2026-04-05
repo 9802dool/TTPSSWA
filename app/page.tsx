@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ExecutiveTeamGrid } from '@/components/ExecutiveTeamGrid';
+import { HomeMainTabs } from '@/components/HomeMainTabs';
 import { MembersBenefitsBlock } from '@/components/MembersBenefitsBlock';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
@@ -59,78 +60,94 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section
-          id="subsidiaries"
-          className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-[#e8ecf1] py-14 dark:bg-slate-900"
-        >
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-center text-2xl font-bold text-ink dark:text-white">Subsidiaries &amp; services</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted dark:text-slate-400">
-              Hotel reservations, membership benefits, salary deduction, and more.
-            </p>
-            <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <li>
-                <Link
-                  href="/hotel-reservations"
-                  className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
-                >
-                  <h3 className="font-bold text-ink dark:text-white">Hotel reservations</h3>
-                  <p className="mt-2 text-sm text-muted dark:text-slate-400">Book association accommodations.</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/membership-services"
-                  className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
-                >
-                  <h3 className="font-bold text-ink dark:text-white">Membership services</h3>
-                  <p className="mt-2 text-sm text-muted dark:text-slate-400">Benefits, grants, and applications.</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/central-committee-representatives"
-                  className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
-                >
-                  <h3 className="font-bold text-ink dark:text-white">Central committee</h3>
-                  <p className="mt-2 text-sm text-muted dark:text-slate-400">Regional representatives.</p>
-                </Link>
-              </li>
-            </ul>
-          </div>
-        </section>
+        <HomeMainTabs
+          overview={
+            <>
+              <section
+                id="subsidiaries"
+                className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-[#e8ecf1] py-14 dark:bg-slate-900"
+              >
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                  <h2 className="text-center text-2xl font-bold text-ink dark:text-white">
+                    Subsidiaries &amp; services
+                  </h2>
+                  <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted dark:text-slate-400">
+                    Hotel reservations, membership benefits, salary deduction, and more.
+                  </p>
+                  <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    <li>
+                      <Link
+                        href="/hotel-reservations"
+                        className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
+                      >
+                        <h3 className="font-bold text-ink dark:text-white">Hotel reservations</h3>
+                        <p className="mt-2 text-sm text-muted dark:text-slate-400">
+                          Book association accommodations.
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/membership-services"
+                        className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
+                      >
+                        <h3 className="font-bold text-ink dark:text-white">Membership services</h3>
+                        <p className="mt-2 text-sm text-muted dark:text-slate-400">
+                          Benefits, grants, and applications.
+                        </p>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/central-committee-representatives"
+                        className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
+                      >
+                        <h3 className="font-bold text-ink dark:text-white">Central committee</h3>
+                        <p className="mt-2 text-sm text-muted dark:text-slate-400">Regional representatives.</p>
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </section>
 
-        <section
-          id="members-benefits"
-          className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-navy py-14 text-white"
-        >
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-center text-2xl font-bold">Member benefits</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-slate-400">
-              Programs and support available to financial members.
-            </p>
-            <div className="mt-10 flex justify-center">
-              <MembersBenefitsBlock variant="dark" />
-            </div>
-          </div>
-        </section>
-
-        <section className="border-b border-line bg-[#e8ecf1] py-14 dark:bg-slate-900">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-center text-2xl font-bold text-ink dark:text-white">Executive team</h2>
-            <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted dark:text-slate-400">
-              National officers and leadership.
-            </p>
-            <div className="mt-10">
-              <ExecutiveTeamGrid />
-            </div>
-            <p className="mt-8 text-center">
-              <Link href="/executive" className="text-sm font-semibold text-brand underline-offset-4 hover:underline">
-                Executive page →
-              </Link>
-            </p>
-          </div>
-        </section>
+              <section
+                id="members-benefits"
+                className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-navy py-14 text-white"
+              >
+                <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                  <h2 className="text-center text-2xl font-bold">Member benefits</h2>
+                  <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-slate-400">
+                    Programs and support available to financial members.
+                  </p>
+                  <div className="mt-10 flex justify-center">
+                    <MembersBenefitsBlock variant="dark" />
+                  </div>
+                </div>
+              </section>
+            </>
+          }
+          executive={
+            <section className="border-b border-line bg-[#e8ecf1] py-14 dark:bg-slate-900">
+              <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+                <h2 className="text-center text-2xl font-bold text-ink dark:text-white">Executive team</h2>
+                <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted dark:text-slate-400">
+                  National officers and leadership.
+                </p>
+                <div className="mt-10">
+                  <ExecutiveTeamGrid />
+                </div>
+                <p className="mt-8 text-center">
+                  <Link
+                    href="/executive"
+                    className="text-sm font-semibold text-brand underline-offset-4 hover:underline"
+                  >
+                    Full executive page →
+                  </Link>
+                </p>
+              </div>
+            </section>
+          }
+        />
       </main>
       <SiteFooter />
     </>
