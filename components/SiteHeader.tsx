@@ -2,7 +2,8 @@ import Link from "next/link";
 import { PromoBanner } from "@/components/PromoBanner";
 
 const nav = [
-  { href: "/", label: "Home" },
+  { href: "/?tab=services", label: "Home" },
+  { href: "/", label: "Executive team" },
   { href: "/?tab=services#subsidiaries", label: "Subsidiaries" },
   { href: "/partnership", label: "Partnership" },
   { href: "/login", label: "Signup / Login" },
