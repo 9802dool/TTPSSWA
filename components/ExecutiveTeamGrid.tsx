@@ -93,7 +93,7 @@ export function ExecutiveTeamGrid({ tone = "light" }: ExecutiveTeamGridProps) {
                       className="object-contain object-center transition group-hover:opacity-95"
                     />
                   ) : (
-                    <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center">
+                    <div className="flex h-full w-full items-center justify-center p-6 text-center">
                       <span
                         className={
                           darkPage
@@ -105,15 +105,27 @@ export function ExecutiveTeamGrid({ tone = "light" }: ExecutiveTeamGridProps) {
                       </span>
                     </div>
                   )}
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/50 to-transparent px-3 pb-3 pt-14 text-left sm:px-4 sm:pb-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-sky-300 sm:text-[11px]">
-                      {role.title}
-                    </p>
-                    <p className="mt-0.5 text-base font-semibold leading-snug text-white drop-shadow-md sm:text-lg">
-                      {role.name ?? "Name to be announced"}
-                    </p>
-                  </div>
                 </button>
+                <div className="flex flex-1 flex-col justify-center border-t border-line p-6 dark:border-slate-600">
+                  <h2
+                    className={
+                      darkPage
+                        ? "text-base font-bold text-sky-400 md:text-lg"
+                        : "text-base font-bold text-brand md:text-lg"
+                    }
+                  >
+                    {role.title}
+                  </h2>
+                  <p
+                    className={
+                      darkPage
+                        ? "mt-3 text-xl font-semibold leading-snug text-white md:text-2xl"
+                        : "mt-3 text-xl font-semibold leading-snug text-ink md:text-2xl"
+                    }
+                  >
+                    {role.name ?? "Name to be announced"}
+                  </p>
+                </div>
               </li>
             ))}
           </ul>
