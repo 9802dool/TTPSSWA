@@ -1,28 +1,17 @@
-import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
-import { AnalyticsTracker } from "@/components/AnalyticsTracker";
-import "./globals.css";
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  weight: ["400", "500", "600", "700"],
-});
+import type { Metadata } from 'next';
+import { AnalyticsTracker } from '@/components/AnalyticsTracker';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "TTPSSWA — Trinidad and Tobago Police Service Social Welfare Association",
+  title: 'TTPSSWA | Trinidad & Tobago Police Service Social & Welfare Association',
   description:
-    "Trinidad and Tobago Police Service Social Welfare Association (TTPSSWA) — official information, programs, and community updates.",
+    'Member services, benefits, and resources for the Trinidad and Tobago Police Service Social & Welfare Association.',
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`scroll-smooth ${jakarta.variable}`}>
-      <body className="font-sans antialiased">
+    <html lang="en">
+      <body className="min-h-screen antialiased">
         <AnalyticsTracker />
         {children}
       </body>

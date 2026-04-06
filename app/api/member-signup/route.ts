@@ -1,36 +1,61 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "node:crypto";
+import { notifyMembershipApplicationPending } from "@/lib/member-application-notify";
+import { hashPassword } from "@/lib/password-hash";
 import {
   MAX_PHOTO_BYTES_FOR_STORAGE,
   recordPendingMemberSignup,
 } from "@/lib/member-signup-storage";
-import { notifyMembershipApplicationPending } from "@/lib/member-application-notify";
-import { hashPassword } from "@/lib/password-hash";
-import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
 
 export const runtime = "nodejs";
 
-const USERNAME_RE = /^[a-zA-Z0-9._-]{3,32}$/;
+const PLACEHOLDER_GIF_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-function optionalLocalPhone(s: unknown): string {
-  const t = String(s ?? "").trim();
-  if (!t) return "";
-  const digits = t.replace(/\D/g, "");
-  return digits;
-}
-
-function validateOptionalPhoneDigits(digits: string, label: string): string | null {
-  if (!digits) return null;
-  if (digits.length < 6 || digits.length > 15) {
-    return `${label} must be 6–15 digits (local number, no country code).`;
-  }
-  return null;
-}
-
-export async function POST(request: Request) {
-  let formData: FormData;
+/** Mobile app: minimal JSON application (full PDF form still on /login). */
+async function handleJson(request: Request) {
+  let body: { fullName?: string; email?: string; phone?: string };
   try {
-    formData = await request.formData();
+    body = await request.json();
   } catch {
+    return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
+  }
+  const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
+  const email = typeof body.email === "string" ? body.email.trim() : "";
+  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+  if (!fullName || !email || !phone) {
+    return NextResponse.json(
+      { error: "Full name, email, and phone are required." },
+      { status: 400 },
+    );
+  }
+  const username = (email.split("@")[0] ?? `user${Date.now()}`).slice(0, 32).replace(/[^a-zA-Z0-9._-]/g, "_") || `user${Date.now()}`;
+  const gate = `mobile-pending:${randomUUID()}`;
+  const ok = await recordPendingMemberSignup({
+    username,
+    passwordHash: hashPassword(gate),
+    regimentalNumber: "—",
+    rank: "—",
+    fullName,
+    address: "Submitted via TTPSSWA mobile app — complete full application on the website if requested.",
+    email,
+    phone,
+    phoneCountryCode: "+1868",
+    financialMember: "yes",
+    photoMimeType: "image/gif",
+    photoBase64: PLACEHOLDER_GIF_BASE64,
+  });
+  if (!ok) {
+    return NextResponse.json(
+      { error: "Could not save application. Storage may be unavailable." },
+      { status: 503 },
+    );
+  }
+  return NextResponse.json({ ok: true }, { status: 201 });
+}
+
+async function handleMultipart(request: Request) {
+  const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
+  if (!formData) {
     return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
   }
 
@@ -41,185 +66,71 @@ export async function POST(request: Request) {
   const fullName = String(formData.get("fullName") ?? "").trim();
   const departmentDivision = String(formData.get("departmentDivision") ?? "").trim();
   const sectionStation = String(formData.get("sectionStation") ?? "").trim();
+  const address = String(formData.get("address") ?? "").trim();
+  const phoneCountryCode = String(formData.get("phoneCountryCode") ?? "").trim();
+  const phoneHome = String(formData.get("phoneHome") ?? "").replace(/\D/g, "");
+  const phoneWork = String(formData.get("phoneWork") ?? "").replace(/\D/g, "");
+  const phone = String(formData.get("phone") ?? "").replace(/\D/g, "");
   const age = String(formData.get("age") ?? "").trim();
   const sex = String(formData.get("sex") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
   const dateOfBirth = String(formData.get("dateOfBirth") ?? "").trim();
   const dateOfEnlistment = String(formData.get("dateOfEnlistment") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const phoneCountryCode = String(formData.get("phoneCountryCode") ?? "").trim();
-  const phoneHome = optionalLocalPhone(formData.get("phoneHome"));
-  const phoneWork = optionalLocalPhone(formData.get("phoneWork"));
-  const phone = optionalLocalPhone(formData.get("phone"));
   const financialMember = String(formData.get("financialMember") ?? "").trim();
-  const declarationMembership = String(formData.get("declarationMembership") ?? "").trim();
-  const beneficiaryRegimentalNumber = String(
-    formData.get("beneficiaryRegimentalNumber") ?? "",
-  ).trim();
-  const beneficiaryRank = String(formData.get("beneficiaryRank") ?? "").trim();
-  const beneficiaryFullName = String(formData.get("beneficiaryFullName") ?? "").trim();
-  const beneficiaryRelationship = String(
-    formData.get("beneficiaryRelationship") ?? "",
-  ).trim();
-  const beneficiaryIdNumber = String(formData.get("beneficiaryIdNumber") ?? "").trim();
-  const witnessName = String(formData.get("witnessName") ?? "").trim();
+  const declaration = String(formData.get("declarationMembership") ?? "").trim();
   const applicationDateSigned = String(formData.get("applicationDateSigned") ?? "").trim();
-  const photo = formData.get("facialPhoto");
-
-  if (!USERNAME_RE.test(username)) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error:
-          "Username must be 3–32 characters (letters, numbers, dot, underscore, or hyphen only).",
-      },
-      { status: 400 },
-    );
-  }
-
-  if (password.length < 8 || password.length > 128) {
-    return NextResponse.json(
-      { ok: false, error: "Password must be between 8 and 128 characters." },
-      { status: 400 },
-    );
-  }
 
   if (
+    !username ||
+    password.length < 8 ||
     !regimentalNumber ||
     !rank ||
     !fullName ||
     !departmentDivision ||
     !sectionStation ||
-    !age ||
     !address ||
-    !email ||
     !phoneCountryCode ||
+    !phone ||
+    !age ||
+    (sex !== "male" && sex !== "female") ||
+    !email ||
     !dateOfBirth ||
     !dateOfEnlistment ||
+    (financialMember !== "yes" && financialMember !== "no") ||
+    declaration !== "yes" ||
     !applicationDateSigned
   ) {
     return NextResponse.json(
-      { ok: false, error: "Please fill in all required fields." },
+      { ok: false, error: "Please fill in all required fields and accept the declaration." },
       { status: 400 },
     );
   }
 
-  if (sex !== "male" && sex !== "female") {
-    return NextResponse.json(
-      { ok: false, error: "Please select Male or Female." },
-      { status: 400 },
-    );
+  const facial = formData.get("facialPhoto");
+  if (!(facial instanceof Blob) || facial.size === 0) {
+    return NextResponse.json({ ok: false, error: "Facial photograph is required." }, { status: 400 });
   }
-
-  if (!phone) {
-    return NextResponse.json(
-      { ok: false, error: "Please enter your cell phone number." },
-      { status: 400 },
-    );
+  const buf = Buffer.from(await facial.arrayBuffer());
+  if (buf.length > MAX_PHOTO_BYTES_FOR_STORAGE) {
+    return NextResponse.json({ ok: false, error: "Photo exceeds the maximum size." }, { status: 400 });
   }
-
-  const errHome = validateOptionalPhoneDigits(phoneHome, "Home phone");
-  if (errHome) {
-    return NextResponse.json({ ok: false, error: errHome }, { status: 400 });
-  }
-  const errWork = validateOptionalPhoneDigits(phoneWork, "Work phone");
-  if (errWork) {
-    return NextResponse.json({ ok: false, error: errWork }, { status: 400 });
-  }
-
-  if (!isAllowedMembershipPhoneCountryCode(phoneCountryCode)) {
-    return NextResponse.json(
-      { ok: false, error: "Please choose a valid country code." },
-      { status: 400 },
-    );
-  }
-
-  if (phone.length < 6 || phone.length > 15) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error:
-          "Enter your cell number (6–15 digits) without the country code.",
-      },
-      { status: 400 },
-    );
-  }
-
-  if (financialMember !== "yes" && financialMember !== "no") {
-    return NextResponse.json(
-      { ok: false, error: "Please select Yes or No for financial member." },
-      { status: 400 },
-    );
-  }
-
-  if (declarationMembership !== "yes") {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "You must confirm the membership application and salary deduction statement.",
-      },
-      { status: 400 },
-    );
-  }
-
-  if (
-    !beneficiaryFullName ||
-    !beneficiaryRelationship ||
-    !beneficiaryIdNumber
-  ) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error: "Please complete the beneficiary nomination (name, relationship, and ID).",
-      },
-      { status: 400 },
-    );
-  }
-
-  if (!(photo instanceof File) || photo.size === 0) {
-    return NextResponse.json(
-      { ok: false, error: "Please upload a facial photo." },
-      { status: 400 },
-    );
-  }
-
-  const type = photo.type;
-  if (!["image/jpeg", "image/png", "image/webp"].includes(type)) {
-    return NextResponse.json(
-      { ok: false, error: "Photo must be JPG, PNG, or WebP." },
-      { status: 400 },
-    );
-  }
-
-  if (photo.size > MAX_PHOTO_BYTES_FOR_STORAGE) {
-    const kb = Math.round(MAX_PHOTO_BYTES_FOR_STORAGE / 1024);
-    return NextResponse.json(
-      {
-        ok: false,
-        error: `Photo must be ${kb} KB or smaller so it can be queued for admin review.`,
-      },
-      { status: 400 },
-    );
-  }
-
-  const buf = Buffer.from(await photo.arrayBuffer());
+  const photoMimeType = facial.type || "image/jpeg";
   const photoBase64 = buf.toString("base64");
-  const passwordHash = hashPassword(password);
 
-  const stored = await recordPendingMemberSignup({
+  const ok = await recordPendingMemberSignup({
     username,
-    passwordHash,
+    passwordHash: hashPassword(password),
     regimentalNumber,
     rank,
     fullName,
     address,
     email,
-    phoneCountryCode,
     phone,
+    phoneCountryCode,
     phoneHome: phoneHome || undefined,
     phoneWork: phoneWork || undefined,
     financialMember: financialMember as "yes" | "no",
-    photoMimeType: type,
+    photoMimeType,
     photoBase64,
     departmentDivision,
     sectionStation,
@@ -228,22 +139,18 @@ export async function POST(request: Request) {
     dateOfBirth,
     dateOfEnlistment,
     declarationAccepted: true,
-    beneficiaryRegimentalNumber: beneficiaryRegimentalNumber || undefined,
-    beneficiaryRank: beneficiaryRank || undefined,
-    beneficiaryFullName,
-    beneficiaryRelationship,
-    beneficiaryIdNumber,
-    witnessName: witnessName || undefined,
     applicationDateSigned,
+    beneficiaryRegimentalNumber: String(formData.get("beneficiaryRegimentalNumber") ?? "").trim() || undefined,
+    beneficiaryRank: String(formData.get("beneficiaryRank") ?? "").trim() || undefined,
+    beneficiaryFullName: String(formData.get("beneficiaryFullName") ?? "").trim() || undefined,
+    beneficiaryRelationship: String(formData.get("beneficiaryRelationship") ?? "").trim() || undefined,
+    beneficiaryIdNumber: String(formData.get("beneficiaryIdNumber") ?? "").trim() || undefined,
+    witnessName: String(formData.get("witnessName") ?? "").trim() || undefined,
   });
 
-  if (!stored) {
+  if (!ok) {
     return NextResponse.json(
-      {
-        ok: false,
-        error:
-          "Signup storage is not configured. Add Upstash Redis (same as analytics) or try again later.",
-      },
+      { ok: false, error: "Could not save application. Storage may be unavailable." },
       { status: 503 },
     );
   }
@@ -258,4 +165,12 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json({ ok: true });
+}
+
+export async function POST(request: Request) {
+  const ct = request.headers.get("content-type") ?? "";
+  if (ct.includes("application/json")) {
+    return handleJson(request);
+  }
+  return handleMultipart(request);
 }

@@ -7,61 +7,93 @@ import {
   MEMBERSHIP_PHONE_COUNTRY_CODES,
 } from "@/lib/phone-country-codes";
 
-/** Matches MEMBERSHIP APPLICATION.pdf — block caps, tight tracking */
-const L =
-  "text-[9px] font-bold uppercase tracking-[0.14em] text-slate-900";
+/** Masthead blue — matches printed form */
+const MASTHEAD_BLUE = "#1e40af";
 
-/** Underline field style like printed blanks on the PDF */
+const L = "text-[10px] font-bold uppercase tracking-wide text-black";
+
 const pdfLine =
-  "mt-0.5 w-full border-0 border-b-2 border-slate-900 bg-transparent px-0 py-1.5 text-sm font-medium uppercase tracking-wide text-slate-900 outline-none ring-0 placeholder:text-slate-400 focus:border-slate-900 focus:ring-0 dark:bg-white";
+  "mt-0.5 w-full min-h-[1.75rem] border-0 border-b border-dotted border-black bg-transparent px-0 py-0.5 text-xs font-semibold uppercase tracking-wide text-black outline-none ring-0 placeholder:text-neutral-400 focus:border-black focus:ring-0";
 
 const pdfBox =
-  "mt-0.5 w-full rounded-none border-2 border-slate-900 bg-white px-2 py-2 text-sm font-medium uppercase tracking-wide text-slate-900 outline-none focus:border-slate-900 focus:ring-1 focus:ring-slate-900 dark:bg-white";
+  "mt-0.5 w-full rounded-none border border-black bg-white px-1 py-1.5 text-xs font-semibold uppercase text-black outline-none focus:border-black focus:ring-1 focus:ring-black";
 
-/** Official PDF masthead (Nov 2025) — update when the printed form changes */
-function MembershipPdfMasthead() {
+/** Circular emblem + titles + photo box — like the printed membership form */
+function PaperMembershipHeader() {
   return (
-    <div className="border-b-2 border-slate-900 bg-white px-3 py-4 text-slate-900 dark:bg-white">
-      <p className="text-center text-[8px] font-semibold uppercase leading-snug tracking-wide text-slate-700">
-        Vice President: Ag. A.S.P Owie Russell; Assistant Secretary: No. 16940 W/Ag.
-        Sgt. Tricia Durant-Charles
-      </p>
-      <p className="mt-1 text-center text-[8px] font-semibold uppercase leading-snug tracking-wide text-slate-700">
-        Treasurer: No. 18668 Ag. Cpl. Selwyn Marcano
-      </p>
-      <p className="mt-1 text-center text-[8px] font-semibold uppercase leading-snug tracking-wide text-slate-700">
-        Trustees: No. 13281 Sgt. Adrian Andrews No. 16540 Sgt. Jason Johnson
-      </p>
-      <p className="mt-1 text-center text-[8px] font-semibold uppercase leading-snug tracking-wide text-slate-700">
-        First Division Officer: Ag. A.C.P Oswain Subero
-      </p>
-      <p className="mt-1 text-center text-[8px] font-semibold uppercase leading-snug tracking-wide text-slate-700">
-        Special Reserve Officer: No. 5369 PC Kevin Nicholls; Municipal Officer: No.
-        12279 PC David Mc Guirk
-      </p>
-      <p className="mt-4 text-center text-sm font-bold uppercase tracking-[0.25em] text-slate-900">
-        Trinidad and Tobago Police Service
-      </p>
-      <p className="mt-1 text-center text-sm font-bold uppercase tracking-[0.25em] text-slate-900">
-        Social and Welfare Association
-      </p>
-      <p className="mx-auto mt-3 max-w-xl text-center text-[9px] font-semibold uppercase leading-relaxed tracking-wide text-slate-800">
-        4th Floor, Riverside Plaza, #3 Besson Street, Port of Spain, Tel: 235-5260
-        792-6226. E-Mail: ttpsswa.receptionist@outlook.com Website: ttpsswa.org
-      </p>
-      <p className="mt-3 text-center text-[9px] font-bold uppercase tracking-wide text-slate-800">
-        President: Ag. A.S.P. Ishmael Pitt
-      </p>
-      <p className="mt-1 text-center text-[9px] font-bold uppercase tracking-wide text-slate-800">
-        Secretary: W/Ag. A.S.P. Nathalie John
-      </p>
-      <p className="mt-5 text-center text-base font-bold uppercase tracking-[0.2em] text-slate-900 underline decoration-2 underline-offset-4">
-        Membership form
-      </p>
-      <p className="mt-3 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-slate-800">
-        Please fill out in block letters
-      </p>
-    </div>
+    <header className="border-b-2 border-black bg-white px-2 pb-4 pt-3 text-black">
+      <div className="mx-auto max-w-3xl">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,5.5rem)_1fr_minmax(0,5.5rem)] sm:items-start sm:gap-3">
+          <div className="flex flex-col items-center gap-2 sm:items-start">
+            <div
+              className="flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-full border-[3px] bg-white p-1"
+              style={{ borderColor: MASTHEAD_BLUE }}
+              aria-hidden
+            >
+              <svg viewBox="0 0 100 100" className="h-full w-full" fill="none">
+                <circle cx="50" cy="50" r="46" stroke={MASTHEAD_BLUE} strokeWidth="2.5" />
+                <path
+                  d="M50 22 L62 48 L88 48 L66 62 L76 88 L50 74 L24 88 L34 62 L12 48 L38 48 Z"
+                  stroke={MASTHEAD_BLUE}
+                  strokeWidth="1.8"
+                  fill="none"
+                />
+              </svg>
+            </div>
+            <div className="text-center text-[8px] font-bold uppercase leading-tight sm:text-left sm:text-[9px]" style={{ color: MASTHEAD_BLUE }}>
+              <p>President: Ag. A.S.P. Ishmael Pitt</p>
+              <p className="mt-1">Secretary: W/Ag. A.S.P. Nathalie John</p>
+            </div>
+          </div>
+
+          <div className="min-w-0 text-center sm:pt-1">
+            <p
+              className="text-[11px] font-bold uppercase leading-tight sm:text-sm sm:leading-snug"
+              style={{ color: MASTHEAD_BLUE }}
+            >
+              Trinidad and Tobago Police Service
+            </p>
+            <p
+              className="mt-1 text-[11px] font-bold uppercase sm:text-sm"
+              style={{ color: MASTHEAD_BLUE }}
+            >
+              Social and Welfare Association
+            </p>
+          </div>
+
+          <div className="mx-auto flex aspect-[5/6] w-[5.5rem] items-center justify-center border-2 border-black sm:mx-0 sm:w-full sm:max-w-[5.5rem]">
+            <span className="text-[11px] font-bold uppercase">Photo</span>
+          </div>
+        </div>
+
+        <div className="mt-3 h-1.5 w-full" style={{ backgroundColor: MASTHEAD_BLUE }} aria-hidden />
+
+        <div
+          className="mt-2 space-y-1 text-center text-[8px] font-semibold uppercase leading-snug sm:text-[9px]"
+          style={{ color: MASTHEAD_BLUE }}
+        >
+          <p>4th Floor, Riverside Plaza, #3 Besson Street, Port of Spain, Tel: 235-5260</p>
+          <p className="flex flex-wrap items-center justify-center gap-x-1 gap-y-0.5">
+            <svg
+              className="inline h-3.5 w-3.5 shrink-0 text-emerald-600"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden
+            >
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.435 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
+            <span>792-6226. E-Mail: ttpsswa.receptionist@outlook.com Website: ttpsswa.org</span>
+          </p>
+        </div>
+
+        <h2 className="mt-6 text-center text-base font-bold uppercase tracking-[0.2em] text-black underline decoration-2 underline-offset-4 sm:text-lg">
+          Membership form
+        </h2>
+        <p className="mt-3 text-left text-[10px] font-bold uppercase tracking-wide text-black underline decoration-1 underline-offset-2">
+          Please fill out in block letters
+        </p>
+      </div>
+    </header>
   );
 }
 
@@ -125,17 +157,15 @@ export function MemberSignupForm() {
     <form
       id="membership-application-form"
       onSubmit={(e) => void onSubmit(e)}
-      className="membership-form-pdf w-full border-2 border-slate-900 bg-white text-left text-slate-900 shadow-[0_2px_0_0_rgba(15,23,42,0.06)] dark:bg-white"
+      className="membership-form-pdf w-full border-2 border-black bg-white text-left text-black shadow-sm"
       encType="multipart/form-data"
     >
-      {/* Digital-only: not on printed PDF */}
-      <div className="border-b-2 border-slate-900 bg-slate-100 px-4 py-4 dark:bg-slate-100">
-        <p className={`${L} text-slate-600`}>Online account (this website only)</p>
-        <p className="mt-2 text-[10px] leading-relaxed text-slate-700">
-          Choose a username and password to submit and track this application. Not shown
-          on the printable PDF.
+      <div className="border-b-2 border-black bg-neutral-100 px-3 py-3">
+        <p className={`${L} text-neutral-700`}>Online account (this website only)</p>
+        <p className="mt-1 text-[9px] uppercase leading-relaxed text-neutral-600">
+          Username and password for submitting this application — not part of the printed form.
         </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <div className="sm:col-span-2 lg:col-span-3">
             <label htmlFor="username" className={L}>
               Username <span className="text-red-600">*</span>
@@ -151,11 +181,8 @@ export function MemberSignupForm() {
               pattern="[a-zA-Z0-9._-]+"
               title="Letters, numbers, dots, underscores, and hyphens only"
               className={pdfLine}
-              placeholder="e.g. j.smith"
+              placeholder=""
             />
-            <p className="mt-1 text-[8px] uppercase tracking-wide text-slate-500">
-              3–32 characters: letters, numbers, dot, underscore, or hyphen.
-            </p>
           </div>
           <div>
             <label htmlFor="password" className={L}>
@@ -192,14 +219,14 @@ export function MemberSignupForm() {
         </div>
       </div>
 
-      <MembershipPdfMasthead />
+      <PaperMembershipHeader />
 
-      <div className="space-y-0 border-b-2 border-slate-900 px-4 py-4">
-        <div className="grid gap-4 sm:grid-cols-12">
-          <div className="sm:col-span-3">
-            <label htmlFor="regimentalNumber" className={L}>
-              Reg. no. <span className="text-red-600">*</span>
-            </label>
+      <div className="space-y-5 border-b-2 border-black px-3 py-4">
+        <div className="grid grid-cols-12 gap-x-2 gap-y-2">
+          <div className="col-span-6 sm:col-span-2">
+            <span className={L}>
+              Reg no <span className="text-red-600">*</span>
+            </span>
             <input
               id="regimentalNumber"
               name="regimentalNumber"
@@ -209,10 +236,10 @@ export function MemberSignupForm() {
               className={pdfLine}
             />
           </div>
-          <div className="sm:col-span-3">
-            <label htmlFor="rank" className={L}>
+          <div className="col-span-6 sm:col-span-3">
+            <span className={L}>
               Rank <span className="text-red-600">*</span>
-            </label>
+            </span>
             <input
               id="rank"
               name="rank"
@@ -222,10 +249,10 @@ export function MemberSignupForm() {
               className={pdfLine}
             />
           </div>
-          <div className="sm:col-span-6">
-            <label htmlFor="fullName" className={L}>
-              Name (forename and surname) <span className="text-red-600">*</span>
-            </label>
+          <div className="col-span-12 sm:col-span-7">
+            <span className={L}>
+              Name <span className="text-red-600">*</span>
+            </span>
             <input
               id="fullName"
               name="fullName"
@@ -234,13 +261,14 @@ export function MemberSignupForm() {
               required
               className={pdfLine}
             />
-            <p className="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-500">
-              Forename &nbsp;&nbsp;&nbsp; Surname
-            </p>
+            <div className="mt-1 flex justify-between text-[8px] font-bold uppercase tracking-widest text-black">
+              <span>Forename</span>
+              <span>Surname</span>
+            </div>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="departmentDivision" className={L}>
               Department / division <span className="text-red-600">*</span>
@@ -267,29 +295,29 @@ export function MemberSignupForm() {
           </div>
         </div>
 
-        <div className="mt-6">
+        <div>
           <label htmlFor="address" className={L}>
             Home address <span className="text-red-600">*</span>
           </label>
           <textarea
             id="address"
             name="address"
-            rows={4}
+            rows={3}
             required
             autoComplete="street-address"
-            className={`${pdfBox} min-h-[5rem] resize-y`}
+            className={`${pdfBox} min-h-[4.5rem] w-full resize-y border-dotted`}
           />
         </div>
 
-        <div className="mt-6">
+        <div>
           <p className={L}>Contact numbers</p>
-          <p className="mt-1 text-[8px] uppercase tracking-wide text-slate-500">
-            Country code applies once; enter local digits only for each line.
+          <p className="mt-1 text-[8px] font-bold uppercase text-neutral-600">
+            Country code (once) — local digits only per line
           </p>
-          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-2 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <label htmlFor="phoneCountryCode" className={L}>
-                Country code <span className="text-red-600">*</span>
+                Code <span className="text-red-600">*</span>
               </label>
               <select
                 id="phoneCountryCode"
@@ -297,7 +325,7 @@ export function MemberSignupForm() {
                 required
                 defaultValue={MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE}
                 autoComplete="tel-country-code"
-                className={pdfBox}
+                className={`${pdfBox} border-solid`}
               >
                 {MEMBERSHIP_PHONE_COUNTRY_CODES.map((c) => (
                   <option key={c.value} value={c.value}>
@@ -308,7 +336,7 @@ export function MemberSignupForm() {
             </div>
             <div>
               <label htmlFor="phoneHome" className={L}>
-                Home (optional)
+                Home
               </label>
               <input
                 id="phoneHome"
@@ -317,12 +345,11 @@ export function MemberSignupForm() {
                 inputMode="tel"
                 autoComplete="tel-national"
                 className={pdfLine}
-                placeholder="Local"
               />
             </div>
             <div>
               <label htmlFor="phoneWork" className={L}>
-                Work (optional)
+                Work
               </label>
               <input
                 id="phoneWork"
@@ -330,7 +357,6 @@ export function MemberSignupForm() {
                 type="tel"
                 inputMode="tel"
                 className={pdfLine}
-                placeholder="Local"
               />
             </div>
             <div>
@@ -345,13 +371,12 @@ export function MemberSignupForm() {
                 autoComplete="tel-national"
                 required
                 className={pdfLine}
-                placeholder="Local"
               />
             </div>
           </div>
         </div>
 
-        <div className="mt-6 grid gap-4 sm:grid-cols-12">
+        <div className="grid gap-4 sm:grid-cols-12">
           <div className="sm:col-span-2">
             <label htmlFor="age" className={L}>
               Age <span className="text-red-600">*</span>
@@ -363,36 +388,35 @@ export function MemberSignupForm() {
               inputMode="numeric"
               required
               className={pdfLine}
-              placeholder="e.g. 35"
             />
           </div>
-          <div className="sm:col-span-4">
+          <div className="sm:col-span-5">
             <span className={L}>
               Sex <span className="text-red-600">*</span>
             </span>
-            <div className="mt-3 flex flex-wrap gap-6">
-              <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-900">
+            <div className="mt-2 flex flex-wrap gap-6">
+              <label className="inline-flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase text-black">
                 <input
                   type="radio"
                   name="sex"
                   value="male"
                   required
-                  className="h-4 w-4 border-slate-900 text-slate-900 focus:ring-slate-900"
+                  className="h-3.5 w-3.5 border-2 border-black text-black focus:ring-black"
                 />
                 Male
               </label>
-              <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-900">
+              <label className="inline-flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase text-black">
                 <input
                   type="radio"
                   name="sex"
                   value="female"
-                  className="h-4 w-4 border-slate-900 text-slate-900 focus:ring-slate-900"
+                  className="h-3.5 w-3.5 border-2 border-black text-black focus:ring-black"
                 />
                 Female
               </label>
             </div>
           </div>
-          <div className="sm:col-span-6">
+          <div className="sm:col-span-5">
             <label htmlFor="email" className={L}>
               Email address <span className="text-red-600">*</span>
             </label>
@@ -407,7 +431,7 @@ export function MemberSignupForm() {
           </div>
         </div>
 
-        <div className="mt-6 grid gap-6 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2">
           <div>
             <label htmlFor="dateOfBirth" className={L}>
               Date of birth <span className="text-red-600">*</span>
@@ -419,8 +443,8 @@ export function MemberSignupForm() {
               required
               className={pdfLine}
             />
-            <p className="mt-1 text-[8px] font-bold uppercase tracking-wide text-slate-500">
-              Day / month / year
+            <p className="mt-1 text-center text-[8px] font-bold uppercase tracking-wide text-black">
+              Day/month/year
             </p>
           </div>
           <div>
@@ -434,37 +458,36 @@ export function MemberSignupForm() {
               required
               className={pdfLine}
             />
-            <p className="mt-1 text-[8px] font-bold uppercase tracking-wide text-slate-500">
-              Day / month / year
+            <p className="mt-1 text-center text-[8px] font-bold uppercase tracking-wide text-black">
+              Day/month/year
             </p>
           </div>
         </div>
 
-        <fieldset className="mt-6 border-2 border-slate-900 bg-slate-50 p-3 dark:bg-slate-50">
+        <fieldset className="border-2 border-black border-dotted bg-neutral-50 p-3">
           <legend className={`${L} px-1`}>
             Financial member <span className="text-red-600">*</span>
           </legend>
-          <p className="mb-2 text-[9px] uppercase tracking-wide text-slate-600">
-            Required for online processing (not shown as a separate line on the printable
-            PDF).
+          <p className="mb-2 text-[8px] font-bold uppercase text-neutral-600">
+            Required for online submission (not on printed PDF).
           </p>
           <div className="flex flex-wrap gap-8">
-            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-900">
+            <label className="inline-flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase text-black">
               <input
                 type="radio"
                 name="financialMember"
                 value="yes"
                 required
-                className="h-4 w-4 border-slate-900 text-slate-900 focus:ring-slate-900"
+                className="h-3.5 w-3.5 border-2 border-black text-black focus:ring-black"
               />
               Yes
             </label>
-            <label className="inline-flex cursor-pointer items-center gap-2 text-xs font-bold uppercase tracking-wide text-slate-900">
+            <label className="inline-flex cursor-pointer items-center gap-2 text-[10px] font-bold uppercase text-black">
               <input
                 type="radio"
                 name="financialMember"
                 value="no"
-                className="h-4 w-4 border-slate-900 text-slate-900 focus:ring-slate-900"
+                className="h-3.5 w-3.5 border-2 border-black text-black focus:ring-black"
               />
               No
             </label>
@@ -472,41 +495,35 @@ export function MemberSignupForm() {
         </fieldset>
       </div>
 
-      {/* Declaration — wording aligned to PDF */}
-      <div className="border-b-2 border-slate-900 px-4 py-4">
-        <p className={`${L} mb-3`}>Declaration</p>
-        <div className="space-y-3 border-2 border-slate-900 bg-white p-4 font-serif text-[13px] leading-relaxed text-slate-900 dark:bg-white">
+      <div className="border-b-2 border-black px-3 py-4">
+        <div className="space-y-3 text-[10px] font-bold uppercase leading-relaxed tracking-wide text-black">
           <p>
-            As a member of the Trinidad and Tobago Police Service I hereby apply for
-            membership with the Trinidad and Tobago Police Service Social and Welfare
-            Association.
+            As member of the Trinidad &amp; Tobago Police Service I hereby apply for membership with the
+            Trinidad &amp; Tobago Police Service Social &amp; Welfare Association.
           </p>
           <p>
-            Additionally, I authorize the monthly deductions from my salary of the sum
-            of one hundred and forty dollars ($140.00 TTD), being my subscription to the
-            Association.
+            Additionally, I authorize the monthly deductions from my salary of the sum of one hundred and
+            forty dollars ($140.00), being my subscription to the Association.
           </p>
         </div>
-        <label className="mt-4 flex cursor-pointer gap-3 border-2 border-slate-900 bg-slate-50 p-4 text-xs text-slate-900 dark:bg-slate-50">
+        <label className="mt-4 flex cursor-pointer gap-2 border-2 border-black border-dotted bg-neutral-50 p-3">
           <input
             type="checkbox"
             name="declarationMembership"
             value="yes"
             required
-            className="mt-0.5 h-4 w-4 shrink-0 border-slate-900 text-slate-900 focus:ring-slate-900"
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 border-2 border-black text-black focus:ring-black"
           />
-          <span className="font-bold uppercase leading-relaxed tracking-wide">
-            I confirm that I have read and agree to the statements above regarding my
-            membership application and the $140.00 monthly salary deduction.{" "}
+          <span className="text-[9px] font-bold uppercase leading-relaxed tracking-wide text-black">
+            I confirm the statements above and the $140.00 monthly deduction.{" "}
             <span className="text-red-600">*</span>
           </span>
         </label>
       </div>
 
-      <div className="border-b-2 border-slate-900 px-4 py-4">
+      <div className="border-b-2 border-black px-3 py-4">
         <label htmlFor="applicationDateSigned" className={L}>
-          Dated this application (day / month / year){" "}
-          <span className="text-red-600">*</span>
+          Dated this <span className="text-red-600">*</span>
         </label>
         <input
           id="applicationDateSigned"
@@ -514,30 +531,33 @@ export function MemberSignupForm() {
           type="date"
           required
           defaultValue={todaySigned}
-          className={`${pdfLine} mt-2 max-w-xs`}
+          className={`${pdfLine} mt-1 max-w-xs`}
         />
-        <p className="mt-4 text-[10px] font-serif italic leading-relaxed text-slate-800">
-          Submitting this application online constitutes your electronic signature as the
-          applicant in place of a handwritten signature on the printed form.
-        </p>
+        <div className="mt-2 flex flex-wrap justify-between gap-2 text-[8px] font-bold uppercase text-black sm:max-w-lg">
+          <span>(Weekday)</span>
+          <span>(Date)</span>
+          <span>(Month)</span>
+          <span>(Year)</span>
+        </div>
+        <div className="mt-4">
+          <p className={L}>Signature of applicant</p>
+          <div className="mt-1 border-b border-dotted border-black pb-4" />
+          <p className="mt-4 text-[8px] font-bold uppercase text-neutral-700">
+            Online submission counts as your electronic signature in place of a handwritten signature.
+          </p>
+        </div>
       </div>
 
-      {/* Nomination of beneficiary — PDF layout */}
-      <div className="border-b-2 border-slate-900 px-4 py-4">
-        <p className={`${L} mb-2`}>Nomination of beneficiary</p>
-        <p className="mb-4 text-[10px] font-serif leading-relaxed text-slate-800">
-          For the purpose of the Death Benefit as provided by the rules of the Trinidad
-          &amp; Tobago Police Service Social Welfare Association.
+      <div className="border-b-2 border-black px-3 py-4">
+        <h3 className="text-center text-[11px] font-bold uppercase tracking-wide text-black underline decoration-2 underline-offset-4">
+          Nomination of beneficiary
+        </h3>
+        <p className="mt-4 text-[10px] font-bold uppercase leading-relaxed text-black">
+          I, the applicant named above, do hereby nominate:
         </p>
-        <p className="text-[11px] font-serif leading-relaxed text-slate-900">
-          I, the applicant named above, do hereby nominate the following person as my
-          beneficiary:
-        </p>
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
           <div>
-            <label htmlFor="beneficiaryRegimentalNumber" className={L}>
-              Beneficiary reg. no. (optional)
-            </label>
+            <span className={L}>Reg no (optional)</span>
             <input
               id="beneficiaryRegimentalNumber"
               name="beneficiaryRegimentalNumber"
@@ -546,15 +566,8 @@ export function MemberSignupForm() {
             />
           </div>
           <div>
-            <label htmlFor="beneficiaryRank" className={L}>
-              Beneficiary rank (optional)
-            </label>
-            <input
-              id="beneficiaryRank"
-              name="beneficiaryRank"
-              type="text"
-              className={pdfLine}
-            />
+            <span className={L}>Rank (optional)</span>
+            <input id="beneficiaryRank" name="beneficiaryRank" type="text" className={pdfLine} />
           </div>
           <div className="sm:col-span-3">
             <label htmlFor="beneficiaryFullName" className={L}>
@@ -569,10 +582,10 @@ export function MemberSignupForm() {
             />
           </div>
         </div>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div>
             <label htmlFor="beneficiaryRelationship" className={L}>
-              He/she is my (relationship) <span className="text-red-600">*</span>
+              He/she is my <span className="text-red-600">*</span>
             </label>
             <input
               id="beneficiaryRelationship"
@@ -581,10 +594,11 @@ export function MemberSignupForm() {
               required
               className={pdfLine}
             />
+            <p className="mt-0.5 text-[8px] font-bold uppercase text-black">(Relationship)</p>
           </div>
           <div>
             <label htmlFor="beneficiaryIdNumber" className={L}>
-              ID / DP / PP no. <span className="text-red-600">*</span>
+              With ID/DP/PP no. <span className="text-red-600">*</span>
             </label>
             <input
               id="beneficiaryIdNumber"
@@ -595,55 +609,54 @@ export function MemberSignupForm() {
             />
           </div>
         </div>
-        <p className="mt-4 text-[11px] font-serif leading-relaxed text-slate-900">
-          As my beneficiary for the purpose of &ldquo;Death Benefit&rdquo; as provided for
-          by the rules of the Trinidad &amp; Tobago Police Service Social &amp; Welfare
-          Association.
+        <p className="mt-4 text-[10px] font-bold uppercase leading-relaxed text-black">
+          As my beneficiary for the purpose of &ldquo;Death Benefit&rdquo; as provided for by the rules of
+          the Trinidad &amp; Tobago Police Service Social &amp; Welfare Association.
+        </p>
+        <div className="mt-5 space-y-3">
+          <div>
+            <p className={L}>Signature of applicant</p>
+            <div className="mt-1 border-b border-dotted border-black pb-3" />
+            <p className="mt-1 text-[8px] font-bold uppercase text-black">Date</p>
+          </div>
+          <div>
+            <label htmlFor="witnessName" className={L}>
+              Witness to signature of applicant (optional)
+            </label>
+            <input id="witnessName" name="witnessName" type="text" className={pdfLine} />
+            <p className="mt-1 text-[8px] font-bold uppercase text-black">Date</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2 border-b-2 border-black px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[8px] font-bold uppercase text-black">Nov 2023</p>
+        <p className="text-center text-[8px] font-bold uppercase leading-tight text-red-600 underline decoration-1 sm:flex-1">
+          N.B. Only upon acceptance as a member. You will be entitled to the benefits.
+        </p>
+        <span className="hidden w-16 sm:block" aria-hidden />
+      </div>
+
+      <div className="px-3 py-3">
+        <p className={L}>Facial photograph</p>
+        <p className="mt-1 text-[9px] font-bold uppercase leading-relaxed text-neutral-700">
+          Use the photo panel: Take your picture or upload. JPG, PNG, or WebP. Max 900 KB.{" "}
+          <span className="text-red-600">*</span>
         </p>
       </div>
 
-      <div className="border-b-2 border-slate-900 px-4 py-4">
-        <label htmlFor="witnessName" className={L}>
-          Witness to signature of applicant (optional)
-        </label>
-        <input
-          id="witnessName"
-          name="witnessName"
-          type="text"
-          className={pdfLine}
-          placeholder="Name of witness, if applicable"
-        />
-      </div>
-
-      <div className="border-b-2 border-slate-900 bg-slate-50 px-4 py-3 dark:bg-slate-50">
-        <p className="text-center text-[9px] font-bold uppercase leading-relaxed tracking-wide text-slate-800">
-          N.B. Only upon acceptance as a member, you will be entitled to the benefits.
-        </p>
-      </div>
-
-      <div className="px-4 py-4">
-        <p className={`${L} mb-2`}>Facial photograph</p>
-        <p className="text-[11px] leading-relaxed text-slate-800">
-          Upload your facial photo using the <strong>photo panel</strong> on the right
-          (desktop) or below the form (mobile): use{" "}
-          <strong className="font-semibold text-slate-900">Take your picture</strong> or
-          choose a file. Clear, recent face photo. JPG, PNG, or WebP. Maximum{" "}
-          <strong>900 KB</strong>.
-        </p>
-      </div>
-
-      <div className="border-t-2 border-slate-900 bg-slate-50 px-4 py-4 dark:bg-slate-50">
-        <p className="text-[9px] leading-relaxed text-slate-600">
-          This online form follows the official{" "}
+      <div className="border-t border-black bg-neutral-100 px-3 py-2">
+        <p className="text-[8px] font-bold uppercase leading-relaxed text-neutral-600">
+          Printable reference:{" "}
           <a
             href="/forms/MEMBERSHIP APPLICATION.pdf"
-            className="font-bold text-slate-900 underline"
+            className="text-black underline"
             target="_blank"
             rel="noopener noreferrer"
           >
             Membership application (PDF)
           </a>
-          . Password is stored securely and is not visible to administrators as plain text.
+          . Password is stored securely.
         </p>
       </div>
 
@@ -652,31 +665,23 @@ export function MemberSignupForm() {
           role="status"
           className={
             status === "success"
-              ? "border-t border-green-700 bg-green-50 px-4 py-3 text-sm text-green-950"
-              : "border-t border-red-700 bg-red-50 px-4 py-3 text-sm text-red-950"
+              ? "border-t border-green-700 bg-green-50 px-3 py-3 text-sm text-green-950"
+              : "border-t border-red-700 bg-red-50 px-3 py-3 text-sm text-red-950"
           }
         >
           {message}
         </p>
       ) : null}
 
-      <div className="flex flex-col gap-4 border-t-2 border-slate-900 bg-white px-4 py-6 sm:flex-row sm:items-center sm:justify-between dark:bg-white">
-        <p className="text-[9px] font-medium uppercase leading-relaxed tracking-wide text-slate-600">
-          By submitting, you confirm that the information provided is accurate to the best
-          of your knowledge. Need help? See{" "}
-          <Link
-            href="/membership-services"
-            className="font-bold text-slate-900 underline decoration-slate-400"
-          >
+      <div className="flex flex-col gap-3 border-t-2 border-black bg-white px-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-[8px] font-bold uppercase leading-relaxed text-neutral-600">
+          By submitting you confirm the information is accurate.{" "}
+          <Link href="/membership-services" className="text-black underline">
             Membership services
           </Link>
           .
         </p>
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          className="site-btn-submit"
-        >
+        <button type="submit" disabled={status === "loading"} className="site-btn-submit">
           {status === "loading" ? "Submitting…" : "Submit application"}
         </button>
       </div>

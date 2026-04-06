@@ -19,10 +19,8 @@ function validateOptionalPhoneDigits(digitsStr: string, label: string): string |
 }
 
 export async function POST(request: Request) {
-  let formData: FormData;
-  try {
-    formData = await request.formData();
-  } catch {
+  const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
+  if (!formData) {
     return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
   }
 
