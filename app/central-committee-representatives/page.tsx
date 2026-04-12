@@ -38,16 +38,17 @@ export default function CentralCommitteeIndexPage() {
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
               Choose a division or section to view the representative profile and contact details.
             </p>
+            <div className="mt-10 border-t border-white/10" aria-hidden />
           </div>
         </section>
-        <section className="border-b border-line bg-[#e8ecf1] py-12 dark:bg-slate-900">
+        <section className="border-b border-line bg-navy py-12 text-white">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
               {CENTRAL_COMMITTEE_REGIONS.map((r) => (
                 <li key={r.slug}>
                   <Link
                     href={`/central-committee-representatives/${r.slug}`}
-                    className="block rounded-xl border border-line bg-white px-4 py-3 text-sm font-semibold text-ink shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    className="block min-h-[4.25rem] rounded-xl border border-white/10 bg-slate-950/80 px-4 py-4 text-sm font-semibold text-white shadow-sm transition hover:border-sky-400/35 hover:bg-slate-900/90"
                   >
                     {r.name}
                   </Link>

@@ -13,8 +13,8 @@ export default function BeethamNpServiceStationPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-slate-950 pt-[var(--site-header-stack)] text-slate-100">
-        <section className="relative overflow-hidden border-b border-slate-800 bg-navy text-white">
+      <main className="pt-[var(--site-header-stack)]">
+        <section className="relative overflow-hidden border-b border-line bg-navy text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-50"
             aria-hidden
@@ -36,10 +36,11 @@ export default function BeethamNpServiceStationPage() {
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
               Select a committee to view details. More information can be added for each group as it becomes available.
             </p>
+            <div className="mt-10 border-t border-white/10" aria-hidden />
           </div>
         </section>
 
-        <section className="border-b border-slate-800 py-12 sm:py-14">
+        <section className="border-b border-line bg-navy py-12 text-white">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <CommitteesSection />
           </div>

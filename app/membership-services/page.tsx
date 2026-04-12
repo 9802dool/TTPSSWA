@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MembersBenefitsBlock } from "@/components/MembersBenefitsBlock";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { MEMBER_BENEFITS, MEMBER_BENEFITS_PILLAR } from "@/lib/member-benefits-data";
 
 export const metadata: Metadata = {
   title: "Membership services | TTPSSWA",
@@ -34,23 +34,32 @@ export default function MembershipServicesPage() {
             </p>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Membership services</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              Programs for financial members: benefits overview and links to apply for grants, loans, legal aid, and
-              more.
+              {MEMBER_BENEFITS_PILLAR.body}
             </p>
+            <div className="mt-10 border-t border-white/10" aria-hidden />
           </div>
         </section>
         <section
           id="members-benefits"
-          className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-navy py-14 text-white"
+          className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-navy py-12 text-white"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-center text-2xl font-bold">Member benefits</h2>
+            <h2 className="text-center text-2xl font-bold">{MEMBER_BENEFITS_PILLAR.title}</h2>
             <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-slate-400">
-              Expand each item for details and application links.
+              Choose a benefit to open the full page with details and application links.
             </p>
-            <div className="mt-10 flex justify-center">
-              <MembersBenefitsBlock variant="dark" />
-            </div>
+            <ul className="mt-10 grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+              {MEMBER_BENEFITS.map((b) => (
+                <li key={b.number}>
+                  <Link
+                    href={`/membership-services/${b.number}`}
+                    className="block min-h-[4.25rem] rounded-xl border border-white/10 bg-slate-950/80 px-4 py-4 text-sm font-semibold text-white shadow-sm transition hover:border-sky-400/35 hover:bg-slate-900/90"
+                  >
+                    {b.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       </main>

@@ -1,7 +1,7 @@
 export const MEMBER_BENEFITS_PILLAR = {
   title: "Members Benefits",
   body:
-    "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Use a benefit button below to read full details.",
+    "These benefits are how we support members: legal aid, optical and dental grants, death and retirement benefits, health plans, education and scholarships, housing and land programs, business promotion, tokens, and more. Choose a benefit below to open its full page.",
 } as const;
 
 export const MEMBER_BENEFITS: { number: number; title: string }[] = [
@@ -28,3 +28,9 @@ export const MEMBER_BENEFITS: { number: number; title: string }[] = [
   { number: 18, title: "Membership Discount Card" },
   { number: 19, title: "End of Year Membership Token" },
 ];
+
+export function getMemberBenefitByBenefitId(benefitId: string) {
+  const n = Number.parseInt(benefitId, 10);
+  if (!Number.isFinite(n)) return undefined;
+  return MEMBER_BENEFITS.find((b) => b.number === n);
+}
