@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CommitteesSection } from "@/components/CommitteesSection";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
-  title: "Beetham NP Service Station | TTPSSWA",
-  description: "TTPSSWA subsidiary — Beetham NP Service Station.",
+  title: "Committees | TTPSSWA",
+  description: "TTPSSWA committees — Education, Events, Welfare, and more.",
 };
 
 export default function BeethamNpServiceStationPage() {
   return (
     <>
       <SiteHeader />
-      <main className="pt-[var(--site-header-stack)]">
-        <section className="relative overflow-hidden border-b border-line bg-navy text-white">
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-slate-950 pt-[var(--site-header-stack)] text-slate-100">
+        <section className="relative overflow-hidden border-b border-slate-800 bg-navy text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-50"
             aria-hidden
@@ -22,7 +23,7 @@ export default function BeethamNpServiceStationPage() {
                 "linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)",
             }}
           />
-          <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+          <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
             <p className="mb-4">
               <Link
                 href="/"
@@ -31,10 +32,16 @@ export default function BeethamNpServiceStationPage() {
                 ← Home
               </Link>
             </p>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Beetham NP Service Station</h1>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Committees</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              TTPSSWA subsidiary location. Member offers and information will be posted here as they become available.
+              Select a committee to view details. More information can be added for each group as it becomes available.
             </p>
+          </div>
+        </section>
+
+        <section className="border-b border-slate-800 py-12 sm:py-14">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <CommitteesSection />
           </div>
         </section>
       </main>
