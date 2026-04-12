@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ExecutiveTeamGrid } from '@/components/ExecutiveTeamGrid';
-import { MembersBenefitsBlock } from '@/components/MembersBenefitsBlock';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
 
@@ -84,10 +83,10 @@ export default function HomePage({ searchParams }: HomePageProps) {
                 Central committee
               </Link>
               <Link
-                href="/hotel-reservations"
+                href="/beetham-np-service-station"
                 className="inline-flex rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
-                Beetam NP Service Station
+                Beetham NP Service Station
               </Link>
               <Link
                 href="/rule-book"
@@ -106,40 +105,45 @@ export default function HomePage({ searchParams }: HomePageProps) {
               className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-[#e8ecf1] py-14 dark:bg-slate-900"
             >
               <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <h2 className="text-center text-2xl font-bold text-ink dark:text-white">
-                  Subsidiaries &amp; services
-                </h2>
+                <h2 className="text-center text-2xl font-bold text-ink dark:text-white">Subsidiaries</h2>
                 <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted dark:text-slate-400">
-                  Association subsidiaries and partner services.
+                  Association subsidiary locations and partner venues.
                 </p>
-                <ul className="mx-auto mt-10 grid max-w-xl gap-4">
+                <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   <li>
                     <Link
-                      href="/hotel-reservations"
+                      href="/beetham-np-service-station"
                       className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
                     >
-                      <h3 className="font-bold text-ink dark:text-white">Beetam NP Service Station</h3>
+                      <h3 className="font-bold text-ink dark:text-white">Beetham NP Service Station</h3>
                       <p className="mt-2 text-sm text-muted dark:text-slate-400">
                         TTPSSWA subsidiary — member offers and information.
                       </p>
                     </Link>
                   </li>
+                  <li>
+                    <Link
+                      href="/laventille-np-service-station"
+                      className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
+                    >
+                      <h3 className="font-bold text-ink dark:text-white">Laventille NP Service Station</h3>
+                      <p className="mt-2 text-sm text-muted dark:text-slate-400">
+                        TTPSSWA subsidiary — member offers and information.
+                      </p>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/noel-chase-hotel-and-conference-centre"
+                      className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
+                    >
+                      <h3 className="font-bold text-ink dark:text-white">Noel Chase Hotel and Conference Centre</h3>
+                      <p className="mt-2 text-sm text-muted dark:text-slate-400">
+                        Accommodation, conference facilities, and member booking.
+                      </p>
+                    </Link>
+                  </li>
                 </ul>
-              </div>
-            </section>
-
-            <section
-              id="members-benefits"
-              className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-navy py-14 text-white"
-            >
-              <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <h2 className="text-center text-2xl font-bold">Member benefits</h2>
-                <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-slate-400">
-                  Programs and support available to financial members.
-                </p>
-                <div className="mt-10 flex justify-center">
-                  <MembersBenefitsBlock variant="dark" />
-                </div>
               </div>
             </section>
           </>
