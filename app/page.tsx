@@ -11,11 +11,6 @@ export const metadata: Metadata = {
     'Trinidad and Tobago Police Service Social & Welfare Association — member benefits, executive team, and services.',
 };
 
-const tabActiveClass =
-  'relative rounded-t-xl border border-b-0 border-line bg-white px-4 py-3 text-sm font-bold text-ink shadow-sm dark:border-slate-600 dark:bg-slate-950 dark:text-white';
-const tabIdleClass =
-  'rounded-t-xl border border-transparent px-4 py-3 text-sm font-semibold text-muted transition hover:text-ink dark:text-slate-400 dark:hover:text-white';
-
 type HomePageProps = {
   searchParams: { tab?: string | string[] };
 };
@@ -34,30 +29,6 @@ export default function HomePage({ searchParams }: HomePageProps) {
     <>
       <SiteHeader />
       <main className="pt-[var(--site-header-stack)]">
-        <nav
-          className="sticky top-[var(--site-header-stack)] z-40 border-b border-line bg-[#e8ecf1]/95 backdrop-blur-md dark:border-slate-700 dark:bg-slate-900/95"
-          aria-label="Home sections"
-        >
-          <div className="mx-auto flex max-w-6xl gap-1 px-4 pt-3 sm:px-6 sm:pt-4 lg:px-8">
-            <Link
-              href="/"
-              scroll={false}
-              className={tab === 'executive' ? tabActiveClass : tabIdleClass}
-              aria-current={tab === 'executive' ? 'page' : undefined}
-            >
-              Executive team
-            </Link>
-            <Link
-              href="/?tab=services"
-              scroll={false}
-              className={tab === 'overview' ? tabActiveClass : tabIdleClass}
-              aria-current={tab === 'overview' ? 'page' : undefined}
-            >
-              Services &amp; benefits
-            </Link>
-          </div>
-        </nav>
-
         <section className="relative overflow-hidden border-b border-line bg-navy text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-50"
