@@ -1,13 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PartnershipPillars } from "@/components/PartnershipPillars";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+
+const PARTNERSHIP_CARDS = [
+  { slug: "hardware-and-beyond", label: "Hardware and Beyond" },
+  { slug: "antar-auto-repairs-and-parts", label: "Antar Auto" },
+  { slug: "dream-builder-colour-studio-ltd", label: "Dream Builder Colour Studio Ltd" },
+] as const;
 
 export const metadata: Metadata = {
   title: "Partnership | TTPSSWA",
   description:
-    "TTPSSWA corporate partners — Hardware and Beyond, Antar auto Repairs And Parts, Dream Builder Colour Studio Ltd, and more.",
+    "TTPSSWA corporate partners — Hardware and Beyond, Antar Auto, Dream Builder Colour Studio Ltd.",
 };
 
 export default function PartnershipPage() {
@@ -33,31 +38,31 @@ export default function PartnershipPage() {
                 ← Home
               </Link>
             </p>
-            <p className="mb-3 inline-flex rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-300">
-              Partnership
-            </p>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Working together
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Partnership</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              Corporate partners, sponsors, and collaborative programs that support
-              TTPSSWA members.
+              Choose a partner below to open their profile, offers, and contact details.
             </p>
+            <div className="mt-10 border-t border-white/10" aria-hidden />
           </div>
         </section>
 
         <section
           id="partnership-programs"
-          className="scroll-mt-24 border-b border-line bg-surface py-12 dark:bg-canvas"
+          className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-navy py-12 text-white"
         >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-lg font-bold tracking-tight text-ink md:text-xl">
-              Partnership programs
-            </h2>
-            <p className="mt-2 text-sm text-muted">
-              Open a program below for its full page.
-            </p>
-            <PartnershipPillars />
+            <ul className="grid list-none gap-3 p-0 sm:grid-cols-2 lg:grid-cols-3">
+              {PARTNERSHIP_CARDS.map((p) => (
+                <li key={p.slug}>
+                  <Link
+                    href={`/partnership/${p.slug}`}
+                    className="block min-h-[4.25rem] rounded-xl border border-white/10 bg-slate-950/80 px-4 py-4 text-sm font-semibold text-white shadow-sm transition hover:border-sky-400/35 hover:bg-slate-900/90"
+                  >
+                    {p.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       </main>
