@@ -72,10 +72,22 @@ export default function HomePage({ searchParams }: HomePageProps) {
                 Become a member
               </Link>
               <Link
+                href="/membership-services"
+                className="inline-flex rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Membership services
+              </Link>
+              <Link
+                href="/central-committee-representatives"
+                className="inline-flex rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              >
+                Central committee
+              </Link>
+              <Link
                 href="/hotel-reservations"
                 className="inline-flex rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
-                Hotel reservations
+                Beetam NP Service Station
               </Link>
               <Link
                 href="/rule-book"
@@ -98,38 +110,18 @@ export default function HomePage({ searchParams }: HomePageProps) {
                   Subsidiaries &amp; services
                 </h2>
                 <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted dark:text-slate-400">
-                  Hotel reservations, membership benefits, salary deduction, and more.
+                  Association subsidiaries and partner services.
                 </p>
-                <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <ul className="mx-auto mt-10 grid max-w-xl gap-4">
                   <li>
                     <Link
                       href="/hotel-reservations"
                       className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
                     >
-                      <h3 className="font-bold text-ink dark:text-white">Hotel reservations</h3>
+                      <h3 className="font-bold text-ink dark:text-white">Beetam NP Service Station</h3>
                       <p className="mt-2 text-sm text-muted dark:text-slate-400">
-                        Book association accommodations.
+                        TTPSSWA subsidiary — member offers and information.
                       </p>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/membership-services"
-                      className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
-                    >
-                      <h3 className="font-bold text-ink dark:text-white">Membership services</h3>
-                      <p className="mt-2 text-sm text-muted dark:text-slate-400">
-                        Benefits, grants, and applications.
-                      </p>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/central-committee-representatives"
-                      className="block rounded-2xl border border-line bg-white p-6 shadow-sm transition hover:border-brand dark:border-slate-700 dark:bg-slate-950"
-                    >
-                      <h3 className="font-bold text-ink dark:text-white">Central committee</h3>
-                      <p className="mt-2 text-sm text-muted dark:text-slate-400">Regional representatives.</p>
                     </Link>
                   </li>
                 </ul>
