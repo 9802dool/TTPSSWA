@@ -66,13 +66,13 @@ export default function HomePage() {
                 href="/central-committee-representatives"
                 className="inline-flex rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
-                Central committee
+                Central Committee Reps
               </Link>
               <Link
-                href="/beetham-np-service-station"
+                href="/committees"
                 className="inline-flex rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
-                Beetham NP Service Station
+                Committees
               </Link>
               <Link
                 href="/rule-book"
