@@ -13,7 +13,7 @@ export default function ExecutivePage() {
   return (
     <>
       <SiteHeader />
-      <main className="bg-slate-950 pt-[var(--site-header-stack)] text-slate-100">
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-slate-950 pt-[var(--site-header-stack)] text-slate-100">
         <section className="relative overflow-hidden border-b border-slate-800 bg-navy text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-50"

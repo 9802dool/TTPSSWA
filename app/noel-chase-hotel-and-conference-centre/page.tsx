@@ -28,10 +28,10 @@ export default function NoelChaseHotelPage() {
             <div>
               <p className="mb-6">
                 <Link
-                  href="/?tab=services#subsidiaries"
+                  href="/"
                   className="inline-flex text-sm font-medium text-sky-200 underline-offset-4 transition hover:text-white hover:underline"
                 >
-                  ← Subsidiaries
+                  ← Home
                 </Link>
               </p>
               <div className="flex items-center gap-2 text-xs text-slate-300">

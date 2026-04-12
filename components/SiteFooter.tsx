@@ -22,7 +22,7 @@ export default function SiteFooter() {
             </p>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
-                <Link href="/#about" className="transition hover:text-white">
+                <Link href="/about" className="transition hover:text-white">
                   About
                 </Link>
               </li>

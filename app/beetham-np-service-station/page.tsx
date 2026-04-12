@@ -25,10 +25,10 @@ export default function BeethamNpServiceStationPage() {
           <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
             <p className="mb-4">
               <Link
-                href="/?tab=services#subsidiaries"
+                href="/"
                 className="inline-flex text-sm font-medium text-sky-200 underline-offset-4 transition hover:text-white hover:underline"
               >
-                ← Subsidiaries
+                ← Home
               </Link>
             </p>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Beetham NP Service Station</h1>
