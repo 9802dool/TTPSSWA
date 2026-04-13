@@ -11,22 +11,22 @@ export const metadata: Metadata = {
 
 const PILLARS = [
   {
-    title: "Hardware and Beyond",
-    href: "/subsidiaries/hardware-and-beyond",
+    title: "Noel Chase Hotel Tobago",
+    href: "/noel-chase-hotel-and-conference-centre",
     description:
-      "Hardware supplies and related services for members; further details and offers can be published here as they are finalized.",
+      "Accommodation and conference facilities for members and guests; reservations and details are available on the hotel page.",
   },
   {
-    title: "Antar Auto",
-    href: "/subsidiaries/antar-auto",
+    title: "TTPSSWA NP Service Station Beetham Highway",
+    href: "/beetham-np-service-station",
     description:
-      "Automotive services and member benefits through this subsidiary; information will appear here as programs are confirmed.",
+      "TTPSSWA subsidiary location on the Beetham Highway. Member offers and information will be posted here as they become available.",
   },
   {
-    title: "Dream Builders Color Studio",
-    href: "/subsidiaries/dream-builders-color-studio",
+    title: "TTPSSWA NP Service Station Laventille",
+    href: "/laventille-np-service-station",
     description:
-      "Colour and finishing solutions for projects supporting the association’s mission; updates can be added here when available.",
+      "TTPSSWA subsidiary location in Laventille. Member offers and information will be posted here as they become available.",
   },
 ] as const;
 
