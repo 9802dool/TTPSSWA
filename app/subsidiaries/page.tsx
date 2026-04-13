@@ -12,16 +12,19 @@ export const metadata: Metadata = {
 const PILLARS = [
   {
     title: "Hardware and Beyond",
+    href: "/subsidiaries/hardware-and-beyond",
     description:
       "Hardware supplies and related services for members; further details and offers can be published here as they are finalized.",
   },
   {
     title: "Antar Auto",
+    href: "/subsidiaries/antar-auto",
     description:
       "Automotive services and member benefits through this subsidiary; information will appear here as programs are confirmed.",
   },
   {
     title: "Dream Builders Color Studio",
+    href: "/subsidiaries/dream-builders-color-studio",
     description:
       "Colour and finishing solutions for projects supporting the association’s mission; updates can be added here when available.",
   },
@@ -74,10 +77,16 @@ export default function SubsidiariesPage() {
             <ul className="mt-10 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
               {PILLARS.map((pillar) => (
                 <li key={pillar.title}>
-                  <article className="flex h-full flex-col rounded-xl border border-slate-700/80 bg-slate-900/60 px-5 py-6 shadow-sm transition hover:border-sky-500/35 hover:bg-slate-900/90">
-                    <h3 className="text-lg font-semibold text-white">{pillar.title}</h3>
+                  <Link
+                    href={pillar.href}
+                    className="group flex h-full flex-col rounded-xl border border-slate-700/80 bg-slate-900/60 px-5 py-6 shadow-sm transition hover:border-sky-500/35 hover:bg-slate-900/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-400"
+                  >
+                    <span className="text-lg font-semibold text-white group-hover:text-sky-100">{pillar.title}</span>
                     <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-400">{pillar.description}</p>
-                  </article>
+                    <span className="mt-4 text-sm font-medium text-sky-400 group-hover:text-sky-300">
+                      View details →
+                    </span>
+                  </Link>
                 </li>
               ))}
             </ul>
