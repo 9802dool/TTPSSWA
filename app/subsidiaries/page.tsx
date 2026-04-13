@@ -9,6 +9,24 @@ export const metadata: Metadata = {
     "Subsidiaries and related entities of the Trinidad and Tobago Police Service Social & Welfare Association.",
 };
 
+const PILLARS = [
+  {
+    title: "Hardware and Beyond",
+    description:
+      "Hardware supplies and related services for members; further details and offers can be published here as they are finalized.",
+  },
+  {
+    title: "Antar Auto",
+    description:
+      "Automotive services and member benefits through this subsidiary; information will appear here as programs are confirmed.",
+  },
+  {
+    title: "Dream Builders Color Studio",
+    description:
+      "Colour and finishing solutions for projects supporting the association’s mission; updates can be added here when available.",
+  },
+] as const;
+
 export default function SubsidiariesPage() {
   return (
     <>
@@ -38,11 +56,31 @@ export default function SubsidiariesPage() {
             </p>
           </div>
         </section>
-        <section className="border-b border-slate-800 bg-slate-950 py-14">
+        <section
+          id="pillars"
+          className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-slate-800 bg-slate-950 py-14"
+          aria-labelledby="subsidiaries-pillars-heading"
+        >
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <p className="max-w-3xl text-base leading-relaxed text-slate-400">
-              Content for this section can be added when details are ready.
+            <h2
+              id="subsidiaries-pillars-heading"
+              className="text-xl font-bold tracking-tight text-white md:text-2xl"
+            >
+              Three pillars
+            </h2>
+            <p className="mt-3 max-w-3xl text-base leading-relaxed text-slate-400">
+              TTPSSWA subsidiaries at a glance—edit descriptions anytime as specifics are confirmed.
             </p>
+            <ul className="mt-10 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
+              {PILLARS.map((pillar) => (
+                <li key={pillar.title}>
+                  <article className="flex h-full flex-col rounded-xl border border-slate-700/80 bg-slate-900/60 px-5 py-6 shadow-sm transition hover:border-sky-500/35 hover:bg-slate-900/90">
+                    <h3 className="text-lg font-semibold text-white">{pillar.title}</h3>
+                    <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-400">{pillar.description}</p>
+                  </article>
+                </li>
+              ))}
+            </ul>
           </div>
         </section>
       </main>
