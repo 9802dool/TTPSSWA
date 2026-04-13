@@ -4,12 +4,12 @@ import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
-  title: "Subsidaries | TTPSSWA",
+  title: "Subsidiaries | TTPSSWA",
   description:
-    "Subsidaries and related entities of the Trinidad and Tobago Police Service Social & Welfare Association.",
+    "Subsidiaries and related entities of the Trinidad and Tobago Police Service Social & Welfare Association.",
 };
 
-export default function SubsidariesPage() {
+export default function SubsidiariesPage() {
   return (
     <>
       <SiteHeader />
@@ -32,7 +32,7 @@ export default function SubsidariesPage() {
                 ← Home
               </Link>
             </p>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Subsidaries</h1>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Subsidiaries</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
               Information about TTPSSWA subsidiaries and related entities will appear here.
             </p>
