@@ -18,15 +18,15 @@ export default function SiteHeader() {
     <header className="fixed inset-x-0 top-0 z-50 shadow-corp">
       <PromoBanner />
       <div className="border-b border-line bg-white/95 backdrop-blur-md dark:bg-white/90">
-        <div className="mx-auto flex min-h-[4.25rem] max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
-          <Link href="/" className="flex shrink-0 items-center bg-transparent py-1">
+        <div className="mx-auto flex min-h-[5.25rem] max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
+          <Link href="/" className="flex shrink-0 items-center bg-transparent py-0.5">
             <Image
               src="/logo.png"
               alt="TTPSSWA"
-              width={200}
-              height={200}
+              width={400}
+              height={400}
               priority
-              className="h-10 w-auto object-contain object-left sm:h-11 md:h-12"
+              className="h-12 w-auto object-contain object-left sm:h-14 md:h-16 lg:h-[4.5rem]"
             />
           </Link>
           <nav
