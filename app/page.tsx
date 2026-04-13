@@ -14,16 +14,23 @@ export default function HomePage() {
     <>
       <SiteHeader />
       <main className="pt-[var(--site-header-stack)]">
-        <section className="relative mx-auto flex min-h-[28rem] w-full max-w-[1920px] flex-col justify-center overflow-hidden border-b border-line bg-navy text-white sm:min-h-[34rem] md:min-h-[42rem] lg:min-h-[1080px]">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-50"
+        <section className="relative mx-auto flex min-h-[28rem] w-full max-w-[1920px] flex-col justify-center overflow-hidden border-b border-line bg-navy text-white sm:min-h-[34rem] md:min-h-[42rem] lg:aspect-video lg:min-h-0">
+          <video
+            className="absolute inset-0 z-0 h-full w-full object-cover object-center"
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
             aria-hidden
-            style={{
-              backgroundImage:
-                'linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)',
-            }}
+          >
+            <source src="/homepage-add.mp4" type="video/mp4" />
+          </video>
+          <div
+            className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-navy/80 via-navy/55 to-[rgb(30_58_95)]/50"
+            aria-hidden
           />
-          <div className="relative mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
+          <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-20">
             <p className="mx-auto max-w-2xl text-center text-lg leading-relaxed text-slate-300 md:mx-0 md:text-left">
               Advocacy, benefits, and community for officers. Apply online, explore member services, and meet the
               executive team.
