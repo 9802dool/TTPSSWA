@@ -46,7 +46,7 @@ export default async function CommitteeDetailPage({ params }: Props) {
           <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
             <p className="mb-4">
               <Link
-                href="/beetham-np-service-station"
+                href="/committees"
                 className="inline-flex text-sm font-medium text-sky-200 underline-offset-4 transition hover:text-white hover:underline"
               >
                 ← All committees

@@ -8,6 +8,11 @@ const nextConfig = {
         destination: "/subsidiaries",
         permanent: true,
       },
+      {
+        source: "/beetham-np-service-station/:slug",
+        destination: "/committees/:slug",
+        permanent: true,
+      },
     ];
   },
 };

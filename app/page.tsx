@@ -69,7 +69,7 @@ export default function HomePage() {
                 Central Committee Reps
               </Link>
               <Link
-                href="/beetham-np-service-station"
+                href="/committees"
                 className="inline-flex rounded-xl border border-white/25 px-6 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
               >
                 Committees

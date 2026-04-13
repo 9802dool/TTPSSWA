@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CommitteesSection } from "@/components/CommitteesSection";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
-  title: "Beetham Highway NP Service Station | TTPSSWA",
-  description: "TTPSSWA subsidiary — TTPSSWA NP Service Station Beetham Highway.",
+  title: "Committees | TTPSSWA",
+  description: "TTPSSWA committees — Education, Events, Welfare, and more.",
 };
 
-export default function BeethamNpServiceStationPage() {
+export default function CommitteesPage() {
   return (
     <>
       <SiteHeader />
@@ -22,7 +23,7 @@ export default function BeethamNpServiceStationPage() {
                 "linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)",
             }}
           />
-          <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+          <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
             <p className="mb-4">
               <Link
                 href="/"
@@ -31,10 +32,17 @@ export default function BeethamNpServiceStationPage() {
                 ← Home
               </Link>
             </p>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">TTPSSWA NP Service Station Beetham Highway</h1>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Committees</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              TTPSSWA subsidiary location. Member offers and information will be posted here as they become available.
+              Select a committee to view details. More information can be added for each group as it becomes available.
             </p>
+            <div className="mt-10 border-t border-white/10" aria-hidden />
+          </div>
+        </section>
+
+        <section className="border-b border-line bg-navy py-12 text-white">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <CommitteesSection />
           </div>
         </section>
       </main>
