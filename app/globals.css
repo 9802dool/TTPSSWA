@@ -5,7 +5,7 @@
 @layer base {
   :root {
     --promo-banner-height: 2.75rem;
-    --site-header-stack: calc(var(--promo-banner-height) + 5.25rem);
+    --site-header-stack: calc(var(--promo-banner-height) + 4.25rem);
     --brand: #1e40af;
     --brand-hover: #1d4ed8;
     --bg: #0c1929;
