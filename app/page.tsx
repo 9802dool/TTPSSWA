@@ -14,7 +14,7 @@ export default function HomePage() {
     <>
       <SiteHeader />
       <main className="pt-[var(--site-header-stack)]">
-        <section className="relative overflow-hidden border-b border-line bg-navy text-white">
+        <section className="relative mx-auto flex min-h-[1080px] w-full max-w-[1920px] flex-col justify-center overflow-hidden border-b border-line bg-navy text-white">
           <div
             className="pointer-events-none absolute inset-0 opacity-50"
             aria-hidden
@@ -23,7 +23,7 @@ export default function HomePage() {
                 'linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)',
             }}
           />
-          <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+          <div className="relative mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
             <p className="mx-auto max-w-2xl text-center text-lg leading-relaxed text-slate-300 md:mx-0 md:text-left">
               Advocacy, benefits, and community for officers. Apply online, explore member services, and meet the
               executive team.

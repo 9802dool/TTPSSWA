@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { PromoBanner } from "@/components/PromoBanner";
 
@@ -17,9 +18,19 @@ export default function SiteHeader() {
     <header className="fixed inset-x-0 top-0 z-50 shadow-corp">
       <PromoBanner />
       <div className="border-b border-line bg-white/95 backdrop-blur-md dark:bg-white/90">
-        <div className="mx-auto flex min-h-[4.25rem] max-w-6xl flex-wrap items-center justify-end gap-x-0.5 gap-y-1 px-4 py-2 sm:gap-x-1 sm:px-6 lg:px-8">
+        <div className="mx-auto flex min-h-[4.25rem] max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
+          <Link href="/" className="flex shrink-0 items-center bg-transparent py-1">
+            <Image
+              src="/logo.png"
+              alt="TTPSSWA"
+              width={200}
+              height={200}
+              priority
+              className="h-10 w-auto object-contain object-left sm:h-11 md:h-12"
+            />
+          </Link>
           <nav
-            className="flex flex-wrap items-center justify-end gap-x-0.5 gap-y-1 sm:gap-x-1"
+            className="flex flex-1 flex-wrap items-center justify-end gap-x-0.5 gap-y-1 sm:gap-x-1"
             aria-label="Primary"
           >
             {nav.map((item) => (
