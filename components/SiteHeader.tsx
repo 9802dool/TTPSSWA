@@ -21,21 +21,21 @@ export default function SiteHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 shadow-corp">
       <PromoBanner />
-      <div className="border-b border-line bg-surface/95 backdrop-blur-md dark:bg-surface/90">
-        <div className="mx-auto flex min-h-[4.25rem] max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
+      <div className="border-b border-line bg-white/95 backdrop-blur-md dark:bg-white/90">
+        <div className="mx-auto flex min-h-[5.25rem] max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 sm:px-6 lg:px-8">
           <Link
             href="/"
-            className="order-first flex min-h-[2.5rem] shrink-0 items-center pr-2"
+            className="order-first flex min-h-0 shrink-0 items-center bg-transparent pr-2 outline-none ring-0 focus-visible:ring-2 focus-visible:ring-brand/40 focus-visible:ring-offset-2"
             aria-label="TTPSSWA — Trinidad and Tobago Police Service Social and Welfare Association"
           >
             <Image
               src="/ttpsswa-header-brand.png"
               alt=""
-              width={320}
-              height={72}
+              width={440}
+              height={100}
               priority
-              className="h-8 w-auto max-w-[min(100vw-10rem,17rem)] object-contain object-left sm:h-9 sm:max-w-[20rem] md:h-10"
-              style={{ filter: brandImageFilter }}
+              className="h-11 w-auto max-w-[min(100vw-8rem,22rem)] bg-transparent object-contain object-left sm:h-12 sm:max-w-[26rem] md:h-14 md:max-w-[30rem] lg:h-[3.75rem] lg:max-w-[34rem]"
+              style={{ filter: brandImageFilter, backgroundColor: "transparent" }}
             />
           </Link>
           <nav
