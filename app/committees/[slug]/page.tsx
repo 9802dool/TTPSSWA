@@ -3,7 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { COMMITTEES, getCommitteeBySlug } from "@/lib/committees-data";
+import {
+  COMMITTEES,
+  getCommitteeBySlug,
+  getCommitteeDetailContent,
+} from "@/lib/committees-data";
 
 type Props = { params: Promise<{ slug: string }> | { slug: string } };
 
@@ -17,9 +21,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!committee) {
     return { title: "Committee | TTPSSWA" };
   }
+  const detail = getCommitteeDetailContent(slug);
   return {
     title: `${committee.title} | Committees | TTPSSWA`,
-    description: `TTPSSWA ${committee.title} — information and contacts.`,
+    description:
+      detail?.metaDescription ??
+      `TTPSSWA ${committee.title} — information and contacts.`,
   };
 }
 
@@ -29,6 +36,8 @@ export default async function CommitteeDetailPage({ params }: Props) {
   if (!committee) {
     notFound();
   }
+
+  const detail = getCommitteeDetailContent(slug);
 
   return (
     <>
@@ -57,17 +66,31 @@ export default async function CommitteeDetailPage({ params }: Props) {
             </p>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{committee.title}</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              Information, contacts, and updates for this committee can be added here.
+              {detail?.heroDescription ??
+                "Information, contacts, and updates for this committee can be added here."}
             </p>
           </div>
         </section>
 
         <section className="border-b border-line bg-surface py-12 dark:bg-canvas">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <p className="text-sm leading-relaxed text-muted">
-              Further details for <span className="font-medium text-ink">{committee.title}</span> will appear in this
-              section as they become available.
-            </p>
+            {detail ? (
+              <div className="space-y-6">
+                {detail.sectionHeading ? (
+                  <h2 className="text-xl font-semibold tracking-tight text-ink">{detail.sectionHeading}</h2>
+                ) : null}
+                <ul className="list-disc space-y-3 pl-5 text-base leading-relaxed text-muted marker:text-navy">
+                  {detail.highlights.map((line) => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="text-sm leading-relaxed text-muted">
+                Further details for <span className="font-medium text-ink">{committee.title}</span> will appear in this
+                section as they become available.
+              </p>
+            )}
           </div>
         </section>
       </main>

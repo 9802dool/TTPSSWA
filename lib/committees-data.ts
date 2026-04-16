@@ -21,6 +21,41 @@ export const COMMITTEES = [
 
 export type CommitteeSlug = (typeof COMMITTEES)[number]["slug"];
 
+/** Optional copy for committee detail pages (`/committees/[slug]`). */
+export type CommitteeDetailContent = {
+  /** SEO / social preview (optional). */
+  metaDescription?: string;
+  /** Hero supporting paragraph under the committee title. */
+  heroDescription: string;
+  /** Optional heading above the highlight list. */
+  sectionHeading?: string;
+  /** Main bullet points for this committee. */
+  highlights: string[];
+};
+
+export const COMMITTEE_DETAIL_CONTENT: Partial<
+  Record<CommitteeSlug, CommitteeDetailContent>
+> = {
+  "communication-committee": {
+    metaDescription:
+      "TTPSSWA Communication Committee — social media, Zoom, podcasts, bulletins, and I 95 FM radio every Wednesday.",
+    heroDescription:
+      "The Communication Committee keeps members informed through social media, virtual and hybrid meetings, live broadcasts, print, and radio.",
+    sectionHeading: "Channels and activities",
+    highlights: [
+      "Sharing of information via social media platforms such as Instagram, Facebook, YouTube, TikTok",
+      "Virtual and Hybrid meetings via Zoom",
+      "Podcasts/Facebook Live",
+      "Posters/Bulletins",
+      "Radio Program on I 95 FM every Wednesday (conversations with the Executive, Bacchanal Wednesday, meeting the various committee members and learning about their functions)",
+    ],
+  },
+};
+
+export function getCommitteeDetailContent(slug: string) {
+  return COMMITTEE_DETAIL_CONTENT[slug as CommitteeSlug];
+}
+
 export function getCommitteeBySlug(slug: string) {
   return COMMITTEES.find((c) => c.slug === slug);
 }
