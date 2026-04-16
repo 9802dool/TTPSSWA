@@ -151,18 +151,17 @@ export const COMMITTEE_DETAIL_CONTENT: Partial<
   },
   "events-committee": {
     metaDescription:
-      "TTPSSWA Events Committee — seasonal events, cultural programmes, competitions, anniversary activities, and regional conferences.",
+      "TTPSSWA Events Committee — annual member and family events, anniversary programmes, and regional conferences including CFPA.",
     heroDescription:
-      "The Events Committee organises member gatherings, cultural celebrations, competitions, and milestone activities for the Association.",
-    sectionHeading: "Events and activities",
-    highlights: [
-      "Christmas Dinner",
-      "Children Christmas Treat",
-      "Boatride",
-      "Divali Cultural Show",
-      "Protective Arms Monarch Competition",
-      "30th Anniversary Week of Activities (Interfaith Thanksgiving Service, Fun and Family Day, Health Fair, Socarobics, Awards Ceremony, Curry Tabanca Cookout, Chow and All Fours Competition, Football Tournament, Executive and Central Committee Retreat)",
-      "Hosting the Caribbean Federation of Police Welfare Association 10th Intercessional Conference",
+      "The Events Committee plans and hosts activities that bring our members and their families together. The committee organizes major annual events such as the Christmas Dinner, Children’s Christmas Treat, Boatride, Divali Cultural Show, and the Protective Arms Monarch Competition.",
+    richSections: [
+      {
+        paragraphs: [
+          "It also coordinates large-scale initiatives, including the 30th Anniversary Week of Activities—featuring the Interfaith Thanksgiving Service, Fun and Family Day, Health Fair, Socarobics, Awards Ceremony, Curry Tabanca Cookout, Chow and All Fours Competition, Football Tournament, and the Executive & Central Committee Retreat.",
+          "The committee further represents the organization by hosting regional gatherings such as the Caribbean Federation of Police Welfare Association 10th Intercessional Conference.",
+          "In short, the Events Committee ensures a vibrant calendar of cultural, social, and family-focused activities for all members.",
+        ],
+      },
     ],
   },
   "legal-aid-committee": {
