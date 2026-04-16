@@ -74,7 +74,35 @@ export default async function CommitteeDetailPage({ params }: Props) {
 
         <section className="border-b border-line bg-surface py-12 dark:bg-canvas">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            {detail ? (
+            {detail?.richSections && detail.richSections.length > 0 ? (
+              <div className="space-y-10">
+                {detail.overviewIntro ? (
+                  <p className="text-base leading-relaxed text-muted">{detail.overviewIntro}</p>
+                ) : null}
+                {detail.richSections.map((block, i) => (
+                  <div key={i} className="space-y-4">
+                    {block.title ? (
+                      <h2 className="text-xl font-semibold tracking-tight text-ink">{block.title}</h2>
+                    ) : null}
+                    {block.paragraphs.map((p, j) => (
+                      <p key={`${i}-${j}`} className="text-base leading-relaxed text-muted">
+                        {p}
+                      </p>
+                    ))}
+                    {block.bullets && block.bullets.length > 0 ? (
+                      <ul className="list-disc space-y-2 pl-5 text-base leading-relaxed text-muted marker:text-navy">
+                        {block.bullets.map((line) => (
+                          <li key={line}>{line}</li>
+                        ))}
+                      </ul>
+                    ) : null}
+                    {block.afterBullets ? (
+                      <p className="text-base leading-relaxed text-muted">{block.afterBullets}</p>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : detail?.highlights && detail.highlights.length > 0 ? (
               <div className="space-y-6">
                 {detail.sectionHeading ? (
                   <h2 className="text-xl font-semibold tracking-tight text-ink">{detail.sectionHeading}</h2>

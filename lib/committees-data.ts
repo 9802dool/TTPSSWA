@@ -21,6 +21,15 @@ export const COMMITTEES = [
 
 export type CommitteeSlug = (typeof COMMITTEES)[number]["slug"];
 
+/** Long-form section (housing-style pages with sub-bullets). */
+export type CommitteeRichSection = {
+  title?: string;
+  paragraphs: string[];
+  bullets?: string[];
+  /** Paragraph immediately after the bullet list. */
+  afterBullets?: string;
+};
+
 /** Optional copy for committee detail pages (`/committees/[slug]`). */
 export type CommitteeDetailContent = {
   /** SEO / social preview (optional). */
@@ -29,13 +38,88 @@ export type CommitteeDetailContent = {
   heroDescription: string;
   /** Optional heading above the highlight list. */
   sectionHeading?: string;
-  /** Main bullet points for this committee. */
-  highlights: string[];
+  /** Main bullet points for this committee (simple list pages). */
+  highlights?: string[];
+  /** Intro line(s) between hero and body (e.g. overview sentence). */
+  overviewIntro?: string;
+  /** Structured sections; when set, rendered instead of `highlights`. */
+  richSections?: CommitteeRichSection[];
 };
 
 export const COMMITTEE_DETAIL_CONTENT: Partial<
   Record<CommitteeSlug, CommitteeDetailContent>
 > = {
+  "housing-committee": {
+    metaDescription:
+      "TTPSSWA Housing Committee — HDC and LSA support, Hardware & Beyond, and Blue Legacy at Baker Trace, Sangre Grande.",
+    heroDescription:
+      "The Housing Committee is dedicated to helping members access affordable, secure, and sustainable housing opportunities. Through strategic partnerships and member-focused initiatives, the committee provides guidance, support, and pathways to homeownership and land acquisition.",
+    overviewIntro:
+      "Below is an overview of the key services and programmes managed or facilitated by the Housing Committee.",
+    richSections: [
+      {
+        title: "Housing Development Corporation (HDC)",
+        paragraphs: [
+          "The committee assists members in navigating the Housing Development Corporation (HDC) application process.",
+          "Support includes:",
+        ],
+        bullets: [
+          "Guidance on eligibility and documentation",
+          "Updates on available housing developments",
+          "Advocacy to ensure members have fair access to opportunities",
+        ],
+        afterBullets:
+          "This helps members move closer to owning a modern, government-supported home.",
+      },
+      {
+        title: "Land Parcels Through the Land Settlement Agency",
+        paragraphs: [
+          "For members interested in building their own homes, the committee works with the Land Settlement Agency (LSA) to provide access to residential land parcels.",
+          "The committee supports members by:",
+        ],
+        bullets: [
+          "Sharing information on available parcels",
+          "Assisting with application requirements",
+          "Helping members understand land development and construction options",
+        ],
+        afterBullets: "This programme empowers members to build at their own pace.",
+      },
+      {
+        title: "Hardware & Beyond Initiative",
+        paragraphs: [
+          "The Housing Committee also manages the Hardware and Beyond Initiative, which allows members to access building materials on credit.",
+          "This initiative supports:",
+        ],
+        bullets: [
+          "Home construction",
+          "Renovations and expansions",
+          "Completion of LSA or HDC projects",
+        ],
+        afterBullets:
+          "It reduces financial strain and ensures members can access quality materials when they need them.",
+      },
+      {
+        title: "Blue Legacy – Baker Trace, Sangre Grande",
+        paragraphs: [
+          "The committee provides members with priority information and support for Blue Legacy, a new housing development at Baker Trace, Sangre Grande.",
+          "Members benefit from:",
+        ],
+        bullets: [
+          "Early updates on project progress",
+          "Guidance on application and allocation",
+          "Access to modern, affordable housing options",
+        ],
+        afterBullets:
+          "This development represents a long-term investment in community growth and member well-being.",
+      },
+      {
+        paragraphs: [
+          "The Housing Committee exists to support members on every step of their housing journey, whether they are applying for a home, securing land, building, or renovating.",
+          "Its mission is simple: to make homeownership more accessible, affordable, and achievable for all members.",
+        ],
+      },
+    ],
+  },
   "communication-committee": {
     metaDescription:
       "TTPSSWA Communication Committee — social media, Zoom, podcasts, bulletins, and I 95 FM radio every Wednesday.",
