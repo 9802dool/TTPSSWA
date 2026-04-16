@@ -10,9 +10,9 @@ export const metadata: Metadata = {
     'Trinidad and Tobago Police Service Social & Welfare Association — member benefits, executive team, and services.',
 };
 
-/** One size for all three headline lines; colour only differs */
+/** One size for all three headline lines; colour only differs (third line is caps + white) */
 const headlineLine =
-  'text-[clamp(1rem,2.8vw,1.35rem)] font-bold leading-snug sm:text-xl md:text-2xl lg:text-[1.35rem] xl:text-2xl';
+  'text-[clamp(1.35rem,4vw,2.1rem)] font-bold leading-tight sm:text-2xl md:text-3xl lg:text-[2rem] xl:text-[2.35rem] 2xl:text-[2.5rem]';
 
 const heroCtaSecondary =
   'inline-flex shrink-0 items-center justify-center rounded-full border border-white/85 bg-transparent px-2.5 py-2 text-[0.65rem] font-semibold text-white transition hover:bg-white/10 sm:px-3 sm:text-xs md:px-3.5 md:text-sm lg:px-4';
@@ -37,7 +37,7 @@ export default function HomePage() {
                     width={320}
                     height={320}
                     priority
-                    className="h-44 w-auto max-w-[16rem] object-contain brightness-0 invert drop-shadow-[0_12px_40px_rgba(0,0,0,0.4)] sm:h-52 lg:h-[15.5rem] xl:h-[17rem]"
+                    className="h-56 w-auto max-w-[min(100%,22rem)] object-contain brightness-0 invert drop-shadow-[0_16px_48px_rgba(0,0,0,0.45)] sm:h-64 md:h-72 lg:h-[20rem] xl:h-[22rem] 2xl:h-[24rem]"
                   />
                 </div>
                 <div className="min-w-0 flex-1 text-center lg:text-left">
@@ -47,7 +47,9 @@ export default function HomePage() {
                   <p className={`${headlineLine} mt-1 uppercase tracking-[0.08em] text-home-headline`}>
                     POLICE SERVICE
                   </p>
-                  <p className={`${headlineLine} mt-1 text-white`}>Social &amp; Welfare Association</p>
+                  <p className={`${headlineLine} mt-1 uppercase tracking-[0.06em] text-white`}>
+                    SOCIAL &amp; WELFARE ASSOCIATION
+                  </p>
                   <p className="mx-auto mt-5 max-w-xl text-sm font-normal leading-relaxed text-white sm:text-base lg:mx-0">
                     Advocacy, benefits, and community for officers. Apply online, explore member services, and meet the
                     executive team.
