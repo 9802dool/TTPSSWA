@@ -50,6 +50,67 @@ export const COMMITTEE_DETAIL_CONTENT: Partial<
       "Radio Program on I 95 FM every Wednesday (conversations with the Executive, Bacchanal Wednesday, meeting the various committee members and learning about their functions)",
     ],
   },
+  "education-committee": {
+    metaDescription:
+      "TTPSSWA Education Committee — grants, scholarships, book discounts, tertiary support, and Police Credit Union starter accounts for members’ children.",
+    heroDescription:
+      "The Education Committee supports members’ children and families with grants, scholarships, book discounts, and partnerships across Trinidad and Tobago.",
+    sectionHeading: "Programmes and initiatives",
+    highlights: [
+      "SEA/CSEC/CAPE Grants and Awards function for members’ children across Trinidad and Tobago",
+      "Book Store Discounts with Charran, Mohammed, Naipaul Holdings, Nelson’s Tobago",
+      "Part Time and Full Time Tertiary Scholarship",
+      "Tertiary Education Grant",
+      "Book bartering initiative",
+      "Starter Accounts partnering with Police Credit Union",
+    ],
+  },
+  "events-committee": {
+    metaDescription:
+      "TTPSSWA Events Committee — seasonal events, cultural programmes, competitions, anniversary activities, and regional conferences.",
+    heroDescription:
+      "The Events Committee organises member gatherings, cultural celebrations, competitions, and milestone activities for the Association.",
+    sectionHeading: "Events and activities",
+    highlights: [
+      "Christmas Dinner",
+      "Children Christmas Treat",
+      "Boatride",
+      "Divali Cultural Show",
+      "Protective Arms Monarch Competition",
+      "30th Anniversary Week of Activities (Interfaith Thanksgiving Service, Fun and Family Day, Health Fair, Socarobics, Awards Ceremony, Curry Tabanca Cookout, Chow and All Fours Competition, Football Tournament, Executive and Central Committee Retreat)",
+      "Hosting the Caribbean Federation of Police Welfare Association 10th Intercessional Conference",
+    ],
+  },
+  "legal-aid-committee": {
+    metaDescription:
+      "TTPSSWA Legal Aid Committee — policy, legal assistance, tribunal and industrial court representation, and workmen’s compensation.",
+    heroDescription:
+      "The Legal Aid Committee advances policy, direct assistance, and representation for members in judicial, tribunal, and industrial matters.",
+    sectionHeading: "Focus areas",
+    highlights: [
+      "Policy Revision",
+      "Legal Aid Assistance",
+      "Introduction of Judicial Reviews",
+      "Maintained indictable and summary matters",
+      "Tribunal Aid Training and Representation",
+      "Industrial Court Representation",
+      "Workmen’s Compensation",
+    ],
+  },
+  "special-purpose-committee": {
+    metaDescription:
+      "TTPSSWA Special Purpose Committee — rule book, SRP and municipal representation, HR collaboration, and Special Reserve Police proposals.",
+    heroDescription:
+      "The Special Purpose Committee leads structural and regulatory initiatives that shape how the Association governs and represents SRP and municipal interests.",
+    sectionHeading: "Priorities",
+    highlights: [
+      "Revised Association’s Rule Book",
+      "Extension of SRP and Municipal placement on Executive",
+      "Job evaluation exercise in collaboration with HR and CPO’s office",
+      "Proposal re-Special Reserve Police Regulations",
+      "Proposal for Special Reserve Police re promotion, absorption",
+    ],
+  },
 };
 
 export function getCommitteeDetailContent(slug: string) {
