@@ -5,6 +5,8 @@
 @layer base {
   :root {
     --promo-banner-height: 2.75rem;
+    /** Fixed nav row used on home (transparent overlay). */
+    --nav-row-height: 3.5rem;
     --site-header-stack: calc(var(--promo-banner-height) + 3.75rem);
     --brand: #1e40af;
     --brand-hover: #1d4ed8;

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function SiteFooter() {
   return (
-    <footer className="border-t border-white/10 bg-black text-slate-300">
+    <footer className="border-t border-white/15 bg-[rgb(6,12,22)] text-slate-300">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-3 sm:gap-8">
           <div>
@@ -44,7 +44,7 @@ export default function SiteFooter() {
           <div className="sm:text-right">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Legal</p>
             <p className="mt-4 text-sm leading-relaxed text-slate-500">
-              Registration and corporate details, privacy policy, and terms of use can be listed here when available.
+              Add registration numbers, privacy policy, or terms of use here.
             </p>
           </div>
         </div>
