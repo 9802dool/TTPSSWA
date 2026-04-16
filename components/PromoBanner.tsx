@@ -29,7 +29,7 @@ function MarqueeSegment({ duplicate = false }: { duplicate?: boolean }) {
 export function PromoBanner() {
   return (
     <div
-      className="flex min-h-[var(--promo-banner-height)] items-center border-b border-white/10 bg-navy py-1.5 text-xs font-medium text-white sm:text-sm"
+      className="flex min-h-[var(--promo-banner-height)] items-center border-b border-white/15 bg-brand py-1.5 text-xs font-medium text-white sm:text-sm"
       role="region"
       aria-label="Promotion: Dream Builder Colour Studio Ltd member discount on paints and building supplies"
     >
