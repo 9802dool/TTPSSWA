@@ -28,24 +28,6 @@
   .promo-marquee-animate {
     animation: promo-marquee 45s linear infinite;
   }
-  /** Subtle diagonal mesh on the right side of the home hero (reference screenshot). */
-  .home-hero-mesh {
-    background-image:
-      repeating-linear-gradient(
-        -32deg,
-        transparent 0,
-        transparent 14px,
-        rgb(255 255 255 / 0.045) 14px,
-        rgb(255 255 255 / 0.045) 15px
-      ),
-      repeating-linear-gradient(
-        32deg,
-        transparent 0,
-        transparent 14px,
-        rgb(255 255 255 / 0.03) 14px,
-        rgb(255 255 255 / 0.03) 15px
-      );
-  }
 }
 
 @layer components {

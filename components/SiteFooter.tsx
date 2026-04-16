@@ -9,7 +9,7 @@ export default function SiteFooter() {
             <p className="text-lg font-bold tracking-tight text-white">TTPSSWA</p>
           </div>
           <div className="sm:text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Navigate</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-home-headline/85">Navigate</p>
             <ul className="mt-4 text-sm">
               <li>
                 <Link href="/about" className="text-white transition hover:text-home-headline">
@@ -19,9 +19,9 @@ export default function SiteFooter() {
             </ul>
           </div>
           <div className="sm:text-right">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Legal</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-home-headline/85">Legal</p>
             <p className="mt-4 text-sm leading-relaxed text-white">
-              Add registration numbers, privacy…
+              Add registration numbers, privacy
             </p>
           </div>
         </div>

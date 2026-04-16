@@ -10,8 +10,9 @@ export const metadata: Metadata = {
     'Trinidad and Tobago Police Service Social & Welfare Association — member benefits, executive team, and services.',
 };
 
+/** Matches screenshot: transparent fill, white border, white label */
 const heroCtaSecondary =
-  'inline-flex rounded-full border border-white/75 bg-home-cta px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 sm:px-6 sm:py-3';
+  'inline-flex rounded-full border border-white/85 bg-transparent px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/10 sm:px-6 sm:py-3';
 
 export default function HomePage() {
   return (
@@ -19,11 +20,6 @@ export default function HomePage() {
       <SiteHeader />
       <main className="pt-[var(--site-header-stack)]">
         <section className="relative flex min-h-[calc(100dvh-var(--site-header-stack))] flex-col overflow-hidden border-b border-white/25 bg-home-hero text-white">
-          <div className="pointer-events-none absolute inset-0 bg-home-hero" aria-hidden />
-          <div
-            className="home-hero-mesh pointer-events-none absolute inset-y-0 right-0 w-[50%] max-md:hidden"
-            aria-hidden
-          />
           <div className="relative flex flex-1 flex-col justify-center">
             <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
               <div className="grid items-center gap-10 lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-12 xl:gap-16">
@@ -38,10 +34,14 @@ export default function HomePage() {
                   />
                 </div>
                 <div className="text-center lg:text-left">
-                  <h1 className="text-[1.35rem] font-bold uppercase leading-[1.2] tracking-[0.06em] text-home-headline sm:text-2xl md:text-3xl lg:text-[2.1rem] xl:text-[2.35rem]">
-                    TRINIDAD AND TOBAGO POLICE SERVICE
-                  </h1>
-                  <p className="mt-3 text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:text-[2.85rem] xl:text-6xl">
+                  {/* Three lines per reference PNG */}
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-home-headline sm:text-base">
+                    TRINIDAD AND TOBAGO
+                  </p>
+                  <p className="mt-2 text-2xl font-bold uppercase leading-tight tracking-[0.06em] text-home-headline sm:text-3xl md:text-4xl lg:text-[2.35rem] xl:text-5xl">
+                    POLICE SERVICE
+                  </p>
+                  <p className="mt-3 text-3xl font-bold leading-tight text-white sm:text-4xl md:text-5xl lg:text-[2.75rem] xl:text-6xl">
                     Social &amp; Welfare Association
                   </p>
                   <p className="mx-auto mt-6 max-w-xl text-base font-normal leading-relaxed text-white sm:text-lg lg:mx-0">
