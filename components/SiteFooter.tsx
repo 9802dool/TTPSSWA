@@ -2,90 +2,54 @@ import Link from "next/link";
 
 export default function SiteFooter() {
   return (
-    <footer className="border-t border-line bg-navy text-slate-300">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-12">
-          <div className="lg:col-span-2">
+    <footer className="border-t border-white/10 bg-black text-slate-300">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid gap-10 sm:grid-cols-3 sm:gap-8">
+          <div>
             <p className="text-lg font-bold tracking-tight text-white">TTPSSWA</p>
-            <p className="mt-3 max-w-md text-sm leading-relaxed text-slate-400">
-              Serving members with clear governance, transparent communication, and
-              programs that support our community. Update this text in{" "}
-              <code className="rounded bg-white/10 px-1.5 py-0.5 text-xs text-slate-200">
-                SiteFooter.tsx
-              </code>
-              .
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-500">
+              Trinidad and Tobago Police Service Social &amp; Welfare Association.
             </p>
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Navigate
-            </p>
-            <ul className="mt-4 space-y-2 text-sm">
+          <div className="sm:text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Navigate</p>
+            <ul className="mt-4 space-y-2 text-sm text-white">
               <li>
-                <Link href="/about" className="transition hover:text-white">
+                <Link href="/about" className="transition hover:text-sky-200">
                   About
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/hotel-reservations"
-                  className="transition hover:text-white"
-                >
-                  Hotel reservations
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/membership-services"
-                  className="transition hover:text-white"
-                >
+                <Link href="/membership-services" className="transition hover:text-sky-200">
                   Membership services
                 </Link>
               </li>
               <li>
-                <Link href="/executive" className="transition hover:text-white">
-                  Executive
+                <Link href="/executive" className="transition hover:text-sky-200">
+                  Executive team
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/central-committee-representatives"
-                  className="transition hover:text-white"
-                >
-                  Central Committee Representative
+                <Link href="/partnership" className="transition hover:text-sky-200">
+                  Partnership
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/membership-services"
-                  className="transition hover:text-white"
-                >
-                  Members services
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/admin/login"
-                  className="transition hover:text-white"
-                >
-                  Admin login
+                <Link href="/subsidiaries" className="transition hover:text-sky-200">
+                  Subsidiaries
                 </Link>
               </li>
             </ul>
           </div>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-              Legal
-            </p>
-            <p className="mt-4 text-sm leading-relaxed text-slate-400">
-              Add registration numbers, privacy policy, or terms of use here.
+          <div className="sm:text-right">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Legal</p>
+            <p className="mt-4 text-sm leading-relaxed text-slate-500">
+              Registration and corporate details, privacy policy, and terms of use can be listed here when available.
             </p>
           </div>
         </div>
-        <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs text-slate-500">
-            © {new Date().getFullYear()} TTPSSWA. All rights reserved.
-          </p>
+        <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-slate-600">© {new Date().getFullYear()} TTPSSWA. All rights reserved.</p>
           <p className="text-xs text-slate-600">Trinidad and Tobago</p>
         </div>
       </div>
