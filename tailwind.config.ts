@@ -6,6 +6,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        /** Homepage hero / footer — sampled from `public/Screenshot 2026-04-16 170956.png` */
+        'home-hero': '#0a162b',
+        /** Filled outline CTAs on hero (slightly above base). */
+        'home-cta': '#0c203f',
+        'home-headline': '#a5d1ff',
+        'home-gold': '#e9bd43',
         navy: '#0c1929',
         /** Hover / tint surfaces (matches app/globals.css :root tokens). */
         'navy-muted': '#1e3a5f',
