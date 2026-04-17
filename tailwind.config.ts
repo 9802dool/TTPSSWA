@@ -7,6 +7,8 @@ const config: Config = {
     extend: {
       colors: {
         navy: '#0c1929',
+        /** Committee body copy — matches brand swatch #11213B (rgb 17, 33, 59). */
+        'committee-ink': '#11213B',
         /** Hover / tint surfaces (matches app/globals.css :root tokens). */
         'navy-muted': '#1e3a5f',
         'brand-subtle': '#eff6ff',

@@ -68,20 +68,20 @@ export default async function CommitteeDetailPage({ params }: Props) {
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             {committee.channels && committee.channels.length > 0 ? (
               <>
-                <h2 className="text-2xl font-bold tracking-tight text-navy dark:text-sky-100">
+                <h2 className="text-2xl font-bold tracking-tight text-committee-ink dark:text-sky-100">
                   {committee.channelsHeading ?? "Key initiatives and programmes"}
                 </h2>
                 <ul className="mt-6 list-none space-y-6 p-0">
                   {committee.channels.map((item, i) => (
-                    <li key={i} className="text-base font-bold leading-relaxed text-navy dark:text-sky-100">
+                    <li key={i} className="text-base font-bold leading-relaxed text-committee-ink dark:text-sky-100">
                       {item}
                     </li>
                   ))}
                 </ul>
               </>
             ) : (
-              <p className="text-base font-bold leading-relaxed text-navy dark:text-sky-100">
-                Further details for <span className="text-brand dark:text-sky-300">{committee.title}</span> will appear
+              <p className="text-base font-bold leading-relaxed text-committee-ink dark:text-sky-100">
+                Further details for <span className="text-committee-ink dark:text-sky-200">{committee.title}</span> will appear
                 in this section as they become available.
               </p>
             )}
