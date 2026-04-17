@@ -1,13 +1,15 @@
 """
 Stitch front + back + side jersey PNGs into one sheet (layout only—uniform scale to row height).
-Usage: python scripts/stitch_jersey_views.py
-  (expects files in public/) OR set env TEAM_IATF_SRC as comma-separated paths.
+Default output: Desktop\\TTPSSWA-generated-png\\ (not public/).
 """
 from __future__ import annotations
 
 import os
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from generated_assets_dir import generated_png_dir  # noqa: E402
 
 try:
     from PIL import Image
@@ -43,8 +45,7 @@ def stitch(paths: list[Path], out_path: Path, pad: int = 32) -> None:
 
 
 def main() -> None:
-    root = Path(__file__).resolve().parents[1]
-    public = root / "public"
+    gen = generated_png_dir()
     if len(sys.argv) >= 4:
         paths = [Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])]
     else:
@@ -53,15 +54,11 @@ def main() -> None:
             paths = [Path(p.strip()) for p in env.split(",") if p.strip()]
         else:
             paths = [
-                public / "team-iatf-jersey-blue-green.png",
-                public / "team-iatf-jersey-blue-green-back.png",
-                public / "team-iatf-jersey-blue-green-side.png",
+                gen / "team-iatf-jersey-blue-green.png",
+                gen / "team-iatf-jersey-blue-green-back.png",
+                gen / "team-iatf-jersey-blue-green-side.png",
             ]
-    out_path = (
-        Path(sys.argv[4])
-        if len(sys.argv) >= 5
-        else public / "team-iatf-jersey-blue-green-all-views.png"
-    )
+    out_path = Path(sys.argv[4]) if len(sys.argv) >= 5 else gen / "team-iatf-jersey-blue-green-all-views.png"
     stitch(paths, out_path)
 
 

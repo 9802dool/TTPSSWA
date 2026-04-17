@@ -4,3 +4,8 @@
 /out/
 .env*.local
 *.tsbuildinfo
+
+# Generated jersey/logo mockups — keep under Desktop\TTPSSWA-generated-png (see scripts/generated_assets_dir.py)
+public/team-iatf*.png
+public/tt-knight-riders*.png
+scripts/__pycache__/
