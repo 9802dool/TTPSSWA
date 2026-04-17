@@ -14,35 +14,23 @@ export default function CommitteesPage() {
     <>
       <SiteHeader />
       <main className="pt-[var(--site-header-stack)]">
-        <section className="relative overflow-hidden border-b border-line bg-navy text-white">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-50"
-            aria-hidden
-            style={{
-              backgroundImage:
-                "linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)",
-            }}
-          />
-          <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-            <p className="mb-4">
+        <section className="bg-canvas py-12 dark:bg-slate-950">
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+            <p className="mb-6">
               <Link
                 href="/"
-                className="inline-flex text-sm font-medium text-sky-200 underline-offset-4 transition hover:text-white hover:underline"
+                className="inline-flex text-sm font-bold text-navy underline-offset-4 transition hover:text-brand hover:underline dark:text-sky-200 dark:hover:text-white"
               >
                 ← Home
               </Link>
             </p>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Committees</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
+            <h1 className="text-3xl font-bold tracking-tight text-navy dark:text-sky-100 md:text-4xl">Committees</h1>
+            <p className="mt-4 max-w-3xl text-lg font-bold leading-relaxed text-navy dark:text-sky-100">
               Select a committee to view details. More information can be added for each group as it becomes available.
             </p>
-            <div className="mt-10 border-t border-white/10" aria-hidden />
-          </div>
-        </section>
-
-        <section className="border-b border-line bg-navy py-12 text-white">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-            <CommitteesSection />
+            <div className="mt-12">
+              <CommitteesSection />
+            </div>
           </div>
         </section>
       </main>
