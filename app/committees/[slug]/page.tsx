@@ -69,7 +69,7 @@ export default async function CommitteeDetailPage({ params }: Props) {
             {committee.channels && committee.channels.length > 0 ? (
               <>
                 <h2 className="text-xl font-semibold text-ink">
-                  How we keep members informed
+                  {committee.channelsHeading ?? "Key initiatives and programmes"}
                 </h2>
                 <ul className="mt-6 space-y-4">
                   {committee.channels.map((item, i) => (
