@@ -32,7 +32,10 @@ def recolor_tt_national(bgr: np.ndarray) -> np.ndarray:
 
     blue = (~neutral) & (h >= 90) & (h <= 142)
     teal_green = (~neutral) & (h >= 36) & (h < 92)
-    purple = (~neutral) & (h > 142) & (h <= 176)
+    # Magenta / violet / hot pink (navy→pink gradient jerseys)
+    purple_magenta = (~neutral) & (h > 142) & (h <= 179)
+    # Orange / brown / rust (shadows on pink, or trim)
+    orange_brown = (~neutral) & (h >= 4) & (h < 36)
 
     h2[blue] = np.clip(4.0 + (h[blue] - 90) * 0.06, 0, 14)
     s2[blue] = np.clip(s[blue] * 1.08 + 6, 0, 255)
@@ -42,9 +45,13 @@ def recolor_tt_national(bgr: np.ndarray) -> np.ndarray:
     s2[teal_green] = np.clip(s[teal_green] * 0.52 + 12, 0, 130)
     v2[teal_green] = np.clip(v[teal_green] * 0.58 + 10, 32, 118)
 
-    h2[purple] = 172.0
-    s2[purple] = np.clip(s[purple] * 1.03, 0, 255)
-    v2[purple] = np.clip(v[purple] * 0.94, 0, 255)
+    h2[purple_magenta] = np.clip(2.0 + (h[purple_magenta] - 150) * 0.15, 0, 12)
+    s2[purple_magenta] = np.clip(s[purple_magenta] * 1.12 + 4, 0, 255)
+    v2[purple_magenta] = np.clip(v[purple_magenta] * 1.02, 0, 255)
+
+    h2[orange_brown] = 6.0
+    s2[orange_brown] = np.clip(s[orange_brown] * 1.05 + 8, 0, 255)
+    v2[orange_brown] = np.clip(v[orange_brown] * 0.98, 0, 255)
 
     h2[neutral] = h[neutral]
     s2[neutral] = s[neutral]
