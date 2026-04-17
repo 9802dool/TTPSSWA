@@ -64,24 +64,24 @@ export default async function CommitteeDetailPage({ params }: Props) {
           </div>
         </section>
 
-        <section className="border-b border-line bg-surface py-12 dark:bg-canvas">
+        <section className="border-b border-line bg-white py-12 dark:bg-white">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             {committee.channels && committee.channels.length > 0 ? (
               <>
-                <h2 className="text-2xl font-bold tracking-tight text-committee-ink dark:text-sky-100">
+                <h2 className="text-2xl font-bold tracking-tight text-committee-ink">
                   {committee.channelsHeading ?? "Key initiatives and programmes"}
                 </h2>
                 <ul className="mt-6 list-none space-y-6 p-0">
                   {committee.channels.map((item, i) => (
-                    <li key={i} className="text-base font-bold leading-relaxed text-committee-ink dark:text-sky-100">
+                    <li key={i} className="text-base font-bold leading-relaxed text-committee-ink">
                       {item}
                     </li>
                   ))}
                 </ul>
               </>
             ) : (
-              <p className="text-base font-bold leading-relaxed text-committee-ink dark:text-sky-100">
-                Further details for <span className="text-committee-ink dark:text-sky-200">{committee.title}</span> will appear
+              <p className="text-base font-bold leading-relaxed text-committee-ink">
+                Further details for <span className="font-extrabold text-committee-ink">{committee.title}</span> will appear
                 in this section as they become available.
               </p>
             )}
