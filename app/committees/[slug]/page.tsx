@@ -71,15 +71,15 @@ export default async function CommitteeDetailPage({ params }: Props) {
                 <h2 className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">
                   {committee.channelsHeading ?? "Key initiatives and programmes"}
                 </h2>
-                <ul className="mt-6 space-y-4">
+                <ul className="mt-6 divide-y divide-zinc-200 dark:divide-slate-600">
                   {committee.channels.map((item, i) => (
                     <li
                       key={i}
-                      className="flex gap-3 rounded-lg border border-zinc-200 bg-white p-4 text-base font-semibold leading-relaxed text-black shadow-sm dark:border-slate-600 dark:bg-slate-800/90 dark:text-zinc-50"
+                      className="flex gap-3 py-5 text-base font-bold leading-relaxed text-zinc-950 first:pt-0 last:pb-0 dark:text-zinc-100"
                     >
                       <span
                         aria-hidden
-                        className="mt-1.5 inline-block h-2 w-2 flex-none shrink-0 rounded-full bg-zinc-900 dark:bg-zinc-200"
+                        className="mt-2 inline-block h-2 w-2 flex-none shrink-0 rounded-full bg-brand"
                       />
                       <span className="text-pretty">{item}</span>
                     </li>
@@ -87,9 +87,9 @@ export default async function CommitteeDetailPage({ params }: Props) {
                 </ul>
               </>
             ) : (
-              <p className="text-base font-semibold leading-relaxed text-zinc-950 dark:text-zinc-100">
-                Further details for <span className="font-bold text-black dark:text-white">{committee.title}</span> will
-                appear in this section as they become available.
+              <p className="text-base font-bold leading-relaxed text-zinc-950 dark:text-zinc-100">
+                Further details for <span className="text-black dark:text-white">{committee.title}</span> will appear in
+                this section as they become available.
               </p>
             )}
           </div>
