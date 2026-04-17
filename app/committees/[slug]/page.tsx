@@ -57,7 +57,7 @@ export default async function CommitteeDetailPage({ params }: Props) {
               Committee
             </p>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{committee.title}</h1>
-            <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
+            <p className="mt-4 max-w-3xl text-lg font-medium leading-relaxed text-slate-100">
               {committee.summary ??
                 "Information, contacts, and updates for this committee can be added here."}
             </p>
@@ -68,28 +68,28 @@ export default async function CommitteeDetailPage({ params }: Props) {
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             {committee.channels && committee.channels.length > 0 ? (
               <>
-                <h2 className="text-xl font-semibold text-ink">
+                <h2 className="text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">
                   {committee.channelsHeading ?? "Key initiatives and programmes"}
                 </h2>
                 <ul className="mt-6 space-y-4">
                   {committee.channels.map((item, i) => (
                     <li
                       key={i}
-                      className="flex gap-3 rounded-lg border border-line bg-white/60 p-4 text-sm leading-relaxed text-ink shadow-sm dark:bg-white/5"
+                      className="flex gap-3 rounded-lg border border-zinc-200 bg-white p-4 text-base font-semibold leading-relaxed text-black shadow-sm dark:border-slate-600 dark:bg-slate-800/90 dark:text-zinc-50"
                     >
                       <span
                         aria-hidden
-                        className="mt-1 inline-block h-2 w-2 flex-none rounded-full bg-sky-500"
+                        className="mt-1.5 inline-block h-2 w-2 flex-none shrink-0 rounded-full bg-zinc-900 dark:bg-zinc-200"
                       />
-                      <span>{item}</span>
+                      <span className="text-pretty">{item}</span>
                     </li>
                   ))}
                 </ul>
               </>
             ) : (
-              <p className="text-sm leading-relaxed text-muted">
-                Further details for <span className="font-medium text-ink">{committee.title}</span> will appear in this
-                section as they become available.
+              <p className="text-base font-semibold leading-relaxed text-zinc-950 dark:text-zinc-100">
+                Further details for <span className="font-bold text-black dark:text-white">{committee.title}</span> will
+                appear in this section as they become available.
               </p>
             )}
           </div>
