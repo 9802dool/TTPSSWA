@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from generated_assets_dir import generated_png_dir  # noqa: E402
 
 
-def recolor_tt_national(bgr: np.ndarray) -> np.ndarray:
+def recolor_tt_national(bgr: np.ndarray, style: str = "classic") -> np.ndarray:
     hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
     h = hsv[:, :, 0].astype(np.float32)
     s = hsv[:, :, 1].astype(np.float32)
@@ -56,6 +56,22 @@ def recolor_tt_national(bgr: np.ndarray) -> np.ndarray:
     h2[neutral] = h[neutral]
     s2[neutral] = s[neutral]
     v2[neutral] = v[neutral]
+
+    colored = blue | teal_green | purple_magenta | orange_brown
+    # Style tweaks — still only red / black / white family
+    if style == "midnight":
+        # Darker kit: deeper blacks, slightly muted reds
+        v2[colored] = np.clip(v2[colored] * 0.88, 0, 255)
+        s2[blue | purple_magenta] = np.clip(s2[blue | purple_magenta] * 0.94, 0, 255)
+    elif style == "scarlet":
+        # Brighter, punchier reds
+        s2[blue | purple_magenta] = np.clip(s2[blue | purple_magenta] * 1.16, 0, 255)
+        v2[blue | purple_magenta] = np.clip(v2[blue | purple_magenta] * 1.05, 0, 255)
+    elif style == "obsidian":
+        # More black in panels / accents; red body stays strong
+        v2[teal_green | orange_brown] = np.clip(v2[teal_green | orange_brown] * 0.72, 0, 110)
+        s2[teal_green] = np.clip(s2[teal_green] * 0.85, 0, 120)
+    # classic: no extra pass
 
     out_hsv = np.stack(
         [
