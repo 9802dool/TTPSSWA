@@ -19,7 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   return {
     title: `${committee.title} | Committees | TTPSSWA`,
-    description: `TTPSSWA ${committee.title} — information and contacts.`,
+    description:
+      committee.summary ?? `TTPSSWA ${committee.title} — information and contacts.`,
   };
 }
 
@@ -57,17 +58,40 @@ export default async function CommitteeDetailPage({ params }: Props) {
             </p>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{committee.title}</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              Information, contacts, and updates for this committee can be added here.
+              {committee.summary ??
+                "Information, contacts, and updates for this committee can be added here."}
             </p>
           </div>
         </section>
 
         <section className="border-b border-line bg-surface py-12 dark:bg-canvas">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <p className="text-sm leading-relaxed text-muted">
-              Further details for <span className="font-medium text-ink">{committee.title}</span> will appear in this
-              section as they become available.
-            </p>
+            {committee.channels && committee.channels.length > 0 ? (
+              <>
+                <h2 className="text-xl font-semibold text-ink">
+                  How we keep members informed
+                </h2>
+                <ul className="mt-6 space-y-4">
+                  {committee.channels.map((item, i) => (
+                    <li
+                      key={i}
+                      className="flex gap-3 rounded-lg border border-line bg-white/60 p-4 text-sm leading-relaxed text-ink shadow-sm dark:bg-white/5"
+                    >
+                      <span
+                        aria-hidden
+                        className="mt-1 inline-block h-2 w-2 flex-none rounded-full bg-sky-500"
+                      />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className="text-sm leading-relaxed text-muted">
+                Further details for <span className="font-medium text-ink">{committee.title}</span> will appear in this
+                section as they become available.
+              </p>
+            )}
           </div>
         </section>
       </main>
