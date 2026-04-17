@@ -1,6 +1,7 @@
 """
-Recolor jersey mockup to Trinidad & Tobago national palette (red, black, white)
-without changing layout, shapes, or text geometry — HSV remapping only.
+Recolor jersey mockup to Trinidad & Tobago national palette (red, black, white).
+HSV remapping with softer masks + mild denoise to reduce hem/collar artifacts
+from hard thresholding.
 """
 from __future__ import annotations
 
@@ -20,31 +21,30 @@ def recolor_tt_national(bgr: np.ndarray) -> np.ndarray:
     b, g, r = cv2.split(bgr.astype(np.float32))
     mb = np.max(np.stack([b, g, r], axis=-1), axis=-1)
     mn = np.min(np.stack([b, g, r], axis=-1), axis=-1)
-    # Preserve near-neutral pixels (white text, bright buttons, paper-white BG)
-    neutral = (mb - mn < 28) & (mb > 185)
+    chroma = mb - mn
+
+    # Wider "neutral" = collar interior, white text, buttons, paper BG — avoids mottled collar
+    neutral = (chroma < 42) & (mb > 148)
 
     h2, s2, v2 = h.copy(), s.copy(), v.copy()
 
-    # OpenCV H: 0-179. Blue ~100-125, Teal/cyan/green ~40-100
-    blue = (~neutral) & (h >= 92) & (h <= 140)
-    teal_green = (~neutral) & (h >= 38) & (h < 92)
-    purple = (~neutral) & (h > 140) & (h <= 175)
+    blue = (~neutral) & (h >= 90) & (h <= 142)
+    teal_green = (~neutral) & (h >= 36) & (h < 92)
+    purple = (~neutral) & (h > 142) & (h <= 176)
 
-    # Blues -> vivid TT red (keep shading via V/S)
-    h2[blue] = 4.0 + (h[blue] - 92) * 0.08  # slight variation
-    h2[blue] = np.clip(h2[blue], 0, 12)
-    s2[blue] = np.clip(s[blue] * 1.12 + 8, 0, 255)
-    v2[blue] = np.clip(v[blue] * 1.02, 0, 255)
+    # Blues -> TT red (slightly softer saturation bump)
+    h2[blue] = np.clip(4.0 + (h[blue] - 90) * 0.06, 0, 14)
+    s2[blue] = np.clip(s[blue] * 1.08 + 6, 0, 255)
+    v2[blue] = np.clip(v[blue] * 1.01, 0, 255)
 
-    # Teal / green accents -> black / near-black (keep a hint of red undertone)
-    h2[teal_green] = 3.0
-    s2[teal_green] = np.clip(s[teal_green] * 0.45 + 15, 0, 120)
-    v2[teal_green] = np.clip(v[teal_green] * 0.42, 0, 95)
+    # Teal/green -> dark (less crushing = less "static" noise at hem)
+    h2[teal_green] = 4.0
+    s2[teal_green] = np.clip(s[teal_green] * 0.52 + 12, 0, 130)
+    v2[teal_green] = np.clip(v[teal_green] * 0.58 + 10, 32, 118)
 
-    # Purple stray -> deep red
     h2[purple] = 172.0
-    s2[purple] = np.clip(s[purple] * 1.05, 0, 255)
-    v2[purple] = np.clip(v[purple] * 0.92, 0, 255)
+    s2[purple] = np.clip(s[purple] * 1.03, 0, 255)
+    v2[purple] = np.clip(v[purple] * 0.94, 0, 255)
 
     h2[neutral] = h[neutral]
     s2[neutral] = s[neutral]
@@ -58,7 +58,11 @@ def recolor_tt_national(bgr: np.ndarray) -> np.ndarray:
         ],
         axis=-1,
     )
-    return cv2.cvtColor(out_hsv, cv2.COLOR_HSV2BGR)
+    out = cv2.cvtColor(out_hsv, cv2.COLOR_HSV2BGR)
+
+    # Edge-preserving denoise: reduces speckle at hue boundaries / hem without AI redraw
+    out = cv2.bilateralFilter(out, d=5, sigmaColor=55, sigmaSpace=55)
+    return out
 
 
 def main() -> None:
@@ -73,7 +77,7 @@ def main() -> None:
         sys.exit(1)
     out = recolor_tt_national(bgr)
     outp.parent.mkdir(parents=True, exist_ok=True)
-    cv2.imwrite(str(outp), out, [cv2.IMWRITE_PNG_COMPRESSION, 9])
+    cv2.imwrite(str(outp), out, [cv2.IMWRITE_PNG_COMPRESSION, 6])
     print(f"Wrote {outp}")
 
 
