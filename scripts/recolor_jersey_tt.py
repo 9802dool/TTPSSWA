@@ -20,6 +20,9 @@ def recolor_tt_national(bgr: np.ndarray, style: str = "classic") -> np.ndarray:
     h = hsv[:, :, 0].astype(np.float32)
     s = hsv[:, :, 1].astype(np.float32)
     v = hsv[:, :, 2].astype(np.float32)
+    h_src = h.copy()
+    s_src = s.copy()
+    v_src = v.copy()
 
     b, g, r = cv2.split(bgr.astype(np.float32))
     mb = np.max(np.stack([b, g, r], axis=-1), axis=-1)
@@ -72,6 +75,16 @@ def recolor_tt_national(bgr: np.ndarray, style: str = "classic") -> np.ndarray:
         v2[teal_green | orange_brown] = np.clip(v2[teal_green | orange_brown] * 0.72, 0, 110)
         s2[teal_green] = np.clip(s2[teal_green] * 0.85, 0, 120)
     # classic: no extra pass
+
+    # Trinidad & Tobago white: map bright highlights / trims / light pink zones to visible white
+    # (runs after style so whites are not muted). Uses source luminance so placket & stripes pop.
+    w_hi = (purple_magenta | blue) & (v_src >= 148)
+    w_trim = teal_green & (v_src >= 120)
+    w_glint = orange_brown & (v_src >= 162)
+    w_fabric = (w_hi | w_trim | w_glint) & (~neutral)
+    h2[w_fabric] = 0.0
+    s2[w_fabric] = np.clip(s_src[w_fabric] * 0.07 + 8.0, 8.0, 38.0)
+    v2[w_fabric] = np.clip(228.0 + (v_src[w_fabric] - 135.0) * 0.14, 218.0, 255.0)
 
     out_hsv = np.stack(
         [
