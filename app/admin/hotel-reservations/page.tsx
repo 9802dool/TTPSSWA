@@ -76,7 +76,7 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
       <SiteHeader />
       <header className="border-b border-[var(--border)] bg-[var(--surface)] pt-[var(--site-header-stack)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
+        <div className="site-container flex flex-wrap items-center justify-between gap-4 py-4">
           <div>
             <p className="text-sm text-[var(--muted)]">
               <Link href="/admin" className="text-[var(--brand)] hover:underline">
@@ -113,7 +113,7 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
+      <main className="site-container space-y-6 py-10">
         {!db.storageConfigured ? (
           <div
             className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"

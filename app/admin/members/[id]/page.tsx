@@ -53,7 +53,7 @@ export default async function AdminMemberProfilePage({ params }: Props) {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
       <SiteHeader />
       <header className="border-b border-[var(--border)] bg-[var(--surface)] pt-[var(--site-header-stack)]">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-between gap-4 px-4 py-4">
+        <div className="site-container-reading flex flex-wrap items-center justify-between gap-4 py-4">
           <div>
             <p className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-[var(--muted)]">
               <Link
@@ -84,7 +84,7 @@ export default async function AdminMemberProfilePage({ params }: Props) {
         </div>
       </header>
 
-      <div className="mx-auto max-w-3xl border-b border-[var(--border)] bg-[var(--bg)] px-4 py-4">
+      <div className="site-container-reading border-b border-[var(--border)] bg-[var(--bg)] py-4">
         <form
           method="get"
           action="/admin"
@@ -116,7 +116,7 @@ export default async function AdminMemberProfilePage({ params }: Props) {
         </form>
       </div>
 
-      <main className="mx-auto max-w-3xl space-y-8 px-4 py-10">
+      <main className="site-container-reading space-y-8 py-10">
         <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="border-b border-[var(--border)] bg-[var(--bg)] px-6 py-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">

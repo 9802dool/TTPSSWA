@@ -65,7 +65,7 @@ export default async function AdminPage({ searchParams }: Props) {
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
       <SiteHeader />
       <header className="border-b border-[var(--border)] bg-[var(--surface)] pt-[var(--site-header-stack)]">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-4 py-4">
+        <div className="site-container-admin flex flex-wrap items-center justify-between gap-4 py-4">
           <div>
             <h1 className="text-lg font-semibold tracking-tight">
               Site administration
@@ -104,7 +104,7 @@ export default async function AdminPage({ searchParams }: Props) {
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl space-y-10 px-4 py-10">
+      <main className="site-container-admin space-y-10 py-10">
         {!stats.storageConfigured ? (
           <div
             className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"

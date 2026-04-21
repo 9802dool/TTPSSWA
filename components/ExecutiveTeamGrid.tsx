@@ -53,7 +53,7 @@ export function ExecutiveTeamGrid({ tone = "light" }: ExecutiveTeamGridProps) {
   return (
     <>
       <section className="bg-transparent py-8 sm:py-10">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="site-container">
           <p
             className={
               darkPage

@@ -138,7 +138,7 @@ export function MemberSignupForm() {
       </div>
 
       <div className="border-b-2 border-black bg-white px-3 pb-4 pt-3">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto w-full max-w-[min(100%,var(--container-reading-max))]">
           <h2 className="text-center text-base font-bold uppercase tracking-[0.2em] text-black underline decoration-2 underline-offset-4 sm:text-lg">
             Membership form
           </h2>

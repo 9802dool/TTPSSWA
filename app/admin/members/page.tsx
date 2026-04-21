@@ -70,7 +70,7 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
       <SiteHeader />
       <header className="border-b border-[var(--border)] bg-[var(--surface)] pt-[var(--site-header-stack)]">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
+        <div className="site-container flex flex-wrap items-center justify-between gap-4 py-4">
           <div>
             <p className="text-sm text-[var(--muted)]">
               <Link href="/admin" className="text-[var(--brand)] hover:underline">
@@ -109,7 +109,7 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl space-y-6 px-4 py-10">
+      <main className="site-container space-y-6 py-10">
         <div className="flex flex-wrap items-center gap-2 text-sm">
           <span className="text-[var(--muted)]">Status:</span>
           {(

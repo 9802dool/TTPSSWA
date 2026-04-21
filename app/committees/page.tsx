@@ -23,7 +23,7 @@ export default function CommitteesPage() {
                 "linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)",
             }}
           />
-          <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          <div className="relative site-container py-12 sm:py-16">
             <p className="mb-4">
               <Link
                 href="/"
@@ -41,7 +41,7 @@ export default function CommitteesPage() {
         </section>
 
         <section className="border-b border-line bg-navy py-12 text-white">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="site-container">
             <CommitteesSection />
           </div>
         </section>

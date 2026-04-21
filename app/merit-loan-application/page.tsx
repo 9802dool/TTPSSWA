@@ -16,7 +16,7 @@ export default function MeritLoanApplicationPage() {
       <SiteHeader />
       <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#e8ecf1] pt-[var(--site-header-stack)] dark:bg-slate-900">
         <div className="border-b border-slate-200 bg-white py-10 shadow-sm dark:border-slate-700 dark:bg-slate-950">
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="site-container">
             <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-brand">
               Trinidad and Tobago Police Service Social Welfare Association
             </p>

@@ -2,16 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Responsive foundation:
+  - Fluid gutters via clamp (proportional to viewport).
+  - Container max widths use min(100%, …rem) so grids stay fluid.
+  - Media queries below tune typography and motion for small/large viewports.
+*/
 @layer base {
   :root {
-    --promo-banner-height: 2.75rem;
+    --promo-banner-height: clamp(2.5rem, 8vw, 2.75rem);
     --site-header-stack: calc(var(--promo-banner-height) + 4.25rem);
+    --site-gutter: clamp(1rem, 4vw, 2rem);
+    --container-max: 72rem;
+    --container-wide-max: 80rem;
+    --container-admin-max: 64rem;
+    --container-reading-max: 48rem;
     --brand: #1e40af;
     --brand-hover: #1d4ed8;
     --bg: #0c1929;
     --fg: #f1f5f9;
     --surface: #0f172a;
     --border: #334155;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  img,
+  video,
+  canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  iframe {
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --promo-banner-height: 2.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
@@ -31,6 +73,70 @@
 }
 
 @layer components {
+  /** Fluid page shell: percentage-based width cap + clamp gutters (fluid grid column). */
+  .site-container {
+    width: 100%;
+    max-width: min(100%, var(--container-max));
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--site-gutter);
+    padding-right: var(--site-gutter);
+    box-sizing: border-box;
+  }
+
+  .site-container-wide {
+    width: 100%;
+    max-width: min(100%, var(--container-wide-max));
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--site-gutter);
+    padding-right: var(--site-gutter);
+    box-sizing: border-box;
+  }
+
+  .site-container-admin {
+    width: 100%;
+    max-width: min(100%, var(--container-admin-max));
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--site-gutter);
+    padding-right: var(--site-gutter);
+    box-sizing: border-box;
+  }
+
+  .site-container-reading {
+    width: 100%;
+    max-width: min(100%, var(--container-reading-max));
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: var(--site-gutter);
+    padding-right: var(--site-gutter);
+    box-sizing: border-box;
+  }
+
+  /** Embeds: flexible height from aspect ratio (see hotel / Noel Chase pages). */
+  .site-map-embed {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+  }
+
+  @media (min-width: 640px) {
+    .site-map-embed {
+      aspect-ratio: 16 / 10;
+    }
+  }
+
+  .site-map-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
   .site-btn-nav-pill {
     @apply rounded-full border border-line bg-white/95 px-3 py-1.5 text-sm text-ink shadow-sm transition hover:border-brand hover:text-brand;
   }

@@ -18,7 +18,7 @@ export default async function RuleBookPage() {
     <>
       <SiteHeader />
       <main className="min-h-[70vh] border-b border-line bg-[#e8ecf1] pt-[var(--site-header-stack)] dark:bg-slate-900">
-        <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="site-container py-8">
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-muted dark:text-slate-400">

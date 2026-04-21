@@ -23,7 +23,7 @@ export default function MembershipServicesPage() {
                 "linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)",
             }}
           />
-          <div className="relative mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          <div className="relative site-container py-12 sm:py-16">
             <p className="mb-4">
               <Link
                 href="/"
@@ -43,7 +43,7 @@ export default function MembershipServicesPage() {
           id="members-benefits"
           className="scroll-mt-[calc(var(--site-header-stack)+0.5rem)] border-b border-line bg-navy py-12 text-white"
         >
-          <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="site-container">
             <h2 className="text-center text-2xl font-bold">{MEMBER_BENEFITS_PILLAR.title}</h2>
             <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-slate-400">
               Choose a benefit to open the full page with details and application links.

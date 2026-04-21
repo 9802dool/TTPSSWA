@@ -23,7 +23,7 @@ export default function AboutPage() {
                 "linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)",
             }}
           />
-          <div className="relative mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+          <div className="relative site-container py-14 sm:py-20">
             <p className="mb-4">
               <Link
                 href="/"
@@ -32,7 +32,7 @@ export default function AboutPage() {
                 ← Home
               </Link>
             </p>
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">About TTPSSWA</h1>
+            <h1 className="text-fluid-3xl font-bold tracking-tight md:text-fluid-4xl">About TTPSSWA</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
               The Trinidad and Tobago Police Service Social &amp; Welfare Association represents members through advocacy,
               transparent governance, and programs that support officers and their families.
@@ -40,7 +40,7 @@ export default function AboutPage() {
           </div>
         </section>
         <section className="border-b border-line bg-[#e8ecf1] py-14 dark:border-slate-800 dark:bg-slate-900">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+          <div className="site-container-reading">
             <h2 className="text-xl font-bold text-ink dark:text-white">Our purpose</h2>
             <p className="mt-4 text-muted dark:text-slate-400">
               We work to strengthen community among members, deliver welfare benefits and services, and uphold professional

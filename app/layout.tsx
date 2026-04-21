@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen bg-canvas antialiased text-ink [font-size:clamp(0.9375rem,0.88rem+0.25vw,1.0625rem)]">
         <AnalyticsTracker />
         {children}
       </body>

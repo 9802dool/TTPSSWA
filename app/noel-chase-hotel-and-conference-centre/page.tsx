@@ -24,7 +24,7 @@ export default function NoelChaseHotelPage() {
                 "linear-gradient(160deg, rgb(12 25 41) 0%, rgb(30 58 95 / .8) 55%, rgb(30 64 175 / .2) 100%)",
             }}
           />
-          <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-end lg:px-8 lg:py-28">
+          <div className="relative site-container-wide grid gap-10 py-16 sm:py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:py-28">
             <div>
               <p className="mb-6">
                 <Link
@@ -38,7 +38,7 @@ export default function NoelChaseHotelPage() {
                 <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
                 Noel Chase Hotel and Conference Centre
               </div>
-              <h1 className="mt-4 max-w-xl text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-[3.4rem] lg:leading-[1.1]">
+              <h1 className="mt-4 max-w-[min(100%,24rem)] text-fluid-4xl font-extrabold tracking-tight lg:leading-[1.1]">
                 Stay with TTPSSWA
               </h1>
               <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-slate-300">
@@ -70,27 +70,25 @@ export default function NoelChaseHotelPage() {
         </section>
 
         <section className="bg-surface py-12 dark:bg-surface lg:py-16">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="site-container-wide">
             <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">Our Location</h2>
             <p className="mt-2 text-[15px] text-muted">Find us on the map below.</p>
             <div className="mt-6 overflow-hidden rounded-xl border border-line shadow-corp">
-              <iframe
-                title="Noel Chase Hotel and Conference Centre location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1962.5!2d-60.82871992401175!3d11.158669870877992!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDA5JzMxLjIiTiA2MMKwNDknNDMuNCJX!5e0!3m2!1sen!2stt!4v1700000000000"
-                width="100%"
-                height="450"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="w-full"
-              />
+              <div className="site-map-embed">
+                <iframe
+                  title="Noel Chase Hotel and Conference Centre location"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1962.5!2d-60.82871992401175!3d11.158669870877992!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDA5JzMxLjIiTiA2MMKwNDknNDMuNCJX!5e0!3m2!1sen!2stt!4v1700000000000"
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
             </div>
           </div>
         </section>
 
         <section className="bg-canvas py-12 dark:bg-canvas lg:py-16">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="site-container-wide">
             <HotelReservationForm />
           </div>
         </section>
