@@ -1,0 +1,45 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  UNVERIFIED
+  BASIC_USER
+  FINANCIAL_MEMBER
+  ADMIN
+}
+
+// Web Authentication Account
+model User {
+  id            String   @id @default(cuid())
+  fullName      String
+  email         String   @unique
+  serviceNumber String   @unique
+  passwordHash  String
+  role          UserRole @default(UNVERIFIED)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  membershipApplication MembershipApplication?
+}
+
+// Decoupled Formal Membership & Salary Deduction
+model MembershipApplication {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  stationDivision         String
+  nisNumber               String
+  bankName                String
+  accountNumber           String
+  salaryDeductionApproved Boolean  @default(false)
+  signatureUrl            String?
+  status                  String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  submittedAt             DateTime @default(now())
+}

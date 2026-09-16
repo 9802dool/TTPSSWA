@@ -12,6 +12,7 @@ Next.js site and API for the Trinidad & Tobago Police Service Social & Welfare A
 
 | Variable | Purpose |
 |----------|---------|
+| `DATABASE_URL` | PostgreSQL connection string for Prisma (`User`, `MembershipApplication`) |
 | `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Member applications, admin stats, hotel bookings, session-backed features |
 | `ADMIN_PASSWORD` | Admin login (min 8 characters); also used to derive member session signing if `MEMBER_SESSION_SECRET` is unset |
 | `MEMBER_SESSION_SECRET` | Optional; dedicated secret for member cookies (≥ 8 chars) |
@@ -50,3 +51,9 @@ npm run dev
 ```
 
 Runs on [http://localhost:3001](http://localhost:3001) so it does not clash with the portfolio on port 3000. Copy `.env.example` to `.env.local` if you add one for local secrets.
+
+With `DATABASE_URL` set, apply Prisma tables:
+
+```bash
+npx prisma migrate deploy
+```
