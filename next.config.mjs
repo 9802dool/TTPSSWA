@@ -13,6 +13,11 @@ const nextConfig = {
         destination: "/committees/:slug",
         permanent: true,
       },
+      {
+        source: "/dashboard/apply-membership",
+        destination: "/services/membership-application",
+        permanent: false,
+      },
     ];
   },
 };

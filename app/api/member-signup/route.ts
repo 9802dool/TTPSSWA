@@ -11,7 +11,7 @@ export const runtime = "nodejs";
 
 const PLACEHOLDER_GIF_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-/** Mobile app: minimal JSON application (full PDF form still on /login). */
+/** Mobile app: minimal JSON application (web account sign-up is /register). */
 async function handleJson(request: Request) {
   let body: { fullName?: string; email?: string; phone?: string };
   try {

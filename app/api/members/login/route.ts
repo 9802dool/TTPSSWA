@@ -1,7 +1,7 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { findAcceptedMemberByUsernameOrEmail } from "@/lib/member-signup-storage";
 import { verifyPassword } from "@/lib/password-hash";
+import { getPrisma } from "@/lib/prisma";
 import {
   getMemberCookieName,
   isMemberSessionConfigured,
@@ -39,12 +39,33 @@ export async function POST(request: Request) {
     );
   }
 
-  const member = await findAcceptedMemberByUsernameOrEmail(identifier);
-  if (!member?.passwordHash || !verifyPassword(password, member.passwordHash)) {
+  const prisma = getPrisma();
+  const prismaUser = prisma
+    ? await prisma.user.findFirst({
+        where: {
+          OR: [
+            { email: { equals: identifier, mode: "insensitive" } },
+            { serviceNumber: identifier },
+          ],
+        },
+      })
+    : null;
+
+  let sessionId: string | null = null;
+  if (prismaUser && verifyPassword(password, prismaUser.passwordHash)) {
+    sessionId = prismaUser.id;
+  } else {
+    const member = await findAcceptedMemberByUsernameOrEmail(identifier);
+    if (member?.passwordHash && verifyPassword(password, member.passwordHash)) {
+      sessionId = member.id;
+    }
+  }
+
+  if (!sessionId) {
     return NextResponse.json({ error: "Invalid credentials." }, { status: 401 });
   }
 
-  const token = signMemberSession(member.id, Date.now() + COOKIE_MAX_AGE_SEC * 1000);
+  const token = signMemberSession(sessionId, Date.now() + COOKIE_MAX_AGE_SEC * 1000);
   if (!token) {
     return NextResponse.json({ error: "Could not create session." }, { status: 500 });
   }

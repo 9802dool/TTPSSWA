@@ -78,8 +78,8 @@ export default async function AdminNewMembershipDatabasePage({ searchParams }: P
             </h1>
             <p className="text-sm text-[var(--muted)]">
               Pending applications from{" "}
-              <Link href="/login" className="text-[var(--brand)] hover:underline">
-                Become a Member Apply Here
+              <Link href="/register" className="text-[var(--brand)] hover:underline">
+                Create an online account
               </Link>{" "}
               ({pendingSignups.length} awaiting review)
             </p>

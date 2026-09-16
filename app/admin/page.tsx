@@ -148,8 +148,8 @@ export default async function AdminPage({ searchParams }: Props) {
               <h2 className="text-base font-semibold">Applications pending review</h2>
               <p className="mt-1 text-sm text-[var(--muted)]">
                 New submissions from{" "}
-                <Link href="/login" className="text-[var(--brand)] hover:underline">
-                  Become a Member Apply Here
+                <Link href="/register" className="text-[var(--brand)] hover:underline">
+                  Create an online account
                 </Link>{" "}
                 appear in the{" "}
                 <Link

@@ -1,19 +1,28 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MembershipApplicationPhotoFrame } from "@/components/MembershipApplicationPhotoFrame";
-import { MembershipFacialPhotoPanel } from "@/components/MembershipFacialPhotoPanel";
-import { MemberSignupForm } from "@/components/MemberSignupForm";
-import { SalaryDeductionForm } from "@/components/SalaryDeductionForm";
+import { MembersLoginForm } from "@/components/MembersLoginForm";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
-  title: "Become a member | TTPSSWA",
-  description:
-    "Submit the Trinidad and Tobago Police Service Social Welfare Association membership application and salary deduction forms online.",
+  title: "Sign in | TTPSSWA",
+  description: "Sign in to your TTPSSWA web account.",
 };
 
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams: Record<string, string | string[] | undefined>;
+}) {
+  const registered = searchParams.registered === "true";
+  const rawNext = searchParams.next;
+  const nextPath =
+    typeof rawNext === "string"
+      ? rawNext
+      : registered
+        ? "/services/membership-application"
+        : undefined;
+
   return (
     <>
       <SiteHeader />
@@ -24,73 +33,40 @@ export default function LoginPage() {
               Trinidad and Tobago Police Service Social Welfare Association
             </p>
             <h1 className="mt-4 text-center text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-              Become a Member Apply Here
+              Sign in
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted">
-              Complete the <strong className="font-semibold text-ink">membership application</strong>{" "}
-              and, if required, the <strong className="font-semibold text-ink">salary deduction</strong>{" "}
-              form below. Printable PDFs:{" "}
-              <a
-                href="/forms/MEMBERSHIP APPLICATION.pdf"
-                className="text-base font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-lg"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Membership application
-              </a>
-              ,{" "}
-              <a
-                href="/forms/SALARY DEDUCTION.pdf"
-                className="text-base font-bold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover sm:text-lg"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Salary deduction
-              </a>
-              . Already approved?{" "}
-              <Link href="/members/login" className="font-semibold text-brand hover:underline">
-                Members login
+              Use your work email or regiment number and password. New here?{" "}
+              <Link href="/register" className="font-semibold text-brand hover:underline">
+                Create an online account
               </Link>
               .
             </p>
           </div>
         </div>
-
-        <div className="mx-auto w-full max-w-[min(100%,96rem)] space-y-12 px-4 pb-20 pt-10 sm:px-6 lg:px-8">
-          <section aria-labelledby="membership-form-heading">
-            <h2
-              id="membership-form-heading"
-              className="mb-6 text-center text-xl font-bold uppercase tracking-[0.14em] text-slate-900 sm:text-2xl dark:text-slate-100"
+        <div className="mx-auto max-w-md px-4 py-12 sm:px-6">
+          {registered ? (
+            <p
+              className="mb-6 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800"
+              role="status"
             >
-              Membership application
-            </h2>
-            <div className="border-2 border-slate-300 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.06),0_12px_40px_rgba(15,23,42,0.08)] dark:border-slate-600 dark:bg-white">
-              <div className="flex flex-col lg:flex-row lg:items-start">
-                <div className="min-w-0 flex-1 px-5 py-8 sm:px-8 sm:py-10 lg:order-1">
-                  <MemberSignupForm />
-                </div>
-                <aside
-                  className="flex w-full shrink-0 flex-col border-t border-slate-200 bg-slate-50/90 px-5 py-6 sm:px-6 lg:order-2 lg:w-[min(100%,19rem)] lg:border-l lg:border-t-0 lg:border-slate-200 lg:px-5 lg:py-10"
-                  aria-label="Facial photograph upload"
-                >
-                  <MembershipApplicationPhotoFrame />
-                  <MembershipFacialPhotoPanel formId="membership-application-form" />
-                </aside>
-              </div>
-            </div>
-          </section>
-
-          <section aria-labelledby="salary-deduction-heading">
-            <h2
-              id="salary-deduction-heading"
-              className="mb-6 text-center text-xl font-bold uppercase tracking-[0.14em] text-slate-900 sm:text-2xl dark:text-slate-100"
+              Account created. Sign in to continue with formal membership and salary
+              deduction, if you wish.
+            </p>
+          ) : null}
+          <div className="rounded-lg bg-white p-6 shadow-md">
+            <MembersLoginForm redirectAfterLogin={nextPath ?? null} />
+          </div>
+          <p className="mt-6 text-center text-sm text-muted">
+            Formal membership application:{" "}
+            <Link
+              href="/services/membership-application"
+              className="font-semibold text-brand hover:underline"
             >
-              Salary deduction
-            </h2>
-            <div className="border-2 border-slate-300 bg-white px-5 py-8 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_12px_40px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10 dark:border-slate-600 dark:bg-white">
-              <SalaryDeductionForm />
-            </div>
-          </section>
+              salary deduction authorization
+            </Link>
+            .
+          </p>
         </div>
       </main>
       <SiteFooter />

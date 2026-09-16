@@ -36,6 +36,14 @@ export default function MembershipServicesPage() {
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
               {MEMBER_BENEFITS_PILLAR.body}
             </p>
+            <p className="mt-6">
+              <Link
+                href="/services/membership-application"
+                className="inline-flex min-h-[2.75rem] items-center rounded-xl bg-gold px-5 py-3 text-sm font-bold text-navy transition hover:opacity-90"
+              >
+                Apply for formal membership
+              </Link>
+            </p>
             <div className="mt-10 border-t border-white/10" aria-hidden />
           </div>
         </section>

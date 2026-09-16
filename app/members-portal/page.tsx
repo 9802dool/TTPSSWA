@@ -17,9 +17,9 @@ export default function MembersPortalPage() {
         <div className="mx-auto max-w-lg px-4 py-12 sm:px-6 lg:px-8">
           <h1 className="text-center text-2xl font-bold">Members portal</h1>
           <p className="mt-3 text-center text-sm text-slate-400">
-            Sign in with the username or email from your accepted application. New members can{" "}
-            <Link href="/login" className="font-semibold text-sky-300 underline underline-offset-2 hover:text-white">
-              apply here
+            Sign in with your email, regiment number, or username. New members can{" "}
+            <Link href="/register" className="font-semibold text-sky-300 underline underline-offset-2 hover:text-white">
+              create an account
             </Link>
             .
           </p>

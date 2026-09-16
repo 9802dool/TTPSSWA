@@ -70,7 +70,7 @@ export function MembersLoginForm({
     >
       <div>
         <label htmlFor="identifier" className={labelClass}>
-          Username or email <span className="text-red-500">*</span>
+          Email, regiment number, or username <span className="text-red-500">*</span>
         </label>
         <input
           id="identifier"
@@ -79,7 +79,7 @@ export function MembersLoginForm({
           autoComplete="username"
           required
           className={inputClass}
-          placeholder="Same as on your application"
+          placeholder="Work email or regiment number"
         />
       </div>
       <div>

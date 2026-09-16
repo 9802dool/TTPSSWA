@@ -72,7 +72,7 @@ export default function AdminLoginPage() {
               Dashboard also includes{" "}
               <strong className="text-[var(--fg)]">applications pending review</strong>
               , analytics, and service requests.{" "}
-              <Link href="/login" className="text-[var(--brand)] hover:underline">
+              <Link href="/register" className="text-[var(--brand)] hover:underline">
                 Public signup form
               </Link>
             </p>

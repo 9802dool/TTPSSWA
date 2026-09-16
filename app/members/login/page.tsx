@@ -29,10 +29,11 @@ export default function MemberLoginPage({
         <div className="mx-auto max-w-lg px-4 py-12 sm:px-6 lg:px-8">
           <h1 className="text-center text-2xl font-bold">Member login</h1>
           <p className="mt-3 text-center text-sm text-slate-400">
-            Use your username or email and password.{" "}
-            <Link href="/login" className="font-semibold text-sky-300 underline underline-offset-2 hover:text-white">
-              Membership application
+            Use your email, regiment number, or username and password.{" "}
+            <Link href="/register" className="font-semibold text-sky-300 underline underline-offset-2 hover:text-white">
+              Create an account
             </Link>
+            .
           </p>
           <Suspense fallback={<p className="mt-8 text-center text-sm text-slate-500">Loading…</p>}>
             <LoginFormWithNext nextPath={nextPath} />
