@@ -14,6 +14,18 @@ enum UserRole {
   ADMIN
 }
 
+enum RoomCategory {
+  PRESIDENTIAL_SUITE
+  SINGLE_OCCUPANCY
+  DOUBLE_OCCUPANCY
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
 // Web Authentication Account
 model User {
   id            String   @id @default(cuid())
@@ -30,9 +42,9 @@ model User {
 
 // Decoupled Formal Membership & Salary Deduction
 model MembershipApplication {
-  id                      String   @id @default(cuid())
-  userId                  String   @unique
-  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   stationDivision         String
   nisNumber               String
@@ -42,4 +54,20 @@ model MembershipApplication {
   signatureUrl            String?
   status                  String   @default("PENDING") // PENDING, APPROVED, REJECTED
   submittedAt             DateTime @default(now())
+}
+
+model HotelBooking {
+  id            String        @id @default(cuid())
+  guestName     String
+  serviceNumber String
+  email         String
+  phone         String
+  roomCategory  RoomCategory
+  checkIn       DateTime
+  checkOut      DateTime
+  status        BookingStatus @default(CONFIRMED)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([roomCategory, status, checkIn, checkOut])
 }

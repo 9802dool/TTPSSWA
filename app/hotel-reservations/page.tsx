@@ -1,93 +1,35 @@
 import type { Metadata } from "next";
-import HotelReservationForm from "@/components/HotelReservationForm";
+import SimpleBookingForm from "@/components/hotel/SimpleBookingForm";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Hotel reservations | TTPSSWA",
   description:
-    "Request hotel accommodation: check-in and check-out dates and times — TTPSSWA.",
+    "Book a TTPSSWA guest house room with live category capacity checks.",
 };
 
 export default function HotelReservationsPage() {
   return (
     <>
       <SiteHeader />
-      <main className="pt-[var(--site-header-stack)]">
-        {/* ── Hero ── */}
-        <section className="relative overflow-hidden bg-navy text-white">
-          <div
-            className="pointer-events-none absolute inset-0"
-            aria-hidden
-            style={{
-              backgroundImage:
-                "linear-gradient(160deg, rgb(12 25 41) 0%, rgb(30 58 95 / .8) 55%, rgb(30 64 175 / .2) 100%)",
-            }}
-          />
-          <div className="relative site-container-wide grid gap-10 py-16 sm:py-20 lg:grid-cols-[1fr_auto] lg:items-end lg:py-28">
-            <div>
-              <div className="flex items-center gap-2 text-xs text-slate-300">
-                <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                Accommodation
-              </div>
-              <h1 className="mt-4 max-w-[min(100%,24rem)] text-fluid-4xl font-extrabold tracking-tight lg:leading-[1.1]">
-                Stay with TTPSSWA
-              </h1>
-              <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-slate-300">
-                8 rooms across three categories. Choose your dates, pick rooms,
-                and submit a request — our coordinator confirms rates and
-                availability.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-6 text-sm text-white/70">
-                <span className="flex items-center gap-2"><span className="text-lg">🏨</span> 8 rooms</span>
-                <span className="flex items-center gap-2"><span className="text-lg">👤</span> Up to 10 guests</span>
-                <span className="flex items-center gap-2"><span className="text-lg">📧</span> Email confirmation</span>
-              </div>
-            </div>
-            <div className="hidden rounded-2xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur-sm lg:block">
-              <p className="text-xs font-semibold uppercase tracking-widest text-white/50">
-                Room types
-              </p>
-              <ul className="mt-3 space-y-2 text-sm text-white/80">
-                <li>2 &times; Presidential suite</li>
-                <li>2 &times; Full bed room</li>
-                <li>4 &times; Double bed room</li>
-              </ul>
-              <p className="mt-4 text-xs text-white/40">
-                Rooms adjustable on request.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Location map ── */}
-        <section className="bg-surface py-12 dark:bg-surface lg:py-16">
-          <div className="site-container-wide">
-            <h2 className="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-              Our Location
-            </h2>
-            <p className="mt-2 text-[15px] text-muted">
-              Find us on the map below.
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-slate-100 pt-[var(--site-header-stack)]">
+        <section className="border-b border-white/10 bg-navy text-white">
+          <div className="site-container py-10 text-center sm:py-14">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200">
+              Noel Chase Hotel and Conference Centre
             </p>
-            <div className="mt-6 overflow-hidden rounded-xl border border-line shadow-corp">
-              <div className="site-map-embed">
-                <iframe
-                  title="TTPSSWA Hotel Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1962.5!2d-60.82871992401175!3d11.158669870877992!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTHCsDA5JzMxLjIiTiA2MMKwNDknNDMuNCJX!5e0!3m2!1sen!2stt!4v1700000000000"
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              </div>
-            </div>
+            <h1 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+              Guest house reservations
+            </h1>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
+              Eight rooms across three categories: two presidential suites, two
+              single-occupancy rooms, and four double-occupancy rooms.
+            </p>
           </div>
         </section>
-
-        {/* ── Booking form section ── */}
-        <section className="bg-canvas py-12 dark:bg-canvas lg:py-16">
-          <div className="site-container-wide">
-            <HotelReservationForm />
-          </div>
+        <section className="site-container px-4 py-6 sm:px-6 sm:py-10">
+          <SimpleBookingForm />
         </section>
       </main>
       <SiteFooter />
