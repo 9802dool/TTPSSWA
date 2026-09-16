@@ -137,7 +137,7 @@ export async function getPendingMemberSignupById(
   return all.find((r) => r.id === id) ?? null;
 }
 
-/** For member login: match username/email and must be accepted. */
+/** For legacy member login: match username, email, or service number and must be accepted. */
 export async function findAcceptedMemberByUsernameOrEmail(
   identifier: string,
 ): Promise<PendingMemberSignup | null> {
@@ -149,7 +149,8 @@ export async function findAcceptedMemberByUsernameOrEmail(
     if (r.applicationStatus !== "accepted" || !r.passwordHash) continue;
     const user = (r.username ?? "").trim().toLowerCase();
     const mail = (r.email ?? "").trim().toLowerCase();
-    if (user === qLower || mail === qLower) {
+    const serviceNumber = (r.regimentalNumber ?? "").trim().toLowerCase();
+    if (user === qLower || mail === qLower || serviceNumber === qLower) {
       return r;
     }
   }

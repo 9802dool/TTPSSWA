@@ -12,8 +12,8 @@ Next.js site and API for the Trinidad & Tobago Police Service Social & Welfare A
 
 | Variable | Purpose |
 |----------|---------|
-| `DATABASE_URL` | PostgreSQL connection string for Prisma (`User`, `MembershipApplication`) |
-| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Member applications, admin stats, hotel bookings, session-backed features |
+| `DATABASE_URL` | Optional PostgreSQL connection string for the Prisma membership-application models |
+| `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` | Online accounts, member applications, admin stats, hotel bookings, session-backed features |
 | `ADMIN_PASSWORD` | Admin login (min 8 characters); also used to derive member session signing if `MEMBER_SESSION_SECRET` is unset |
 | `MEMBER_SESSION_SECRET` | Optional; dedicated secret for member cookies (≥ 8 chars) |
 | `RESEND_API_KEY` | Transactional email (membership pending, hotel notifications) |
