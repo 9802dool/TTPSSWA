@@ -143,3 +143,33 @@ export async function getWebAccountById(id: string): Promise<WebAccount | null> 
     return null;
   }
 }
+
+/** Online login accounts for the authenticated admin dashboard, newest first. */
+export async function listWebAccounts(): Promise<WebAccount[]> {
+  const redis = getRedis();
+  if (!redis) return [];
+
+  try {
+    let cursor = 0;
+    const keys: string[] = [];
+    do {
+      const [nextCursor, page] = await redis.scan(cursor, {
+        match: `${ACCOUNT_PREFIX}:id:*`,
+        count: 100,
+      });
+      cursor = Number(nextCursor);
+      keys.push(...page);
+    } while (cursor !== 0 && keys.length < 500);
+
+    const records = await Promise.all(
+      keys.slice(0, 500).map((key) => redis.get(key)),
+    );
+    return records
+      .map(parseAccount)
+      .filter((account): account is WebAccount => account !== null)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  } catch (error) {
+    console.error("listWebAccounts:", error);
+    return [];
+  }
+}

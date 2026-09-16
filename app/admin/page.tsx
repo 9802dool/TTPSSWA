@@ -8,6 +8,7 @@ import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
 import { formatMemberPhoneDisplay } from "@/lib/member-phone";
 import { getAdminStats } from "@/lib/analytics-storage";
 import { getPendingMemberSignups } from "@/lib/member-signup-storage";
+import { listWebAccounts } from "@/lib/web-account-storage";
 
 type Props = {
   searchParams: Promise<{ q?: string }> | { q?: string };
@@ -25,6 +26,7 @@ export default async function AdminPage({ searchParams }: Props) {
 
   let stats: Awaited<ReturnType<typeof getAdminStats>>;
   let pendingSignups: Awaited<ReturnType<typeof getPendingMemberSignups>>;
+  let webAccounts: Awaited<ReturnType<typeof listWebAccounts>>;
   try {
     stats = await getAdminStats();
   } catch (e) {
@@ -42,11 +44,26 @@ export default async function AdminPage({ searchParams }: Props) {
     console.error("AdminPage getPendingMemberSignups error:", e);
     pendingSignups = [];
   }
+  try {
+    webAccounts = await listWebAccounts();
+  } catch (e) {
+    console.error("AdminPage listWebAccounts error:", e);
+    webAccounts = [];
+  }
   const pathEntries = stats.visitsByPath
     ? Object.entries(stats.visitsByPath).sort((a, b) => b[1] - a[1])
     : [];
 
   const qLower = nameQuery.toLowerCase();
+  const filteredAccounts =
+    nameQuery.length > 0
+      ? webAccounts.filter(
+          (account) =>
+            account.fullName.toLowerCase().includes(qLower) ||
+            account.email.toLowerCase().includes(qLower) ||
+            account.serviceNumber.toLowerCase().includes(qLower),
+        )
+      : webAccounts;
   const filteredSignups =
     nameQuery.length > 0
       ? pendingSignups.filter((m) => {
@@ -145,21 +162,84 @@ export default async function AdminPage({ searchParams }: Props) {
         <section>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-base font-semibold">Applications pending review</h2>
+              <h2 className="text-base font-semibold">Online accounts</h2>
               <p className="mt-1 text-sm text-[var(--muted)]">
-                New submissions from{" "}
+                Website login accounts created at{" "}
                 <Link href="/register" className="text-[var(--brand)] hover:underline">
                   Create an online account
-                </Link>{" "}
-                appear in the{" "}
+                </Link>
+                . These records are separate from formal association membership.
+              </p>
+            </div>
+            <span className="text-sm font-medium text-[var(--muted)]">
+              {webAccounts.length} account{webAccounts.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+            {webAccounts.length === 0 ? (
+              <p className="p-6 text-sm text-[var(--muted)]">
+                {stats.storageConfigured
+                  ? "No online accounts yet."
+                  : "Redis is not configured, so online accounts cannot be loaded."}
+              </p>
+            ) : filteredAccounts.length === 0 ? (
+              <p className="p-6 text-sm text-[var(--muted)]">
+                No online accounts match &quot;{nameQuery}&quot;.
+              </p>
+            ) : (
+              <table className="w-full min-w-[760px] text-left text-sm">
+                <thead className="border-b border-[var(--border)] bg-[var(--bg)]">
+                  <tr>
+                    <th className="px-4 py-3 font-medium">Created (UTC)</th>
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Work email</th>
+                    <th className="px-4 py-3 font-medium">Service #</th>
+                    <th className="px-4 py-3 font-medium">Role</th>
+                    <th className="px-4 py-3 font-medium">Password</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAccounts.map((account) => (
+                    <tr
+                      key={account.id}
+                      className="border-b border-[var(--border)] align-top last:border-0"
+                    >
+                      <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[var(--muted)]">
+                        {account.createdAt}
+                      </td>
+                      <td className="px-4 py-3 font-medium">{account.fullName}</td>
+                      <td className="max-w-[14rem] break-all px-4 py-3 text-xs">
+                        {account.email}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs">
+                        {account.serviceNumber}
+                      </td>
+                      <td className="px-4 py-3 text-xs">
+                        {account.role.replaceAll("_", " ")}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-[var(--muted)]">Hashed</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </section>
+
+        <section>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h2 className="text-base font-semibold">Applications pending review</h2>
+              <p className="mt-1 text-sm text-[var(--muted)]">
+                Formal membership submissions appear in the{" "}
                 <Link
                   href="/admin/new-membership"
                   className="font-medium text-[var(--brand)] hover:underline"
                 >
                   New Membership Applications
                 </Link>
-                . Accept an applicant to allow members login. Pending applicants cannot
-                sign in.
+                . Online account holders can sign in independently while formal
+                applications remain pending review.
               </p>
             </div>
             <Link
