@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getPrisma } from "@/lib/prisma";
+import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 import { getMemberCookieName, verifyMemberSession } from "@/lib/member-session";
 
 export function getSessionUserId(): string | null {
@@ -11,10 +11,14 @@ export function getSessionUserId(): string | null {
 export async function getSessionUser() {
   const id = getSessionUserId();
   if (!id) return null;
-  const prisma = getPrisma();
-  if (!prisma) return null;
-  return prisma.user.findUnique({
-    where: { id },
-    include: { membershipApplication: true },
-  });
+  if (!isDatabaseConfigured()) return null;
+  try {
+    return await prisma.user.findUnique({
+      where: { id },
+      include: { membershipApplication: true },
+    });
+  } catch (error) {
+    console.error("getSessionUser:", error);
+    return null;
+  }
 }

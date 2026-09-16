@@ -1,22 +1,35 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { hashPassword } from "@/lib/password-hash";
-import { getPrisma } from "@/lib/prisma";
+import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** P1001/P1000: server unreachable or credentials rejected. */
+function isUnreachableDatabase(error: unknown): boolean {
+  return (
+    error instanceof Prisma.PrismaClientInitializationError ||
+    (error instanceof Prisma.PrismaClientKnownRequestError &&
+      (error.code === "P1000" || error.code === "P1001"))
+  );
+}
+
 function isUniqueConflict(error: unknown): boolean {
-  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
+  return (
+    error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"
+  );
 }
 
 export async function POST(request: Request) {
-  const prisma = getPrisma();
-  if (!prisma) {
+  if (!isDatabaseConfigured()) {
     return NextResponse.json(
-      { message: "Account database is not configured." },
-      { status: 503 },
+      {
+        message:
+          "Account database is not configured. Missing DATABASE_URL in environment.",
+      },
+      { status: 500 },
     );
   }
 
@@ -41,13 +54,16 @@ export async function POST(request: Request) {
 
   if (!fullName || !email || !serviceNumber || !password) {
     return NextResponse.json(
-      { message: "Full name, work email, service number, and password are required." },
+      { message: "All fields are required." },
       { status: 400 },
     );
   }
 
   if (!EMAIL_RE.test(email)) {
-    return NextResponse.json({ message: "Enter a valid work email address." }, { status: 400 });
+    return NextResponse.json(
+      { message: "Enter a valid work email address." },
+      { status: 400 },
+    );
   }
 
   if (password.length < 8) {
@@ -62,7 +78,18 @@ export async function POST(request: Request) {
   }
 
   try {
-    await prisma.user.create({
+    const existingUser = await prisma.user.findFirst({
+      where: { OR: [{ email }, { serviceNumber }] },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { message: "An account with this email or service number already exists." },
+        { status: 409 },
+      );
+    }
+
+    const newUser = await prisma.user.create({
       data: {
         fullName,
         email,
@@ -71,6 +98,11 @@ export async function POST(request: Request) {
         role: "UNVERIFIED",
       },
     });
+
+    return NextResponse.json(
+      { ok: true, message: "Account created successfully.", userId: newUser.id },
+      { status: 201 },
+    );
   } catch (error) {
     if (isUniqueConflict(error)) {
       return NextResponse.json(
@@ -78,9 +110,20 @@ export async function POST(request: Request) {
         { status: 409 },
       );
     }
+    if (isUnreachableDatabase(error)) {
+      console.error("POST /api/auth/register — database unreachable:", error);
+      return NextResponse.json(
+        {
+          message:
+            "Could not reach the account database. Check DATABASE_URL and that Postgres is running.",
+        },
+        { status: 503 },
+      );
+    }
     console.error("POST /api/auth/register:", error);
-    return NextResponse.json({ message: "Failed to register account." }, { status: 500 });
+    return NextResponse.json(
+      { message: "Failed to register account." },
+      { status: 500 },
+    );
   }
-
-  return NextResponse.json({ ok: true }, { status: 201 });
 }

@@ -4,19 +4,18 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-function createPrismaClient() {
-  return new PrismaClient();
-}
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log:
+      process.env.NODE_ENV === "development"
+        ? ["query", "error", "warn"]
+        : ["error"],
+  });
 
-/** Shared Prisma client. Returns null when DATABASE_URL is not set. */
-export function getPrisma(): PrismaClient | null {
-  if (!process.env.DATABASE_URL) {
-    return null;
-  }
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-  if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = createPrismaClient();
-  }
-
-  return globalForPrisma.prisma;
+/** False when DATABASE_URL is unset, so routes can answer before querying. */
+export function isDatabaseConfigured(): boolean {
+  return Boolean(process.env.DATABASE_URL);
 }

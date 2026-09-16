@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { findAcceptedMemberByUsernameOrEmail } from "@/lib/member-signup-storage";
 import { verifyPassword } from "@/lib/password-hash";
-import { getPrisma } from "@/lib/prisma";
+import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 import {
   getMemberCookieName,
   isMemberSessionConfigured,
@@ -39,17 +39,22 @@ export async function POST(request: Request) {
     );
   }
 
-  const prisma = getPrisma();
-  const prismaUser = prisma
-    ? await prisma.user.findFirst({
+  let prismaUser = null;
+  if (isDatabaseConfigured()) {
+    try {
+      prismaUser = await prisma.user.findFirst({
         where: {
           OR: [
             { email: { equals: identifier, mode: "insensitive" } },
             { serviceNumber: identifier },
           ],
         },
-      })
-    : null;
+      });
+    } catch (error) {
+      // Fall back to Redis-backed members when Postgres is unreachable.
+      console.error("POST /api/members/login — Prisma lookup failed:", error);
+    }
+  }
 
   let sessionId: string | null = null;
   if (prismaUser && verifyPassword(password, prismaUser.passwordHash)) {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
-import { getPrisma } from "@/lib/prisma";
+import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 import { getSessionUserId } from "@/lib/session-user";
 
 export const runtime = "nodejs";
@@ -10,11 +10,13 @@ function isUniqueConflict(error: unknown): boolean {
 }
 
 export async function POST(request: Request) {
-  const prisma = getPrisma();
-  if (!prisma) {
+  if (!isDatabaseConfigured()) {
     return NextResponse.json(
-      { message: "Account database is not configured." },
-      { status: 503 },
+      {
+        message:
+          "Account database is not configured. Missing DATABASE_URL in environment.",
+      },
+      { status: 500 },
     );
   }
 
