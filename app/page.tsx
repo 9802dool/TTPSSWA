@@ -52,10 +52,10 @@ export default function HomePage() {
             </div>
             <div className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4 md:justify-start">
               <Link
-                href="/register"
+                href="/hotel-reservations"
                 className="inline-flex min-h-[2.75rem] min-w-[min(100%,12rem)] flex-1 items-center justify-center rounded-xl bg-gold px-5 py-3 text-center text-sm font-bold text-navy transition hover:opacity-90 sm:min-w-0 sm:flex-initial sm:px-6"
               >
-                Become a member
+                Hotel reservation
               </Link>
               <Link
                 href="/membership-services"
