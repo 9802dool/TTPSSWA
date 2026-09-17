@@ -57,17 +57,20 @@ model MembershipApplication {
 }
 
 model HotelBooking {
-  id            String        @id @default(cuid())
-  guestName     String
-  serviceNumber String
-  email         String
-  phone         String
-  roomCategory  RoomCategory
-  checkIn       DateTime
-  checkOut      DateTime
-  status        BookingStatus @default(CONFIRMED)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  id              String        @id @default(cuid())
+  guestName       String
+  serviceNumber   String
+  email           String
+  phone           String
+  roomCategory    RoomCategory
+  checkIn         DateTime
+  checkOut        DateTime
+  guests          Int           @default(1)
+  meals           String[]      @default([])
+  specialRequests String?
+  status          BookingStatus @default(CONFIRMED)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@index([roomCategory, status, checkIn, checkOut])
 }

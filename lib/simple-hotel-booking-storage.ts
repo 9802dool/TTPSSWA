@@ -20,6 +20,9 @@ export type SimpleHotelBooking = {
   roomCategory: RoomCategory;
   checkIn: string;
   checkOut: string;
+  guests: number;
+  meals: string[];
+  specialRequests: string;
   status: "CONFIRMED";
   createdAt: string;
   updatedAt: string;

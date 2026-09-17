@@ -36,6 +36,9 @@ type FormState = {
   roomCategory: RoomCategory;
   checkIn: string;
   checkOut: string;
+  guests: string;
+  meals: string[];
+  specialRequests: string;
 };
 
 const INITIAL_FORM: FormState = {
@@ -46,6 +49,9 @@ const INITIAL_FORM: FormState = {
   roomCategory: "DOUBLE_OCCUPANCY",
   checkIn: "",
   checkOut: "",
+  guests: "1",
+  meals: [],
+  specialRequests: "",
 };
 
 const inputClass =
@@ -72,6 +78,16 @@ export default function SimpleBookingForm() {
     setMessage(null);
   }
 
+  function toggleMeal(meal: string) {
+    setFormData((current) => ({
+      ...current,
+      meals: current.meals.includes(meal)
+        ? current.meals.filter((item) => item !== meal)
+        : [...current.meals, meal],
+    }));
+    setMessage(null);
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
@@ -93,7 +109,7 @@ export default function SimpleBookingForm() {
 
       setMessage({
         type: "success",
-        text: "Booking confirmed! Your reservation has been recorded.",
+        text: "Booking request submitted! Your reserved room has been recorded.",
       });
       setFormData(INITIAL_FORM);
     } catch (error: unknown) {
@@ -113,7 +129,7 @@ export default function SimpleBookingForm() {
     <div className="mx-auto my-8 max-w-3xl rounded-xl border border-slate-200 bg-white p-5 shadow-md sm:p-7">
       <div className="mb-6 border-b border-slate-200 pb-4">
         <h2 className="text-2xl font-bold text-slate-900">
-          TTPSSWA Guest House Booking
+          Hotel Booking Request
         </h2>
         <p className="mt-1 text-sm text-slate-500">
           Select one room, choose your dates, and confirm your accommodation.
@@ -291,15 +307,75 @@ export default function SimpleBookingForm() {
                 onChange={(event) => update("phone", event.target.value)}
               />
             </div>
+            <div>
+              <label htmlFor="hotel-guests" className="text-xs text-slate-500">
+                Number of guests
+              </label>
+              <input
+                id="hotel-guests"
+                type="number"
+                required
+                min={1}
+                max={10}
+                inputMode="numeric"
+                className={inputClass}
+                value={formData.guests}
+                onChange={(event) => update("guests", event.target.value)}
+              />
+            </div>
           </div>
         </fieldset>
+
+        <fieldset>
+          <legend className="block text-sm font-semibold text-slate-700">
+            Meal options
+          </legend>
+          <p className="mt-1 text-xs text-slate-500">
+            Select meals you would like included with your stay. Prices are
+            confirmed separately.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-3">
+            {["Breakfast", "Lunch", "Dinner"].map((meal) => (
+              <label
+                key={meal}
+                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700"
+              >
+                <input
+                  type="checkbox"
+                  checked={formData.meals.includes(meal)}
+                  onChange={() => toggleMeal(meal)}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                />
+                {meal}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        <div>
+          <label
+            htmlFor="hotel-special-requests"
+            className="block text-sm font-semibold text-slate-700"
+          >
+            Special requests
+          </label>
+          <textarea
+            id="hotel-special-requests"
+            rows={4}
+            maxLength={2000}
+            className={`${inputClass} resize-y`}
+            placeholder="Dietary restrictions, room preferences, estimated arrival time, etc."
+            value={formData.specialRequests}
+            onChange={(event) => update("specialRequests", event.target.value)}
+          />
+        </div>
 
         <button
           type="submit"
           disabled={loading}
           className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white shadow transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Checking availability..." : "Confirm reservation"}
+          {loading ? "Checking availability..." : "Submit booking request"}
         </button>
       </form>
     </div>

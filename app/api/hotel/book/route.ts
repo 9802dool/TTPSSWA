@@ -10,6 +10,7 @@ export const runtime = "nodejs";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ALLOWED_MEALS = new Set(["Breakfast", "Lunch", "Dinner"]);
 
 function isRoomCategory(value: string): value is RoomCategory {
   return Object.hasOwn(ROOM_CAPACITY, value);
@@ -33,6 +34,17 @@ export async function POST(request: Request) {
     typeof body.roomCategory === "string" ? body.roomCategory.trim() : "";
   const checkIn = typeof body.checkIn === "string" ? body.checkIn.trim() : "";
   const checkOut = typeof body.checkOut === "string" ? body.checkOut.trim() : "";
+  const guests = Number(body.guests);
+  const meals = Array.isArray(body.meals)
+    ? body.meals.filter(
+        (meal): meal is string =>
+          typeof meal === "string" && ALLOWED_MEALS.has(meal),
+      )
+    : [];
+  const specialRequests =
+    typeof body.specialRequests === "string"
+      ? body.specialRequests.trim().slice(0, 2000)
+      : "";
 
   if (
     !guestName ||
@@ -41,9 +53,17 @@ export async function POST(request: Request) {
     !phone ||
     !roomCategory ||
     !checkIn ||
-    !checkOut
+    !checkOut ||
+    !Number.isInteger(guests)
   ) {
     return NextResponse.json({ message: "All fields are required." }, { status: 400 });
+  }
+
+  if (guests < 1 || guests > 10) {
+    return NextResponse.json(
+      { message: "Number of guests must be between 1 and 10." },
+      { status: 400 },
+    );
   }
 
   if (!EMAIL_RE.test(email)) {
@@ -82,6 +102,9 @@ export async function POST(request: Request) {
     roomCategory,
     checkIn,
     checkOut,
+    guests,
+    meals,
+    specialRequests,
   });
 
   if (!result.ok && result.reason === "full") {
@@ -120,6 +143,9 @@ export async function POST(request: Request) {
           `Room: ${roomCategory.replaceAll("_", " ")}`,
           `Check-in: ${checkIn}`,
           `Check-out: ${checkOut}`,
+          `Guests: ${guests}`,
+          `Meals: ${meals.length > 0 ? meals.join(", ") : "None"}`,
+          `Special requests: ${specialRequests || "None"}`,
           "Status: CONFIRMED",
         ].join("\n"),
       });
