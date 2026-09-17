@@ -1,14 +1,16 @@
 "use client";
 
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 const ROOM_OPTIONS = [
   {
     id: "PRESIDENTIAL_SUITE",
-    title: "Presidential Suite",
-    desc: "Luxury suite with king bed, executive lounge access, and sea view.",
+    title: "Deluxe Ocean View Suite",
+    desc: "Spacious suite with a king bed, private balcony, ocean view, and luxury bathroom.",
     maxCount: 2,
     price: "$1,200 / night",
+    amenities: ["King Bed", "Free Wi-Fi", "Air Conditioning", "Balcony"],
   },
   {
     id: "SINGLE_OCCUPANCY",
@@ -16,6 +18,7 @@ const ROOM_OPTIONS = [
     desc: "Ideal for solo travellers or officers on short administrative stays.",
     maxCount: 2,
     price: "$450 / night",
+    amenities: ["Full Bed", "Free Wi-Fi", "Air Conditioning", "Work Desk"],
   },
   {
     id: "DOUBLE_OCCUPANCY",
@@ -23,6 +26,7 @@ const ROOM_OPTIONS = [
     desc: "Spacious room with two queen beds, suitable for families or colleagues.",
     maxCount: 4,
     price: "$650 / night",
+    amenities: ["Two Queen Beds", "Free Wi-Fi", "Air Conditioning", "Family Space"],
   },
 ] as const;
 
@@ -205,35 +209,60 @@ export default function SimpleBookingForm() {
             {ROOM_OPTIONS.map((room) => {
               const selected = formData.roomCategory === room.id;
               return (
-                <label
+                <article
                   key={room.id}
-                  className={`cursor-pointer rounded-lg border p-4 transition-all ${
+                  className={`overflow-hidden rounded-xl border bg-white transition-all ${
                     selected
-                      ? "border-blue-600 bg-blue-50/60 ring-2 ring-blue-500"
-                      : "border-slate-200 bg-white hover:border-slate-400"
+                      ? "border-blue-600 ring-2 ring-blue-500"
+                      : "border-slate-200 hover:border-slate-400 hover:shadow-md"
                   }`}
                 >
-                  <input
-                    type="radio"
-                    name="roomCategory"
-                    value={room.id}
-                    checked={selected}
-                    onChange={() => update("roomCategory", room.id)}
-                    className="sr-only"
-                  />
-                  <span className="inline-flex rounded bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">
-                    {room.maxCount} rooms total
-                  </span>
-                  <span className="mt-3 block text-sm font-bold text-slate-900">
-                    {room.title}
-                  </span>
-                  <span className="mt-1 block text-xs leading-relaxed text-slate-500">
-                    {room.desc}
-                  </span>
-                  <span className="mt-3 block text-xs font-semibold text-slate-700">
-                    {room.price}
-                  </span>
-                </label>
+                  <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
+                    <Image
+                      src="/hotel/deluxe-room.svg"
+                      alt={`${room.title} room`}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <span className="inline-flex rounded bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">
+                      {room.maxCount} rooms total
+                    </span>
+                    <h3 className="mt-3 text-sm font-bold text-slate-900">
+                      {room.title}
+                    </h3>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                      {room.desc}
+                    </p>
+                    <ul className="mt-3 grid grid-cols-2 gap-x-2 gap-y-1 text-[11px] text-slate-600">
+                      {room.amenities.map((amenity) => (
+                        <li key={amenity} className="flex items-center gap-1">
+                          <span className="text-blue-600" aria-hidden>
+                            ✓
+                          </span>
+                          {amenity}
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="mt-3 text-xs font-semibold text-slate-700">
+                      {room.price}
+                    </p>
+                    <button
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => update("roomCategory", room.id)}
+                      className={`mt-4 w-full rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                        selected
+                          ? "bg-blue-600 text-white"
+                          : "border border-blue-600 text-blue-700 hover:bg-blue-50"
+                      }`}
+                    >
+                      {selected ? "Room selected" : "Select room"}
+                    </button>
+                  </div>
+                </article>
               );
             })}
           </div>
