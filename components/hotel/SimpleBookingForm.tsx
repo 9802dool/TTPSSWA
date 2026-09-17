@@ -9,7 +9,6 @@ const ROOM_OPTIONS = [
     title: "Deluxe Ocean View Suite",
     desc: "Spacious suite with a king bed, private balcony, ocean view, and luxury bathroom.",
     maxCount: 2,
-    price: "$1,200 / night",
     amenities: ["King Bed", "Free Wi-Fi", "Air Conditioning", "Balcony"],
   },
   {
@@ -17,7 +16,6 @@ const ROOM_OPTIONS = [
     title: "Single Occupancy",
     desc: "Ideal for solo travellers or officers on short administrative stays.",
     maxCount: 2,
-    price: "$450 / night",
     amenities: ["Full Bed", "Free Wi-Fi", "Air Conditioning", "Work Desk"],
   },
   {
@@ -25,7 +23,6 @@ const ROOM_OPTIONS = [
     title: "Double Occupancy",
     desc: "Spacious room with two queen beds, suitable for families or colleagues.",
     maxCount: 4,
-    price: "$650 / night",
     amenities: ["Two Queen Beds", "Free Wi-Fi", "Air Conditioning", "Family Space"],
   },
 ] as const;
@@ -246,9 +243,6 @@ export default function SimpleBookingForm() {
                         </li>
                       ))}
                     </ul>
-                    <p className="mt-3 text-xs font-semibold text-slate-700">
-                      {room.price}
-                    </p>
                     <button
                       type="button"
                       aria-pressed={selected}
@@ -360,8 +354,7 @@ export default function SimpleBookingForm() {
             Meal options
           </legend>
           <p className="mt-1 text-xs text-slate-500">
-            Select meals you would like included with your stay. Prices are
-            confirmed separately.
+            Select meals you would like included with your stay.
           </p>
           <div className="mt-3 flex flex-wrap gap-3">
             {["Breakfast", "Lunch", "Dinner"].map((meal) => (

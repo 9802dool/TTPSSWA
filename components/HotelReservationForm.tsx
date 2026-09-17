@@ -526,8 +526,8 @@ export default function HotelReservationForm() {
         </h3>
         <p className="mt-3 text-[15px] leading-relaxed text-[#717171]">
           Your reservation request has been emailed to our accommodations team.
-          A coordinator will confirm availability and rates shortly. Submitting
-          does not charge a card or guarantee a room until we confirm with you.
+          A coordinator will confirm availability shortly. A room is not
+          guaranteed until we confirm with you.
         </p>
         <div className="mt-6 space-y-1.5 rounded-2xl border border-[#ebebeb] bg-[#f7f7f7] p-5 text-[14px] text-[#222] dark:border-[#333] dark:bg-[#111] dark:text-[#e8e8e8]">
           {summaryLines.map((line) => (
@@ -731,7 +731,7 @@ export default function HotelReservationForm() {
               Your details
             </h2>
             <p className="mt-1 text-[14px] text-[#717171]">
-              We&apos;ll use this to send you a quotation and confirmation.
+              We&apos;ll use this to send your booking confirmation.
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <div className="sm:col-span-2">
@@ -767,7 +767,7 @@ export default function HotelReservationForm() {
             <button type="submit" disabled={submitting} className="site-btn-hotel-submit py-4 text-[16px] disabled:opacity-60">
               {submitting ? "Sending…" : "Reserve"}
             </button>
-            <p className="mt-3 text-center text-[12px] text-[#717171]">You won&apos;t be charged — we confirm availability first.</p>
+            <p className="mt-3 text-center text-[12px] text-[#717171]">We confirm availability after submission.</p>
           </div>
         </div>
 
@@ -818,15 +818,12 @@ export default function HotelReservationForm() {
           <hr className="my-5 border-[#ebebeb] dark:border-[#333]" />
 
           <p className="text-center text-[13px] leading-relaxed text-[#717171]">
-            Rates confirmed after submission.<br />No card required to request.
+            Availability is confirmed after submission.
           </p>
 
           <button type="submit" disabled={submitting} className="site-btn-hotel-submit mt-5 py-3.5 text-[16px] disabled:opacity-60">
             {submitting ? "Sending…" : "Reserve"}
           </button>
-          <p className="mt-3 text-center text-[12px] text-[#717171]">
-            You won&apos;t be charged yet.
-          </p>
 
           {submitError ? (
             <div className="mt-4 rounded-xl border border-[#ddd] bg-[#fff5f5] p-3 text-[13px] text-[#c13515] dark:border-[#333] dark:bg-[#2a1515]" role="alert">
