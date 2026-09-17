@@ -2,6 +2,9 @@
 
 import { useMemo, useState } from "react";
 
+const MEAL_OPTIONS = ["Breakfast", "Lunch", "Dinner"] as const;
+type MealOption = (typeof MEAL_OPTIONS)[number];
+
 const ROOM_OPTIONS = [
   {
     id: "PRESIDENTIAL_SUITE",
@@ -37,7 +40,7 @@ type FormState = {
   checkIn: string;
   checkOut: string;
   guests: string;
-  meals: string[];
+  meals: Record<MealOption, string>;
   specialRequests: string;
 };
 
@@ -50,7 +53,11 @@ const INITIAL_FORM: FormState = {
   checkIn: "",
   checkOut: "",
   guests: "1",
-  meals: [],
+  meals: {
+    Breakfast: "0",
+    Lunch: "0",
+    Dinner: "0",
+  },
   specialRequests: "",
 };
 
@@ -78,12 +85,13 @@ export default function SimpleBookingForm() {
     setMessage(null);
   }
 
-  function toggleMeal(meal: string) {
+  function updateMealQuantity(meal: MealOption, quantity: string) {
     setFormData((current) => ({
       ...current,
-      meals: current.meals.includes(meal)
-        ? current.meals.filter((item) => item !== meal)
-        : [...current.meals, meal],
+      meals: {
+        ...current.meals,
+        [meal]: quantity,
+      },
     }));
     setMessage(null);
   }
@@ -101,6 +109,7 @@ export default function SimpleBookingForm() {
       });
       const data = (await response.json().catch(() => ({}))) as {
         message?: string;
+        guestEmailSent?: boolean;
       };
 
       if (!response.ok) {
@@ -109,7 +118,9 @@ export default function SimpleBookingForm() {
 
       setMessage({
         type: "success",
-        text: "Booking request submitted! Your reserved room has been recorded.",
+        text: data.guestEmailSent
+          ? "Booking submitted! A thank-you email has been sent to your email address."
+          : "Booking submitted! Your reservation has been recorded.",
       });
       setFormData(INITIAL_FORM);
     } catch (error: unknown) {
@@ -361,22 +372,36 @@ export default function SimpleBookingForm() {
             Meal options
           </legend>
           <p className="mt-1 text-xs text-slate-500">
-            Select meals you would like included with your stay.
+            Choose how many of each meal you would like.
           </p>
-          <div className="mt-3 flex flex-wrap gap-3">
-            {["Breakfast", "Lunch", "Dinner"].map((meal) => (
-              <label
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            {MEAL_OPTIONS.map((meal) => (
+              <div
                 key={meal}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-medium text-slate-700"
+                className="rounded-lg border border-slate-200 bg-slate-50 p-3"
               >
-                <input
-                  type="checkbox"
-                  checked={formData.meals.includes(meal)}
-                  onChange={() => toggleMeal(meal)}
-                  className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                />
-                {meal}
-              </label>
+                <label
+                  htmlFor={`hotel-meal-${meal.toLowerCase()}`}
+                  className="block text-sm font-medium text-slate-700"
+                >
+                  {meal}
+                </label>
+                <select
+                  id={`hotel-meal-${meal.toLowerCase()}`}
+                  value={formData.meals[meal]}
+                  onChange={(event) =>
+                    updateMealQuantity(meal, event.target.value)
+                  }
+                  className={inputClass}
+                >
+                  <option value="0">None</option>
+                  {Array.from({ length: 10 }, (_, index) => (
+                    <option key={index + 1} value={String(index + 1)}>
+                      {index + 1}
+                    </option>
+                  ))}
+                </select>
+              </div>
             ))}
           </div>
         </fieldset>

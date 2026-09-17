@@ -10,10 +10,48 @@ export const runtime = "nodejs";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const ALLOWED_MEALS = new Set(["Breakfast", "Lunch", "Dinner"]);
+const MEAL_OPTIONS = ["Breakfast", "Lunch", "Dinner"] as const;
+const ALLOWED_MEALS = new Set<string>(MEAL_OPTIONS);
 
 function isRoomCategory(value: string): value is RoomCategory {
   return Object.hasOwn(ROOM_CAPACITY, value);
+}
+
+function parseMeals(value: unknown): { meals: string[]; valid: boolean } {
+  if (Array.isArray(value)) {
+    const meals = Array.from(
+      new Set(
+        value.filter(
+          (meal): meal is string =>
+            typeof meal === "string" && ALLOWED_MEALS.has(meal),
+        ),
+      ),
+    ).map((meal) => `${meal} x1`);
+    return { meals, valid: true };
+  }
+
+  if (value === undefined || value === null) {
+    return { meals: [], valid: true };
+  }
+
+  if (typeof value !== "object") {
+    return { meals: [], valid: false };
+  }
+
+  const quantities = value as Record<string, unknown>;
+  const meals: string[] = [];
+  for (const meal of MEAL_OPTIONS) {
+    const rawQuantity = quantities[meal];
+    if (rawQuantity === undefined || rawQuantity === "") continue;
+
+    const quantity = Number(rawQuantity);
+    if (!Number.isInteger(quantity) || quantity < 0 || quantity > 10) {
+      return { meals: [], valid: false };
+    }
+    if (quantity > 0) meals.push(`${meal} x${quantity}`);
+  }
+
+  return { meals, valid: true };
 }
 
 export async function POST(request: Request) {
@@ -34,12 +72,8 @@ export async function POST(request: Request) {
   const checkOut = typeof body.checkOut === "string" ? body.checkOut.trim() : "";
   const roomCount = Number(body.roomCount);
   const guests = Number(body.guests);
-  const meals = Array.isArray(body.meals)
-    ? body.meals.filter(
-        (meal): meal is string =>
-          typeof meal === "string" && ALLOWED_MEALS.has(meal),
-      )
-    : [];
+  const parsedMeals = parseMeals(body.meals);
+  const meals = parsedMeals.meals;
   const specialRequests =
     typeof body.specialRequests === "string"
       ? body.specialRequests.trim().slice(0, 2000)
@@ -61,6 +95,13 @@ export async function POST(request: Request) {
   if (guests < 1 || guests > 10) {
     return NextResponse.json(
       { message: "Number of guests must be between 1 and 10." },
+      { status: 400 },
+    );
+  }
+
+  if (!parsedMeals.valid) {
+    return NextResponse.json(
+      { message: "Meal quantities must be whole numbers between 0 and 10." },
       { status: 400 },
     );
   }
@@ -134,33 +175,67 @@ export async function POST(request: Request) {
 
   const notify = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim();
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (notify && apiKey) {
+  let guestEmailSent = false;
+  if (apiKey) {
+    const resend = new Resend(apiKey);
+    const from =
+      process.env.BOOKING_FROM_EMAIL?.trim() ||
+      "TTPSSWA Bookings <onboarding@resend.dev>";
+
     try {
-      const resend = new Resend(apiKey);
-      const from =
-        process.env.BOOKING_FROM_EMAIL?.trim() ||
-        "TTPSSWA Bookings <onboarding@resend.dev>";
-      await resend.emails.send({
+      const guestEmail = await resend.emails.send({
         from,
-        to: [notify],
-        replyTo: [email],
-        subject: `Confirmed TTPSSWA hotel booking [${result.booking.id}]`,
+        to: [email],
+        subject: "Thank you for your TTPSSWA hotel booking",
         text: [
-          `Guest: ${guestName}`,
-          `Email: ${email}`,
-          `Phone: ${phone}`,
+          `Hello ${guestName},`,
+          "",
+          "Thank you for your booking with the TTPSSWA Noel Chase Hotel and Conference Centre.",
+          "Your booking request has been received and recorded.",
+          "You will receive another email shortly with your invoice.",
+          "",
+          `Booking reference: ${result.booking.id}`,
           `Room category: ${roomCategory.replaceAll("_", " ")}`,
           `Number of rooms: ${roomCount}`,
           `Check-in: ${checkIn}`,
           `Check-out: ${checkOut}`,
-          `Guests: ${guests}`,
-          `Meals: ${meals.length > 0 ? meals.join(", ") : "None"}`,
-          `Special requests: ${specialRequests || "None"}`,
-          "Status: CONFIRMED",
+          "",
+          "TTPSSWA",
         ].join("\n"),
       });
+      if (guestEmail.error) {
+        console.error("hotel guest acknowledgment email:", guestEmail.error);
+      } else {
+        guestEmailSent = true;
+      }
     } catch (error) {
-      console.error("hotel booking confirmation email:", error);
+      console.error("hotel guest acknowledgment email:", error);
+    }
+
+    if (notify) {
+      try {
+        await resend.emails.send({
+          from,
+          to: [notify],
+          replyTo: [email],
+          subject: `Confirmed TTPSSWA hotel booking [${result.booking.id}]`,
+          text: [
+            `Guest: ${guestName}`,
+            `Email: ${email}`,
+            `Phone: ${phone}`,
+            `Room category: ${roomCategory.replaceAll("_", " ")}`,
+            `Number of rooms: ${roomCount}`,
+            `Check-in: ${checkIn}`,
+            `Check-out: ${checkOut}`,
+            `Guests: ${guests}`,
+            `Meals: ${meals.length > 0 ? meals.join(", ") : "None"}`,
+            `Special requests: ${specialRequests || "None"}`,
+            "Status: CONFIRMED",
+          ].join("\n"),
+        });
+      } catch (error) {
+        console.error("hotel booking notification email:", error);
+      }
     }
   }
 
@@ -168,6 +243,7 @@ export async function POST(request: Request) {
     {
       message: "Booking successful.",
       booking: result.booking,
+      guestEmailSent,
     },
     { status: 201 },
   );
