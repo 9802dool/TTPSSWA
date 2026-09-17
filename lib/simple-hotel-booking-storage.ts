@@ -14,10 +14,10 @@ export type RoomCategory = keyof typeof ROOM_CAPACITY;
 export type SimpleHotelBooking = {
   id: string;
   guestName: string;
-  serviceNumber: string;
   email: string;
   phone: string;
   roomCategory: RoomCategory;
+  roomCount: number;
   checkIn: string;
   checkOut: string;
   guests: number;
@@ -51,7 +51,7 @@ for _, raw in ipairs(rows) do
     if status ~= "CANCELLED" and checkIn and checkOut
       and checkIn < requestedEnd and checkOut > requestedStart then
       if p.roomCategory == category then
-        occupied = occupied + 1
+        occupied = occupied + (tonumber(p.roomCount or p.rooms or 1) or 1)
       elseif not p.roomCategory then
         if category == "PRESIDENTIAL_SUITE" then
           occupied = occupied + (tonumber(p.presidentialSuite or p.presidential or 0) or 0)
@@ -65,11 +65,12 @@ for _, raw in ipairs(rows) do
   end
 end
 
-if occupied >= capacity then
+local requestedCount = tonumber(ARGV[5])
+if not requestedCount or requestedCount < 1 or occupied + requestedCount > capacity then
   return 0
 end
 
-redis.call("LPUSH", KEYS[1], ARGV[5])
+redis.call("LPUSH", KEYS[1], ARGV[6])
 redis.call("LTRIM", KEYS[1], 0, 499)
 return 1
 `;
@@ -98,11 +99,19 @@ export async function reserveHotelRoom(
       fullName: booking.guestName,
       checkInDate: booking.checkIn,
       checkOutDate: booking.checkOut,
-      rooms: "1",
+      rooms: String(booking.roomCount),
       presidentialSuite:
-        booking.roomCategory === "PRESIDENTIAL_SUITE" ? "1" : "0",
-      fullBedRoom: booking.roomCategory === "SINGLE_OCCUPANCY" ? "1" : "0",
-      doubleBedRoom: booking.roomCategory === "DOUBLE_OCCUPANCY" ? "1" : "0",
+        booking.roomCategory === "PRESIDENTIAL_SUITE"
+          ? String(booking.roomCount)
+          : "0",
+      fullBedRoom:
+        booking.roomCategory === "SINGLE_OCCUPANCY"
+          ? String(booking.roomCount)
+          : "0",
+      doubleBedRoom:
+        booking.roomCategory === "DOUBLE_OCCUPANCY"
+          ? String(booking.roomCount)
+          : "0",
     },
   };
 
@@ -115,6 +124,7 @@ export async function reserveHotelRoom(
         booking.checkIn,
         booking.checkOut,
         String(ROOM_CAPACITY[booking.roomCategory]),
+        String(booking.roomCount),
         JSON.stringify(record),
       ],
     );

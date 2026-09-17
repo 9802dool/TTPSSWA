@@ -25,8 +25,6 @@ export async function POST(request: Request) {
   }
 
   const guestName = typeof body.guestName === "string" ? body.guestName.trim() : "";
-  const serviceNumber =
-    typeof body.serviceNumber === "string" ? body.serviceNumber.trim() : "";
   const email =
     typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const phone = typeof body.phone === "string" ? body.phone.trim() : "";
@@ -34,6 +32,7 @@ export async function POST(request: Request) {
     typeof body.roomCategory === "string" ? body.roomCategory.trim() : "";
   const checkIn = typeof body.checkIn === "string" ? body.checkIn.trim() : "";
   const checkOut = typeof body.checkOut === "string" ? body.checkOut.trim() : "";
+  const roomCount = Number(body.roomCount);
   const guests = Number(body.guests);
   const meals = Array.isArray(body.meals)
     ? body.meals.filter(
@@ -48,12 +47,12 @@ export async function POST(request: Request) {
 
   if (
     !guestName ||
-    !serviceNumber ||
     !email ||
     !phone ||
     !roomCategory ||
     !checkIn ||
     !checkOut ||
+    !Number.isInteger(roomCount) ||
     !Number.isInteger(guests)
   ) {
     return NextResponse.json({ message: "All fields are required." }, { status: 400 });
@@ -80,6 +79,15 @@ export async function POST(request: Request) {
     );
   }
 
+  if (roomCount < 1 || roomCount > ROOM_CAPACITY[roomCategory]) {
+    return NextResponse.json(
+      {
+        message: `Number of rooms must be between 1 and ${ROOM_CAPACITY[roomCategory]} for this category.`,
+      },
+      { status: 400 },
+    );
+  }
+
   if (!DATE_RE.test(checkIn) || !DATE_RE.test(checkOut)) {
     return NextResponse.json(
       { message: "Enter valid check-in and check-out dates." },
@@ -96,10 +104,10 @@ export async function POST(request: Request) {
 
   const result = await reserveHotelRoom({
     guestName,
-    serviceNumber,
     email,
     phone,
     roomCategory,
+    roomCount,
     checkIn,
     checkOut,
     guests,
@@ -110,7 +118,9 @@ export async function POST(request: Request) {
   if (!result.ok && result.reason === "full") {
     const label = roomCategory.replaceAll("_", " ").toLowerCase();
     return NextResponse.json(
-      { message: `Sorry, all ${label} rooms are fully booked for those dates.` },
+      {
+        message: `Sorry, ${roomCount} ${label} room${roomCount === 1 ? "" : "s"} are not available for those dates.`,
+      },
       { status: 409 },
     );
   }
@@ -137,10 +147,10 @@ export async function POST(request: Request) {
         subject: `Confirmed TTPSSWA hotel booking [${result.booking.id}]`,
         text: [
           `Guest: ${guestName}`,
-          `Service number: ${serviceNumber}`,
           `Email: ${email}`,
           `Phone: ${phone}`,
-          `Room: ${roomCategory.replaceAll("_", " ")}`,
+          `Room category: ${roomCategory.replaceAll("_", " ")}`,
+          `Number of rooms: ${roomCount}`,
           `Check-in: ${checkIn}`,
           `Check-out: ${checkOut}`,
           `Guests: ${guests}`,

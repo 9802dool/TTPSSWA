@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
 
 const ROOM_OPTIONS = [
@@ -31,10 +30,10 @@ type RoomCategory = (typeof ROOM_OPTIONS)[number]["id"];
 
 type FormState = {
   guestName: string;
-  serviceNumber: string;
   email: string;
   phone: string;
   roomCategory: RoomCategory;
+  roomCount: string;
   checkIn: string;
   checkOut: string;
   guests: string;
@@ -44,10 +43,10 @@ type FormState = {
 
 const INITIAL_FORM: FormState = {
   guestName: "",
-  serviceNumber: "",
   email: "",
   phone: "",
   roomCategory: "DOUBLE_OCCUPANCY",
+  roomCount: "1",
   checkIn: "",
   checkOut: "",
   guests: "1",
@@ -133,7 +132,8 @@ export default function SimpleBookingForm() {
           Hotel Booking Request
         </h2>
         <p className="mt-1 text-sm text-slate-500">
-          Select one room, choose your dates, and confirm your accommodation.
+          Select a room category and quantity, choose your dates, and confirm
+          your accommodation.
         </p>
       </div>
 
@@ -208,22 +208,13 @@ export default function SimpleBookingForm() {
               return (
                 <article
                   key={room.id}
-                  className={`overflow-hidden rounded-xl border bg-white transition-all ${
+                  className={`rounded-xl border bg-white p-4 transition-all ${
                     selected
                       ? "border-blue-600 ring-2 ring-blue-500"
                       : "border-slate-200 hover:border-slate-400 hover:shadow-md"
                   }`}
                 >
-                  <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
-                    <Image
-                      src="/hotel/deluxe-room.svg"
-                      alt={`${room.title} room`}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="p-4">
+                  <div>
                     <span className="inline-flex rounded bg-blue-100 px-2 py-0.5 text-xs font-semibold text-blue-800">
                       {room.maxCount} rooms total
                     </span>
@@ -243,10 +234,44 @@ export default function SimpleBookingForm() {
                         </li>
                       ))}
                     </ul>
+                    <label
+                      htmlFor={`hotel-room-count-${room.id}`}
+                      className="mt-4 block text-xs font-semibold text-slate-700"
+                    >
+                      Number of rooms
+                    </label>
+                    <select
+                      id={`hotel-room-count-${room.id}`}
+                      value={selected ? formData.roomCount : "1"}
+                      disabled={!selected}
+                      onChange={(event) =>
+                        setFormData((current) => ({
+                          ...current,
+                          roomCategory: room.id,
+                          roomCount: event.target.value,
+                        }))
+                      }
+                      className={`${inputClass} disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400`}
+                    >
+                      {Array.from({ length: room.maxCount }, (_, index) => (
+                        <option key={index + 1} value={String(index + 1)}>
+                          {index + 1}
+                        </option>
+                      ))}
+                    </select>
                     <button
                       type="button"
                       aria-pressed={selected}
-                      onClick={() => update("roomCategory", room.id)}
+                      onClick={() =>
+                        setFormData((current) => ({
+                          ...current,
+                          roomCategory: room.id,
+                          roomCount:
+                            current.roomCategory === room.id
+                              ? current.roomCount
+                              : "1",
+                        }))
+                      }
                       className={`mt-4 w-full rounded-lg px-3 py-2 text-xs font-semibold transition ${
                         selected
                           ? "bg-blue-600 text-white"
@@ -276,28 +301,10 @@ export default function SimpleBookingForm() {
                 type="text"
                 required
                 autoComplete="name"
-                placeholder="Officer name"
+                placeholder="Name"
                 className={inputClass}
                 value={formData.guestName}
                 onChange={(event) => update("guestName", event.target.value)}
-              />
-            </div>
-            <div>
-              <label
-                htmlFor="hotel-service-number"
-                className="text-xs text-slate-500"
-              >
-                Service / regiment no.
-              </label>
-              <input
-                id="hotel-service-number"
-                type="text"
-                required
-                autoComplete="off"
-                placeholder="e.g. 12345"
-                className={inputClass}
-                value={formData.serviceNumber}
-                onChange={(event) => update("serviceNumber", event.target.value)}
               />
             </div>
             <div>
