@@ -5,10 +5,10 @@ import { useMemo, useState } from "react";
 const ROOM_OPTIONS = [
   {
     id: "PRESIDENTIAL_SUITE",
-    title: "Deluxe Ocean View Suite",
-    desc: "Spacious suite with a king bed, private balcony, ocean view, and luxury bathroom.",
+    title: "Presidential Suite",
+    desc: "Spacious suite featuring a king bed and luxury bathroom.",
     maxCount: 2,
-    amenities: ["King Bed", "Free Wi-Fi", "Air Conditioning", "Balcony"],
+    amenities: ["King Bed", "Free Wi-Fi", "Air Conditioning", "Luxury Bathroom"],
   },
   {
     id: "SINGLE_OCCUPANCY",
