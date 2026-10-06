@@ -3,48 +3,24 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  AssociationFormHeader,
+  AssociationOfficersFooter,
+} from "@/components/AssociationFormLetterhead";
+import {
   MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE,
   MEMBERSHIP_PHONE_COUNTRY_CODES,
 } from "@/lib/phone-country-codes";
 
-const inputClass =
-  "mt-1 w-full rounded-sm border border-slate-400 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-none outline-none placeholder:text-slate-400 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 dark:border-slate-400 dark:bg-white dark:text-slate-900";
+const line =
+  "w-full min-w-0 border-0 border-b border-black bg-transparent px-1 py-0.5 text-[13px] uppercase text-black outline-none placeholder:normal-case placeholder:text-neutral-400 focus:border-[#0d2a70]";
 
-const labelClass =
-  "block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-800";
-
-function Section({
-  number,
-  title,
-  children,
-}: {
-  number: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border-2 border-slate-900 bg-white shadow-none dark:border-slate-900 dark:bg-white">
-      <div className="border-b-2 border-slate-900 bg-slate-100 px-3 py-2.5 dark:bg-slate-100">
-        <h2 className="text-left text-[11px] font-bold uppercase tracking-[0.2em] text-slate-900">
-          <span className="mr-2 inline-block min-w-[1.25rem] font-mono">{number}.</span>
-          {title}
-        </h2>
-      </div>
-      <div className="space-y-4 bg-white p-4 sm:p-5">{children}</div>
-    </section>
-  );
-}
+const label = "whitespace-nowrap text-xs font-bold uppercase";
 
 export function SalaryDeductionForm() {
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
-    "idle",
-  );
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
 
-  const todaySigned = useMemo(
-    () => new Date().toISOString().slice(0, 10),
-    [],
-  );
+  const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -52,6 +28,19 @@ export function SalaryDeductionForm() {
     setStatus("loading");
     const form = e.currentTarget;
     const fd = new FormData(form);
+    const forename = String(fd.get("forename") ?? "").trim();
+    const surname = String(fd.get("surname") ?? "").trim();
+    fd.set("fullName", `${forename} ${surname}`.trim());
+    const commencing = [
+      fd.get("commencingWeekday"),
+      fd.get("commencingDate"),
+      fd.get("commencingMonth"),
+      fd.get("commencingYear"),
+    ]
+      .map((part) => String(part ?? "").trim())
+      .filter(Boolean)
+      .join(" ");
+    fd.set("commencementDate", commencing);
     try {
       const res = await fetch("/api/salary-deduction", {
         method: "POST",
@@ -78,208 +67,128 @@ export function SalaryDeductionForm() {
   }
 
   return (
-    <form onSubmit={(e) => void onSubmit(e)} className="salary-deduction-form-pdf mt-2 space-y-5 text-left">
-      <div className="border-b-2 border-slate-900 pb-5 text-center">
-        <p className="text-[10px] font-bold uppercase leading-relaxed tracking-[0.28em] text-slate-700">
-          Trinidad and Tobago Police Service
-        </p>
-        <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-900">
-          Social and Welfare Association
-        </p>
-        <p className="mt-4 text-sm font-bold uppercase tracking-[0.18em] text-slate-900 underline decoration-2 underline-offset-4">
+    <form
+      onSubmit={(e) => void onSubmit(e)}
+      className="salary-deduction-form-pdf mx-auto max-w-[850px] text-left text-[13px] text-black"
+    >
+      <div className="mb-4 text-right">
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="rounded bg-[#0d2a70] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+        >
+          {status === "loading" ? "Submitting…" : "Submit Form"}
+        </button>
+      </div>
+
+      <div className="relative border border-[#ccc] bg-white px-6 py-8 shadow-[0_0_10px_rgba(0,0,0,0.1)] sm:px-8">
+        <div className="mb-4 flex justify-end sm:absolute sm:right-8 sm:top-32 sm:mb-0">
+          <div className="flex h-[70px] w-[130px] items-center justify-center border border-dashed border-[#333] bg-[#fafafa] px-2 text-center text-[11px] font-bold uppercase leading-tight">
+            Place association stamp here
+          </div>
+        </div>
+
+        <div className="sm:pr-36">
+          <AssociationFormHeader />
+        </div>
+
+        <h4 className="mt-4 text-center text-base font-bold uppercase underline">
           Salary deduction form
-        </p>
-        <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
-          Please fill out in block letters
-        </p>
-      </div>
+        </h4>
+        <p className="mb-4 text-center text-[11px] font-bold">Please fill out in block letters</p>
 
-      <div className="border border-slate-400 bg-white p-4 text-xs leading-relaxed text-slate-700 dark:bg-white">
-        <p>
-          This online form matches the official{" "}
-          <a
-            href="/forms/SALARY DEDUCTION.pdf"
-            className="font-semibold text-slate-900 underline decoration-slate-400 underline-offset-2 hover:text-slate-700"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Salary deduction (PDF)
-          </a>
-          . Fields marked <span className="font-bold text-red-600">*</span> are required.
-        </p>
-      </div>
+        <div className="mb-3 flex flex-col gap-3 sm:mr-36 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-regimentalNumber" className={label}>
+              Reg no.
+            </label>
+            <input id="sd-regimentalNumber" name="regimentalNumber" type="text" required className={line} />
+          </div>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-rank" className={label}>
+              Rank
+            </label>
+            <input id="sd-rank" name="rank" type="text" required className={line} />
+          </div>
+        </div>
 
-      <Section number="I" title="Service identity">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="sd-regimentalNumber" className={labelClass}>
-              Regimental number <span className="text-red-600">*</span>
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-forename" className={label}>
+              Name
             </label>
             <input
-              id="sd-regimentalNumber"
-              name="regimentalNumber"
+              id="sd-forename"
+              name="forename"
               type="text"
               required
-              className={`${inputClass} uppercase`}
+              autoComplete="given-name"
+              placeholder="FORENAME"
+              className={line}
             />
           </div>
-          <div>
-            <label htmlFor="sd-rank" className={labelClass}>
-              Rank <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end">
+            <label htmlFor="sd-surname" className="sr-only">
+              Surname
             </label>
             <input
-              id="sd-rank"
-              name="rank"
+              id="sd-surname"
+              name="surname"
               type="text"
               required
-              className={`${inputClass} uppercase`}
+              autoComplete="family-name"
+              placeholder="SURNAME"
+              className={line}
             />
           </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="sd-fullName" className={labelClass}>
-              Name (forename and surname) <span className="text-red-600">*</span>
-            </label>
-            <input
-              id="sd-fullName"
-              name="fullName"
-              type="text"
-              required
-              className={`${inputClass} uppercase`}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="sd-departmentDivision" className={labelClass}>
-              Department / division <span className="text-red-600">*</span>
+        </div>
+
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-departmentDivision" className={label}>
+              Department/Division
             </label>
             <input
               id="sd-departmentDivision"
               name="departmentDivision"
               type="text"
               required
-              className={`${inputClass} uppercase`}
+              className={line}
             />
           </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="sd-sectionStation" className={labelClass}>
-              Section / station <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-sectionStation" className={label}>
+              Section/Station
             </label>
-            <input
-              id="sd-sectionStation"
-              name="sectionStation"
-              type="text"
-              required
-              className={`${inputClass} uppercase`}
-            />
+            <input id="sd-sectionStation" name="sectionStation" type="text" required className={line} />
           </div>
         </div>
-      </Section>
 
-      <Section number="II" title="Personal details">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="sd-age" className={labelClass}>
-              Age <span className="text-red-600">*</span>
-            </label>
-            <input
-              id="sd-age"
-              name="age"
-              type="text"
-              inputMode="numeric"
-              required
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <span className={labelClass}>
-              Sex <span className="text-red-600">*</span>
-            </span>
-            <div className="mt-2 flex flex-wrap gap-6">
-              <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
-                <input
-                  type="radio"
-                  name="sex"
-                  value="male"
-                  required
-                  className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
-                />
-                Male
-              </label>
-              <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
-                <input
-                  type="radio"
-                  name="sex"
-                  value="female"
-                  className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
-                />
-                Female
-              </label>
-            </div>
-          </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="sd-email" className={labelClass}>
-              Email address <span className="text-red-600">*</span>
-            </label>
-            <input
-              id="sd-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="sd-dateOfBirth" className={labelClass}>
-              Date of birth <span className="text-red-600">*</span>
-            </label>
-            <input
-              id="sd-dateOfBirth"
-              name="dateOfBirth"
-              type="date"
-              required
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="sd-dateOfEnlistment" className={labelClass}>
-              Date of enlistment in Police Service <span className="text-red-600">*</span>
-            </label>
-            <input
-              id="sd-dateOfEnlistment"
-              name="dateOfEnlistment"
-              type="date"
-              required
-              className={inputClass}
-            />
-          </div>
-        </div>
-      </Section>
-
-      <Section number="III" title="Contact information">
-        <div>
-          <label htmlFor="sd-address" className={labelClass}>
-            Home address <span className="text-red-600">*</span>
+        <div className="mb-3 flex items-end gap-2">
+          <label htmlFor="sd-address" className={label}>
+            Home address
           </label>
-          <textarea
+          <input
             id="sd-address"
             name="address"
-            rows={4}
+            type="text"
             required
             autoComplete="street-address"
-            className={`${inputClass} resize-y min-h-[5rem] uppercase`}
+            className={line}
           />
         </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="sd-phoneCountryCode" className={labelClass}>
-              Country code (phones) <span className="text-red-600">*</span>
+
+        <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-phoneCountryCode" className={label}>
+              Code
             </label>
             <select
               id="sd-phoneCountryCode"
               name="phoneCountryCode"
               required
               defaultValue={MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE}
-              className={inputClass}
+              className={`${line} normal-case`}
             >
               {MEMBERSHIP_PHONE_COUNTRY_CODES.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -288,188 +197,215 @@ export function SalaryDeductionForm() {
               ))}
             </select>
           </div>
-          <div>
-            <label htmlFor="sd-phoneHome" className={labelClass}>
-              Home phone (optional)
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-phoneHome" className={label}>
+              Contact numbers: Home
             </label>
-            <input
-              id="sd-phoneHome"
-              name="phoneHome"
-              type="tel"
-              inputMode="tel"
-              className={inputClass}
-              placeholder="Local number only"
-            />
+            <input id="sd-phoneHome" name="phoneHome" type="tel" inputMode="tel" className={line} />
           </div>
-          <div>
-            <label htmlFor="sd-phoneWork" className={labelClass}>
-              Work phone (optional)
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-phoneWork" className={label}>
+              Work
             </label>
-            <input
-              id="sd-phoneWork"
-              name="phoneWork"
-              type="tel"
-              inputMode="tel"
-              className={inputClass}
-              placeholder="Local number only"
-            />
+            <input id="sd-phoneWork" name="phoneWork" type="tel" inputMode="tel" className={line} />
           </div>
-          <div>
-            <label htmlFor="sd-phone" className={labelClass}>
-              Cell phone <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-phone" className={label}>
+              Cell
+            </label>
+            <input id="sd-phone" name="phone" type="tel" inputMode="tel" required className={line} />
+          </div>
+        </div>
+
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex w-full items-end gap-2 sm:max-w-[8rem]">
+            <label htmlFor="sd-age" className={label}>
+              Age
+            </label>
+            <input id="sd-age" name="age" type="number" required min={18} max={99} className={line} />
+          </div>
+          <fieldset className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
+            <legend className={label}>Sex:</legend>
+            <label className="inline-flex items-center gap-1 text-xs font-bold uppercase">
+              <input type="radio" name="sex" value="male" required /> Male
+            </label>
+            <label className="inline-flex items-center gap-1 text-xs font-bold uppercase">
+              <input type="radio" name="sex" value="female" /> Female
+            </label>
+          </fieldset>
+          <div className="flex min-w-0 flex-[1.4] items-end gap-2">
+            <label htmlFor="sd-email" className={label}>
+              Email address
             </label>
             <input
-              id="sd-phone"
-              name="phone"
-              type="tel"
-              inputMode="tel"
+              id="sd-email"
+              name="email"
+              type="email"
               required
-              className={inputClass}
-              placeholder="Local number only"
+              autoComplete="email"
+              className={`${line} normal-case`}
             />
           </div>
         </div>
-      </Section>
 
-      <Section number="IV" title="Salary deduction authorization">
-        <div className="space-y-3 border-2 border-slate-900 bg-white p-4 font-serif text-sm leading-relaxed text-slate-900 dark:bg-white">
-          <p>
-            As a member of the Trinidad and Tobago Police Service and applying for
-            membership with the Trinidad and Tobago Police Service Social and Welfare
-            Association, I hereby authorize the paysheet clerk to deduct a monthly
-            deduction from my salary, in the sum of one hundred and forty dollars
-            ($140.00 TTD), as my monthly subscription for transmission to the
-            above-named Association.
-          </p>
-          <p className="font-sans text-xs font-bold uppercase tracking-wide text-slate-600">
-            Until further notice.
-          </p>
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-dateOfBirth" className={label}>
+              Date of birth
+            </label>
+            <input id="sd-dateOfBirth" name="dateOfBirth" type="date" required className={`${line} normal-case`} />
+          </div>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="sd-dateOfEnlistment" className={label}>
+              Date of enlistment in Police Service
+            </label>
+            <input
+              id="sd-dateOfEnlistment"
+              name="dateOfEnlistment"
+              type="date"
+              required
+              className={`${line} normal-case`}
+            />
+          </div>
         </div>
-        <div>
-          <label htmlFor="sd-commencementDate" className={labelClass}>
-            Commencing from (date) <span className="text-red-600">*</span>
-          </label>
-          <input
-            id="sd-commencementDate"
-            name="commencementDate"
-            type="date"
-            required
-            className={inputClass}
-          />
-        </div>
-      </Section>
 
-      <Section number="V" title="Declarations">
-        <p className="border border-slate-400 bg-slate-50 p-3 text-xs leading-relaxed text-slate-800 dark:bg-slate-50">
-          This authorization cannot be cancelled or waived unless permission from the
-          Association is obtained in writing. Please be guided accordingly.
+        <p className="my-5 text-justify text-xs uppercase leading-relaxed">
+          As member of the Trinidad &amp; Tobago Police Service and applying for membership with the
+          Trinidad &amp; Tobago Police Service Social &amp; Welfare Association, I hereby authorize the
+          paysheet clerk to deduct a monthly deduction from my salary, in the sum of one hundred and forty
+          dollars ($140.00), as my monthly subscription for transmission to the above-named Association.
         </p>
-        <label className="flex cursor-pointer gap-3 border border-slate-400 bg-white p-4 text-sm text-slate-900 dark:bg-white">
-          <input
-            type="checkbox"
-            name="authMonthlyDeduction"
-            value="yes"
-            required
-            className="mt-1 h-4 w-4 shrink-0 border-slate-600 text-slate-900 focus:ring-slate-900"
-          />
-          <span className="font-medium uppercase tracking-wide">
-            I authorize the monthly deduction of $140.00 TTD from my salary as stated
-            above. <span className="text-red-600">*</span>
-          </span>
-        </label>
-        <label className="flex cursor-pointer gap-3 border border-slate-400 bg-white p-4 text-sm text-slate-900 dark:bg-white">
-          <input
-            type="checkbox"
-            name="policyAcknowledgment"
-            value="yes"
-            required
-            className="mt-1 h-4 w-4 shrink-0 border-slate-600 text-slate-900 focus:ring-slate-900"
-          />
-          <span className="font-medium uppercase tracking-wide">
-            I understand this authorization cannot be cancelled or waived without written
-            permission from the Association. <span className="text-red-600">*</span>
-          </span>
-        </label>
-      </Section>
 
-      <Section number="VI" title="Signature of applicant">
-        <label className="flex cursor-pointer gap-3 border border-slate-400 bg-white p-4 text-sm text-slate-900 dark:bg-white">
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="commencingWeekday" className={label}>
+              Commencing from
+            </label>
+            <input
+              id="commencingWeekday"
+              name="commencingWeekday"
+              type="text"
+              required
+              placeholder="(WEEKDAY)"
+              className={line}
+            />
+          </div>
           <input
-            type="checkbox"
-            name="electronicSignature"
-            value="yes"
+            name="commencingDate"
+            type="text"
             required
-            className="mt-1 h-4 w-4 shrink-0 border-slate-600 text-slate-900 focus:ring-slate-900"
+            placeholder="(DATE)"
+            aria-label="Commencing date"
+            className={line}
           />
-          <span className="font-medium uppercase tracking-wide">
-            I confirm that typing my name and submitting this form constitutes my
-            electronic signature. <span className="text-red-600">*</span>
-          </span>
-        </label>
-        <div>
-          <label htmlFor="sd-applicantDateSigned" className={labelClass}>
-            Date <span className="text-red-600">*</span>
-          </label>
           <input
-            id="sd-applicantDateSigned"
-            name="applicantDateSigned"
-            type="date"
+            name="commencingMonth"
+            type="text"
             required
-            defaultValue={todaySigned}
-            className={inputClass}
+            placeholder="(MONTH)"
+            aria-label="Commencing month"
+            className={line}
+          />
+          <input
+            name="commencingYear"
+            type="text"
+            required
+            placeholder="20.."
+            aria-label="Commencing year"
+            className={line}
           />
         </div>
-      </Section>
 
-      <Section number="VII" title="Witness (optional)">
-        <label htmlFor="sd-witnessName" className={labelClass}>
-          Witness to signature of applicant
-        </label>
-        <input
-          id="sd-witnessName"
-          name="witnessName"
-          type="text"
-          className={`${inputClass} uppercase`}
-        />
-        <div>
-          <label htmlFor="sd-witnessDate" className={labelClass}>
-            Witness date
+        <div className="my-4 text-xs font-bold uppercase leading-relaxed">
+          <p>Until further notice.</p>
+          <p className="mt-3 font-bold normal-case">
+            This authorization cannot be cancelled or waivered unless permission from the Association is
+            obtained in writing. Please be guided accordingly.
+          </p>
+          <label className="mt-3 flex items-start gap-2">
+            <input type="checkbox" name="authMonthlyDeduction" value="yes" required className="mt-0.5" />
+            <span>I authorize the monthly deduction of $140.00.</span>
           </label>
-          <input id="sd-witnessDate" name="witnessDate" type="date" className={inputClass} />
+          <label className="mt-2 flex items-start gap-2">
+            <input type="checkbox" name="policyAcknowledgment" value="yes" required className="mt-0.5" />
+            <span>I understand this authorization cannot be cancelled without written permission.</span>
+          </label>
+          <label className="mt-2 flex items-start gap-2">
+            <input type="checkbox" name="electronicSignature" value="yes" required className="mt-0.5" />
+            <span>Submitting this form is my electronic signature.</span>
+          </label>
         </div>
-      </Section>
 
-      {message ? (
-        <p
-          role="status"
-          className={
-            status === "success"
-              ? "rounded-sm border border-green-700 bg-green-50 px-4 py-3 text-sm text-green-950"
-              : "rounded-sm border border-red-700 bg-red-50 px-4 py-3 text-sm text-red-950"
-          }
-        >
-          {message}
-        </p>
-      ) : null}
+        <div className="mt-6 flex flex-col gap-5 sm:flex-row">
+          <div className="flex-1">
+            <div className="mb-1 h-8 border-b border-black" />
+            <p className="text-[11px] font-bold uppercase">Signature of applicant</p>
+          </div>
+          <div className="flex flex-1 items-end gap-2">
+            <label htmlFor="sd-applicantDateSigned" className={label}>
+              Date
+            </label>
+            <input
+              id="sd-applicantDateSigned"
+              name="applicantDateSigned"
+              type="date"
+              required
+              defaultValue={todaySigned}
+              className={`${line} normal-case`}
+            />
+          </div>
+        </div>
 
-      <div className="flex flex-col gap-4 border-t-2 border-slate-900 pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[10px] font-medium uppercase leading-relaxed tracking-wide text-slate-600">
-          Place association stamp (if applicable) on the printed PDF. Questions? See{" "}
-          <Link
-            href="/membership-services"
-            className="font-bold text-slate-900 underline decoration-slate-400"
+        <div className="mt-6 flex flex-col gap-5 sm:flex-row">
+          <div className="flex flex-1 items-end gap-2">
+            <label htmlFor="sd-witnessName" className="sr-only">
+              Witness to signature of applicant
+            </label>
+            <input
+              id="sd-witnessName"
+              name="witnessName"
+              type="text"
+              className={line}
+              aria-label="Witness to signature of applicant"
+            />
+          </div>
+          <div className="flex flex-1 items-end gap-2">
+            <label htmlFor="sd-witnessDate" className={label}>
+              Date
+            </label>
+            <input
+              id="sd-witnessDate"
+              name="witnessDate"
+              type="date"
+              required
+              className={`${line} normal-case`}
+            />
+          </div>
+        </div>
+        <p className="mt-1 text-[11px] font-bold uppercase">Witness to signature of applicant</p>
+
+        <AssociationOfficersFooter variant="salary" />
+
+        {message ? (
+          <p
+            role="status"
+            className={
+              status === "success"
+                ? "mt-4 border border-green-700 bg-green-50 px-3 py-3 text-sm text-green-950"
+                : "mt-4 border border-red-700 bg-red-50 px-3 py-3 text-sm text-red-950"
+            }
           >
+            {message}
+          </p>
+        ) : null}
+
+        <p className="mt-4 text-[10px] uppercase text-neutral-600">
+          Questions? See{" "}
+          <Link href="/membership-services" className="underline">
             Membership services
           </Link>
           .
         </p>
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          className="site-btn-submit"
-        >
-          {status === "loading" ? "Submitting…" : "Submit salary deduction form"}
-        </button>
       </div>
     </form>
   );

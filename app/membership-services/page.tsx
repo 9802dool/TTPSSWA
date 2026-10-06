@@ -36,12 +36,24 @@ export default function MembershipServicesPage() {
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
               {MEMBER_BENEFITS_PILLAR.body}
             </p>
-            <p className="mt-6">
+            <p className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <Link
                 href="/services/membership-application"
                 className="inline-flex min-h-[2.75rem] items-center rounded-xl bg-gold px-5 py-3 text-sm font-bold text-navy transition hover:opacity-90"
               >
                 Apply for formal membership
+              </Link>
+              <Link
+                href="/membership-form"
+                className="inline-flex min-h-[2.75rem] items-center rounded-xl border border-white/30 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                Membership form
+              </Link>
+              <Link
+                href="/salary-deduction"
+                className="inline-flex min-h-[2.75rem] items-center rounded-xl border border-white/30 px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
+              >
+                Salary deduction form
               </Link>
             </p>
             <div className="mt-10 border-t border-white/10" aria-hidden />
