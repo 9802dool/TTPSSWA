@@ -6,6 +6,7 @@ function serviceLabel(type: string): string {
   if (type === "dental_optical_grant") return "Dental & optical grant";
   if (type === "legal_aid_application") return "Legal aid application";
   if (type === "merit_loan_application") return "Merit loan application";
+  if (type === "merit_salary_deduction") return "MERIT salary deduction";
   if (type === "retirement_benefit_application") return "Retirement benefit application";
   return type.replace(/_/g, " ");
 }
@@ -525,6 +526,88 @@ function LegalAidApplicationDetails({
   );
 }
 
+function MeritSalaryDeductionDetails({
+  payload,
+  variant,
+}: {
+  payload: Record<string, unknown>;
+  variant: "admin" | "member";
+}) {
+  const str = (k: string) => {
+    const v = payload[k];
+    return typeof v === "string" ? v : v != null ? String(v) : "";
+  };
+  const dtClass =
+    variant === "admin"
+      ? "text-[var(--muted)] sm:pt-0.5"
+      : "text-muted sm:pt-0.5";
+  const ddClass =
+    variant === "admin" ? "text-[var(--fg)] sm:col-start-2" : "text-ink sm:col-start-2";
+
+  const rows: [string, string][] = [];
+  const pairs: [string, string][] = [
+    ["Reg. no.", str("regimentalNumber")],
+    ["Rank", str("rank")],
+    ["Name", str("fullName")],
+    ["Division / branch / section", str("divisionBranchSection")],
+    ["Workplace", str("workplaceAddress")],
+    ["Deduction (words)", str("deductionSumWords")],
+    ["Deduction ($)", str("deductionSumDollars")],
+    ["From", [str("startMonth"), str("startYear")].filter(Boolean).join(" ")],
+    ["Until", [str("endMonth"), str("endYear")].filter(Boolean).join(" ")],
+    ["Resume amount ($)", str("resumeAmount")],
+    ["Resume from", [str("resumeMonth"), str("resumeYear")].filter(Boolean).join(" ")],
+    ["Name in block letters", str("nameInBlockLetters")],
+    ["Signature reg. no.", str("signatureRegimentalNumber")],
+    ["Signature rank", str("signatureRank")],
+    ["Date", str("signedDate")],
+    ["Witness", str("witnessName")],
+  ];
+  for (const [k, v] of pairs) {
+    if (v) rows.push([k, v]);
+  }
+  const addr = str("address");
+  if (addr) rows.push(["Address", addr]);
+
+  const documents = Array.isArray(payload.documents)
+    ? payload.documents.flatMap((item) => {
+        if (!item || typeof item !== "object") return [];
+        const doc = item as Record<string, unknown>;
+        const label = typeof doc.label === "string" ? doc.label : "Document";
+        const fileName = typeof doc.fileName === "string" ? doc.fileName : "file";
+        const mimeType =
+          typeof doc.mimeType === "string" ? doc.mimeType : "application/octet-stream";
+        const base64 = typeof doc.base64 === "string" ? doc.base64 : "";
+        if (!base64) return [];
+        return [{ label, fileName, href: `data:${mimeType};base64,${base64}` }];
+      })
+    : [];
+
+  return (
+    <div>
+      <dl className="mt-2 grid gap-1.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4">
+        {rows.map(([dt, dd]) => (
+          <div key={dt} className="contents">
+            <dt className={dtClass}>{dt}</dt>
+            <dd className={ddClass}>{dd}</dd>
+          </div>
+        ))}
+      </dl>
+      {documents.length > 0 ? (
+        <ul className="mt-3 space-y-1 text-sm">
+          {documents.map((doc) => (
+            <li key={`${doc.label}-${doc.fileName}`}>
+              <a href={doc.href} download={doc.fileName} className="font-semibold underline">
+                {doc.label}: {doc.fileName}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
 function RequestBody({
   row,
   variant,
@@ -546,6 +629,9 @@ function RequestBody({
   }
   if (row.serviceType === "merit_loan_application") {
     return <MeritLoanApplicationDetails payload={row.payload} variant={variant} />;
+  }
+  if (row.serviceType === "merit_salary_deduction") {
+    return <MeritSalaryDeductionDetails payload={row.payload} variant={variant} />;
   }
   if (row.serviceType === "retirement_benefit_application") {
     return <RetirementBenefitApplicationDetails payload={row.payload} variant={variant} />;

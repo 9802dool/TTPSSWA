@@ -20,6 +20,13 @@ const OFFICERS_FOOTER = {
     "First Division Officer: Ag. A.C.P Oswain Subero",
     "Special Reserve Officer No. 5369 PC Kevin Nicholls; Municipal Officer: No. 12279 PC David Mc Guirk",
   ],
+  meritSalary: [
+    "Vice President: Ag. A.S.P Owie Russell; Assistant Secretary: No. 16940 W/Ag.Sgt. Tricia Durant-Charles",
+    "Treasurer: No. 18668 Ag. Cpl. Selwyn Marcano",
+    "Trustees: No. 13281 Sgt. Adrian Andrews No. 16540 Sgt. Jason Johnson;",
+    "First Division Officer: Ag. A.C.P Oswain Subero",
+    "Special Reserve Officer No. 5369 PC Kevin Nicholls; Municipal Officer: No.12279 PC David Mc Guirk",
+  ],
 } as const;
 
 export function AssociationFormLogo() {
@@ -60,12 +67,14 @@ export function AssociationFormHeader() {
 
 export function AssociationOfficersFooter({
   variant,
+  dated = "Nov 2025",
 }: {
   variant: keyof typeof OFFICERS_FOOTER;
+  dated?: string;
 }) {
   return (
     <footer className="mt-5 border-t border-black pt-2 text-center text-[10.5px] leading-snug">
-      <p className="font-bold">Nov 2025</p>
+      <p className="font-bold">{dated}</p>
       {OFFICERS_FOOTER[variant].map((line) => (
         <p key={line}>{line}</p>
       ))}

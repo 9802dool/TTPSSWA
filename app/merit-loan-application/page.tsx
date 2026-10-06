@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MeritLoanForm } from "@/components/MeritLoanForm";
+import { MeritSalaryDeductionForm } from "@/components/MeritSalaryDeductionForm";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
@@ -22,6 +23,9 @@ export default function MeritLoanApplicationPage() {
         </p>
         <h1 className="sr-only">Merit application form</h1>
         <MeritLoanForm />
+        <div className="mt-16">
+          <MeritSalaryDeductionForm />
+        </div>
       </main>
       <SiteFooter />
     </>

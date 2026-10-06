@@ -39,7 +39,7 @@ export default function SiteHeader() {
   }, []);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 shadow-corp">
+    <header className="fixed inset-x-0 top-0 z-50 shadow-corp print:hidden">
       <PromoBanner />
       <div className="border-b border-line bg-surface/95 backdrop-blur-md dark:bg-surface/90">
         <div className="site-container flex min-h-[4.25rem] items-center justify-between gap-3 py-2">

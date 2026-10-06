@@ -12,6 +12,7 @@ export type ServiceRequestRecord = {
     | "dental_optical_grant"
     | "legal_aid_application"
     | "merit_loan_application"
+    | "merit_salary_deduction"
     | "retirement_benefit_application";
   createdAt: string;
   payload: Record<string, unknown>;

@@ -323,24 +323,24 @@ export function MeritLoanForm() {
           </div>
         </div>
 
-        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
-          <fieldset className="flex flex-1 flex-wrap items-center gap-3">
-            <legend className="sr-only">Employment type</legend>
-            {(
-              [
-                ["regular", "Regular"],
-                ["special_reserve", "Special reserve"],
-                ["municipal", "Municipal"],
-                ["contracted", "Contracted"],
-              ] as const
-            ).map(([value, text]) => (
-              <label key={value} className="inline-flex items-center gap-1 text-[11px] font-bold uppercase">
-                <input type="radio" name="employmentType" value={value} required={value === "regular"} />
-                {text}
-              </label>
-            ))}
-          </fieldset>
-          <div className="flex min-w-0 flex-1 items-end gap-2">
+        <fieldset className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2">
+          <legend className="sr-only">Employment type</legend>
+          {(
+            [
+              ["regular", "Regular"],
+              ["special_reserve", "Special reserve"],
+              ["municipal", "Municipal"],
+              ["contracted", "Contracted"],
+            ] as const
+          ).map(([value, text]) => (
+            <label key={value} className="inline-flex items-center gap-1 text-[11px] font-bold uppercase">
+              <input type="radio" name="employmentType" value={value} required={value === "regular"} />
+              {text}
+            </label>
+          ))}
+        </fieldset>
+
+        <div className="mb-3 flex max-w-xs items-end gap-2">
             <label htmlFor="ml-yearsOfService" className={label}>
               Years of service:
             </label>
@@ -352,7 +352,6 @@ export function MeritLoanForm() {
               min={0}
               className={line}
             />
-          </div>
         </div>
 
         <h5 className={section}>
