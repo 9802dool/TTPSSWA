@@ -10,6 +10,72 @@ function optionalDigits(s: unknown): string {
     .replace(/\D/g, "");
 }
 
+const MAX_DOCUMENT_BYTES = 800 * 1024;
+
+const LEGAL_AID_DOCUMENTS = [
+  { name: "reportFromApplicant", label: "Report from Applicant", required: true },
+  { name: "copyOfCharges", label: "Copy of Charge(s)", required: true },
+  { name: "warningNotices", label: "Warning Notice(s)", required: true },
+  { name: "requisitionFromAttorney", label: "Requisition from Attorney", required: true },
+  {
+    name: "incidentPhotos",
+    label: "Photos of Incident (Where applicable)",
+    required: false,
+  },
+] as const;
+
+const ALLOWED_DOCUMENT_TYPES = new Set([
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+
+function documentExtension(fileName: string): string {
+  const dot = fileName.lastIndexOf(".");
+  return dot >= 0 ? fileName.slice(dot + 1).toLowerCase() : "";
+}
+
+function isAllowedDocument(file: Blob, fileName: string): boolean {
+  if (ALLOWED_DOCUMENT_TYPES.has(file.type)) return true;
+  return ["pdf", "jpg", "jpeg", "png", "webp"].includes(documentExtension(fileName));
+}
+
+async function readLegalAidDocument(
+  formData: FormData,
+  name: string,
+  label: string,
+  required: boolean,
+): Promise<
+  | { ok: true; file: { label: string; fileName: string; mimeType: string; base64: string } | null }
+  | { ok: false; error: string }
+> {
+  const value = formData.get(name);
+  if (!(value instanceof Blob) || value.size === 0) {
+    if (required) {
+      return { ok: false, error: `Please upload ${label}.` };
+    }
+    return { ok: true, file: null };
+  }
+  const fileName = value instanceof File && value.name ? value.name : `${name}.bin`;
+  if (value.size > MAX_DOCUMENT_BYTES) {
+    return { ok: false, error: `${label} must be 800 KB or smaller.` };
+  }
+  if (!isAllowedDocument(value, fileName)) {
+    return { ok: false, error: `${label} must be a PDF, JPG, PNG, or WebP file.` };
+  }
+  const base64 = Buffer.from(await value.arrayBuffer()).toString("base64");
+  return {
+    ok: true,
+    file: {
+      label,
+      fileName,
+      mimeType: value.type || "application/octet-stream",
+      base64,
+    },
+  };
+}
+
 function validateOptionalPhoneDigits(digitsStr: string, label: string): string | null {
   if (!digitsStr) return null;
   if (digitsStr.length < 6 || digitsStr.length > 15) {
@@ -121,6 +187,20 @@ export async function POST(request: Request) {
     );
   }
 
+  const documents: {
+    label: string;
+    fileName: string;
+    mimeType: string;
+    base64: string;
+  }[] = [];
+  for (const doc of LEGAL_AID_DOCUMENTS) {
+    const read = await readLegalAidDocument(formData, doc.name, doc.label, doc.required);
+    if (!read.ok) {
+      return NextResponse.json({ ok: false, error: read.error }, { status: 400 });
+    }
+    if (read.file) documents.push(read.file);
+  }
+
   const id = await recordServiceRequest("legal_aid_application", {
     regimentalNumber,
     rank,
@@ -141,6 +221,7 @@ export async function POST(request: Request) {
     applicantDateSigned,
     witnessName: witnessName || undefined,
     witnessDate: witnessDate || undefined,
+    documents,
     form: "legal_aid_application_online",
   });
 

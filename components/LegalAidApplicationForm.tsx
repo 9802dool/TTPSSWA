@@ -28,6 +28,20 @@ const CATEGORIES = [
 
 const DISCIPLINARY = new Set<string>(["Three Man Tribunal", "Ordinary Tribunal"]);
 
+const MAX_DOCUMENT_BYTES = 800 * 1024;
+
+const LEGAL_AID_DOCUMENTS = [
+  { name: "reportFromApplicant", label: "Report from Applicant", required: true },
+  { name: "copyOfCharges", label: "Copy of Charge(s)", required: true },
+  { name: "warningNotices", label: "Warning Notice(s)", required: true },
+  { name: "requisitionFromAttorney", label: "Requisition from Attorney", required: true },
+  {
+    name: "incidentPhotos",
+    label: "Photos of Incident (Where applicable)",
+    required: false,
+  },
+] as const;
+
 function matterTypeFromCategories(categories: string[]): "criminal" | "disciplinary" | "both" {
   const hasDisciplinary = categories.some((item) => DISCIPLINARY.has(item));
   const hasOther = categories.some((item) => !DISCIPLINARY.has(item));
@@ -52,6 +66,21 @@ export function LegalAidApplicationForm() {
       setStatus("error");
       setMessage("Please select at least one type of legal aid.");
       return;
+    }
+
+    for (const doc of LEGAL_AID_DOCUMENTS) {
+      const file = fd.get(doc.name);
+      const uploaded = file instanceof File && file.size > 0;
+      if (doc.required && !uploaded) {
+        setStatus("error");
+        setMessage(`Please upload ${doc.label}.`);
+        return;
+      }
+      if (uploaded && file instanceof File && file.size > MAX_DOCUMENT_BYTES) {
+        setStatus("error");
+        setMessage(`${doc.label} must be 800 KB or smaller.`);
+        return;
+      }
     }
 
     const forename = String(fd.get("forename") ?? "").trim();
@@ -413,6 +442,31 @@ export function LegalAidApplicationForm() {
           N.B The Association is not obligated in any way for the full fees applied for. Please be
           guided accordingly.
         </p>
+
+        <section className="mt-6 border-t border-black pt-4">
+          <h5 className="text-xs font-bold uppercase">Documents</h5>
+          <p className="mt-1 text-[11px] uppercase">
+            PDF, JPG, PNG, or WebP. Maximum 800 KB each.
+          </p>
+          <div className="mt-3 space-y-3">
+            {LEGAL_AID_DOCUMENTS.map((doc) => (
+              <div key={doc.name}>
+                <label htmlFor={`la-${doc.name}`} className={`${label} block whitespace-normal`}>
+                  {doc.label}
+                  {doc.required ? <span className="text-red-600"> *</span> : null}
+                </label>
+                <input
+                  id={`la-${doc.name}`}
+                  name={doc.name}
+                  type="file"
+                  required={doc.required}
+                  accept="application/pdf,image/jpeg,image/png,image/webp,.pdf,.jpg,.jpeg,.png,.webp"
+                  className="mt-1 block w-full border border-black bg-white px-2 py-1.5 text-xs file:mr-3 file:border file:border-black file:bg-[#fafafa] file:px-2 file:py-1 file:text-[10px] file:font-bold file:uppercase"
+                />
+              </div>
+            ))}
+          </div>
+        </section>
 
         <fieldset disabled className="mt-5 border-t-2 border-black pt-3">
           <legend className="px-1 text-[13px] font-bold uppercase">◆ For official use only</legend>

@@ -455,15 +455,42 @@ function LegalAidApplicationDetails({
   const wd = str("witnessDate");
   if (wd) rows.push(["Witness date", wd]);
 
+  const documents = Array.isArray(payload.documents)
+    ? payload.documents.flatMap((item) => {
+        if (!item || typeof item !== "object") return [];
+        const doc = item as Record<string, unknown>;
+        const label = typeof doc.label === "string" ? doc.label : "Document";
+        const fileName = typeof doc.fileName === "string" ? doc.fileName : "file";
+        const mimeType =
+          typeof doc.mimeType === "string" ? doc.mimeType : "application/octet-stream";
+        const base64 = typeof doc.base64 === "string" ? doc.base64 : "";
+        if (!base64) return [];
+        return [{ label, fileName, href: `data:${mimeType};base64,${base64}` }];
+      })
+    : [];
+
   return (
-    <dl className="mt-2 grid gap-1.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4">
-      {rows.map(([dt, dd]) => (
-        <div key={dt} className="contents">
-          <dt className={dtClass}>{dt}</dt>
-          <dd className={ddClass}>{dd}</dd>
-        </div>
-      ))}
-    </dl>
+    <div>
+      <dl className="mt-2 grid gap-1.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4">
+        {rows.map(([dt, dd]) => (
+          <div key={dt} className="contents">
+            <dt className={dtClass}>{dt}</dt>
+            <dd className={ddClass}>{dd}</dd>
+          </div>
+        ))}
+      </dl>
+      {documents.length > 0 ? (
+        <ul className="mt-3 space-y-1 text-sm">
+          {documents.map((doc) => (
+            <li key={`${doc.label}-${doc.fileName}`}>
+              <a href={doc.href} download={doc.fileName} className="font-semibold underline">
+                {doc.label}: {doc.fileName}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }
 
