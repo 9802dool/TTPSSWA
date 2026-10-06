@@ -10,6 +10,56 @@ function optionalDigits(s: unknown): string {
     .replace(/\D/g, "");
 }
 
+const MAX_DOCUMENT_BYTES = 800 * 1024;
+
+const MERIT_DOCUMENTS = [
+  { name: "idDocument", label: "ID card / passport / driver's permit" },
+  { name: "payslipDocument", label: "Payslip" },
+] as const;
+
+const ALLOWED_DOCUMENT_TYPES = new Set(["application/pdf", "image/jpeg", "image/png"]);
+
+function documentExtension(fileName: string): string {
+  const dot = fileName.lastIndexOf(".");
+  return dot >= 0 ? fileName.slice(dot + 1).toLowerCase() : "";
+}
+
+function isAllowedDocument(file: Blob, fileName: string): boolean {
+  if (ALLOWED_DOCUMENT_TYPES.has(file.type)) return true;
+  return ["pdf", "jpg", "jpeg", "png"].includes(documentExtension(fileName));
+}
+
+async function readMeritDocument(
+  formData: FormData,
+  name: string,
+  label: string,
+): Promise<
+  | { ok: true; file: { label: string; fileName: string; mimeType: string; base64: string } }
+  | { ok: false; error: string }
+> {
+  const value = formData.get(name);
+  if (!(value instanceof Blob) || value.size === 0) {
+    return { ok: false, error: `Please upload ${label}.` };
+  }
+  const fileName = value instanceof File && value.name ? value.name : `${name}.bin`;
+  if (value.size > MAX_DOCUMENT_BYTES) {
+    return { ok: false, error: `${label} must be 800 KB or smaller.` };
+  }
+  if (!isAllowedDocument(value, fileName)) {
+    return { ok: false, error: `${label} must be a PDF, JPG, or PNG file.` };
+  }
+  const base64 = Buffer.from(await value.arrayBuffer()).toString("base64");
+  return {
+    ok: true,
+    file: {
+      label,
+      fileName,
+      mimeType: value.type || "application/octet-stream",
+      base64,
+    },
+  };
+}
+
 function validateOptionalPhoneDigits(digitsStr: string, label: string): string | null {
   if (!digitsStr) return null;
   if (digitsStr.length < 6 || digitsStr.length > 15) {
@@ -42,8 +92,6 @@ export async function POST(request: Request) {
   const divisionBranchSection = String(formData.get("divisionBranchSection") ?? "").trim();
   const employmentType = String(formData.get("employmentType") ?? "").trim();
   const yearsOfService = String(formData.get("yearsOfService") ?? "").trim();
-  const documentIdCard = String(formData.get("documentIdCard") ?? "").trim();
-  const documentPayslip = String(formData.get("documentPayslip") ?? "").trim();
   const amountRequestedTTD = String(formData.get("amountRequestedTTD") ?? "").trim();
   const priorMeritLoanApplied = String(formData.get("priorMeritLoanApplied") ?? "").trim();
   const purposeOfLoan = String(formData.get("purposeOfLoan") ?? "").trim();
@@ -56,6 +104,8 @@ export async function POST(request: Request) {
   const applicantDateSigned = String(formData.get("applicantDateSigned") ?? "").trim();
   const witnessName = String(formData.get("witnessName") ?? "").trim();
   const witnessDate = String(formData.get("witnessDate") ?? "").trim();
+  const signatureRegimentalNumber = String(formData.get("signatureRegimentalNumber") ?? "").trim();
+  const signatureRank = String(formData.get("signatureRank") ?? "").trim();
 
   if (
     !dateOfApplication ||
@@ -78,7 +128,9 @@ export async function POST(request: Request) {
     !totalSalaryDeductionsTTD ||
     !repaymentInstallmentTTD ||
     !repaymentPeriodMonths ||
-    !applicantDateSigned
+    !applicantDateSigned ||
+    !signatureRegimentalNumber ||
+    !signatureRank
   ) {
     return NextResponse.json(
       { ok: false, error: "Please fill in all required fields." },
@@ -111,17 +163,6 @@ export async function POST(request: Request) {
   if (priorMeritLoanApplied !== "yes" && priorMeritLoanApplied !== "no") {
     return NextResponse.json(
       { ok: false, error: "Please indicate if you have applied for a merit loan before." },
-      { status: 400 },
-    );
-  }
-
-  if (documentIdCard !== "yes" || documentPayslip !== "yes") {
-    return NextResponse.json(
-      {
-        ok: false,
-        error:
-          "Confirm that you will submit copies of ID/passport/driver permit and payslip as required.",
-      },
       { status: 400 },
     );
   }
@@ -171,6 +212,20 @@ export async function POST(request: Request) {
     );
   }
 
+  const documents: {
+    label: string;
+    fileName: string;
+    mimeType: string;
+    base64: string;
+  }[] = [];
+  for (const doc of MERIT_DOCUMENTS) {
+    const read = await readMeritDocument(formData, doc.name, doc.label);
+    if (!read.ok) {
+      return NextResponse.json({ ok: false, error: read.error }, { status: 400 });
+    }
+    documents.push(read.file);
+  }
+
   const id = await recordServiceRequest("merit_loan_application", {
     dateOfApplication,
     regimentalNumber,
@@ -200,6 +255,9 @@ export async function POST(request: Request) {
     repaymentInstallmentTTD,
     repaymentPeriodMonths,
     applicantDateSigned,
+    signatureRegimentalNumber,
+    signatureRank,
+    documents,
     witnessName: witnessName || undefined,
     witnessDate: witnessDate || undefined,
     form: "merit_loan_application_online",

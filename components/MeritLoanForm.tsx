@@ -3,57 +3,65 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
+  AssociationFormHeader,
+  AssociationOfficersFooter,
+} from "@/components/AssociationFormLetterhead";
+import {
   MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE,
   MEMBERSHIP_PHONE_COUNTRY_CODES,
 } from "@/lib/phone-country-codes";
 
-const PDF_HREF = "/forms/MERIT LOAN FORM.pdf";
+const line =
+  "w-full min-w-0 border-0 border-b border-black bg-transparent px-1 py-0.5 text-[13px] uppercase text-black outline-none placeholder:normal-case placeholder:text-neutral-400 focus:border-[#0d2a70] read-only:bg-[#f0f0f0] read-only:font-bold";
 
-const inputClass =
-  "mt-1 w-full rounded-sm border border-slate-400 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-none outline-none placeholder:text-slate-400 focus:border-slate-900 focus:ring-1 focus:ring-slate-900 dark:border-slate-400 dark:bg-white dark:text-slate-900";
+const label = "whitespace-nowrap text-xs font-bold uppercase";
 
-const labelClass =
-  "block text-[10px] font-bold uppercase tracking-[0.14em] text-slate-800 dark:text-slate-800";
+const section =
+  "mb-3 mt-4 border border-[#ccc] bg-[#e6ecf8] px-2 py-1 text-xs font-bold uppercase";
 
-function Section({
-  number,
-  title,
-  children,
-}: {
-  number: string;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border-2 border-slate-900 bg-white shadow-none dark:border-slate-900 dark:bg-white">
-      <div className="border-b-2 border-slate-900 bg-slate-100 px-3 py-2.5 dark:bg-slate-100">
-        <h2 className="text-left text-[11px] font-bold uppercase tracking-[0.2em] text-slate-900">
-          <span className="mr-2 inline-block min-w-[1.25rem] font-mono">{number}.</span>
-          {title}
-        </h2>
-      </div>
-      <div className="space-y-4 bg-white p-4 sm:p-5">{children}</div>
-    </section>
-  );
-}
+const MAX_DOCUMENT_BYTES = 800 * 1024;
+
+const MERIT_DOCUMENTS = [
+  {
+    name: "idDocument",
+    label: "1. ID card / passport / driver's permit",
+  },
+  { name: "payslipDocument", label: "2. Payslip" },
+] as const;
 
 export function MeritLoanForm() {
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
-    "idle",
-  );
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
 
-  const todaySigned = useMemo(
-    () => new Date().toISOString().slice(0, 10),
-    [],
-  );
+  const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMessage(null);
-    setStatus("loading");
     const form = e.currentTarget;
     const fd = new FormData(form);
+    const firstName = String(fd.get("firstName") ?? "").trim();
+    const surname = String(fd.get("surname") ?? "").trim();
+    fd.set("fullName", `${firstName} ${surname}`.trim());
+    fd.set("applicantDateSigned", String(fd.get("dateOfApplication") ?? "").trim());
+    fd.set("documentIdCard", "yes");
+    fd.set("documentPayslip", "yes");
+
+    for (const doc of MERIT_DOCUMENTS) {
+      const file = fd.get(doc.name);
+      if (!(file instanceof File) || file.size === 0) {
+        setStatus("error");
+        setMessage(`Please upload ${doc.label}.`);
+        return;
+      }
+      if (file.size > MAX_DOCUMENT_BYTES) {
+        setStatus("error");
+        setMessage(`${doc.label} must be 800 KB or smaller.`);
+        return;
+      }
+    }
+
+    setStatus("loading");
     try {
       const res = await fetch("/api/merit-loan-application", {
         method: "POST",
@@ -70,7 +78,7 @@ export function MeritLoanForm() {
       }
       setStatus("success");
       setMessage(
-        "Your merit loan application has been received. You will be contacted if further information is needed.",
+        "Your M.E.R.I.T. loan application has been received. You will be contacted if further information is needed.",
       );
       form.reset();
     } catch {
@@ -81,44 +89,32 @@ export function MeritLoanForm() {
 
   return (
     <form
+      id="meritForm"
       onSubmit={(e) => void onSubmit(e)}
-      className="merit-loan-form-pdf mt-2 space-y-5 text-left"
+      className="merit-loan-form-pdf mx-auto max-w-[850px] text-left text-[13px] text-black"
     >
-      <div className="border-b-2 border-slate-900 pb-5 text-center">
-        <p className="text-[10px] font-bold uppercase leading-relaxed tracking-[0.28em] text-slate-700">
-          Trinidad and Tobago Police Service
+      <div className="mb-4 text-right">
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          className="rounded bg-[#0d2a70] px-5 py-2.5 text-sm font-bold text-white disabled:opacity-60"
+        >
+          {status === "loading" ? "Submitting…" : "Submit Application"}
+        </button>
+      </div>
+
+      <div className="border border-[#ccc] bg-white px-6 py-8 shadow-[0_0_10px_rgba(0,0,0,0.1)] sm:px-8">
+        <AssociationFormHeader />
+        <p className="mt-2 text-center text-[13px] font-bold">
+          Members Equity Relief In Times of need
         </p>
-        <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-900">
-          Social and Welfare Association
-        </p>
-        <p className="mt-4 text-sm font-bold uppercase tracking-[0.18em] text-slate-900 underline decoration-2 underline-offset-4">
+        <h4 className="mb-4 text-center text-base font-bold uppercase underline">
           Merit application form
-        </p>
-        <p className="mt-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
-          Please fill out in block letters
-        </p>
-      </div>
+        </h4>
 
-      <div className="border border-slate-400 bg-white p-4 text-xs leading-relaxed text-slate-700 dark:bg-white">
-        <p>
-          This online form matches the official{" "}
-          <a
-            href={PDF_HREF}
-            className="font-semibold text-slate-900 underline decoration-slate-400 underline-offset-2 hover:text-slate-700"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Merit loan application (PDF)
-          </a>
-          . Fields marked <span className="font-bold text-red-600">*</span> are required. N.B. No
-          more than two merit loans per calendar year.
-        </p>
-      </div>
-
-      <Section number="I" title="Application date">
-        <div className="max-w-xs">
-          <label htmlFor="ml-dateOfApplication" className={labelClass}>
-            Date of application <span className="text-red-600">*</span>
+        <div className="mb-3 flex max-w-sm items-end gap-2">
+          <label htmlFor="ml-dateOfApplication" className={label}>
+            Date of application:
           </label>
           <input
             id="ml-dateOfApplication"
@@ -126,90 +122,89 @@ export function MeritLoanForm() {
             type="date"
             required
             defaultValue={todaySigned}
-            className={inputClass}
+            className={`${line} normal-case`}
           />
         </div>
-      </Section>
 
-      <Section number="II" title="Personal information">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="ml-regimentalNumber" className={labelClass}>
-              Reg. no. <span className="text-red-600">*</span>
+        <h5 className={section}>Personal information</h5>
+
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-regimentalNumber" className={label}>
+              Reg. no.:
             </label>
             <input
               id="ml-regimentalNumber"
               name="regimentalNumber"
               type="text"
               required
-              className={`${inputClass} uppercase`}
+              className={line}
             />
           </div>
-          <div>
-            <label htmlFor="ml-rank" className={labelClass}>
-              Rank <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-[1.4] items-end gap-2">
+            <label htmlFor="ml-rank" className={label}>
+              Rank:
+            </label>
+            <input id="ml-rank" name="rank" type="text" required className={line} />
+          </div>
+        </div>
+
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-firstName" className={label}>
+              Name:
             </label>
             <input
-              id="ml-rank"
-              name="rank"
+              id="ml-firstName"
+              name="firstName"
               type="text"
               required
-              className={`${inputClass} uppercase`}
+              autoComplete="given-name"
+              placeholder="FIRST NAME"
+              className={line}
             />
           </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="ml-fullName" className={labelClass}>
-              Name (forename and surname) <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end">
+            <label htmlFor="ml-surname" className="sr-only">
+              Surname
             </label>
             <input
-              id="ml-fullName"
-              name="fullName"
+              id="ml-surname"
+              name="surname"
               type="text"
               required
-              className={`${inputClass} uppercase`}
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="ml-address" className={labelClass}>
-              Address <span className="text-red-600">*</span>
-            </label>
-            <textarea
-              id="ml-address"
-              name="address"
-              rows={4}
-              required
-              autoComplete="street-address"
-              className={`${inputClass} resize-y min-h-[5rem] uppercase`}
+              autoComplete="family-name"
+              placeholder="SURNAME"
+              className={line}
             />
           </div>
         </div>
-      </Section>
 
-      <Section number="III" title="Contact information">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label htmlFor="ml-email" className={labelClass}>
-              Email address <span className="text-red-600">*</span>
-            </label>
-            <input
-              id="ml-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label htmlFor="ml-phoneCountryCode" className={labelClass}>
-              Country code (cell) <span className="text-red-600">*</span>
+        <div className="mb-3 flex items-end gap-2">
+          <label htmlFor="ml-address" className={label}>
+            Address:
+          </label>
+          <input
+            id="ml-address"
+            name="address"
+            type="text"
+            required
+            autoComplete="street-address"
+            className={line}
+          />
+        </div>
+
+        <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-phoneCountryCode" className={label}>
+              Code
             </label>
             <select
               id="ml-phoneCountryCode"
               name="phoneCountryCode"
               required
               defaultValue={MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE}
-              className={inputClass}
+              className={`${line} normal-case`}
             >
               {MEMBERSHIP_PHONE_COUNTRY_CODES.map((c) => (
                 <option key={c.value} value={c.value}>
@@ -218,438 +213,328 @@ export function MeritLoanForm() {
               ))}
             </select>
           </div>
-          <div>
-            <label htmlFor="ml-phone" className={labelClass}>
-              Mobile (cell) <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-phone" className={label}>
+              Telephone contact: Mobile
             </label>
-            <input
-              id="ml-phone"
-              name="phone"
-              type="tel"
-              inputMode="tel"
-              required
-              className={inputClass}
-              placeholder="Local number only"
-            />
+            <input id="ml-phone" name="phone" type="tel" inputMode="tel" required className={line} />
           </div>
-          <div>
-            <label htmlFor="ml-phoneWork" className={labelClass}>
-              Work phone (optional)
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-phoneWork" className={label}>
+              Work
             </label>
-            <input
-              id="ml-phoneWork"
-              name="phoneWork"
-              type="tel"
-              inputMode="tel"
-              className={inputClass}
-              placeholder="Local number only"
-            />
+            <input id="ml-phoneWork" name="phoneWork" type="tel" inputMode="tel" className={line} />
           </div>
-          <div>
-            <label htmlFor="ml-phoneHome" className={labelClass}>
-              Home phone (optional)
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-phoneHome" className={label}>
+              Home
             </label>
-            <input
-              id="ml-phoneHome"
-              name="phoneHome"
-              type="tel"
-              inputMode="tel"
-              className={inputClass}
-              placeholder="Local number only"
-            />
+            <input id="ml-phoneHome" name="phoneHome" type="tel" inputMode="tel" className={line} />
           </div>
         </div>
-      </Section>
 
-      <Section number="IV" title="Marital status & dependents">
-        <fieldset className="border border-slate-400 bg-white p-3 dark:bg-white">
-          <legend className={`${labelClass} px-1`}>
-            Marital status <span className="text-red-600">*</span>
-          </legend>
-          <div className="mt-1 flex flex-wrap gap-3 sm:gap-4">
-            {(
-              [
-                ["single", "Single"],
-                ["married", "Married"],
-                ["civil_union", "Civil union"],
-                ["separated", "Separated"],
-                ["widowed", "Widowed"],
-                ["divorced", "Divorced"],
-              ] as const
-            ).map(([value, label]) => (
-              <label
-                key={value}
-                className="inline-flex cursor-pointer items-center gap-2 text-xs font-medium uppercase tracking-wide text-slate-900 sm:text-sm"
-              >
-                <input
-                  type="radio"
-                  name="maritalStatus"
-                  value={value}
-                  required
-                  className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
-                />
-                {label}
-              </label>
-            ))}
-          </div>
+        <div className="mb-3 flex items-end gap-2">
+          <label htmlFor="ml-email" className={label}>
+            Email address:
+          </label>
+          <input
+            id="ml-email"
+            name="email"
+            type="email"
+            required
+            autoComplete="email"
+            className={`${line} normal-case`}
+          />
+        </div>
+
+        <fieldset className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <legend className={label}>Marital status:</legend>
+          {(
+            [
+              ["single", "Single"],
+              ["married", "Married"],
+              ["civil_union", "Civil union"],
+              ["separated", "Separated"],
+              ["widowed", "Widowed"],
+              ["divorced", "Divorced"],
+            ] as const
+          ).map(([value, text]) => (
+            <label key={value} className="inline-flex items-center gap-1 text-[11px] font-bold uppercase">
+              <input type="radio" name="maritalStatus" value={value} required={value === "single"} />
+              {text}
+            </label>
+          ))}
         </fieldset>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div>
-            <label htmlFor="ml-dateOfBirth" className={labelClass}>
-              Date of birth <span className="text-red-600">*</span>
+
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-dateOfBirth" className={label}>
+              Date of birth:
             </label>
             <input
               id="ml-dateOfBirth"
               name="dateOfBirth"
               type="date"
               required
-              className={inputClass}
+              className={`${line} normal-case`}
             />
           </div>
-          <div>
-            <label htmlFor="ml-age" className={labelClass}>
-              Age <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-age" className={label}>
+              Age:
             </label>
-            <input
-              id="ml-age"
-              name="age"
-              type="text"
-              inputMode="numeric"
-              required
-              className={inputClass}
-              placeholder="e.g. 42"
-            />
+            <input id="ml-age" name="age" type="number" required min={18} className={line} />
           </div>
-          <div>
-            <label htmlFor="ml-numberOfDependents" className={labelClass}>
-              No. of dependents <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-numberOfDependents" className={label}>
+              No. of dependents:
             </label>
             <input
               id="ml-numberOfDependents"
               name="numberOfDependents"
               type="number"
-              min={0}
-              step={1}
               required
-              className={inputClass}
+              min={0}
+              className={line}
             />
           </div>
         </div>
-      </Section>
 
-      <Section number="V" title="Employment details">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label htmlFor="ml-employer" className={labelClass}>
-              Employer <span className="text-red-600">*</span>
+        <h5 className={section}>Employment details</h5>
+
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-employer" className={label}>
+              Employer:
             </label>
-            <input
-              id="ml-employer"
-              name="employer"
-              type="text"
-              required
-              className={`${inputClass} uppercase`}
-            />
+            <input id="ml-employer" name="employer" type="text" required className={line} />
           </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="ml-divisionBranchSection" className={labelClass}>
-              Div. / Br. / Sect. <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-divisionBranchSection" className={label}>
+              Div/Br/Sect:
             </label>
             <input
               id="ml-divisionBranchSection"
               name="divisionBranchSection"
               type="text"
               required
-              className={`${inputClass} uppercase`}
+              className={line}
             />
           </div>
         </div>
-        <fieldset className="border border-slate-400 bg-white p-3 dark:bg-white">
-          <legend className={`${labelClass} px-1`}>
-            Employment type <span className="text-red-600">*</span>
-          </legend>
-          <div className="mt-1 flex flex-wrap gap-6">
-            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
-              <input
-                type="radio"
-                name="employmentType"
-                value="regular"
-                required
-                className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
-              />
-              Regular
-            </label>
-            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
-              <input
-                type="radio"
-                name="employmentType"
-                value="special_reserve"
-                className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
-              />
-              Special reserve
-            </label>
-            <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
-              <input
-                type="radio"
-                name="employmentType"
-                value="contracted"
-                className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
-              />
-              Contracted
-            </label>
-          </div>
-        </fieldset>
-        <div className="max-w-xs">
-          <label htmlFor="ml-yearsOfService" className={labelClass}>
-            Years of service <span className="text-red-600">*</span>
-          </label>
-          <input
-            id="ml-yearsOfService"
-            name="yearsOfService"
-            type="text"
-            required
-            className={inputClass}
-            placeholder="e.g. 12"
-          />
-        </div>
-      </Section>
 
-      <Section number="VI" title="Documents (walk with originals; submit copies)">
-        <p className="text-xs leading-relaxed text-slate-600">
-          Confirm you will provide copies as on the official form (ID card / passport / driver
-          permit; payslip).
-        </p>
-        <label className="flex cursor-pointer gap-3 border border-slate-400 bg-white p-4 text-sm text-slate-900 dark:bg-white">
-          <input
-            type="checkbox"
-            name="documentIdCard"
-            value="yes"
-            required
-            className="mt-1 h-4 w-4 shrink-0 border-slate-600 text-slate-900 focus:ring-slate-900"
-          />
-          <span className="font-medium uppercase tracking-wide">
-            I will submit a copy of ID card / passport / driver permit.{" "}
-            <span className="text-red-600">*</span>
-          </span>
-        </label>
-        <label className="flex cursor-pointer gap-3 border border-slate-400 bg-white p-4 text-sm text-slate-900 dark:bg-white">
-          <input
-            type="checkbox"
-            name="documentPayslip"
-            value="yes"
-            required
-            className="mt-1 h-4 w-4 shrink-0 border-slate-600 text-slate-900 focus:ring-slate-900"
-          />
-          <span className="font-medium uppercase tracking-wide">
-            I will submit a copy of my payslip. <span className="text-red-600">*</span>
-          </span>
-        </label>
-      </Section>
-
-      <Section number="VII" title="Merit loan details">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="ml-amountRequestedTTD" className={labelClass}>
-              Amount requesting (TTD) <span className="text-red-600">*</span>
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <fieldset className="flex flex-1 flex-wrap items-center gap-3">
+            <legend className="sr-only">Employment type</legend>
+            {(
+              [
+                ["regular", "Regular"],
+                ["special_reserve", "Special reserve"],
+                ["contracted", "Contracted"],
+              ] as const
+            ).map(([value, text]) => (
+              <label key={value} className="inline-flex items-center gap-1 text-[11px] font-bold uppercase">
+                <input type="radio" name="employmentType" value={value} required={value === "regular"} />
+                {text}
+              </label>
+            ))}
+          </fieldset>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-yearsOfService" className={label}>
+              Years of service:
             </label>
             <input
-              id="ml-amountRequestedTTD"
-              name="amountRequestedTTD"
-              type="text"
-              inputMode="decimal"
+              id="ml-yearsOfService"
+              name="yearsOfService"
+              type="number"
               required
-              className={inputClass}
-              placeholder="e.g. 5000.00"
+              min={0}
+              className={line}
             />
           </div>
-          <fieldset className="border border-slate-400 bg-white p-3 dark:bg-white sm:col-span-2">
-            <legend className={`${labelClass} px-1`}>
-              Have you ever applied for a merit loan? <span className="text-red-600">*</span>
-            </legend>
-            <div className="mt-1 flex flex-wrap gap-6">
-              <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
-                <input
-                  type="radio"
-                  name="priorMeritLoanApplied"
-                  value="yes"
-                  required
-                  className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
-                />
-                Yes
+        </div>
+
+        <h5 className={section}>
+          Documents submitted (walk with originals, copies to be submitted only)
+        </h5>
+
+        <div className="mb-4 border border-dashed border-[#0d2a70] bg-[#f8faee] p-3">
+          <p className="mb-2 text-[11px] font-bold uppercase">
+            Attach required documents for online registration:
+          </p>
+          {MERIT_DOCUMENTS.map((doc) => (
+            <div key={doc.name} className="mb-2 flex flex-col gap-1 sm:flex-row sm:items-center">
+              <label htmlFor={`ml-${doc.name}`} className="text-[11px] font-bold uppercase sm:w-[250px]">
+                {doc.label}:
               </label>
-              <label className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium uppercase tracking-wide text-slate-900">
-                <input
-                  type="radio"
-                  name="priorMeritLoanApplied"
-                  value="no"
-                  className="h-4 w-4 border-slate-600 text-slate-900 focus:ring-slate-900"
-                />
-                No
-              </label>
+              <input
+                id={`ml-${doc.name}`}
+                name={doc.name}
+                type="file"
+                required
+                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                className="text-[11px]"
+              />
             </div>
-          </fieldset>
-          <div className="sm:col-span-2">
-            <label htmlFor="ml-purposeOfLoan" className={labelClass}>
-              Purpose of M.E.R.I.T. loan <span className="text-red-600">*</span>
-            </label>
-            <textarea
-              id="ml-purposeOfLoan"
-              name="purposeOfLoan"
-              rows={5}
-              required
-              className={`${inputClass} resize-y min-h-[6rem]`}
-            />
-          </div>
-          <div>
-            <label htmlFor="ml-currentNetSalaryTTD" className={labelClass}>
-              Current net salary (TTD) <span className="text-red-600">*</span>
+          ))}
+          <p className="text-[10px] uppercase text-neutral-700">PDF, JPG, or PNG. Maximum 800 KB each.</p>
+        </div>
+
+        <h5 className={section}>Merit details</h5>
+
+        <fieldset className="mb-3 flex flex-wrap items-center gap-3">
+          <legend className={label}>Have you ever applied for a merit loan?</legend>
+          <label className="inline-flex items-center gap-1 text-[11px] font-bold uppercase">
+            <input type="radio" name="priorMeritLoanApplied" value="yes" required /> Yes
+          </label>
+          <label className="inline-flex items-center gap-1 text-[11px] font-bold uppercase">
+            <input type="radio" name="priorMeritLoanApplied" value="no" /> No
+          </label>
+        </fieldset>
+
+        <div className="mb-3 flex max-w-sm items-end gap-2">
+          <label htmlFor="ml-amountRequestedTTD" className={label}>
+            Amount requesting $:
+          </label>
+          <input
+            id="ml-amountRequestedTTD"
+            name="amountRequestedTTD"
+            type="text"
+            readOnly
+            value="3000.00"
+            className={line}
+          />
+        </div>
+
+        <div className="mb-3 flex items-end gap-2">
+          <label htmlFor="ml-purposeOfLoan" className={label}>
+            Purpose of M.E.R.I.T. loan:
+          </label>
+          <input id="ml-purposeOfLoan" name="purposeOfLoan" type="text" required className={line} />
+        </div>
+
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-currentNetSalaryTTD" className={label}>
+              Current net salary $:
             </label>
             <input
               id="ml-currentNetSalaryTTD"
               name="currentNetSalaryTTD"
               type="text"
-              inputMode="decimal"
               required
-              className={inputClass}
+              inputMode="decimal"
+              className={line}
             />
           </div>
-          <div>
-            <label htmlFor="ml-totalSalaryDeductionsTTD" className={labelClass}>
-              Total salary deductions (TTD) <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-totalSalaryDeductionsTTD" className={label}>
+              Total salary deductions $:
             </label>
             <input
               id="ml-totalSalaryDeductionsTTD"
               name="totalSalaryDeductionsTTD"
               type="text"
-              inputMode="decimal"
               required
-              className={inputClass}
+              inputMode="decimal"
+              className={line}
             />
           </div>
-          <div>
-            <label htmlFor="ml-repaymentInstallmentTTD" className={labelClass}>
-              Repayment installment (TTD) <span className="text-red-600">*</span>
+        </div>
+
+        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-repaymentInstallmentTTD" className={label}>
+              Repayment installment $:
             </label>
             <input
               id="ml-repaymentInstallmentTTD"
               name="repaymentInstallmentTTD"
               type="text"
-              inputMode="decimal"
-              required
-              className={inputClass}
+              readOnly
+              value="500.00"
+              className={line}
             />
           </div>
-          <div>
-            <label htmlFor="ml-repaymentPeriodMonths" className={labelClass}>
-              Period for repayment (months) <span className="text-red-600">*</span>
+          <div className="flex min-w-0 flex-1 items-end gap-2">
+            <label htmlFor="ml-repaymentPeriodMonths" className={label}>
+              Period for repayment:
             </label>
             <input
               id="ml-repaymentPeriodMonths"
               name="repaymentPeriodMonths"
               type="text"
-              inputMode="numeric"
-              required
-              className={inputClass}
-              placeholder="e.g. 12"
+              readOnly
+              value="6"
+              className={`${line} max-w-[4rem]`}
             />
+            <span className="text-xs font-bold uppercase">Months</span>
           </div>
         </div>
-      </Section>
 
-      <Section number="VIII" title="Declarations">
-        <label className="flex cursor-pointer gap-3 border border-slate-400 bg-white p-4 text-sm text-slate-900 dark:bg-white">
-          <input
-            type="checkbox"
-            name="declarationAccurate"
-            value="yes"
-            required
-            className="mt-1 h-4 w-4 shrink-0 border-slate-600 text-slate-900 focus:ring-slate-900"
-          />
-          <span className="font-medium uppercase tracking-wide">
-            I declare that the information provided is true and complete to the best of my
-            knowledge. <span className="text-red-600">*</span>
-          </span>
-        </label>
-      </Section>
-
-      <Section number="IX" title="Signature of applicant">
-        <label className="flex cursor-pointer gap-3 border border-slate-400 bg-white p-4 text-sm text-slate-900 dark:bg-white">
-          <input
-            type="checkbox"
-            name="electronicSignature"
-            value="yes"
-            required
-            className="mt-1 h-4 w-4 shrink-0 border-slate-600 text-slate-900 focus:ring-slate-900"
-          />
-          <span className="font-medium uppercase tracking-wide">
-            I confirm that typing my name and submitting this form constitutes my electronic
-            signature. <span className="text-red-600">*</span>
-          </span>
-        </label>
-        <div>
-          <label htmlFor="ml-applicantDateSigned" className={labelClass}>
-            Date <span className="text-red-600">*</span>
-          </label>
-          <input
-            id="ml-applicantDateSigned"
-            name="applicantDateSigned"
-            type="date"
-            required
-            defaultValue={todaySigned}
-            className={inputClass}
-          />
+        <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end">
+          <div className="sm:flex-[2]">
+            <div className="mb-1 h-8 border-b border-black" />
+            <p className="text-[11px] font-bold uppercase">Signature of applicant</p>
+            <p className="mt-1 text-[10px] uppercase text-neutral-700">
+              Online submission counts as your electronic signature.
+            </p>
+          </div>
+          <div className="flex flex-1 items-end gap-2">
+            <label htmlFor="ml-signatureRegimentalNumber" className={label}>
+              Reg. no.
+            </label>
+            <input
+              id="ml-signatureRegimentalNumber"
+              name="signatureRegimentalNumber"
+              type="text"
+              required
+              className={line}
+            />
+          </div>
+          <div className="flex flex-1 items-end gap-2">
+            <label htmlFor="ml-signatureRank" className={label}>
+              Rank
+            </label>
+            <input id="ml-signatureRank" name="signatureRank" type="text" required className={line} />
+          </div>
         </div>
-      </Section>
 
-      <Section number="X" title="Witness (optional)">
-        <label htmlFor="ml-witnessName" className={labelClass}>
-          Witness to signature of applicant
+        <label className="mt-4 flex items-start gap-2 text-[11px] font-bold uppercase">
+          <input type="checkbox" name="declarationAccurate" value="yes" required className="mt-0.5" />
+          <span>I declare that the information provided is true and complete.</span>
         </label>
-        <input
-          id="ml-witnessName"
-          name="witnessName"
-          type="text"
-          className={`${inputClass} uppercase`}
-        />
-        <div>
-          <label htmlFor="ml-witnessDate" className={labelClass}>
-            Witness date
-          </label>
-          <input id="ml-witnessDate" name="witnessDate" type="date" className={inputClass} />
-        </div>
-      </Section>
+        <label className="mt-2 flex items-start gap-2 text-[11px] font-bold uppercase">
+          <input type="checkbox" name="electronicSignature" value="yes" required className="mt-0.5" />
+          <span>Submitting this form is my electronic signature.</span>
+        </label>
 
-      {message ? (
-        <p
-          role="status"
-          className={
-            status === "success"
-              ? "rounded-sm border border-green-700 bg-green-50 px-4 py-3 text-sm text-green-950"
-              : "rounded-sm border border-red-700 bg-red-50 px-4 py-3 text-sm text-red-950"
-          }
-        >
-          {message}
+        <p className="mt-4 text-center text-[10.5px] font-bold uppercase">
+          N.B. No more than two merit loans per calender year
         </p>
-      ) : null}
 
-      <div className="flex flex-col gap-4 border-t-2 border-slate-900 pt-6 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-[10px] font-medium uppercase leading-relaxed tracking-wide text-slate-600">
-          Bring originals where required; submit copies as instructed. Questions? See{" "}
-          <Link
-            href="/membership-services"
-            className="font-bold text-slate-900 underline decoration-slate-400"
+        <AssociationOfficersFooter variant="merit" />
+
+        {message ? (
+          <p
+            role="status"
+            className={
+              status === "success"
+                ? "mt-4 border border-green-700 bg-green-50 px-3 py-3 text-sm text-green-950"
+                : "mt-4 border border-red-700 bg-red-50 px-3 py-3 text-sm text-red-950"
+            }
           >
+            {message}
+          </p>
+        ) : null}
+
+        <p className="mt-4 text-[10px] uppercase text-neutral-600">
+          Questions? See{" "}
+          <Link href="/membership-services" className="underline">
             Membership services
           </Link>
           .
         </p>
-        <button
-          type="submit"
-          disabled={status === "loading"}
-          className="site-btn-submit"
-        >
-          {status === "loading" ? "Submitting…" : "Submit merit loan application"}
-        </button>
       </div>
     </form>
   );
