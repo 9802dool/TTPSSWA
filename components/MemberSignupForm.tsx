@@ -144,14 +144,15 @@ export function MemberSignupForm() {
           </div>
         </div>
 
-        <AssociationFormHeader />
-
-        <h4 className="mt-4 text-center text-base font-bold uppercase underline">Membership form</h4>
-        <p className="mb-4 text-center text-[11px] font-bold">Please fill out in block letters</p>
-
-        <div className="mb-4 border border-black bg-[#fafafa] p-3">
-          <p className="text-center text-xs font-bold uppercase">Photo</p>
-          <MembershipFacialPhotoPanel formId="membership-application-form" />
+        <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div className="min-w-0 flex-1">
+            <AssociationFormHeader />
+            <h4 className="mt-4 text-center text-base font-bold uppercase underline">Membership form</h4>
+            <p className="mb-1 text-center text-[11px] font-bold">Please fill out in block letters</p>
+          </div>
+          <div className="w-full shrink-0 sm:w-44">
+            <MembershipFacialPhotoPanel formId="membership-application-form" />
+          </div>
         </div>
 
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
