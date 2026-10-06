@@ -153,7 +153,12 @@ export async function POST(request: Request) {
     );
   }
 
-  if (employmentType !== "regular" && employmentType !== "special_reserve" && employmentType !== "contracted") {
+  if (
+    employmentType !== "regular" &&
+    employmentType !== "special_reserve" &&
+    employmentType !== "municipal" &&
+    employmentType !== "contracted"
+  ) {
     return NextResponse.json(
       { ok: false, error: "Please select employment type." },
       { status: 400 },

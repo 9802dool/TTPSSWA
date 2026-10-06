@@ -259,9 +259,11 @@ function MeritLoanApplicationDetails({
       ? "Regular"
       : emp === "special_reserve"
         ? "Special reserve"
-        : emp === "contracted"
-          ? "Contracted"
-          : emp;
+        : emp === "municipal"
+          ? "Municipal"
+          : emp === "contracted"
+            ? "Contracted"
+            : emp;
 
   const rows: [string, string][] = [];
   const pairs: [string, string][] = [

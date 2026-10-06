@@ -330,6 +330,7 @@ export function MeritLoanForm() {
               [
                 ["regular", "Regular"],
                 ["special_reserve", "Special reserve"],
+                ["municipal", "Municipal"],
                 ["contracted", "Contracted"],
               ] as const
             ).map(([value, text]) => (
