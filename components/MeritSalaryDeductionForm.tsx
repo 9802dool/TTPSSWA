@@ -68,7 +68,7 @@ export function MeritSalaryDeductionForm() {
   }
 
   return (
-    <div className="mx-auto max-w-[850px] text-left text-[13px] text-black">
+    <div id="merit-salary-print" className="mx-auto max-w-[850px] text-left text-[13px] text-black print:max-w-none">
       <div className="mb-5 flex flex-wrap items-center justify-between gap-4 border border-[#ccc] bg-white px-5 py-4 shadow-[0_2px_5px_rgba(0,0,0,0.05)] print:hidden">
         <p className="text-sm font-bold text-[#0d2a70]">MERIT salary deduction form (step 2 of 2)</p>
         <button

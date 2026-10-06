@@ -91,7 +91,7 @@ export function MeritLoanForm() {
     <form
       id="meritForm"
       onSubmit={(e) => void onSubmit(e)}
-      className="merit-loan-form-pdf mx-auto max-w-[850px] text-left text-[13px] text-black"
+      className="merit-loan-form-pdf mx-auto max-w-[850px] text-left text-[13px] text-black print:hidden"
     >
       <div className="mb-4 text-right">
         <button

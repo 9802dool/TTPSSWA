@@ -15,15 +15,15 @@ export default function MeritLoanApplicationPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#f4f6f9] px-4 pb-16 pt-[calc(var(--site-header-stack)+1.25rem)]">
-        <p className="mx-auto mb-4 max-w-[850px] text-sm">
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#f4f6f9] px-4 pb-16 pt-[calc(var(--site-header-stack)+1.25rem)] print:min-h-0 print:bg-white print:p-0">
+        <p className="mx-auto mb-4 max-w-[850px] text-sm print:hidden">
           <Link href="/membership-services#members-benefits" className="font-semibold text-[#0d2a70] underline">
             ← Back to members benefits
           </Link>
         </p>
         <h1 className="sr-only">Merit application form</h1>
         <MeritLoanForm />
-        <div className="mt-16">
+        <div className="mt-16 print:mt-0">
           <MeritSalaryDeductionForm />
         </div>
       </main>
