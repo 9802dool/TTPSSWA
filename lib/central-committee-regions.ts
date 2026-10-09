@@ -39,6 +39,7 @@ export const CENTRAL_COMMITTEE_REGIONS = [
   { slug: "special-victims", name: "Special Victims" },
   { slug: "tobago", name: "Tobago" },
   { slug: "traffic-highway-patrol", name: "Traffic & Highway Patrol" },
+  { slug: "transit-police", name: "Transit Police Unit" },
   { slug: "transport-telecom", name: "Transport & Telecom" },
   { slug: "western", name: "Western" },
 ] as const;
