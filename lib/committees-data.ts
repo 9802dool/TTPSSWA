@@ -112,6 +112,26 @@ export const COMMITTEES: readonly Committee[] = [
       "Outreach extended to incarcerated officers’ family members and children.",
       "Promotion study material and interview preparation for incarcerated officers.",
     ],
+    members: [
+      {
+        name: "Ag Cpl Selwyn Marcano",
+        role: "Executive",
+        summary: "Reg. No. 18668",
+        phone: "(868) 722-2315",
+      },
+      {
+        name: "Ag Sgt Kevin Benjamin",
+        role: "Chairman",
+        summary: "Reg. No. 15060 · SIU / Agra Court",
+        phone: "(868) 783-5581",
+      },
+      {
+        name: "W/Cpl Avelon Monsegue",
+        role: "Secretary",
+        summary: "Reg. No. 17225 · South Western Division",
+        phone: "(868) 746-9658",
+      },
+    ],
   },
   {
     id: 4,
@@ -219,7 +239,30 @@ export const COMMITTEES: readonly Committee[] = [
       },
     ],
   },
-  { id: 7, slug: "transitioning-committee", title: "Transitioning Committee" },
+  {
+    id: 7,
+    slug: "transitioning-committee",
+    title: "Resettlement & Retirement",
+    members: [
+      {
+        name: "W/Ag ASP Nathalie John",
+        role: "Executive",
+        phone: "(868) 798-5562",
+      },
+      {
+        name: "Ag Insp Kevin Denny",
+        role: "Chairman",
+        summary: "Reg. No. 14251 · HRB",
+        phone: "(868) 710-0066",
+      },
+      {
+        name: "W/Cpl Daniel",
+        role: "Secretary",
+        summary: "Reg. No. 18231 · Police Academy",
+        phone: "(868) 755-4257",
+      },
+    ],
+  },
   {
     id: 8,
     slug: "special-projects-committee",
@@ -231,6 +274,59 @@ export const COMMITTEES: readonly Committee[] = [
       "First annual retirees function.",
       "Approvals for the Waterloo project: a multi-purpose complex including a PriceSmart-style supermarket, indoor range, office space, auditorium, kiosk, sports bar, and members club.",
       "Surveying of the outdoor range in Cumuto (in partnership with the TTPS Range).",
+    ],
+    members: [
+      {
+        name: "Ag Supt Ishmael Pitt",
+        phone: "(868) 487-5093",
+      },
+      {
+        name: "Ag ASP Owie Russell",
+        role: "Vice President",
+        summary: "Corporate Communications",
+      },
+      {
+        name: "W/Ag ASP Nathalie John",
+        role: "Secretary",
+      },
+      {
+        name: "W/Ag Sgt Tricia Durant-Charles",
+        role: "Assistant Secretary",
+        summary: "Reg. No. 16940 · Special Victims",
+      },
+      {
+        name: "Ag Cpl Selwyn Marcano",
+        role: "Treasurer",
+        summary: "Reg. No. 18668",
+        phone: "(868) 722-2315",
+      },
+      {
+        name: "Sgt Adrian Andrews",
+        role: "Trustee",
+        summary: "Reg. No. 13281 · Central Division",
+      },
+      {
+        name: "Sgt Jason Johnson",
+        role: "Trustee",
+        summary: "Reg. No. 16540 · IATF",
+        phone: "(868) 354-7341",
+      },
+      {
+        name: "Snr Supt Oswain Subero",
+        role: "1st Division Representative",
+        phone: "(868) 488-7302",
+      },
+      {
+        name: "PC Kevin Nicholls",
+        role: "SRP Representative",
+        summary: "Reg. No. 5369 · Port of Spain Division",
+        phone: "(868) 727-8643",
+      },
+      {
+        name: "PC David Mc Guirk",
+        role: "Municipal Representative",
+        summary: "Reg. No. 12279 · POS Municipal",
+      },
     ],
   },
   {
@@ -246,6 +342,26 @@ export const COMMITTEES: readonly Committee[] = [
       "Proposals regarding Special Reserve Police regulations.",
       "Proposals regarding Special Reserve Police promotion and absorption.",
     ],
+    members: [
+      {
+        name: "Ag Cpl Selwyn Marcano",
+        role: "Executive",
+        summary: "Reg. No. 18668",
+        phone: "(868) 722-2315",
+      },
+      {
+        name: "Cpl Kwesi Carmona",
+        role: "Chairman",
+        summary: "Reg. No. 17065 · SIU / Agra Court",
+        phone: "(868) 485-7818",
+      },
+      {
+        name: "W/Ag Sgt Andrea Saunders",
+        role: "Secretary",
+        summary: "Reg. No. 3205 · POS Municipal",
+        phone: "(868) 746-9658",
+      },
+    ],
   },
   {
     id: 10,
@@ -258,11 +374,132 @@ export const COMMITTEES: readonly Committee[] = [
       "Construction of a swimming pool.",
       "Tobago mess.",
     ],
+    members: [
+      {
+        name: "Ag ACP Oswain Subero",
+        role: "Executive",
+        phone: "(868) 488-7302",
+      },
+      {
+        name: "WPC Bacchus",
+        role: "Chairman",
+        summary: "Reg. No. 19738 · Tobago Division",
+        phone: "(868) 788-3515",
+      },
+      {
+        name: "WPC Corbin",
+        role: "Secretary",
+        summary: "Reg. No. 9474 · Tobago Division",
+        phone: "(868) 793-9911",
+      },
+    ],
   },
-  { id: 11, slug: "marketing-committee", title: "Marketing Committee" },
-  { id: 12, slug: "municipal-committee", title: "Municipal Committee" },
-  { id: 13, slug: "srp-committee", title: "SRP Committee" },
-  { id: 14, slug: "disciplinary-committee", title: "Disciplinary Committee" },
+  {
+    id: 11,
+    slug: "marketing-committee",
+    title: "Marketing Committee",
+    members: [
+      {
+        name: "W/Ag ASP Nathalie John",
+        role: "Executive",
+        phone: "(868) 798-5562",
+      },
+      {
+        name: "WPC Selma Adams",
+        role: "Chairman",
+        summary: "Reg. No. 18541 · North Central Division",
+        phone: "(868) 761-5073",
+      },
+      {
+        name: "PC Doolarsingh",
+        role: "Secretary",
+        summary: "Reg. No. 9802 · IATF",
+        phone: "(868) 322-4691",
+      },
+    ],
+  },
+  {
+    id: 12,
+    slug: "municipal-committee",
+    title: "Municipal Committee",
+    members: [
+      {
+        name: "PC David Mc Guirk",
+        role: "Executive",
+        summary: "Reg. No. 12279 · POS Municipal",
+        phone: "(868) 719-6546",
+      },
+      {
+        name: "PC Bennete",
+        role: "Chairman",
+        summary: "Reg. No. 12255 · POS Municipal",
+        phone: "(868) 720-6357",
+      },
+      {
+        name: "WPC Cedeno",
+        role: "Secretary",
+        summary: "Reg. No. 12197 · POS Municipal",
+        phone: "(868) 474-6193",
+      },
+    ],
+  },
+  {
+    id: 13,
+    slug: "srp-committee",
+    title: "SRP Committee",
+    members: [
+      {
+        name: "PC Kevin Nicholls",
+        role: "Executive",
+        summary: "Reg. No. 5369 · Port of Spain Division",
+        phone: "(868) 727-8643",
+      },
+      {
+        name: "PC Lex Springer",
+        role: "Chairman",
+        summary: "Reg. No. 8572 · Justice Protection Unit",
+        phone: "(868) 716-3495",
+      },
+      {
+        name: "WPC Kamaria Guy",
+        role: "Secretary",
+        summary: "Reg. No. 7245 · Court & Process",
+        phone: "(868) 387-8313",
+      },
+    ],
+  },
+  {
+    id: 14,
+    slug: "disciplinary-committee",
+    title: "Disciplinary Committee",
+    members: [
+      {
+        name: "PC McMillan",
+        summary: "Reg. No. 18900 · CID",
+        phone: "(868) 732-0403",
+      },
+      {
+        name: "W/Cpl Cyrus",
+        summary: "Reg. No. 18989 · South Western Division",
+        phone: "(868) 350-2235",
+      },
+      {
+        name: "PC Duprey",
+        summary: "Reg. No. 14524",
+        phone: "(868) 768-6746",
+      },
+      {
+        name: "Sgt Joefield",
+        summary: "Reg. No. 16904",
+        phone: "(868) 334-7028",
+      },
+      {
+        name: "PC Forgenie",
+        summary: "Reg. No. 15059",
+        phone: "(868) 367-3876",
+      },
+    ],
+  },
   { id: 15, slug: "finance-committee", title: "Finance Committee" },
   {
     id: 16,
