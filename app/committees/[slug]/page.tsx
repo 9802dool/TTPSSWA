@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CommitteeRepPhotoFrame } from "@/components/CommitteeRepPhotoFrame";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { COMMITTEES, getCommitteeBySlug } from "@/lib/committees-data";
+
+/** Build a usable tel: URL for TT numbers. */
+function telHref(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  const base = digits.slice(0, 10);
+  if (base.length === 10 && base.startsWith("868")) {
+    return `tel:+1${base}`;
+  }
+  return `tel:${raw.replace(/\s/g, "")}`;
+}
 
 type Props = { params: Promise<{ slug: string }> | { slug: string } };
 
@@ -87,6 +98,63 @@ export default async function CommitteeDetailPage({ params }: Props) {
             )}
           </div>
         </section>
+
+        {committee.members && committee.members.length > 0 ? (
+          <section className="border-b border-line bg-surface py-12 dark:bg-canvas">
+            <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+              <h2 className="text-lg font-bold text-ink md:text-xl">Committee members</h2>
+              <ul className="mt-8 space-y-6">
+                {committee.members.map((member) => (
+                  <li
+                    key={member.name}
+                    className="flex flex-col gap-5 rounded-xl border border-line bg-canvas p-5 text-sm shadow-corp dark:bg-surface sm:flex-row sm:items-start sm:gap-6"
+                  >
+                    <CommitteeRepPhotoFrame name={member.name} photoSrc={member.photoSrc} />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-base font-bold text-ink">{member.name}</p>
+                      {member.role ? (
+                        <p className="mt-1 font-medium text-brand">{member.role}</p>
+                      ) : null}
+                      {member.summary ? (
+                        <p
+                          className={`leading-relaxed text-muted ${member.role ? "mt-3" : "mt-1"}`}
+                        >
+                          {member.summary}
+                        </p>
+                      ) : null}
+                      {member.phone || member.email ? (
+                        <div className="mt-4 space-y-1 border-t border-line pt-4 text-muted">
+                          {member.phone ? (
+                            <p>
+                              <span className="font-semibold text-ink">Phone:</span>{" "}
+                              <a
+                                href={telHref(member.phone)}
+                                className="text-brand underline-offset-4 hover:underline"
+                              >
+                                {member.phone}
+                              </a>
+                            </p>
+                          ) : null}
+                          {member.email ? (
+                            <p>
+                              <span className="font-semibold text-ink">Email:</span>{" "}
+                              <a
+                                href={`mailto:${member.email}`}
+                                className="text-brand underline-offset-4 hover:underline"
+                              >
+                                {member.email}
+                              </a>
+                            </p>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ) : null}
       </main>
       <SiteFooter />
     </>

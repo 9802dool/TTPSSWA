@@ -1,3 +1,16 @@
+/** Officer shown on a committee page, using the same card shape as Central Committee representatives. */
+export type CommitteeMember = {
+  name: string;
+  /** Committee post (e.g. Chairman). */
+  role?: string;
+  /** Short line under the name (e.g. reg. no. and division). */
+  summary?: string;
+  /** Square photo under `public/`. */
+  photoSrc?: string;
+  phone?: string;
+  email?: string;
+};
+
 /** Committees list with stable URL slugs and optional per-committee content. */
 export type Committee = {
   id: number;
@@ -9,6 +22,8 @@ export type Committee = {
   channelsHeading?: string;
   /** Bulleted list of channels, services, or activities. */
   channels?: readonly string[];
+  /** Named officers for this committee. */
+  members?: readonly CommitteeMember[];
 };
 
 export const COMMITTEES: readonly Committee[] = [
@@ -73,6 +88,34 @@ export const COMMITTEES: readonly Committee[] = [
       "Podcasts and live broadcasts on Facebook Live, providing in-depth discussions on issues affecting members and their families.",
       "Official posters and bulletins distributed online and at divisional stations to communicate notices, events, and member benefits.",
       "A dedicated weekly radio program on I 95 FM every Wednesday, featuring conversations with the Executive, the popular Bacchanal Wednesday segment, and introductions to each committee and the work its members do on behalf of the Association.",
+    ],
+    members: [
+      {
+        name: "Ag ASP Ishmael Pitt",
+        role: "Executive Office",
+        photoSrc: "/ex-pics/p1.JPG",
+        phone: "(868) 487-5093",
+      },
+      {
+        name: "Sgt Marlon King",
+        role: "Chairman",
+        summary: "Reg. No. 13137 · Central Division",
+        photoSrc: "/ex-pics/cc-rep/central-13137.jpg",
+        phone: "(868) 384-1919",
+      },
+      {
+        name: "Ag Sgt Adrian Smith",
+        role: "Secretary",
+        summary: "Reg. No. 16854 · PSB",
+        phone: "(868) 749-2920",
+      },
+      {
+        name: "WPC Calisha Harry",
+        role: "Information Manager",
+        summary: "Reg. No. 19415 · GEB",
+        photoSrc: "/ex-pics/cc-rep/geb-19415.jpg",
+        phone: "(868) 492-0291",
+      },
     ],
   },
   {
