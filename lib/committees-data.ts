@@ -41,6 +41,25 @@ export const COMMITTEES: readonly Committee[] = [
       "Book bartering initiative.",
       "Starter accounts in partnership with the Police Credit Union.",
     ],
+    members: [
+      {
+        name: "W/Ag ASP Nathalie John",
+        role: "Executive",
+        phone: "(868) 798-5562",
+      },
+      {
+        name: "W/Sgt Etta Brown",
+        role: "Chairman",
+        summary: "Reg. No. 14120 · HRB",
+        phone: "(868) 794-1686",
+      },
+      {
+        name: "W/Ag Cpl Rachel George-Thomas",
+        role: "Secretary",
+        summary: "Reg. No. 19860 · ACIB",
+        phone: "(868) 739-7230",
+      },
+    ],
   },
   {
     id: 2,
@@ -56,6 +75,26 @@ export const COMMITTEES: readonly Committee[] = [
       "Protective Arms Monarch competition.",
       "30th anniversary week of activities: interfaith thanksgiving service, fun and family day, health fair, socarobics, awards ceremony, curry tabanca cookout, chow and all fours competition, football tournament, and executive and central committee retreat.",
       "Hosting the Caribbean Federation of Police Welfare Associations’ 10th intersessional conference.",
+    ],
+    members: [
+      {
+        name: "Sgt Adrian Andrews",
+        role: "Executive",
+        summary: "Reg. No. 13281 · Central Division",
+        phone: "(868) 763-5033",
+      },
+      {
+        name: "Cpl Fermine-Garcia",
+        role: "Chairman",
+        summary: "Reg. No. 17930 · North Eastern Division",
+        phone: "(868) 313-1727",
+      },
+      {
+        name: "WPC Shivonne Baptiste",
+        role: "Secretary",
+        summary: "Reg. No. 12345 · POS Municipal",
+        phone: "(868) 713-2929",
+      },
     ],
   },
   {
@@ -74,7 +113,36 @@ export const COMMITTEES: readonly Committee[] = [
       "Promotion study material and interview preparation for incarcerated officers.",
     ],
   },
-  { id: 4, slug: "entrepreneur-committee", title: "Entrepreneur Committee" },
+  {
+    id: 4,
+    slug: "entrepreneur-committee",
+    title: "Entrepreneur Committee",
+    members: [
+      {
+        name: "W/Ag Sgt Tricia Durant-Charles",
+        role: "Executive",
+        summary: "Reg. No. 16940 · Special Victims",
+        phone: "(868) 336-7776",
+      },
+      {
+        name: "Sgt Jacey Small",
+        role: "Chairman",
+        summary: "Reg. No. 16589 · Central Division",
+        phone: "(868) 282-8256",
+      },
+      {
+        name: "WPC Thompson",
+        role: "Vice Chairman",
+        summary: "Reg. No. 20617 · Special Branch",
+      },
+      {
+        name: "WPC McClatchie-Gabriel",
+        role: "Secretary",
+        summary: "Reg. No. 19079 · Special Victims",
+        phone: "(868) 282-4555",
+      },
+    ],
+  },
   {
     id: 5,
     slug: "communication-committee",
@@ -129,6 +197,26 @@ export const COMMITTEES: readonly Committee[] = [
       "Parcels of land through the Land Settlement Agency (LSA).",
       "Hardware and Beyond initiative (building materials on credit).",
       "Blue Legacy housing development at Baker Trace, Sangre Grande.",
+    ],
+    members: [
+      {
+        name: "Ag ASP Owie Russell",
+        role: "Executive",
+        summary: "Corporate Communications",
+        phone: "(868) 787-4478",
+      },
+      {
+        name: "Insp Mohammed",
+        role: "Chairman",
+        summary: "Reg. No. 10694 · Police Academy",
+        phone: "(868) 350-5460",
+      },
+      {
+        name: "W/Sgt Andrews",
+        role: "Secretary",
+        summary: "Reg. No. 16700 · Complaints",
+        phone: "(868) 383-4717",
+      },
     ],
   },
   { id: 7, slug: "transitioning-committee", title: "Transitioning Committee" },
