@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CommitteeRepPhotoFrame } from "@/components/CommitteeRepPhotoFrame";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { COMMITTEES, getCommitteeBySlug } from "@/lib/committees-data";
@@ -107,10 +106,9 @@ export default async function CommitteeDetailPage({ params }: Props) {
                 {committee.members.map((member) => (
                   <li
                     key={member.name}
-                    className="flex flex-col gap-5 rounded-xl border border-line bg-canvas p-5 text-sm shadow-corp dark:bg-surface sm:flex-row sm:items-start sm:gap-6"
+                    className="rounded-xl border border-line bg-canvas p-5 text-sm shadow-corp dark:bg-surface"
                   >
-                    <CommitteeRepPhotoFrame name={member.name} photoSrc={member.photoSrc} />
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0">
                       <p className="text-base font-bold text-ink">{member.name}</p>
                       {member.role ? (
                         <p className="mt-1 font-medium text-brand">{member.role}</p>

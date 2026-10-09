@@ -7,7 +7,6 @@ import {
   CENTRAL_COMMITTEE_REGIONS,
   getRegionBySlug,
 } from "@/lib/central-committee-regions";
-import { CommitteeRepPhotoFrame } from "@/components/CommitteeRepPhotoFrame";
 import { COMMITTEE_REPRESENTATIVES } from "@/lib/central-committee-representatives-data";
 
 /** Build a usable tel: URL for TT numbers; supports optional ext. (incl. spaces / slashes). */
@@ -104,13 +103,9 @@ export default async function CentralCommitteeRegionPage({ params }: Props) {
                 {content.representatives.map((rep) => (
                   <li
                     key={rep.name}
-                    className="flex flex-col gap-5 rounded-xl border border-line bg-canvas p-5 text-sm shadow-corp dark:bg-surface sm:flex-row sm:items-start sm:gap-6"
+                    className="rounded-xl border border-line bg-canvas p-5 text-sm shadow-corp dark:bg-surface"
                   >
-                    <CommitteeRepPhotoFrame
-                      name={rep.name}
-                      photoSrc={rep.photoSrc}
-                    />
-                    <div className="min-w-0 flex-1">
+                    <div className="min-w-0">
                       <p className="text-base font-bold text-ink">{rep.name}</p>
                       {rep.role ? (
                         <p className="mt-1 font-medium text-brand">{rep.role}</p>
