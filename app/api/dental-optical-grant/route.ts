@@ -43,6 +43,7 @@ export async function POST(request: Request) {
   const phoneHome = optionalDigits(formData.get("phoneHome"));
   const phoneWork = optionalDigits(formData.get("phoneWork"));
   const phone = optionalDigits(formData.get("phone"));
+  const memberCategory = String(formData.get("memberCategory") ?? "").trim();
   const age = String(formData.get("age") ?? "").trim();
   const sex = String(formData.get("sex") ?? "").trim();
   const grantTypes = formData
@@ -77,6 +78,13 @@ export async function POST(request: Request) {
 
   if (sex !== "male" && sex !== "female") {
     return NextResponse.json({ ok: false, error: "Please select sex." }, { status: 400 });
+  }
+
+  if (memberCategory !== "srp" && memberCategory !== "municipal") {
+    return NextResponse.json(
+      { ok: false, error: "Please select S.R.P. or Municipal." },
+      { status: 400 },
+    );
   }
 
   const uniqueGrantTypes = Array.from(new Set(grantTypes));
@@ -181,7 +189,7 @@ export async function POST(request: Request) {
     fullName,
     departmentDivision,
     sectionStation,
-    memberCategory: "srp",
+    memberCategory,
     address,
     email,
     phoneCountryCode,

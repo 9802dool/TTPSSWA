@@ -95,11 +95,24 @@ export function DentalOpticalGrantForm() {
           <AssociationFormHeader />
 
           <h4 className="mb-1 mt-4 text-center text-[15px] font-bold uppercase underline">
-            Application for financial assistance re: Dental / Optical grant (S.R.P&apos;s)
+            Application for financial assistance re: Dental / Optical grant
           </h4>
+          <p className="mb-1 text-center text-[12px] font-bold uppercase">
+            For Special Reserve Police (S.R.P.&apos;s) and Municipal Police
+          </p>
           <p className="mb-4 text-center text-[11px] font-bold uppercase">
             Please fill out in block letters
           </p>
+
+          <fieldset className="mb-4 flex flex-wrap items-center justify-center gap-3">
+            <legend className={label}>Applicant:</legend>
+            <label className="inline-flex items-center gap-1 text-xs font-bold uppercase">
+              <input type="radio" name="memberCategory" value="srp" required /> S.R.P.
+            </label>
+            <label className="inline-flex items-center gap-1 text-xs font-bold uppercase">
+              <input type="radio" name="memberCategory" value="municipal" /> Municipal
+            </label>
+          </fieldset>
 
           <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex min-w-0 flex-[0.4] items-end gap-2">
@@ -286,29 +299,9 @@ export function DentalOpticalGrantForm() {
               name="documentsList"
               type="text"
               required
-              placeholder="e.g. Dental Invoice, Optical Receipt"
+              placeholder="Receipt or invoice"
               className={line}
             />
-          </div>
-
-          <div className="my-5 border-2 border-dashed border-[#0d2a70] bg-[#f8faee] p-4 print:hidden">
-            <p className="mb-2 text-xs font-bold uppercase text-[#b30000]">
-              * Required documentation for submission:
-            </p>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <label htmlFor="dog-grantReceiptInvoiceDoc" className="text-xs font-bold uppercase">
-                Attach original receipt and/or invoice:
-              </label>
-              <input
-                id="dog-grantReceiptInvoiceDoc"
-                name="grantReceiptInvoiceDoc"
-                type="file"
-                accept=".pdf,.jpg,.jpeg,.png"
-                required
-                className="text-xs"
-              />
-            </div>
-            <p className="mt-2 text-[11px]">PDF, JPG, or PNG. Maximum 800 KB.</p>
           </div>
 
           <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end">
@@ -385,8 +378,29 @@ export function DentalOpticalGrantForm() {
           </fieldset>
 
           <AssociationOfficersFooter variant="dentalOptical" dated="Apr 2026" />
+        </div>
 
-          {message ? (
+        <div className="mt-5 border-2 border-dashed border-[#0d2a70] bg-[#f8faee] p-4 print:hidden">
+          <p className="mb-2 text-xs font-bold uppercase text-[#b30000]">
+            * Required documentation for submission:
+          </p>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <label htmlFor="dog-grantReceiptInvoiceDoc" className="text-xs font-bold uppercase">
+              Attach original receipt or invoice:
+            </label>
+            <input
+              id="dog-grantReceiptInvoiceDoc"
+              name="grantReceiptInvoiceDoc"
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              required
+              className="text-xs"
+            />
+          </div>
+          <p className="mt-2 text-[11px]">PDF, JPG, or PNG. Maximum 800 KB. This upload is not part of the printed form.</p>
+        </div>
+
+        {message ? (
             <p
               role="status"
               className={
@@ -398,7 +412,6 @@ export function DentalOpticalGrantForm() {
               {message}
             </p>
           ) : null}
-        </div>
       </form>
     </div>
   );

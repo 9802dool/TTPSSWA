@@ -7,7 +7,7 @@ import SiteHeader from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Dental & optical grant application | TTPSSWA",
   description:
-    "Apply online for the TTPSSWA dental and optical grant for Special Reserve Police (S.R.P.).",
+    "Apply online for the TTPSSWA dental and optical grant for Special Reserve Police (S.R.P.) and Municipal Police.",
 };
 
 export default function DentalOpticalGrantPage() {
@@ -30,7 +30,7 @@ export default function DentalOpticalGrantPage() {
           </a>
         </p>
         <h1 className="sr-only">
-          Application for financial assistance re: Dental / Optical grant (S.R.P&apos;s)
+          Application for financial assistance re: Dental / Optical grant (S.R.P.&apos;s and Municipal)
         </h1>
         <DentalOpticalGrantForm />
       </main>

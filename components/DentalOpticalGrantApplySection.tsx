@@ -8,7 +8,7 @@ export function DentalOpticalGrantApplySection() {
   return (
     <div className="space-y-4">
       <p className="text-sm leading-relaxed text-muted">
-        Special Reserve Police (S.R.P.) members can download the official{" "}
+        Special Reserve Police (S.R.P.) and Municipal Police members can download the official{" "}
         <a
           href={PDF_HREF}
           className="font-semibold text-brand underline decoration-slate-400 underline-offset-2 hover:text-brand-hover"
