@@ -93,6 +93,12 @@ export default async function AdminPage({ searchParams }: Props) {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link
+              href="/admin/dashboard"
+              className="text-sm font-medium text-[var(--brand)] hover:underline"
+            >
+              Registration documents
+            </Link>
+            <Link
               href="/admin/new-membership"
               className="text-sm font-medium text-[var(--brand)] hover:underline"
             >
