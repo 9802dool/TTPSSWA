@@ -168,14 +168,20 @@ function DentalOpticalGrantDetails({
   const memberLabel =
     cat === "srp" ? "SRP" : cat === "municipal" ? "Municipal Police" : cat;
   const grant = str("grantType");
+  const applied = Array.isArray(payload.grantAppliedFor)
+    ? payload.grantAppliedFor.filter((item): item is string => typeof item === "string").join(", ")
+    : "";
   const grantLabel =
-    grant === "dental"
-      ? "Dental"
+    applied ||
+    (grant === "dental"
+      ? "Dental ($1000)"
       : grant === "optical"
-        ? "Optical"
+        ? "Optical ($1000)"
         : grant === "both"
-          ? "Dental & optical"
-          : grant;
+          ? "Dental ($1000), Optical ($1000)"
+          : grant);
+  const sex = str("sex");
+  const sexLabel = sex === "male" ? "Male" : sex === "female" ? "Female" : sex;
 
   const rows: [string, string][] = [];
   const pairs: [string, string][] = [
@@ -185,8 +191,12 @@ function DentalOpticalGrantDetails({
     ["Member category", memberLabel],
     ["Department / division", str("departmentDivision")],
     ["Section / station", str("sectionStation")],
+    ["Age", str("age")],
+    ["Sex", sexLabel],
     ["Email", str("email")],
-    ["Grant type", grantLabel],
+    ["Grant applied for", grantLabel],
+    ["Previous grant", str("previousGrant")],
+    ["Documents listed", str("documentsList")],
     ["Estimated (TTD)", str("estimatedAmountTTD")],
     ["Applicant date", str("applicantDateSigned")],
   ];
@@ -215,15 +225,42 @@ function DentalOpticalGrantDetails({
   const wd = str("witnessDate");
   if (wd) rows.push(["Witness date", wd]);
 
+  const documents = Array.isArray(payload.documents)
+    ? payload.documents.flatMap((item) => {
+        if (!item || typeof item !== "object") return [];
+        const doc = item as Record<string, unknown>;
+        const docLabel = typeof doc.label === "string" ? doc.label : "Document";
+        const fileName = typeof doc.fileName === "string" ? doc.fileName : "file";
+        const mimeType =
+          typeof doc.mimeType === "string" ? doc.mimeType : "application/octet-stream";
+        const base64 = typeof doc.base64 === "string" ? doc.base64 : "";
+        if (!base64) return [];
+        return [{ label: docLabel, fileName, href: `data:${mimeType};base64,${base64}` }];
+      })
+    : [];
+
   return (
-    <dl className="mt-2 grid gap-1.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4">
-      {rows.map(([dt, dd]) => (
-        <div key={dt} className="contents">
-          <dt className={dtClass}>{dt}</dt>
-          <dd className={ddClass}>{dd}</dd>
-        </div>
-      ))}
-    </dl>
+    <div>
+      <dl className="mt-2 grid gap-1.5 text-sm sm:grid-cols-[auto_1fr] sm:gap-x-4">
+        {rows.map(([dt, dd]) => (
+          <div key={dt} className="contents">
+            <dt className={dtClass}>{dt}</dt>
+            <dd className={ddClass}>{dd}</dd>
+          </div>
+        ))}
+      </dl>
+      {documents.length > 0 ? (
+        <ul className="mt-3 space-y-1 text-sm">
+          {documents.map((doc) => (
+            <li key={`${doc.label}-${doc.fileName}`}>
+              <a href={doc.href} download={doc.fileName} className="font-semibold underline">
+                {doc.label}: {doc.fileName}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }
 

@@ -7,56 +7,32 @@ import SiteHeader from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Dental & optical grant application | TTPSSWA",
   description:
-    "Apply online for the TTPSSWA dental and optical grant (SRP and Municipal Police).",
+    "Apply online for the TTPSSWA dental and optical grant for Special Reserve Police (S.R.P.).",
 };
 
 export default function DentalOpticalGrantPage() {
   return (
     <>
       <SiteHeader />
-      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#e8ecf1] pt-[var(--site-header-stack)] dark:bg-slate-900">
-        <div className="border-b border-slate-200 bg-white py-10 shadow-sm dark:border-slate-700 dark:bg-slate-950">
-          <div className="site-container">
-            <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-brand">
-              Trinidad and Tobago Police Service Social Welfare Association
-            </p>
-            <h1 className="mt-4 text-center text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-              Dental and optical grant application
-            </h1>
-            <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted">
-              For Special Reserve Police (SRP) and Municipal Police members. Printable PDF:{" "}
-              <a
-                href="/forms/DENTAL AND OPTICAL GRANT APPLICATION.pdf"
-                className="font-semibold text-brand hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Download form (PDF)
-              </a>
-              .{" "}
-              <Link
-                href="/membership-services#members-benefits"
-                className="font-semibold text-brand hover:underline"
-              >
-                ← Back to members benefits
-              </Link>
-            </p>
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-4xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
-          <section aria-labelledby="dental-optical-form-heading">
-            <h2
-              id="dental-optical-form-heading"
-              className="sr-only"
-            >
-              Digital application form
-            </h2>
-            <div className="border-2 border-slate-300 bg-white px-5 py-8 shadow-[0_1px_3px_rgba(0,0,0,0.06),0_12px_40px_rgba(15,23,42,0.08)] sm:px-8 sm:py-10 dark:border-slate-600 dark:bg-white">
-              <DentalOpticalGrantForm />
-            </div>
-          </section>
-        </div>
+      <main className="min-h-[calc(100vh-var(--site-header-stack))] bg-[#f4f6f9] px-4 pb-16 pt-[calc(var(--site-header-stack)+1.25rem)] print:min-h-0 print:bg-white print:p-0">
+        <p className="mx-auto mb-4 max-w-[850px] text-sm print:hidden">
+          <Link href="/membership-services#members-benefits" className="font-semibold text-[#0d2a70] underline">
+            ← Back to members benefits
+          </Link>
+          {" · "}
+          <a
+            href="/forms/DENTAL AND OPTICAL GRANT APPLICATION.pdf"
+            className="font-semibold text-[#0d2a70] underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Download form (PDF)
+          </a>
+        </p>
+        <h1 className="sr-only">
+          Application for financial assistance re: Dental / Optical grant (S.R.P&apos;s)
+        </h1>
+        <DentalOpticalGrantForm />
       </main>
       <SiteFooter />
     </>

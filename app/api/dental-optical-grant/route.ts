@@ -10,6 +10,14 @@ function optionalDigits(s: unknown): string {
     .replace(/\D/g, "");
 }
 
+const MAX_DOCUMENT_BYTES = 800 * 1024;
+const ALLOWED_DOCUMENT_TYPES = new Set(["application/pdf", "image/jpeg", "image/png"]);
+
+function documentExtension(fileName: string): string {
+  const dot = fileName.lastIndexOf(".");
+  return dot >= 0 ? fileName.slice(dot + 1).toLowerCase() : "";
+}
+
 function validateOptionalPhoneDigits(digitsStr: string, label: string): string | null {
   if (!digitsStr) return null;
   if (digitsStr.length < 6 || digitsStr.length > 15) {
@@ -29,23 +37,23 @@ export async function POST(request: Request) {
   const fullName = String(formData.get("fullName") ?? "").trim();
   const departmentDivision = String(formData.get("departmentDivision") ?? "").trim();
   const sectionStation = String(formData.get("sectionStation") ?? "").trim();
-  const memberCategory = String(formData.get("memberCategory") ?? "").trim();
   const address = String(formData.get("address") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
   const phoneCountryCode = String(formData.get("phoneCountryCode") ?? "").trim();
   const phoneHome = optionalDigits(formData.get("phoneHome"));
   const phoneWork = optionalDigits(formData.get("phoneWork"));
   const phone = optionalDigits(formData.get("phone"));
-  const grantType = String(formData.get("grantType") ?? "").trim();
-  const treatmentDescription = String(formData.get("treatmentDescription") ?? "").trim();
-  const estimatedAmountTTD = String(formData.get("estimatedAmountTTD") ?? "").trim();
-  const providerName = String(formData.get("providerName") ?? "").trim();
-  const quoteOrVisitDate = String(formData.get("quoteOrVisitDate") ?? "").trim();
+  const age = String(formData.get("age") ?? "").trim();
+  const sex = String(formData.get("sex") ?? "").trim();
+  const grantTypes = formData
+    .getAll("grantType")
+    .map((value) => String(value).trim())
+    .filter((value) => value === "dental" || value === "optical");
+  const previousGrant = String(formData.get("previousGrant") ?? "").trim();
+  const documentsList = String(formData.get("documentsList") ?? "").trim();
   const declarationAccurate = String(formData.get("declarationAccurate") ?? "").trim();
   const electronicSignature = String(formData.get("electronicSignature") ?? "").trim();
   const applicantDateSigned = String(formData.get("applicantDateSigned") ?? "").trim();
-  const witnessName = String(formData.get("witnessName") ?? "").trim();
-  const witnessDate = String(formData.get("witnessDate") ?? "").trim();
 
   if (
     !regimentalNumber ||
@@ -57,8 +65,8 @@ export async function POST(request: Request) {
     !email ||
     !phoneCountryCode ||
     !phone ||
-    !treatmentDescription ||
-    !estimatedAmountTTD ||
+    !age ||
+    !documentsList ||
     !applicantDateSigned
   ) {
     return NextResponse.json(
@@ -67,19 +75,26 @@ export async function POST(request: Request) {
     );
   }
 
-  if (memberCategory !== "srp" && memberCategory !== "municipal") {
-    return NextResponse.json(
-      { ok: false, error: "Please select SRP or Municipal Police." },
-      { status: 400 },
-    );
+  if (sex !== "male" && sex !== "female") {
+    return NextResponse.json({ ok: false, error: "Please select sex." }, { status: 400 });
   }
 
-  if (grantType !== "dental" && grantType !== "optical" && grantType !== "both") {
+  const uniqueGrantTypes = Array.from(new Set(grantTypes));
+  if (uniqueGrantTypes.length === 0) {
     return NextResponse.json(
-      { ok: false, error: "Please select a grant type." },
+      { ok: false, error: "Please select Dental ($1000), Optical ($1000), or both." },
       { status: 400 },
     );
   }
+  const grantType =
+    uniqueGrantTypes.length === 2
+      ? "both"
+      : uniqueGrantTypes[0] === "dental"
+        ? "dental"
+        : "optical";
+  const grantAppliedFor = uniqueGrantTypes.map((value) =>
+    value === "dental" ? "DENTAL ($1000)" : "OPTICAL ($1000)",
+  );
 
   if (!isAllowedMembershipPhoneCountryCode(phoneCountryCode)) {
     return NextResponse.json(
@@ -126,27 +141,61 @@ export async function POST(request: Request) {
     );
   }
 
+  const uploaded = formData.get("grantReceiptInvoiceDoc");
+  if (!(uploaded instanceof Blob) || uploaded.size === 0) {
+    return NextResponse.json(
+      { ok: false, error: "Please attach the original receipt and/or invoice." },
+      { status: 400 },
+    );
+  }
+  const fileName =
+    uploaded instanceof File && uploaded.name ? uploaded.name : "receipt-invoice.bin";
+  if (uploaded.size > MAX_DOCUMENT_BYTES) {
+    return NextResponse.json(
+      { ok: false, error: "The receipt or invoice must be 800 KB or smaller." },
+      { status: 400 },
+    );
+  }
+  const allowed =
+    ALLOWED_DOCUMENT_TYPES.has(uploaded.type) ||
+    ["pdf", "jpg", "jpeg", "png"].includes(documentExtension(fileName));
+  if (!allowed) {
+    return NextResponse.json(
+      { ok: false, error: "The receipt or invoice must be a PDF, JPG, or PNG file." },
+      { status: 400 },
+    );
+  }
+
+  const documents = [
+    {
+      label: "Original receipt and/or invoice",
+      fileName,
+      mimeType: uploaded.type || "application/octet-stream",
+      base64: Buffer.from(await uploaded.arrayBuffer()).toString("base64"),
+    },
+  ];
+
   const id = await recordServiceRequest("dental_optical_grant", {
     regimentalNumber,
     rank,
     fullName,
     departmentDivision,
     sectionStation,
-    memberCategory,
+    memberCategory: "srp",
     address,
     email,
     phoneCountryCode,
     phoneHome: phoneHome || undefined,
     phoneWork: phoneWork || undefined,
     phone,
+    age,
+    sex,
     grantType,
-    treatmentDescription,
-    estimatedAmountTTD,
-    providerName: providerName || undefined,
-    quoteOrVisitDate: quoteOrVisitDate || undefined,
+    grantAppliedFor,
+    previousGrant: previousGrant || undefined,
+    documentsList,
+    documents,
     applicantDateSigned,
-    witnessName: witnessName || undefined,
-    witnessDate: witnessDate || undefined,
     form: "dental_optical_grant_online",
   });
 

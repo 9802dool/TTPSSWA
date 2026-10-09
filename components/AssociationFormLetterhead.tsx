@@ -34,6 +34,13 @@ const OFFICERS_FOOTER = {
     "First Division Officer: Ag. A.C.P Oswain Subero",
     "Special Reserve Officer No. 5369 PC Kevin Nicholls: Municipal Officer: No.12279 PC David Mc Guirk",
   ],
+  dentalOptical: [
+    "Vice President: Ag. A.S.P Owie Russell; Assistant Secretary: No. 16940 W/Ag.Sgt. Tricia Durant-Charles",
+    "Treasurer: No. 18668 Ag. Cpl. Selwyn Marcano",
+    "Trustees: No. 13281 Sgt. Adrian Andrews; No. 16540 Sgt. Jason Johnson",
+    "First Division Officer: Ag. A.C.P Oswain Subero",
+    "Special Reserve Officer: No. 5369 PC Kevin Nicholls; Municipal Officer: No.12279 PC David Mc Guirk",
+  ],
 } as const;
 
 export function AssociationFormLogo() {
