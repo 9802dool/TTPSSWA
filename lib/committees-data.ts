@@ -500,7 +500,40 @@ export const COMMITTEES: readonly Committee[] = [
       },
     ],
   },
-  { id: 15, slug: "finance-committee", title: "Finance Committee" },
+  {
+    id: 15,
+    slug: "finance-committee",
+    title: "Finance Committee",
+    members: [
+      {
+        name: "Sgt Junior Nisbett",
+        role: "Chairman",
+        summary: "Reg. No. 16311 · FIB",
+        phone: "(868) 366-2221",
+      },
+      {
+        name: "Ag Sgt Adrian Smith",
+        role: "Secretary",
+        summary: "Reg. No. 16854 · PSB",
+        phone: "(868) 749-2920",
+      },
+      {
+        name: "Sgt Greene",
+        summary: "Reg. No. 16903 · Complaints",
+        phone: "(868) 301-2109",
+      },
+      {
+        name: "Sgt Pierre",
+        summary: "Reg. No. 14212",
+        phone: "(868) 472-9714",
+      },
+      {
+        name: "WPC Avalon Phillip",
+        summary: "Reg. No. 17219 · OCC",
+        phone: "(868) 294-4063",
+      },
+    ],
+  },
   {
     id: 16,
     slug: "legal-aid-committee",
@@ -516,6 +549,35 @@ export const COMMITTEES: readonly Committee[] = [
       "Industrial Court representation.",
       "Workmen’s compensation.",
     ],
+    members: [
+      {
+        name: "W/Sgt Helen Solomon",
+        role: "Chairman",
+        summary: "Reg. No. 14953 · North Eastern Division",
+        phone: "(868) 778-7206",
+      },
+      {
+        name: "W/Ag Cpl Skeete",
+        role: "Secretary",
+        summary: "Reg. No. 19125 · Finance",
+        phone: "(868) 705-1955",
+      },
+      {
+        name: "Ag Insp Williams",
+        summary: "SIU",
+        phone: "(868) 290-7399",
+      },
+      {
+        name: "Cpl Kevon Beatrice",
+        summary: "Reg. No. 17057 · Police Academy",
+        phone: "(868) 709-9970",
+      },
+      {
+        name: "W/Cpl Moore",
+        summary: "Reg. No. 18314 · SIU / CTU",
+        phone: "(868) 323-8717",
+      },
+    ],
   },
   {
     id: 17,
@@ -526,6 +588,45 @@ export const COMMITTEES: readonly Committee[] = [
     channels: [
       "Conducted an incident-free and transparent election for Central Committee representatives for the period 2023–2025.",
       "Oversees the next executive and Central Committee elections for the period 2025–2027.",
+    ],
+    members: [
+      {
+        name: "Insp Phillip",
+        role: "Chairman",
+        summary: "GEB",
+        phone: "(868) 687-0803",
+      },
+      {
+        name: "W/Ag Sgt Tudor",
+        role: "Secretary",
+        summary: "Reg. No. 16222 · COPS",
+        phone: "(868) 304-1267",
+      },
+      {
+        name: "Sgt James",
+        summary: "Reg. No. 13534 · Court & Process",
+        phone: "(868) 304-3457",
+      },
+      {
+        name: "Sgt Adams",
+        summary: "Reg. No. 16263 · IATF",
+        phone: "(868) 397-3535",
+      },
+      {
+        name: "Cpl Ballantyne",
+        summary: "Reg. No. 17496 · GEB",
+        phone: "(868) 716-2601",
+      },
+      {
+        name: "PC Moore",
+        summary: "Reg. No. 19075 · CTU",
+        phone: "(868) 295-4756",
+      },
+      {
+        name: "PC Leed",
+        summary: "Reg. No. 20284 · IATF",
+        phone: "(868) 347-4164",
+      },
     ],
   },
 ];
