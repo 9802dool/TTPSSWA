@@ -9,6 +9,15 @@ export const metadata: Metadata = {
     'Trinidad and Tobago Police Service Social & Welfare Association — member benefits, executive team, and services.',
 };
 
+const heroActions = [
+  { href: '/become-a-member', label: 'Become a Member', primary: true },
+  { href: '/hotel-reservations', label: 'Hotel reservation' },
+  { href: '/membership-services', label: 'Membership services' },
+  { href: '/central-committee-representatives', label: 'Central Committee Reps' },
+  { href: '/committees', label: 'Committees' },
+  { href: '/rule-book', label: 'Rule Book' },
+] as const;
+
 export default function HomePage() {
   return (
     <>
@@ -23,58 +32,40 @@ export default function HomePage() {
                 'linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)',
             }}
           />
-          <div className="relative site-container py-12 sm:py-16 lg:py-20">
+          <div className="relative site-container flex min-h-[22rem] items-center py-16 sm:min-h-[26rem] sm:py-20 lg:min-h-[30rem]">
             <div className="min-w-0 text-center md:text-left">
-                <h1 className="font-bold tracking-tight text-fluid-5xl">
-                  <span className="block text-[clamp(0.7rem,2vw,0.85rem)] uppercase tracking-[0.18em] text-sky-200">
-                    Trinidad and Tobago Police Service
-                  </span>
-                  <span className="mt-3 block text-white text-fluid-4xl">Social &amp; Welfare Association</span>
-                </h1>
-                <p className="mx-auto mt-5 max-w-[min(100%,42rem)] text-[1em] leading-relaxed text-slate-300 md:mx-0">
-                  Advocacy, benefits, and community for officers. Apply online, explore member services, and meet the
-                  executive team.
-                </p>
-            </div>
-            <div className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4 md:justify-start">
-              <Link
-                href="/become-a-member"
-                className="inline-flex min-h-[2.75rem] min-w-[min(100%,12rem)] flex-1 items-center justify-center rounded-xl bg-gold px-5 py-3 text-center text-sm font-bold text-navy transition hover:opacity-90 sm:min-w-0 sm:flex-initial sm:px-6"
-              >
-                Become a Member
-              </Link>
-              <Link
-                href="/hotel-reservations"
-                className="inline-flex min-h-[2.75rem] min-w-[min(100%,12rem)] flex-1 items-center justify-center rounded-xl border border-white/25 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10 sm:min-w-0 sm:flex-initial sm:px-6"
-              >
-                Hotel reservation
-              </Link>
-              <Link
-                href="/membership-services"
-                className="inline-flex min-h-[2.75rem] flex-1 items-center justify-center rounded-xl border border-white/25 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10 sm:flex-initial sm:px-6"
-              >
-                Membership services
-              </Link>
-              <Link
-                href="/central-committee-representatives"
-                className="inline-flex min-h-[2.75rem] flex-1 items-center justify-center rounded-xl border border-white/25 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10 sm:flex-initial sm:px-6"
-              >
-                Central Committee Reps
-              </Link>
-              <Link
-                href="/committees"
-                className="inline-flex min-h-[2.75rem] flex-1 items-center justify-center rounded-xl border border-white/25 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10 sm:flex-initial sm:px-6"
-              >
-                Committees
-              </Link>
-              <Link
-                href="/rule-book"
-                className="inline-flex min-h-[2.75rem] flex-1 items-center justify-center rounded-xl border border-white/25 px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-white/10 sm:flex-initial sm:px-6"
-              >
-                Rule Book
-              </Link>
+              <h1 className="font-bold tracking-tight text-fluid-5xl">
+                <span className="block text-[clamp(0.7rem,2vw,0.85rem)] uppercase tracking-[0.18em] text-sky-200">
+                  Trinidad and Tobago Police Service
+                </span>
+                <span className="mt-3 block text-white text-fluid-4xl">Social &amp; Welfare Association</span>
+              </h1>
+              <p className="mx-auto mt-5 max-w-[min(100%,42rem)] text-[1em] leading-relaxed text-slate-300 md:mx-0">
+                Advocacy, benefits, and community for officers. Apply online, explore member services, and meet the
+                executive team.
+              </p>
             </div>
           </div>
+          <nav
+            aria-label="Member actions"
+            className="relative border-t border-white/15 bg-black/30"
+          >
+            <div className="site-container flex flex-wrap items-center justify-center gap-2 px-4 py-3 sm:gap-3">
+              {heroActions.map((action) => (
+                <Link
+                  key={action.href}
+                  href={action.href}
+                  className={
+                    'primary' in action
+                      ? 'inline-flex min-h-10 items-center justify-center rounded-full bg-gold px-4 py-2 text-center text-sm font-bold text-navy transition hover:opacity-90'
+                      : 'inline-flex min-h-10 items-center justify-center rounded-full border border-white/25 bg-white/5 px-4 py-2 text-center text-sm font-semibold text-white transition hover:bg-white/15'
+                  }
+                >
+                  {action.label}
+                </Link>
+              ))}
+            </div>
+          </nav>
         </section>
       </main>
       <SiteFooter />
