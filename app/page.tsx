@@ -24,28 +24,21 @@ export default function HomePage() {
       <SiteHeader />
       <main className="pt-[var(--site-header-stack)]">
         <section className="relative overflow-hidden border-b border-line bg-navy text-white">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-50"
-            aria-hidden
-            style={{
-              backgroundImage:
-                'linear-gradient(135deg, rgb(12 25 41) 0%, rgb(30 58 95) 50%, rgb(30 64 175 / 0.25) 100%)',
-            }}
-          />
-          <div className="relative site-container flex min-h-[22rem] items-center py-16 sm:min-h-[26rem] sm:py-20 lg:min-h-[30rem]">
-            <div className="min-w-0 text-center md:text-left">
-              <h1 className="font-bold tracking-tight text-fluid-5xl">
-                <span className="block text-[clamp(0.7rem,2vw,0.85rem)] uppercase tracking-[0.18em] text-sky-200">
-                  Trinidad and Tobago Police Service
-                </span>
-                <span className="mt-3 block text-white text-fluid-4xl">Social &amp; Welfare Association</span>
-              </h1>
-              <p className="mx-auto mt-5 max-w-[min(100%,42rem)] text-[1em] leading-relaxed text-slate-300 md:mx-0">
-                Advocacy, benefits, and community for officers. Apply online, explore member services, and meet the
-                executive team.
-              </p>
-            </div>
-          </div>
+          <h1 className="sr-only">Trinidad and Tobago Police Service Social and Welfare Association</h1>
+          <video
+            className="block aspect-[2560/730] h-auto w-full bg-navy object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-label="Protective Arms Monarch Competition 2027"
+          >
+            <source
+              src="/Protective%20Arms%20Monarch%20Competition%202027%20%20(2560%20x%20730%20px).mp4"
+              type="video/mp4"
+            />
+          </video>
           <nav
             aria-label="Member actions"
             className="relative border-t border-white/15 bg-black/30"
