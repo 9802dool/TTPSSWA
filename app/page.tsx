@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { HeroVideoSlideshow } from '@/components/HeroVideoSlideshow';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
 
@@ -25,20 +26,7 @@ export default function HomePage() {
       <main className="pt-[var(--site-header-stack)]">
         <section className="relative overflow-hidden border-b border-line bg-navy text-white">
           <h1 className="sr-only">Trinidad and Tobago Police Service Social and Welfare Association</h1>
-          <video
-            className="block aspect-[2560/730] h-auto w-full bg-navy object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            aria-label="Protective Arms Monarch Competition 2027"
-          >
-            <source
-              src="/Protective%20Arms%20Monarch%20Competition%202027%20%20(2560%20x%20730%20px).mp4"
-              type="video/mp4"
-            />
-          </video>
+          <HeroVideoSlideshow />
           <nav
             aria-label="Member actions"
             className="relative border-t border-white/15 bg-black/30"
