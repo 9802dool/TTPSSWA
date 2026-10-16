@@ -43,18 +43,18 @@ export default function SiteHeader() {
     <header className="fixed inset-x-0 top-0 z-50 shadow-corp print:hidden">
       <PromoBanner />
       <div className="border-b border-line bg-surface/95 backdrop-blur-md dark:bg-surface/90">
-        <div className="site-container flex min-h-[4.25rem] items-center justify-between gap-3 py-2">
+        <div className="site-container flex min-h-[5.5rem] items-center justify-between gap-3 py-2">
           <Link
             href="/"
             className="flex min-w-0 shrink items-center gap-2.5 font-extrabold tracking-tight text-ink transition hover:text-brand"
             onClick={() => setOpen(false)}
           >
-            <span className="relative h-12 w-12 shrink-0 overflow-hidden">
+            <span className="relative h-16 w-16 shrink-0 overflow-hidden">
               <Image
                 src="/logo1.png"
                 alt=""
-                width={192}
-                height={192}
+                width={256}
+                height={256}
                 priority
                 className="absolute left-1/2 top-1/2 h-[112%] w-[112%] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain brightness-0"
               />
@@ -63,8 +63,8 @@ export default function SiteHeader() {
               <span className="block truncate text-[clamp(0.95rem,2.5vw,1.125rem)] leading-tight">
                 TTPSSWA
               </span>
-              <span className="hidden text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted sm:block">
-                Social &amp; Welfare
+              <span className="mt-0.5 block max-w-[11.5rem] text-[0.62rem] font-semibold leading-snug text-muted sm:max-w-[18rem] sm:text-xs lg:max-w-[16rem]">
+                Trinidad and Tobago Police Service Social and Welfare Association
               </span>
             </span>
           </Link>
