@@ -4,7 +4,6 @@ import { memberPhoneE164 } from "@/lib/member-phone";
 export type MembershipPendingNotifyInput = {
   fullName: string;
   email: string;
-  username: string;
   regimentalNumber: string;
   phoneCountryCode: string;
   phone: string;
@@ -16,7 +15,6 @@ function buildEmailText(d: MembershipPendingNotifyInput): string {
     "",
     "We received your TTPSSWA membership application. It is pending review by an administrator.",
     "",
-    `Username: ${d.username}`,
     `Regimental number: ${d.regimentalNumber}`,
     "",
     "You will be contacted again when a decision has been made. If you have questions, reply to this email or use the contact options on our website.",
@@ -31,7 +29,6 @@ function buildWhatsAppBody(d: MembershipPendingNotifyInput): string {
     "",
     "Your TTPSSWA membership application was received and is pending review.",
     "",
-    `Username: ${d.username}`,
     `Regimental number: ${d.regimentalNumber}`,
     "",
     "We will contact you when there is a decision.",

@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { MembershipFacialPhotoPanel } from "@/components/MembershipFacialPhotoPanel";
 import {
   AssociationFormHeader,
@@ -20,24 +19,12 @@ const label = "whitespace-nowrap text-xs font-bold uppercase";
 export function MemberSignupForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
   const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMessage(null);
-    if (password !== confirmPassword) {
-      setStatus("error");
-      setMessage("Password and confirmation do not match.");
-      return;
-    }
-    if (password.length < 8) {
-      setStatus("error");
-      setMessage("Password must be at least 8 characters.");
-      return;
-    }
     setStatus("loading");
     const form = e.currentTarget;
     const fd = new FormData(form);
@@ -60,8 +47,6 @@ export function MemberSignupForm() {
       }
       setStatus("success");
       setMessage("Your application has been received. You will be contacted after review.");
-      setPassword("");
-      setConfirmPassword("");
       form.reset();
     } catch {
       setStatus("error");
@@ -87,63 +72,6 @@ export function MemberSignupForm() {
       </div>
 
       <div className="relative border border-[#ccc] bg-white px-6 py-8 shadow-[0_0_10px_rgba(0,0,0,0.1)] sm:px-8">
-        <div className="mb-4 border border-dashed border-black bg-neutral-50 p-3">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-neutral-700">
-            Online account (this website only)
-          </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-3">
-            <div className="sm:col-span-3">
-              <label htmlFor="username" className={label}>
-                Username <span className="text-red-600">*</span>
-              </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                autoComplete="username"
-                required
-                minLength={3}
-                maxLength={32}
-                pattern="[a-zA-Z0-9._-]+"
-                title="Letters, numbers, dots, underscores, and hyphens only"
-                className={line}
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className={label}>
-                Password <span className="text-red-600">*</span>
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                maxLength={128}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`${line} normal-case`}
-              />
-            </div>
-            <div>
-              <label htmlFor="confirmPassword" className={label}>
-                Confirm password <span className="text-red-600">*</span>
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                required
-                minLength={8}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className={`${line} normal-case`}
-              />
-            </div>
-          </div>
-        </div>
-
         <div className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-start">
           <div className="min-w-0 flex-1">
             <AssociationFormHeader />
@@ -515,12 +443,6 @@ export function MemberSignupForm() {
           </p>
         ) : null}
 
-        <p className="mt-4 text-[10px] uppercase text-neutral-600">
-          Password is stored securely.{" "}
-          <Link href="/membership-services" className="underline">
-            Membership services
-          </Link>
-        </p>
       </div>
     </form>
   );

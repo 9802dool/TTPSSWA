@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "node:crypto";
 import { notifyMembershipApplicationPending } from "@/lib/member-application-notify";
-import { hashPassword } from "@/lib/password-hash";
 import {
   MAX_PHOTO_BYTES_FOR_STORAGE,
   recordPendingMemberSignup,
@@ -11,7 +9,7 @@ export const runtime = "nodejs";
 
 const PLACEHOLDER_GIF_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
-/** Mobile app: minimal JSON application (web account sign-up is /register). */
+/** Mobile app: minimal JSON application without a website login. */
 async function handleJson(request: Request) {
   let body: { fullName?: string; email?: string; phone?: string };
   try {
@@ -28,11 +26,7 @@ async function handleJson(request: Request) {
       { status: 400 },
     );
   }
-  const username = (email.split("@")[0] ?? `user${Date.now()}`).slice(0, 32).replace(/[^a-zA-Z0-9._-]/g, "_") || `user${Date.now()}`;
-  const gate = `mobile-pending:${randomUUID()}`;
   const ok = await recordPendingMemberSignup({
-    username,
-    passwordHash: hashPassword(gate),
     regimentalNumber: "—",
     rank: "—",
     fullName,
@@ -59,8 +53,6 @@ async function handleMultipart(request: Request) {
     return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
   }
 
-  const username = String(formData.get("username") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
   const regimentalNumber = String(formData.get("regimentalNumber") ?? "").trim();
   const rank = String(formData.get("rank") ?? "").trim();
   const fullName = String(formData.get("fullName") ?? "").trim();
@@ -81,8 +73,6 @@ async function handleMultipart(request: Request) {
   const applicationDateSigned = String(formData.get("applicationDateSigned") ?? "").trim();
 
   if (
-    !username ||
-    password.length < 8 ||
     !regimentalNumber ||
     !rank ||
     !fullName ||
@@ -118,8 +108,6 @@ async function handleMultipart(request: Request) {
   const photoBase64 = buf.toString("base64");
 
   const ok = await recordPendingMemberSignup({
-    username,
-    passwordHash: hashPassword(password),
     regimentalNumber,
     rank,
     fullName,
@@ -158,7 +146,6 @@ async function handleMultipart(request: Request) {
   void notifyMembershipApplicationPending({
     fullName,
     email,
-    username,
     regimentalNumber,
     phoneCountryCode,
     phone,
