@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Image from 'next/image';
 import Link from 'next/link';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
@@ -25,19 +24,7 @@ export default function HomePage() {
             }}
           />
           <div className="relative site-container py-12 sm:py-16 lg:py-20">
-            <div className="flex flex-col gap-8 md:flex-row md:items-center md:gap-10 lg:gap-14">
-              <div className="flex shrink-0 justify-center md:justify-start md:basis-[min(100%,14rem)] lg:basis-[min(100%,16rem)]">
-                <Image
-                  src="/logo1.png"
-                  alt="Trinidad and Tobago Police Service"
-                  width={220}
-                  height={220}
-                  sizes="(max-width: 768px) 40vw, 220px"
-                  className="h-auto w-[min(44vw,13rem)] max-w-full object-contain sm:w-[min(36vw,11rem)] md:w-52"
-                  priority
-                />
-              </div>
-              <div className="min-w-0 flex-1 text-center md:text-left">
+            <div className="min-w-0 text-center md:text-left">
                 <h1 className="font-bold tracking-tight text-fluid-5xl">
                   <span className="block text-[clamp(0.7rem,2vw,0.85rem)] uppercase tracking-[0.18em] text-sky-200">
                     Trinidad and Tobago Police Service
@@ -48,7 +35,6 @@ export default function HomePage() {
                   Advocacy, benefits, and community for officers. Apply online, explore member services, and meet the
                   executive team.
                 </p>
-              </div>
             </div>
             <div className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4 md:justify-start">
               <Link

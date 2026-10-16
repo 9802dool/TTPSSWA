@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { PromoBanner } from "@/components/PromoBanner";
@@ -45,14 +46,26 @@ export default function SiteHeader() {
         <div className="site-container flex min-h-[4.25rem] items-center justify-between gap-3 py-2">
           <Link
             href="/"
-            className="min-w-0 shrink font-extrabold tracking-tight text-ink transition hover:text-brand"
+            className="flex min-w-0 shrink items-center gap-2.5 font-extrabold tracking-tight text-ink transition hover:text-brand"
             onClick={() => setOpen(false)}
           >
-            <span className="block truncate text-[clamp(0.95rem,2.5vw,1.125rem)] leading-tight">
-              TTPSSWA
+            <span className="relative h-12 w-12 shrink-0 overflow-hidden">
+              <Image
+                src="/logo1.png"
+                alt=""
+                width={192}
+                height={192}
+                priority
+                className="absolute left-1/2 top-1/2 h-[112%] w-[112%] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain brightness-0"
+              />
             </span>
-            <span className="hidden text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted sm:block">
-              Social &amp; Welfare
+            <span className="min-w-0">
+              <span className="block truncate text-[clamp(0.95rem,2.5vw,1.125rem)] leading-tight">
+                TTPSSWA
+              </span>
+              <span className="hidden text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-muted sm:block">
+                Social &amp; Welfare
+              </span>
             </span>
           </Link>
 
