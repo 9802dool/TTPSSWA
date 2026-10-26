@@ -39,6 +39,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  // Validate status against enum
+  const validStatuses: ApplicationStatus[] = [
+    'submitted',
+    'under_review',
+    'approved',
+    'rejected',
+    'completed',
+    'cancelled',
+  ];
+
+  if (!validStatuses.includes(status)) {
+    return NextResponse.json({ error: "Invalid status value" }, { status: 400 });
+  }
+
   // Get application details before update for email
   const appDetails = await getApplicationById(applicationId);
 

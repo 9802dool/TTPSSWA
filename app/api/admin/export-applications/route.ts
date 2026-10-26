@@ -57,9 +57,31 @@ export async function GET(request: Request) {
     ];
   });
 
+  /**
+   * Neutralizes CSV formula injection by prepending single quote to cells
+   * starting with =, +, -, or @ (which spreadsheets treat as formulas).
+   */
+  function sanitizeCsvCell(cell: string | number): string {
+    const str = String(cell);
+    const firstChar = str[0];
+    
+    // Prefix potentially dangerous characters
+    if (firstChar === '=' || firstChar === '+' || firstChar === '-' || firstChar === '@') {
+      return `'${str}`;
+    }
+    
+    return str;
+  }
+
   const csv = [
     headers.join(','),
-    ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
+    ...rows.map(row => 
+      row.map(cell => {
+        const sanitized = sanitizeCsvCell(cell);
+        // Escape quotes and wrap in quotes
+        return `"${sanitized.replace(/"/g, '""')}"`;
+      }).join(',')
+    ),
   ].join('\n');
 
   const filename = `ttpsswa-applications-${type || 'all'}-${status || 'all'}-${Date.now()}.csv`;

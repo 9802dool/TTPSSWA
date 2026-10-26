@@ -51,21 +51,24 @@ export default async function MemberDashboardPage() {
     );
   }
 
-  // Get all applications for this member by email
-  const allApplications = await getApplications({
-    limit: 100,
-  });
+  // Resolve member record by case-insensitive email match
+  const { getMemberByEmail } = await import('@/lib/supabase/member-helpers');
+  const member = await getMemberByEmail(user.email);
 
-  // Filter to member's applications by email or service number
-  const memberApplications = allApplications.filter(app => {
-    const data = app.application_data as Record<string, unknown>;
-    const appEmail = String(data.email || '').toLowerCase();
-    const appServiceNumber = String(data.regimentalNumber || data.serviceNumber || '');
-    
+  if (!member) {
     return (
-      appEmail === user.email.toLowerCase() ||
-      (user.serviceNumber && appServiceNumber === user.serviceNumber)
+      <DashboardShell userName={user.fullName}>
+        <p className="text-sm text-amber-700">
+          No member record found. Your applications will appear here once you submit one or are registered by an administrator.
+        </p>
+      </DashboardShell>
     );
+  }
+
+  // Query applications directly by member_id (database-level filtering)
+  const memberApplications = await getApplications({
+    member_id: member.id,
+    limit: 100,
   });
 
   // Get detailed data for each application
