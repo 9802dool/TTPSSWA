@@ -51,7 +51,7 @@ export default function SiteHeader() {
             <span className="relative h-16 w-16 shrink-0 overflow-hidden">
               <Image
                 src="/logo1.png"
-                alt=""
+                alt="TTPSSWA logo"
                 width={256}
                 height={256}
                 priority

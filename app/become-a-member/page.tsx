@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   title: "Become a Member | TTPSSWA",
   description:
     "Membership application and salary deduction forms for the Trinidad and Tobago Police Service Social and Welfare Association.",
+  openGraph: {
+    title: "Become a Member | TTPSSWA",
+    description: "Membership application and salary deduction forms for the Trinidad and Tobago Police Service Social and Welfare Association.",
+    url: 'https://ttpsswa.vercel.app/become-a-member',
+  },
 };
 
 export default function BecomeAMemberPage() {

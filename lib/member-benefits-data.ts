@@ -6,7 +6,7 @@ export const MEMBER_BENEFITS_PILLAR = {
 
 export const MEMBER_BENEFITS: { number: number; title: string }[] = [
   { number: 1, title: "Legal Aid Assistance (Criminal/Disciplinary)" },
-  { number: 2, title: "Optical & Dental Grant for SRP's & Municipal" },
+  { number: 2, title: "Optical & Dental Grant for SRPs & Municipal" },
   { number: 3, title: "Death Benefit" },
   { number: 4, title: "Guardian Life Health Plan" },
   { number: 5, title: "Retirement Benefit" },
@@ -21,7 +21,7 @@ export const MEMBER_BENEFITS: { number: number; title: string }[] = [
   { number: 11, title: "Full Time Scholarship" },
   { number: 12, title: "Part time Scholarship" },
   { number: 13, title: "SEA Tokens/Awards" },
-  { number: 14, title: "Promote and utilizes members businesses" },
+  { number: 14, title: "Promote and utilize members' businesses" },
   { number: 15, title: "CXC & Cape Tokens" },
   { number: 16, title: "Rent to Own" },
   { number: 17, title: "Land for the Landless" },

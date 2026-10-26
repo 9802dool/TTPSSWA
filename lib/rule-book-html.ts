@@ -12,11 +12,33 @@ export async function getRuleBookHtml(): Promise<{ html: string; error?: string 
     const fullPath = path.join(process.cwd(), 'public', RULE_BOOK_DOC_FILENAME);
     const buffer = await fs.readFile(fullPath);
     const result = await mammoth.convertToHtml({ buffer });
-    return { html: addHeadingIdsAndTocLinks(result.value) };
+    return { html: addHeadingIdsAndTocLinks(fixHeadingLevels(result.value)) };
   } catch (e) {
     const message = e instanceof Error ? e.message : 'Could not load rule book.';
     return { html: '', error: message };
   }
+}
+
+/**
+ * Converts all H1 tags except the first one to H2 to maintain proper heading hierarchy.
+ */
+function fixHeadingLevels(html: string): string {
+  const root = parse(html, { lowerCaseTagName: true });
+  const h1Elements = root.querySelectorAll('h1');
+  
+  // Keep the first H1, convert the rest to H2
+  h1Elements.forEach((h1, index) => {
+    if (index > 0) {
+      const h2 = parse(`<h2>${h1.innerHTML}</h2>`).firstChild as HtmlElement;
+      if (h1.id) h2.setAttribute('id', h1.id);
+      for (const [key, value] of Object.entries(h1.attributes)) {
+        if (key !== 'id') h2.setAttribute(key, value);
+      }
+      h1.replaceWith(h2);
+    }
+  });
+  
+  return root.innerHTML;
 }
 
 function slugFromHeadingText(text: string): string {

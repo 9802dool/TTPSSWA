@@ -6,7 +6,12 @@ import SiteHeader from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "About | TTPSSWA",
   description:
-    "About the Trinidad and Tobago Police Service Social & Welfare Association — advocacy, benefits, and community.",
+    "About the Trinidad and Tobago Police Service Social and Welfare Association — advocacy, benefits, and community.",
+  openGraph: {
+    title: "About | TTPSSWA",
+    description: "About the Trinidad and Tobago Police Service Social and Welfare Association — advocacy, benefits, and community.",
+    url: 'https://ttpsswa.vercel.app/about',
+  },
 };
 
 export default function AboutPage() {

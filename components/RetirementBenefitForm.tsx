@@ -97,7 +97,7 @@ export function RetirementBenefitForm() {
             retirement to access the plan.
           </p>
           <p className="mb-4 text-center text-[11px] font-bold uppercase">
-            Please fill out in block letters
+            Please complete this form
           </p>
 
           <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end">

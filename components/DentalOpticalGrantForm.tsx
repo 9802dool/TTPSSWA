@@ -101,7 +101,7 @@ export function DentalOpticalGrantForm() {
             For Special Reserve Police (S.R.P.&apos;s) and Municipal Police
           </p>
           <p className="mb-4 text-center text-[11px] font-bold uppercase">
-            Please fill out in block letters
+            Please complete this form
           </p>
 
           <fieldset className="mb-4 flex flex-wrap items-center justify-center gap-3">

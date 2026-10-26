@@ -42,7 +42,7 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
     slug: "antar-auto-repairs-and-parts",
     title: "Antar auto Repairs And Parts",
     body:
-      "Antar Auto Repairs and Parts has partnered with the Association to bring members an exclusive benefit: 10% to 20% off on parts and services.",
+      "Antar Auto Repairs and Parts has partnered with the Association to bring members an exclusive benefit: a 10–20% discount on parts and services.",
     bodySecondary:
       "This collaboration is designed to make vehicle maintenance more affordable while ensuring members receive quality service and genuine parts. It's a practical way to add value to your membership and keep your car running smoothly without stretching your budget.",
     contact: {
@@ -64,7 +64,7 @@ export const PARTNERSHIP_PROGRAMS: PartnershipProgram[] = [
     slug: "dream-builder-colour-studio-ltd",
     title: "Dream Builder Colour Studio Ltd",
     body:
-      "Members of the association can now enjoy special discounts between 5% and 20% on Dream Builder Colour Studio Ltd's full range of products and services.",
+      "Members of the association can now enjoy a 5–20% discount on Dream Builder Colour Studio Ltd's full range of products and services.",
     bodySecondary:
       "From premium colour consultations and design solutions to high-quality materials and finishes, this partnership ensures you get professional expertise at a reduced cost. It's a great opportunity to elevate your projects while saving more as part of your membership benefits.",
     contact: {

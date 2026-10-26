@@ -95,7 +95,7 @@ export function SalaryDeductionForm() {
         <h4 className="mt-4 text-center text-base font-bold uppercase underline">
           Salary deduction form
         </h4>
-        <p className="mb-4 text-center text-[11px] font-bold">Please fill out in block letters</p>
+        <p className="mb-4 text-center text-[11px] font-bold">Please complete this form</p>
 
         <div className="mb-3 flex flex-col gap-3 sm:mr-36 sm:flex-row sm:items-end">
           <div className="flex min-w-0 flex-1 items-end gap-2">

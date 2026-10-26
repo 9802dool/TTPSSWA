@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 const slides = [
   {
-    src: "/Protective%20Arms%20Monarch%20Competition%202027%20%20(2560%20x%20730%20px).mp4",
+    src: "/protective-arms-monarch-competition-2027.mp4",
     label: "Protective Arms Monarch Competition 2027",
   },
   {
-    src: "/christmas%20on%20patrol%205k%202026.mp4",
+    src: "/christmas-on-patrol-5k-2026.mp4",
     label: "Christmas on Patrol 5K 2026",
   },
 ] as const;
@@ -42,7 +42,7 @@ export function HeroVideoSlideshow() {
           }`}
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           aria-label={slide.label}
           aria-hidden={index !== active}
           onEnded={() => {

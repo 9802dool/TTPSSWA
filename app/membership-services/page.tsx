@@ -7,6 +7,11 @@ import { MEMBER_BENEFITS, MEMBER_BENEFITS_PILLAR } from "@/lib/member-benefits-d
 export const metadata: Metadata = {
   title: "Membership services | TTPSSWA",
   description: "Member benefits, grants, and service applications.",
+  openGraph: {
+    title: "Membership services | TTPSSWA",
+    description: "Member benefits, grants, and service applications.",
+    url: 'https://ttpsswa.vercel.app/membership-services',
+  },
 };
 
 export default function MembershipServicesPage() {
