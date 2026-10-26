@@ -8,10 +8,22 @@ import {
   bootstrapFirstAdmin,
 } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
+
+  // Rate limiting by IP for admin login
+  const ipLimit = await checkRateLimit(`admin-login:ip:${clientIP}`, RATE_LIMITS.login);
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { ok: false, error: "Too many login attempts. Please try again later." },
+      { status: 429 },
+    );
+  }
+
   let email = "";
   let password = "";
   let bootstrapMode = false;

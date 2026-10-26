@@ -5,6 +5,9 @@ import {
   upsertMember,
   createApplication,
 } from "@/lib/supabase/applications";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
+import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -23,9 +26,36 @@ function validateOptionalPhoneDigits(digitsStr: string, label: string): string |
 }
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
+
   const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
   if (!formData) {
     return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
+  }
+
+  // Spam protection: honeypot check (silent rejection)
+  if (checkHoneypot(formData.get("website"))) {
+    return NextResponse.json({ ok: true, id: "spam-rejected" });
+  }
+
+  // Spam protection: minimum fill time check (only if token is provided)
+  const formToken = String(formData.get("formToken") ?? "").trim();
+  const tokenCheck = verifyFormToken(formToken || null, 3);
+  // Only reject if token was provided but invalid (skipCheck means token not provided)
+  if (!tokenCheck.valid && !tokenCheck.skipCheck) {
+    return NextResponse.json({ ok: true, id: "spam-rejected" });
+  }
+
+  // Turnstile verification (only if configured)
+  if (isTurnstileConfigured()) {
+    const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
+    const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { ok: false, error: "Verification failed. Please try again." },
+        { status: 400 },
+      );
+    }
   }
 
   const regimentalNumber = String(formData.get("regimentalNumber") ?? "").trim();
@@ -132,6 +162,30 @@ export async function POST(request: Request) {
         error: "You must confirm your electronic signature.",
       },
       { status: 400 },
+    );
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `salary-deduction:ip:${clientIP}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { ok: false, error: "Too many submissions. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by regimental number
+  const regNumLimit = await checkRateLimit(
+    `salary-deduction:regnum:${regimentalNumber}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!regNumLimit.success) {
+    return NextResponse.json(
+      { ok: false, error: "Too many submissions from this account. Please try again later." },
+      { status: 429 },
     );
   }
 

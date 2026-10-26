@@ -7,12 +7,14 @@ import {
   isMemberSessionConfigured,
   signMemberSession,
 } from "@/lib/member-session";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 const COOKIE_MAX_AGE_SEC = 60 * 60 * 24 * 14;
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
   let body: { identifier?: string; email?: string; password?: string };
   try {
     body = await request.json();
@@ -29,6 +31,27 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { error: "Username or email and password are required." },
       { status: 400 },
+    );
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(`member-login:ip:${clientIP}`, RATE_LIMITS.login);
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { error: "Too many login attempts. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by identifier (email/username)
+  const identifierLimit = await checkRateLimit(
+    `member-login:identifier:${identifier.toLowerCase()}`,
+    RATE_LIMITS.login,
+  );
+  if (!identifierLimit.success) {
+    return NextResponse.json(
+      { error: "Too many login attempts for this account. Please try again later." },
+      { status: 429 },
     );
   }
 
