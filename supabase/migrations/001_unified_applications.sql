@@ -182,31 +182,37 @@ DROP POLICY IF EXISTS "Service role full access to history" ON public.applicatio
 -- Admin service role has full access (server-side only)
 CREATE POLICY "Service role full access to members"
 ON public.members FOR ALL
+TO service_role
 USING (true)
 WITH CHECK (true);
 
 CREATE POLICY "Service role full access to applications"
 ON public.applications FOR ALL
+TO service_role
 USING (true)
 WITH CHECK (true);
 
 CREATE POLICY "Service role full access to documents"
 ON public.application_documents FOR ALL
+TO service_role
 USING (true)
 WITH CHECK (true);
 
 CREATE POLICY "Service role full access to history"
 ON public.application_status_history FOR ALL
+TO service_role
 USING (true)
 WITH CHECK (true);
 
 -- Public can submit applications (but not read them)
 CREATE POLICY "Public can insert applications"
 ON public.applications FOR INSERT
+TO anon, authenticated
 WITH CHECK (true);
 
 CREATE POLICY "Public can upload documents during submission"
 ON public.application_documents FOR INSERT
+TO anon, authenticated
 WITH CHECK (true);
 
 -- Storage bucket for private application documents
@@ -217,6 +223,7 @@ ON CONFLICT (id) DO NOTHING;
 -- Storage policies: Only service role can access
 CREATE POLICY "Service role can manage application documents"
 ON storage.objects FOR ALL
+TO service_role
 USING (bucket_id = 'application-documents')
 WITH CHECK (bucket_id = 'application-documents');
 
