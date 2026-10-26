@@ -1,34 +1,54 @@
 import { NextResponse } from "next/server";
-import { verifyCode, clearVerificationCode } from "@/lib/email-verification";
+import { verifyCode, verifyToken, clearVerificationCode, getRemainingAttempts } from "@/lib/email-verification";
 import { markEmailVerified as markRedisEmailVerified } from "@/lib/web-account-storage";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  let body: { userId?: string; code?: string };
+  let body: { userId?: string; code?: string; token?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
+  const token = typeof body.token === "string" ? body.token.trim() : "";
   const userId = typeof body.userId === "string" ? body.userId.trim() : "";
   const code = typeof body.code === "string" ? body.code.trim() : "";
 
-  if (!userId || !code) {
-    return NextResponse.json({ error: "User ID and code are required." }, { status: 400 });
-  }
+  let verifiedUserId: string | null = null;
 
-  // Verify the code
-  const isValid = await verifyCode(userId, code);
-  
-  if (!isValid) {
-    return NextResponse.json({ error: "Invalid or expired verification code." }, { status: 400 });
+  // Token-based verification (link in email)
+  if (token) {
+    verifiedUserId = await verifyToken(token);
+    if (!verifiedUserId) {
+      return NextResponse.json({ error: "Invalid or expired verification link." }, { status: 400 });
+    }
+  }
+  // Code-based verification (manual entry)
+  else if (userId && code) {
+    const isValid = await verifyCode(userId, code);
+    
+    if (!isValid) {
+      const remaining = await getRemainingAttempts(userId);
+      return NextResponse.json({ 
+        error: remaining > 0 
+          ? `Invalid verification code. ${remaining} attempt${remaining === 1 ? '' : 's'} remaining.`
+          : "Too many failed attempts. Please request a new verification code.",
+        remainingAttempts: remaining,
+      }, { status: 400 });
+    }
+    
+    verifiedUserId = userId;
+  }
+  // Neither provided
+  else {
+    return NextResponse.json({ error: "Verification code or token is required." }, { status: 400 });
   }
 
   // Mark email as verified in Redis
-  const redisSuccess = await markRedisEmailVerified(userId);
+  const redisSuccess = await markRedisEmailVerified(verifiedUserId);
   
   if (!redisSuccess) {
     return NextResponse.json({ error: "Failed to update verification status." }, { status: 500 });
@@ -38,7 +58,7 @@ export async function POST(request: Request) {
   if (isDatabaseConfigured()) {
     try {
       await prisma.user.update({
-        where: { id: userId },
+        where: { id: verifiedUserId },
         data: {
           emailVerified: true,
           emailVerifiedAt: new Date(),

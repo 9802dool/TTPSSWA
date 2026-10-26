@@ -24,7 +24,9 @@ interface StatusChangeEmailParams {
 
 export async function sendStatusChangeEmail(params: StatusChangeEmailParams): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const fromEmail = process.env.BOOKING_FROM_EMAIL?.trim() || 'TTPSSWA <onboarding@resend.dev>';
+  const fromEmail = 
+    process.env.BOOKING_FROM_EMAIL?.trim() || 
+    'TTPSSWA <noreply@ttpsswa.org>';
 
   if (!apiKey) {
     console.log('Email not configured (RESEND_API_KEY missing), skipping notification');

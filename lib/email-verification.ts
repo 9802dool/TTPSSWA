@@ -4,11 +4,18 @@
  */
 
 import { Resend } from "resend";
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { getRedis } from "./redis";
 
 const VERIFICATION_PREFIX = "email_verification";
-const VERIFICATION_EXPIRY_SECONDS = 60 * 60 * 24; // 24 hours
+const VERIFICATION_TOKEN_PREFIX = "email_verification_token";
+const VERIFICATION_ATTEMPTS_PREFIX = "email_verification_attempts";
+const RESEND_COOLDOWN_PREFIX = "email_verification_cooldown";
+
+const CODE_EXPIRY_SECONDS = 30 * 60; // 30 minutes
+const TOKEN_EXPIRY_SECONDS = 30 * 60; // 30 minutes
+const RESEND_COOLDOWN_SECONDS = 60; // 60 seconds
+const MAX_ATTEMPTS = 5; // Max failed attempts before code invalidation
 
 /**
  * Generates a secure 6-digit verification code.
@@ -20,14 +27,44 @@ function generateVerificationCode(): string {
 }
 
 /**
- * Generates the verification token key for Redis.
+ * Generates a long random token for link-based verification.
+ */
+function generateVerificationToken(): string {
+  return randomBytes(32).toString('base64url'); // 43 chars, URL-safe
+}
+
+/**
+ * Generates the verification code key for Redis.
  */
 function verificationKey(userId: string): string {
   return `${VERIFICATION_PREFIX}:${userId}`;
 }
 
 /**
- * Sends a verification email with a one-time code.
+ * Generates the verification token key for Redis.
+ */
+function verificationTokenKey(token: string): string {
+  // Hash the token for storage (prevents token leakage via Redis inspection)
+  const hash = createHash('sha256').update(token).digest('hex');
+  return `${VERIFICATION_TOKEN_PREFIX}:${hash}`;
+}
+
+/**
+ * Generates the attempts counter key for Redis.
+ */
+function attemptsKey(userId: string): string {
+  return `${VERIFICATION_ATTEMPTS_PREFIX}:${userId}`;
+}
+
+/**
+ * Generates the resend cooldown key for Redis.
+ */
+function cooldownKey(userId: string): string {
+  return `${RESEND_COOLDOWN_PREFIX}:${userId}`;
+}
+
+/**
+ * Sends a verification email with a one-time code and token-based link.
  * Returns the code on success (for testing/logging), null on failure.
  */
 export async function sendVerificationEmail(params: {
@@ -36,7 +73,11 @@ export async function sendVerificationEmail(params: {
   userId: string;
 }): Promise<{ code: string } | null> {
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const fromEmail = process.env.MEMBERSHIP_FROM_EMAIL?.trim() || 'TTPSSWA <onboarding@resend.dev>';
+  // Use MEMBERSHIP_FROM_EMAIL, fallback to BOOKING_FROM_EMAIL, no onboarding@resend.dev
+  const fromEmail = 
+    process.env.MEMBERSHIP_FROM_EMAIL?.trim() || 
+    process.env.BOOKING_FROM_EMAIL?.trim() || 
+    'TTPSSWA <noreply@ttpsswa.org>';
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ttpsswa.vercel.app';
 
   if (!apiKey) {
@@ -50,23 +91,48 @@ export async function sendVerificationEmail(params: {
     return null;
   }
 
-  // Generate verification code
+  // Check resend cooldown
+  const cooldown = await redis.get<string>(cooldownKey(params.userId));
+  if (cooldown) {
+    console.log(`Resend cooldown active for user ${params.userId}`);
+    return null;
+  }
+
+  // Generate verification code and token
   const code = generateVerificationCode();
+  const token = generateVerificationToken();
   
-  // Store code in Redis with expiry
+  // Store code and token in Redis with expiry
   try {
     await redis.set(
       verificationKey(params.userId),
       code,
-      { ex: VERIFICATION_EXPIRY_SECONDS }
+      { ex: CODE_EXPIRY_SECONDS }
     );
+    
+    // Store token with userId as value (for reverse lookup)
+    await redis.set(
+      verificationTokenKey(token),
+      params.userId,
+      { ex: TOKEN_EXPIRY_SECONDS }
+    );
+
+    // Set resend cooldown
+    await redis.set(
+      cooldownKey(params.userId),
+      '1',
+      { ex: RESEND_COOLDOWN_SECONDS }
+    );
+
+    // Reset attempts counter
+    await redis.del(attemptsKey(params.userId));
   } catch (error) {
     console.error('Failed to store verification code:', error);
     return null;
   }
 
-  // Build email content
-  const verifyUrl = `${siteUrl}/verify-email?userId=${encodeURIComponent(params.userId)}&code=${code}`;
+  // Build email content with token-based link (not code)
+  const verifyUrl = `${siteUrl}/verify-email?token=${token}`;
   
   const subject = 'Verify Your TTPSSWA Account';
   
@@ -79,7 +145,7 @@ Your verification code is: ${code}
 Or click this link to verify automatically:
 ${verifyUrl}
 
-This code expires in 24 hours.
+This code expires in 30 minutes. You have up to 5 attempts to enter the code correctly.
 
 If you did not create an account, please ignore this email.
 
@@ -118,7 +184,7 @@ TTPSSWA Administration`;
       <a href="${verifyUrl}" class="button">Verify Email Address</a>
     </p>
     
-    <p style="color: #6b7280; font-size: 14px;">This code expires in 24 hours.</p>
+    <p style="color: #6b7280; font-size: 14px;">This code expires in 30 minutes. You have up to 5 attempts to enter the code correctly.</p>
     
     <p style="color: #6b7280; font-size: 14px;">If you did not create an account, please ignore this email.</p>
   </div>
@@ -149,8 +215,23 @@ TTPSSWA Administration`;
 }
 
 /**
+ * Constant-time string comparison to prevent timing attacks.
+ */
+function constantTimeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+  
+  const bufA = Buffer.from(a, 'utf8');
+  const bufB = Buffer.from(b, 'utf8');
+  
+  return timingSafeEqual(bufA, bufB);
+}
+
+/**
  * Verifies a code against the stored code for a user.
  * Returns true if valid, false otherwise.
+ * Implements attempt limiting: max 5 failed attempts before code invalidation.
  */
 export async function verifyCode(userId: string, code: string): Promise<boolean> {
   const redis = getRedis();
@@ -167,17 +248,66 @@ export async function verifyCode(userId: string, code: string): Promise<boolean>
       return false;
     }
 
-    const isValid = storedCode === code.trim();
+    // Check attempts counter
+    const attempts = await redis.get<number>(attemptsKey(userId)) || 0;
+    
+    if (attempts >= MAX_ATTEMPTS) {
+      console.log(`Max attempts exceeded for user ${userId}, invalidating code`);
+      await redis.del(verificationKey(userId));
+      await redis.del(attemptsKey(userId));
+      return false;
+    }
+
+    // Constant-time comparison to prevent timing attacks
+    const isValid = constantTimeEqual(storedCode, code.trim());
     
     if (isValid) {
-      // Delete the code after successful verification (one-time use)
+      // Delete the code and attempts counter after successful verification (one-time use)
       await redis.del(verificationKey(userId));
+      await redis.del(attemptsKey(userId));
+    } else {
+      // Increment attempts counter with same expiry as code
+      const ttl = await redis.ttl(verificationKey(userId));
+      await redis.set(attemptsKey(userId), attempts + 1, { ex: Math.max(ttl, 60) });
     }
     
     return isValid;
   } catch (error) {
     console.error('Error verifying code:', error);
     return false;
+  }
+}
+
+/**
+ * Verifies a token-based link (long random token, not 6-digit code).
+ * Returns the userId if valid, null otherwise.
+ */
+export async function verifyToken(token: string): Promise<string | null> {
+  const redis = getRedis();
+  if (!redis) {
+    console.error('Cannot verify token: Redis not available');
+    return null;
+  }
+
+  try {
+    const userId = await redis.get<string>(verificationTokenKey(token));
+    
+    if (!userId) {
+      console.log('Invalid or expired verification token');
+      return null;
+    }
+
+    // Delete the token after use (one-time use)
+    await redis.del(verificationTokenKey(token));
+    
+    // Also delete any pending code and attempts for this user
+    await redis.del(verificationKey(userId));
+    await redis.del(attemptsKey(userId));
+    
+    return userId;
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    return null;
   }
 }
 
@@ -197,7 +327,7 @@ export async function hasPendingVerification(userId: string): Promise<boolean> {
 }
 
 /**
- * Deletes any pending verification code for a user.
+ * Deletes any pending verification code and attempts for a user.
  */
 export async function clearVerificationCode(userId: string): Promise<void> {
   const redis = getRedis();
@@ -205,7 +335,23 @@ export async function clearVerificationCode(userId: string): Promise<void> {
 
   try {
     await redis.del(verificationKey(userId));
+    await redis.del(attemptsKey(userId));
   } catch (error) {
     console.error('Error clearing verification code:', error);
+  }
+}
+
+/**
+ * Gets the remaining attempts for a user.
+ */
+export async function getRemainingAttempts(userId: string): Promise<number> {
+  const redis = getRedis();
+  if (!redis) return MAX_ATTEMPTS;
+
+  try {
+    const attempts = await redis.get<number>(attemptsKey(userId)) || 0;
+    return Math.max(0, MAX_ATTEMPTS - attempts);
+  } catch {
+    return MAX_ATTEMPTS;
   }
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getMemberSessionUserId } from "@/lib/member-session";
 import { getWebAccountById } from "@/lib/web-account-storage";
-import { sendVerificationEmail, hasPendingVerification } from "@/lib/email-verification";
+import { sendVerificationEmail } from "@/lib/email-verification";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -54,15 +54,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Email already verified" }, { status: 400 });
   }
 
-  // Check if there's already a pending verification (rate limiting)
-  const hasPending = await hasPendingVerification(userId);
-  if (hasPending) {
-    return NextResponse.json({
-      error: "A verification code was already sent. Please check your email or wait 24 hours to request a new one.",
-    }, { status: 429 });
-  }
-
-  // Send verification email
+  // Send verification email (cooldown is checked internally - 60s)
   const result = await sendVerificationEmail({
     email: account.email,
     fullName: account.fullName,
@@ -70,7 +62,9 @@ export async function POST(request: Request) {
   });
 
   if (!result) {
-    return NextResponse.json({ error: "Failed to send verification email" }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Please wait 60 seconds before requesting another verification code.",
+    }, { status: 429 });
   }
 
   return NextResponse.json({

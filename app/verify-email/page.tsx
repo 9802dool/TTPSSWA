@@ -46,17 +46,47 @@ function VerifyEmailContent() {
     }
   }, [router]);
 
-  // Auto-verify if code and userId are in URL
-  useEffect(() => {
-    const urlCode = searchParams.get("code");
-    const urlUserId = searchParams.get("userId");
+  const handleTokenVerify = useCallback(async (token: string) => {
+    setLoading(true);
+    setError("");
 
-    if (urlCode && urlUserId && !autoVerifying && !success) {
-      setAutoVerifying(true);
-      setCode(urlCode);
-      handleVerify(urlUserId, urlCode);
+    try {
+      const res = await fetch("/api/auth/verify-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Verification failed");
+        setLoading(false);
+        return;
+      }
+
+      setSuccess(true);
+      setLoading(false);
+
+      // Redirect to dashboard after 2 seconds
+      setTimeout(() => {
+        router.push("/member/dashboard");
+      }, 2000);
+    } catch (err) {
+      setError("Network error. Please try again.");
+      setLoading(false);
     }
-  }, [searchParams, autoVerifying, success, handleVerify]);
+  }, [router]);
+
+  // Auto-verify if token is in URL (link-based verification)
+  useEffect(() => {
+    const urlToken = searchParams.get("token");
+
+    if (urlToken && !autoVerifying && !success) {
+      setAutoVerifying(true);
+      handleTokenVerify(urlToken);
+    }
+  }, [searchParams, autoVerifying, success, handleTokenVerify]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
