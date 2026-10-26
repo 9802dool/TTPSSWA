@@ -136,10 +136,11 @@ export default function SimpleBookingForm() {
 
   const mealQuantities = useMemo(() => {
     const totalGuests = parseInt(formData.guests) || 0;
+    const maxMealCount = 300; // Same cap as server
     return {
-      Breakfast: formData.meals.includeBreakfast ? totalGuests * nights : 0,
-      Lunch: formData.meals.includeLunch ? totalGuests * nights : 0,
-      Dinner: formData.meals.includeDinner ? totalGuests * nights : 0,
+      Breakfast: formData.meals.includeBreakfast ? Math.min(totalGuests * nights, maxMealCount) : 0,
+      Lunch: formData.meals.includeLunch ? Math.min(totalGuests * nights, maxMealCount) : 0,
+      Dinner: formData.meals.includeDinner ? Math.min(totalGuests * nights, maxMealCount) : 0,
     };
   }, [formData.meals, formData.guests, nights]);
 
