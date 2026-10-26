@@ -12,6 +12,7 @@ import {
 import { MemberApplicationCard } from "@/components/member/MemberApplicationCard";
 import { getAccountVerificationStatus } from "@/lib/verify-account-helper";
 import { getWebAccountById } from "@/lib/web-account-storage";
+import { filterOwnedApplications } from "@/lib/dashboard-filters";
 
 export const metadata = {
   title: "My Dashboard | TTPSSWA",
@@ -101,15 +102,13 @@ export default async function MemberDashboardPage() {
     limit: 100,
   });
 
-  // Filter to only show applications where the email submitted on the form
-  // matches the logged-in member's verified email (case-insensitive).
-  // This prevents seeing applications linked only by service number.
-  const verifiedEmail = account.email.toLowerCase();
-  const ownedApplications = memberApplications.filter((app) => {
-    const appEmail = app.application_data?.email;
-    if (typeof appEmail !== 'string') return false;
-    return appEmail.toLowerCase() === verifiedEmail;
-  });
+  // Filter to owned applications using the pure function
+  const ownedApplications = filterOwnedApplications(
+    memberApplications,
+    account.email,
+    member.email,
+    member.id
+  );
 
   // Get detailed data for each application
   const applicationsWithDetails = await Promise.all(
