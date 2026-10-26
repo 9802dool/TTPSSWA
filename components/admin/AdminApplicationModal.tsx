@@ -173,6 +173,7 @@ export function AdminApplicationModal({ application, onClose, onUpdate }: Props)
             </div>
           )}
 
+
           {/* Application Data */}
           <details>
             <summary className="cursor-pointer text-sm font-semibold">Application Data</summary>

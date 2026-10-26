@@ -8,6 +8,7 @@ export type ApplicationType =
   | 'merit_loan_application'
   | 'retirement_benefit_application'
   | 'salary_deduction'
+  | 'merit_salary_deduction'
   | 'hotel_booking';
 
 export type ApplicationStatus =

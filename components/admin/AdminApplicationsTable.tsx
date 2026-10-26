@@ -16,6 +16,7 @@ const APPLICATION_TYPE_LABELS: Record<string, string> = {
   merit_loan_application: "Merit Loan",
   retirement_benefit_application: "Retirement Benefit",
   salary_deduction: "Salary Deduction",
+  merit_salary_deduction: "Merit Salary Deduction",
   hotel_booking: "Hotel Booking",
 };
 

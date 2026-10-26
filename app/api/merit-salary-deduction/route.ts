@@ -8,6 +8,7 @@ import {
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
+import { sendAdminNotification } from "@/lib/email-notifications";
 
 export const runtime = "nodejs";
 
@@ -166,8 +167,9 @@ export async function POST(request: Request) {
 
   // For merit salary deduction, we may not have full member info,
   // so create a minimal member record with what we have
+  const placeholderEmail = `${regimentalNumber.replace(/\s+/g, '')}@placeholder.local`;
   const memberResult = await upsertMember({
-    email: `${regimentalNumber.replace(/\s+/g, '')}@placeholder.local`,
+    email: placeholderEmail,
     full_name: fullName,
     service_number: regimentalNumber,
     rank,
@@ -184,30 +186,34 @@ export async function POST(request: Request) {
     );
   }
 
+  // Build application data
+  const applicationData: Record<string, unknown> = {
+    regimentalNumber,
+    rank,
+    address,
+    divisionBranchSection,
+    workplaceAddress,
+    deductionSumWords,
+    deductionSumDollars,
+    startMonth,
+    startYear,
+    endMonth,
+    endYear,
+    resumeAmount: resumeAmount || undefined,
+    resumeMonth: resumeMonth || undefined,
+    resumeYear: resumeYear || undefined,
+    nameInBlockLetters,
+    signatureRegimentalNumber,
+    signatureRank,
+    signedDate,
+    witnessName,
+  };
+
+
   const appResult = await createApplication({
     member_id: memberResult.member_id,
-    application_type: 'salary_deduction',
-    application_data: {
-      regimentalNumber,
-      rank,
-      address,
-      divisionBranchSection,
-      workplaceAddress,
-      deductionSumWords,
-      deductionSumDollars,
-      startMonth,
-      startYear,
-      endMonth,
-      endYear,
-      resumeAmount: resumeAmount || undefined,
-      resumeMonth: resumeMonth || undefined,
-      resumeYear: resumeYear || undefined,
-      nameInBlockLetters,
-      signatureRegimentalNumber,
-      signatureRank,
-      signedDate,
-      witnessName,
-    },
+    application_type: 'merit_salary_deduction',
+    application_data: applicationData,
   });
 
   if (!appResult) {
@@ -228,6 +234,16 @@ export async function POST(request: Request) {
     file: uploaded,
     file_name: fileName,
     mime_type: uploaded.type || 'application/octet-stream',
+  });
+
+  // Notify admins. This form collects no applicant email (the member record uses a
+  // placeholder address), so no applicant confirmation is sent.
+  await sendAdminNotification({
+    applicationType: 'merit_salary_deduction',
+    applicantName: fullName,
+    applicantEmail: '(not provided)',
+    applicantServiceNumber: regimentalNumber,
+    applicationId: appResult.application_id,
   });
 
   return NextResponse.json({ ok: true, id: appResult.application_id });

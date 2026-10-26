@@ -99,6 +99,7 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
               <option value="merit_loan_application">Merit Loan</option>
               <option value="retirement_benefit_application">Retirement Benefit</option>
               <option value="salary_deduction">Salary Deduction</option>
+              <option value="merit_salary_deduction">Merit Salary Deduction</option>
               <option value="hotel_booking">Hotel Booking</option>
             </select>
           </div>

@@ -11,6 +11,10 @@ import type {
 /**
  * Creates or finds a member record, returns member ID.
  * Used when submitting applications.
+ * 
+ * IMPORTANT: Does NOT overwrite existing member records from public submissions.
+ * When an existing member is found, returns their ID without updating their profile.
+ * The submitted form data is kept as-is in application.application_data.
  */
 export async function upsertMember(data: {
   email: string;
@@ -35,16 +39,17 @@ export async function upsertMember(data: {
   const supabase = createServiceClient();
   if (!supabase) return null;
 
-  // Try to find existing member by email or service number
+  // Try to find existing member by email (case-insensitive) or service number
   let existingMember: Member | null = null;
   
   if (data.email) {
+    // Use RPC function for case-insensitive email lookup
     const { data: byEmail } = await supabase
-      .from('members')
-      .select('*')
-      .eq('email', data.email)
-      .single();
-    existingMember = byEmail;
+      .rpc('get_member_by_email_lower', {
+        search_email: data.email
+      })
+      .maybeSingle();
+    existingMember = byEmail as Member | null;
   }
 
   if (!existingMember && data.service_number) {
@@ -57,41 +62,17 @@ export async function upsertMember(data: {
   }
 
   if (existingMember) {
-    // Update existing member with any new information
-    const { data: updated, error } = await supabase
-      .from('members')
-      .update({
-        full_name: data.full_name || existingMember.full_name,
-        rank: data.rank || existingMember.rank,
-        phone: data.phone || existingMember.phone,
-        phone_country_code: data.phone_country_code || existingMember.phone_country_code,
-        phone_home: data.phone_home || existingMember.phone_home,
-        phone_work: data.phone_work || existingMember.phone_work,
-        address: data.address || existingMember.address,
-        department_division: data.department_division || existingMember.department_division,
-        section_station: data.section_station || existingMember.section_station,
-        date_of_birth: data.date_of_birth || existingMember.date_of_birth,
-        sex: data.sex || existingMember.sex,
-        age: data.age || existingMember.age,
-        service_number: data.service_number || existingMember.service_number,
-      })
-      .eq('id', existingMember.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating member:', error);
-      return null;
-    }
-
-    return { member_id: updated.id, is_new: false };
+    // Found existing member - do NOT overwrite their profile
+    // Return their ID so the application can be linked
+    // The submitted form data is preserved in application.application_data
+    return { member_id: existingMember.id, is_new: false };
   }
 
-  // Create new member
+  // Create new member with lowercased email
   const { data: newMember, error } = await supabase
     .from('members')
     .insert({
-      email: data.email,
+      email: data.email.toLowerCase(),
       service_number: data.service_number || null,
       full_name: data.full_name,
       rank: data.rank || null,

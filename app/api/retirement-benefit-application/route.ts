@@ -9,6 +9,7 @@ import {
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
+import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
 
 export const runtime = "nodejs";
 
@@ -260,31 +261,35 @@ export async function POST(request: Request) {
     );
   }
 
+  // Build application data
+  const applicationData: Record<string, unknown> = {
+    dateOfApplication,
+    regimentalNumber,
+    rank,
+    departmentDivision,
+    sectionStation,
+    address,
+    email,
+    phoneCountryCode,
+    phoneHome: phoneHome || undefined,
+    phoneWork: phoneWork || undefined,
+    phone,
+    age,
+    sex,
+    guardianLifeHealthPlan,
+    effectiveRetirementDate,
+    departmentalOrderReference,
+    departmentalOrderCopyConfirmed: true,
+    applicantDateSigned,
+    witnessName: witnessName || undefined,
+    witnessDate: witnessDate || undefined,
+  };
+
+
   const appResult = await createApplication({
     member_id: memberResult.member_id,
     application_type: 'retirement_benefit_application',
-    application_data: {
-      dateOfApplication,
-      regimentalNumber,
-      rank,
-      departmentDivision,
-      sectionStation,
-      address,
-      email,
-      phoneCountryCode,
-      phoneHome: phoneHome || undefined,
-      phoneWork: phoneWork || undefined,
-      phone,
-      age,
-      sex,
-      guardianLifeHealthPlan,
-      effectiveRetirementDate,
-      departmentalOrderReference,
-      departmentalOrderCopyConfirmed: true,
-      applicantDateSigned,
-      witnessName: witnessName || undefined,
-      witnessDate: witnessDate || undefined,
-    },
+    application_data: applicationData,
   });
 
   if (!appResult) {
@@ -305,6 +310,22 @@ export async function POST(request: Request) {
     file: uploaded,
     file_name: fileName,
     mime_type: uploaded.type || 'application/octet-stream',
+  });
+
+  // Send notifications (failures are logged but don't block success)
+  await sendAdminNotification({
+    applicationType: 'retirement_benefit_application',
+    applicantName: fullName,
+    applicantEmail: email,
+    applicantServiceNumber: regimentalNumber,
+    applicationId: appResult.application_id,
+  });
+
+  await sendApplicantConfirmation({
+    applicationType: 'retirement_benefit_application',
+    applicantName: fullName,
+    applicantEmail: email,
+    applicationId: appResult.application_id,
   });
 
   return NextResponse.json({ ok: true, id: appResult.application_id });

@@ -9,6 +9,7 @@ import {
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
+import { sendAdminNotification } from "@/lib/email-notifications";
 
 export const runtime = "nodejs";
 
@@ -18,12 +19,20 @@ const PLACEHOLDER_GIF_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEA
 
 /** Mobile app: minimal JSON application without a website login. */
 async function handleJson(request: Request) {
-  let body: { fullName?: string; email?: string; phone?: string };
+  const clientIP = getClientIP(request);
+
+  let body: { fullName?: string; email?: string; phone?: string; website?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
+
+  // Spam protection: honeypot check (if present in JSON body)
+  if (body.website && checkHoneypot(body.website)) {
+    return NextResponse.json({ ok: true });
+  }
+
   const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
   const phone = typeof body.phone === "string" ? body.phone.trim() : "";
@@ -38,6 +47,30 @@ async function handleJson(request: Request) {
     return NextResponse.json(
       { error: "Application storage is not configured." },
       { status: 503 },
+    );
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `member-signup:ip:${clientIP}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { error: "Too many submissions. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by email
+  const emailLimit = await checkRateLimit(
+    `member-signup:email:${email}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!emailLimit.success) {
+    return NextResponse.json(
+      { error: "Too many submissions from this email. Please try again later." },
+      { status: 429 },
     );
   }
 
@@ -249,6 +282,7 @@ async function handleMultipart(request: Request) {
     witnessName: String(formData.get("witnessName") ?? "").trim() || undefined,
   };
 
+
   // Create application
   const appResult = await createApplication({
     member_id: memberResult.member_id,
@@ -278,12 +312,25 @@ async function handleMultipart(request: Request) {
     // Continue anyway - application is saved
   }
 
-  void notifyMembershipApplicationPending({
+  // Send admin notification
+  await sendAdminNotification({
+    applicationType: 'membership_signup',
+    applicantName: fullName,
+    applicantEmail: email,
+    applicantServiceNumber: regimentalNumber,
+    applicationId: appResult.application_id,
+  });
+
+  // Applicant confirmation (email/WhatsApp). Awaited so serverless does not cut it off;
+  // failures are logged and never block the submission.
+  await notifyMembershipApplicationPending({
     fullName,
     email,
     regimentalNumber,
     phoneCountryCode,
     phone,
+  }).catch((error) => {
+    console.error("Membership pending notification failed:", error);
   });
 
   return NextResponse.json({ ok: true });

@@ -8,6 +8,7 @@ import {
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
+import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
 
 export const runtime = "nodejs";
 
@@ -228,32 +229,36 @@ export async function POST(request: Request) {
     );
   }
 
+  // Build application data
+  const applicationData: Record<string, unknown> = {
+    regimentalNumber,
+    rank,
+    departmentDivision,
+    sectionStation,
+    address,
+    email,
+    age,
+    sex,
+    dateOfBirth,
+    dateOfEnlistment,
+    phoneCountryCode,
+    phoneHome: phoneHome || undefined,
+    phoneWork: phoneWork || undefined,
+    phone,
+    commencementDate,
+    witnessName: witnessName || undefined,
+    witnessDate: witnessDate || undefined,
+    applicantDateSigned,
+    authMonthlyDeduction,
+    policyAcknowledgment,
+    electronicSignature,
+  };
+
+
   const appResult = await createApplication({
     member_id: memberResult.member_id,
     application_type: 'salary_deduction',
-    application_data: {
-      regimentalNumber,
-      rank,
-      departmentDivision,
-      sectionStation,
-      address,
-      email,
-      age,
-      sex,
-      dateOfBirth,
-      dateOfEnlistment,
-      phoneCountryCode,
-      phoneHome: phoneHome || undefined,
-      phoneWork: phoneWork || undefined,
-      phone,
-      commencementDate,
-      witnessName: witnessName || undefined,
-      witnessDate: witnessDate || undefined,
-      applicantDateSigned,
-      authMonthlyDeduction,
-      policyAcknowledgment,
-      electronicSignature,
-    },
+    application_data: applicationData,
   });
 
   if (!appResult) {
@@ -265,6 +270,22 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+
+  // Send notifications (failures are logged but don't block success)
+  await sendAdminNotification({
+    applicationType: 'salary_deduction',
+    applicantName: fullName,
+    applicantEmail: email,
+    applicantServiceNumber: regimentalNumber,
+    applicationId: appResult.application_id,
+  });
+
+  await sendApplicantConfirmation({
+    applicationType: 'salary_deduction',
+    applicantName: fullName,
+    applicantEmail: email,
+    applicationId: appResult.application_id,
+  });
 
   return NextResponse.json({ ok: true, id: appResult.application_id });
 }
