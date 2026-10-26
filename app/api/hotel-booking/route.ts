@@ -4,6 +4,9 @@ import { Resend } from "resend";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { createApplication } from "@/lib/supabase/applications";
 import type { HotelBookingData } from "@/lib/supabase/types";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
+import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -16,11 +19,39 @@ function buildMailtoFallback(payload: Record<string, unknown>): string {
 }
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  // Spam protection: honeypot check (silent rejection)
+  if (checkHoneypot(body.website)) {
+    // Return success to hide that we detected spam
+    return NextResponse.json({ ok: true }, { status: 201 });
+  }
+
+  // Spam protection: minimum fill time check (only if token is provided)
+  const formToken = typeof body.formToken === "string" ? body.formToken : null;
+  const tokenCheck = verifyFormToken(formToken, 3);
+  // Only reject if token was provided but invalid (skipCheck means token not provided)
+  if (!tokenCheck.valid && !tokenCheck.skipCheck) {
+    return NextResponse.json({ ok: true }, { status: 201 });
+  }
+
+  // Turnstile verification (only if configured)
+  if (isTurnstileConfigured()) {
+    const turnstileToken = typeof body.turnstileToken === "string" ? body.turnstileToken : null;
+    const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIP);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { error: "Verification failed. Please try again." },
+        { status: 400 },
+      );
+    }
   }
 
   const guestName = typeof body.guestName === "string" ? body.guestName.trim() : 
@@ -30,6 +61,30 @@ export async function POST(request: Request) {
   
   if (!guestName || !email) {
     return NextResponse.json({ error: "Guest name and email are required." }, { status: 400 });
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `hotel-booking:ip:${clientIP}`,
+    RATE_LIMITS.hotelBooking,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { error: "Too many booking attempts. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by email
+  const emailLimit = await checkRateLimit(
+    `hotel-booking:email:${email}`,
+    RATE_LIMITS.hotelBooking,
+  );
+  if (!emailLimit.success) {
+    return NextResponse.json(
+      { error: "Too many booking attempts for this email. Please try again later." },
+      { status: 429 },
+    );
   }
 
   let applicationId: string | null = null;

@@ -8,6 +8,7 @@ import {
   getApplications,
 } from "@/lib/supabase/applications";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -16,6 +17,8 @@ function isUniqueConflict(error: unknown): boolean {
 }
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
+
   if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
@@ -41,6 +44,30 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { message: "Sign in to submit a membership application." },
       { status: 401 },
+    );
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `application:ip:${clientIP}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { message: "Too many application submissions. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by user
+  const userLimit = await checkRateLimit(
+    `application:user:${sessionUserId}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!userLimit.success) {
+    return NextResponse.json(
+      { message: "Too many application submissions from this account. Please try again later." },
+      { status: 429 },
     );
   }
 

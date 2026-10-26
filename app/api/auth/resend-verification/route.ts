@@ -3,14 +3,40 @@ import { getMemberSessionUserId } from "@/lib/member-session";
 import { getWebAccountById } from "@/lib/web-account-storage";
 import { sendVerificationEmail } from "@/lib/email-verification";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
   const userId = getMemberSessionUserId();
   
   if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `verification-send:ip:${clientIP}`,
+    RATE_LIMITS.verificationSend,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { error: "Too many verification requests. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by user ID
+  const userLimit = await checkRateLimit(
+    `verification-send:user:${userId}`,
+    RATE_LIMITS.verificationSend,
+  );
+  if (!userLimit.success) {
+    return NextResponse.json(
+      { error: "Too many verification requests for this account. Please try again later." },
+      { status: 429 },
+    );
   }
 
   // Get account from Redis

@@ -6,14 +6,40 @@ import { verifyApplicationOwnership } from "@/lib/supabase/member-helpers";
 import { validateFile } from "@/lib/file-validation";
 import { isEmailVerified } from "@/lib/verify-account-helper";
 import { getWebAccountById } from "@/lib/web-account-storage";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
   const userId = getMemberSessionUserId();
   
   if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `upload:ip:${clientIP}`,
+    RATE_LIMITS.documentUpload,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { error: "Too many upload attempts. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by user
+  const userLimit = await checkRateLimit(
+    `upload:user:${userId}`,
+    RATE_LIMITS.documentUpload,
+  );
+  if (!userLimit.success) {
+    return NextResponse.json(
+      { error: "Too many uploads from this account. Please try again later." },
+      { status: 429 },
+    );
   }
 
   // Check email verification
