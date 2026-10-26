@@ -76,7 +76,7 @@ export function MemberSignupForm() {
           <div className="min-w-0 flex-1">
             <AssociationFormHeader />
             <h4 className="mt-4 text-center text-base font-bold uppercase underline">Membership form</h4>
-            <p className="mb-1 text-center text-[11px] font-bold">Please fill out in block letters</p>
+            <p className="mb-1 text-center text-[11px] font-bold">Please complete this form</p>
           </div>
           <div className="w-full shrink-0 sm:w-44">
             <MembershipFacialPhotoPanel formId="membership-application-form" />

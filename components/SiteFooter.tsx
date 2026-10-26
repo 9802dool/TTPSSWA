@@ -11,9 +11,26 @@ export default function SiteFooter() {
             </p>
             <p className="mt-3 max-w-prose text-[0.95em] leading-relaxed text-slate-400">
               Serving members with clear governance, transparent communication, and programs that support our
-              community. Update this text in{" "}
-              <code className="rounded bg-white/10 px-1.5 py-0.5 text-xs text-slate-200">SiteFooter.tsx</code>.
+              community.
             </p>
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Contact</p>
+            <address className="mt-4 space-y-2 text-sm not-italic text-slate-400">
+              <p>4th Floor, Riverside Plaza</p>
+              <p>#3 Besson Street</p>
+              <p>Port of Spain</p>
+              <p className="pt-2">
+                Tel:{" "}
+                <a href="tel:+18682355260" className="transition hover:text-white">
+                  235-5260
+                </a>
+                {" / "}
+                <a href="tel:+18687926226" className="transition hover:text-white">
+                  792-6226
+                </a>
+              </p>
+            </address>
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Navigate</p>
@@ -43,23 +60,17 @@ export default function SiteFooter() {
                   Central Committee Representative
                 </Link>
               </li>
-              <li>
-                <Link href="/membership-services" className="transition hover:text-white">
-                  Members services
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/login" className="transition hover:text-white">
-                  Admin login
-                </Link>
-              </li>
             </ul>
           </div>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Legal</p>
-            <p className="mt-4 text-sm leading-relaxed text-slate-400">
-              Add registration numbers, privacy policy, or terms of use here.
-            </p>
+            <ul className="mt-4 space-y-2 text-sm">
+              <li>
+                <Link href="/privacy-policy" className="transition hover:text-white">
+                  Privacy Policy
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
         <div className="mt-10 flex flex-col gap-4 border-t border-white/10 pt-8 sm:mt-12 sm:flex-row sm:items-center sm:justify-between">

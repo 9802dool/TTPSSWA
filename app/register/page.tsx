@@ -18,7 +18,7 @@ export default function RegisterPage() {
         <div className="border-b border-slate-200 bg-white py-10 shadow-sm dark:border-slate-700 dark:bg-slate-950">
           <div className="site-container">
             <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-brand">
-              Trinidad and Tobago Police Service Social Welfare Association
+              Trinidad and Tobago Police Service Social and Welfare Association
             </p>
             <h1 className="mt-4 text-center text-2xl font-bold tracking-tight text-ink sm:text-3xl">
               Create an online account

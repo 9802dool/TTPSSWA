@@ -9,6 +9,11 @@ import { RULE_BOOK_DOC_PATH } from '@/lib/rule-book';
 export const metadata: Metadata = {
   title: 'Rule Book | TTPSSWA',
   description: 'Read the TTPSSWA association rule book online or download the original document.',
+  openGraph: {
+    title: 'Rule Book | TTPSSWA',
+    description: 'Read the TTPSSWA association rule book online or download the original document.',
+    url: 'https://ttpsswa.vercel.app/rule-book',
+  },
 };
 
 export default async function RuleBookPage() {

@@ -13,6 +13,7 @@ export default function MembershipApplyForm({ userId }: { userId: string }) {
     bankName: "",
     accountNumber: "",
     salaryDeductionApproved: false,
+    privacyPolicyConsent: false,
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,10 @@ export default function MembershipApplyForm({ userId }: { userId: string }) {
     setError("");
     if (!formData.salaryDeductionApproved) {
       setError("You must consent to salary deduction to apply.");
+      return;
+    }
+    if (!formData.privacyPolicyConsent) {
+      setError("You must accept the privacy policy to apply.");
       return;
     }
 
@@ -155,6 +160,30 @@ export default function MembershipApplyForm({ userId }: { userId: string }) {
         />
         <label htmlFor="deductionConsent" className="text-sm text-muted">
           I hereby authorize monthly salary deduction for association membership dues.
+        </label>
+      </div>
+
+      <div className="flex items-start space-x-3 pt-2">
+        <input
+          type="checkbox"
+          id="privacyConsent"
+          className="mt-1 h-4 w-4 rounded border-gray-300 text-brand"
+          checked={formData.privacyPolicyConsent}
+          onChange={(e) =>
+            setFormData({ ...formData, privacyPolicyConsent: e.target.checked })
+          }
+        />
+        <label htmlFor="privacyConsent" className="text-sm text-muted">
+          I have read and accept the{" "}
+          <a
+            href="/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-brand underline hover:text-brand-hover"
+          >
+            Privacy Policy
+          </a>
+          .
         </label>
       </div>
 

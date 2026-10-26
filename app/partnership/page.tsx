@@ -8,19 +8,19 @@ const PARTNERSHIP_CARDS = [
     slug: "hardware-and-beyond",
     label: "Hardware and Beyond",
     description:
-      "Hardware supplies and related services for members; further details and offers can be published here as they are finalized.",
+      "Hardware supplies and related services for members.",
   },
   {
     slug: "antar-auto-repairs-and-parts",
     label: "Antar Auto",
     description:
-      "Automotive services and member benefits through this subsidiary; information will appear here as programs are confirmed.",
+      "Automotive services and member benefits.",
   },
   {
     slug: "dream-builder-colour-studio-ltd",
     label: "Dream Builder Colour Studio Ltd",
     description:
-      "Colour and finishing solutions for projects supporting the association’s mission; updates can be added here when available.",
+      "Colour and finishing solutions for projects.",
   },
 ] as const;
 
@@ -28,6 +28,11 @@ export const metadata: Metadata = {
   title: "Partnership | TTPSSWA",
   description:
     "TTPSSWA corporate partners — Hardware and Beyond, Antar Auto, Dream Builder Colour Studio Ltd.",
+  openGraph: {
+    title: "Partnership | TTPSSWA",
+    description: "TTPSSWA corporate partners — Hardware and Beyond, Antar Auto, Dream Builder Colour Studio Ltd.",
+    url: 'https://ttpsswa.vercel.app/partnership',
+  },
 };
 
 export default function PartnershipPage() {
@@ -73,7 +78,7 @@ export default function PartnershipPage() {
               Corporate partners
             </h2>
             <p className="mt-3 max-w-3xl text-base leading-relaxed text-slate-400">
-              Profiles, offers, and contact details—edit copy anytime as specifics are confirmed.
+              Profiles, offers, and contact details for our corporate partners.
             </p>
             <ul className="mt-10 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
               {PARTNERSHIP_CARDS.map((p) => (

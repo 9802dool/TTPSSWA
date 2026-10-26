@@ -15,7 +15,7 @@ function MarqueeSegment({ duplicate = false }: { duplicate?: boolean }) {
     <span className="inline-flex shrink-0 items-center whitespace-nowrap px-10 sm:px-14">
       <span>
         Dream Builder Colour Studio Ltd is offering all members of the Association{" "}
-        from 5 to 20% discount on paints and other building supplies. For more info
+        a 5–20% discount on paints and other building supplies. For more info
         call {phone}
       </span>
       <span aria-hidden className="pl-3 text-white/50">

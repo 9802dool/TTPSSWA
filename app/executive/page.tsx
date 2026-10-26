@@ -7,6 +7,11 @@ import SiteHeader from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Executive team | TTPSSWA",
   description: "National officers and leadership of the TTPSSWA.",
+  openGraph: {
+    title: "Executive team | TTPSSWA",
+    description: "National officers and leadership of the TTPSSWA.",
+    url: 'https://ttpsswa.vercel.app/executive',
+  },
 };
 
 export default function ExecutivePage() {

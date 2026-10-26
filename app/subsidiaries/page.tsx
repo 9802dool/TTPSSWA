@@ -6,7 +6,12 @@ import SiteHeader from "@/components/SiteHeader";
 export const metadata: Metadata = {
   title: "Subsidiaries | TTPSSWA",
   description:
-    "Subsidiaries and related entities of the Trinidad and Tobago Police Service Social & Welfare Association.",
+    "Subsidiaries and related entities of the Trinidad and Tobago Police Service Social and Welfare Association.",
+  openGraph: {
+    title: "Subsidiaries | TTPSSWA",
+    description: "Subsidiaries and related entities of the Trinidad and Tobago Police Service Social and Welfare Association.",
+    url: 'https://ttpsswa.vercel.app/subsidiaries',
+  },
 };
 
 const PILLARS = [
@@ -14,19 +19,19 @@ const PILLARS = [
     title: "Noel Chase Hotel Tobago",
     href: "/noel-chase-hotel-and-conference-centre",
     description:
-      "Accommodation and conference facilities for members and guests; reservations and details are available on the hotel page.",
+      "Accommodation and conference facilities for members and guests.",
   },
   {
     title: "TTPSSWA NP Service Station Beetham Highway",
     href: "/beetham-np-service-station",
     description:
-      "TTPSSWA subsidiary location on the Beetham Highway. Member offers and information will be posted here as they become available.",
+      "TTPSSWA subsidiary location on the Beetham Highway.",
   },
   {
     title: "TTPSSWA NP Service Station Laventille",
     href: "/laventille-np-service-station",
     description:
-      "TTPSSWA subsidiary location in Laventille. Member offers and information will be posted here as they become available.",
+      "TTPSSWA subsidiary location in Laventille.",
   },
 ] as const;
 
@@ -55,7 +60,7 @@ export default function SubsidiariesPage() {
             </p>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Subsidiaries</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              Information about TTPSSWA subsidiaries and related entities will appear here.
+              Information about TTPSSWA subsidiaries and related entities.
             </p>
           </div>
         </section>
@@ -72,7 +77,7 @@ export default function SubsidiariesPage() {
               Three pillars
             </h2>
             <p className="mt-3 max-w-3xl text-base leading-relaxed text-slate-400">
-              TTPSSWA subsidiaries at a glance—edit descriptions anytime as specifics are confirmed.
+              TTPSSWA subsidiaries at a glance.
             </p>
             <ul className="mt-10 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
               {PILLARS.map((pillar) => (

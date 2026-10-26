@@ -7,12 +7,17 @@ import SiteHeader from '@/components/SiteHeader';
 export const metadata: Metadata = {
   title: 'Home | TTPSSWA',
   description:
-    'Trinidad and Tobago Police Service Social & Welfare Association — member benefits, executive team, and services.',
+    'Trinidad and Tobago Police Service Social and Welfare Association — member benefits, executive team, and services.',
+  openGraph: {
+    title: 'Home | TTPSSWA',
+    description: 'Trinidad and Tobago Police Service Social and Welfare Association — member benefits, executive team, and services.',
+    url: 'https://ttpsswa.vercel.app',
+  },
 };
 
 const heroActions = [
   { href: '/become-a-member', label: 'Become a Member', primary: true },
-  { href: '/hotel-reservations', label: 'Hotel reservation' },
+  { href: '/hotel-reservations', label: 'Hotel reservations' },
   { href: '/membership-services', label: 'Membership services' },
   { href: '/central-committee-representatives', label: 'Central Committee Reps' },
   { href: '/committees', label: 'Committees' },

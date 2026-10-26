@@ -7,6 +7,11 @@ export const metadata: Metadata = {
   title: "Hotel reservations | TTPSSWA",
   description:
     "Book a TTPSSWA guest house room with live category capacity checks.",
+  openGraph: {
+    title: "Hotel reservations | TTPSSWA",
+    description: "Book a TTPSSWA guest house room with live category capacity checks.",
+    url: 'https://ttpsswa.vercel.app/hotel-reservations',
+  },
 };
 
 export default function HotelReservationsPage() {

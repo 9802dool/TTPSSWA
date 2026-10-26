@@ -76,7 +76,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
         >
           <div className="site-container">
             <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-brand">
-              Trinidad and Tobago Police Service Social Welfare Association
+              Trinidad and Tobago Police Service Social and Welfare Association
             </p>
             <p className="mt-4 text-center">
               <Link
