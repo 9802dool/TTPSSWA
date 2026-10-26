@@ -10,6 +10,7 @@ import type { DentalOpticalGrantData } from "@/lib/supabase/types";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
+import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
 
 export const runtime = "nodejs";
 
@@ -294,10 +295,14 @@ export async function POST(request: Request) {
     applicantDateSigned,
   };
 
+  // If existing member, preserve submitted data
+  const submittedData = memberResult.is_new ? null : applicationData;
+
   const appResult = await createApplication({
     member_id: memberResult.member_id,
     application_type: 'dental_optical_grant',
     application_data: applicationData,
+    submitted_data: submittedData,
   });
 
   if (!appResult) {
@@ -318,6 +323,22 @@ export async function POST(request: Request) {
     file: uploaded,
     file_name: fileName,
     mime_type: uploaded.type || 'application/octet-stream',
+  });
+
+  // Send notifications (failures are logged but don't block success)
+  void sendAdminNotification({
+    applicationType: 'dental_optical_grant',
+    applicantName: fullName,
+    applicantEmail: email,
+    applicantServiceNumber: regimentalNumber,
+    applicationId: appResult.application_id,
+  });
+
+  void sendApplicantConfirmation({
+    applicationType: 'dental_optical_grant',
+    applicantName: fullName,
+    applicantEmail: email,
+    applicationId: appResult.application_id,
   });
 
   return NextResponse.json({ ok: true, id: appResult.application_id });

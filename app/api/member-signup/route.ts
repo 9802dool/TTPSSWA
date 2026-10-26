@@ -9,6 +9,7 @@ import {
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
+import { sendAdminNotification } from "@/lib/email-notifications";
 
 export const runtime = "nodejs";
 
@@ -249,11 +250,15 @@ async function handleMultipart(request: Request) {
     witnessName: String(formData.get("witnessName") ?? "").trim() || undefined,
   };
 
+  // If existing member, preserve submitted data
+  const submittedData = memberResult.is_new ? null : applicationData;
+
   // Create application
   const appResult = await createApplication({
     member_id: memberResult.member_id,
     application_type: 'membership_signup',
     application_data: applicationData,
+    submitted_data: submittedData,
   });
 
   if (!appResult) {
@@ -278,6 +283,16 @@ async function handleMultipart(request: Request) {
     // Continue anyway - application is saved
   }
 
+  // Send admin notification
+  void sendAdminNotification({
+    applicationType: 'membership_signup',
+    applicantName: fullName,
+    applicantEmail: email,
+    applicantServiceNumber: regimentalNumber,
+    applicationId: appResult.application_id,
+  });
+
+  // Send applicant confirmation (existing notifyMembershipApplicationPending already does this)
   void notifyMembershipApplicationPending({
     fullName,
     email,

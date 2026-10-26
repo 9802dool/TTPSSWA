@@ -8,6 +8,7 @@ export type ApplicationType =
   | 'merit_loan_application'
   | 'retirement_benefit_application'
   | 'salary_deduction'
+  | 'merit_salary_deduction'
   | 'hotel_booking';
 
 export type ApplicationStatus =
@@ -53,6 +54,7 @@ export interface Application {
   application_type: ApplicationType;
   status: ApplicationStatus;
   application_data: Record<string, unknown>;
+  submitted_data: Record<string, unknown> | null;
   admin_notes: string | null;
   reviewed_by: string | null;
   reviewed_at: string | null;

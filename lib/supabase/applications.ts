@@ -11,6 +11,10 @@ import type {
 /**
  * Creates or finds a member record, returns member ID.
  * Used when submitting applications.
+ * 
+ * IMPORTANT: Does NOT overwrite existing member records from public submissions.
+ * When an existing member is found, returns their ID without updating their profile.
+ * The submitted data should be stored in application.submitted_data instead.
  */
 export async function upsertMember(data: {
   email: string;
@@ -57,34 +61,10 @@ export async function upsertMember(data: {
   }
 
   if (existingMember) {
-    // Update existing member with any new information
-    const { data: updated, error } = await supabase
-      .from('members')
-      .update({
-        full_name: data.full_name || existingMember.full_name,
-        rank: data.rank || existingMember.rank,
-        phone: data.phone || existingMember.phone,
-        phone_country_code: data.phone_country_code || existingMember.phone_country_code,
-        phone_home: data.phone_home || existingMember.phone_home,
-        phone_work: data.phone_work || existingMember.phone_work,
-        address: data.address || existingMember.address,
-        department_division: data.department_division || existingMember.department_division,
-        section_station: data.section_station || existingMember.section_station,
-        date_of_birth: data.date_of_birth || existingMember.date_of_birth,
-        sex: data.sex || existingMember.sex,
-        age: data.age || existingMember.age,
-        service_number: data.service_number || existingMember.service_number,
-      })
-      .eq('id', existingMember.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error updating member:', error);
-      return null;
-    }
-
-    return { member_id: updated.id, is_new: false };
+    // Found existing member - do NOT overwrite their profile
+    // Return their ID so the application can be linked
+    // The caller should store submitted data in application.submitted_data
+    return { member_id: existingMember.id, is_new: false };
   }
 
   // Create new member
@@ -129,6 +109,7 @@ export async function createApplication(data: {
   member_id?: string | null;
   application_type: ApplicationType;
   application_data: Record<string, unknown>;
+  submitted_data?: Record<string, unknown> | null;
   legacy_redis_id?: string;
 }): Promise<{ application_id: string } | null> {
   const supabase = createServiceClient();
@@ -141,6 +122,7 @@ export async function createApplication(data: {
       application_type: data.application_type,
       status: 'submitted',
       application_data: data.application_data,
+      submitted_data: data.submitted_data || null,
       legacy_redis_id: data.legacy_redis_id || null,
       submitted_at: new Date().toISOString(),
     })
