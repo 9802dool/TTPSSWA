@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { hashPassword } from "@/lib/password-hash";
 import { createWebAccount } from "@/lib/web-account-storage";
+import { sendVerificationEmail } from "@/lib/email-verification";
 
 export const runtime = "nodejs";
 
@@ -72,11 +73,21 @@ export async function POST(request: Request) {
     );
   }
 
+  // Send verification email (non-blocking)
+  sendVerificationEmail({
+    email: result.account.email,
+    fullName: result.account.fullName,
+    userId: result.account.id,
+  }).catch(err => {
+    console.error('Failed to send verification email:', err);
+  });
+
   return NextResponse.json(
     {
       ok: true,
-      message: "Account created successfully.",
+      message: "Account created successfully. Please check your email to verify your account.",
       userId: result.account.id,
+      requiresVerification: true,
     },
     { status: 201 },
   );

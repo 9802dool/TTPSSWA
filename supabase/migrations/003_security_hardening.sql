@@ -1,5 +1,5 @@
 -- TTPSSWA Stage 2: Security Hardening
--- Removes insecure RLS policies and functions
+-- Removes insecure RLS policies and functions (ADDITIVE & IDEMPOTENT)
 
 -- 1. Drop the insecure link_application_to_member function
 DROP FUNCTION IF EXISTS link_application_to_member(UUID, TEXT, TEXT);
@@ -17,7 +17,3 @@ DROP POLICY IF EXISTS "Public can upload documents during submission" ON public.
 
 -- 4. Add index for case-insensitive email lookups used by member dashboard
 CREATE INDEX IF NOT EXISTS idx_members_email_lower ON public.members(LOWER(email));
-
--- Comment for documentation
-COMMENT ON MIGRATION '003_security_hardening' IS 
-'Removes SECURITY DEFINER function and auth.jwt() policies. All data access now via service_role server-side code with verified session checks.';

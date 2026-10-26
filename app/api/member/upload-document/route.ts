@@ -5,6 +5,7 @@ import { uploadApplicationDocument } from "@/lib/supabase/applications";
 import { verifyApplicationOwnership } from "@/lib/supabase/member-helpers";
 import { validateFile } from "@/lib/file-validation";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
+import { isEmailVerified } from "@/lib/verify-account-helper";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,15 @@ export async function POST(request: Request) {
   
   if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  // Check email verification
+  const verified = await isEmailVerified(userId);
+  if (!verified) {
+    return NextResponse.json({ 
+      error: "Email verification required",
+      requiresVerification: true,
+    }, { status: 403 });
   }
 
   if (!isDatabaseConfigured() || !isSupabaseConfigured()) {

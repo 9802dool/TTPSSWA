@@ -4,6 +4,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { verifyDocumentOwnership } from "@/lib/supabase/member-helpers";
 import { getDocumentSignedUrl } from "@/lib/supabase/applications";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
+import { isEmailVerified } from "@/lib/verify-account-helper";
 
 export const runtime = "nodejs";
 
@@ -12,6 +13,15 @@ export async function GET(request: Request) {
   
   if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  // Check email verification
+  const verified = await isEmailVerified(userId);
+  if (!verified) {
+    return NextResponse.json({ 
+      error: "Email verification required",
+      requiresVerification: true,
+    }, { status: 403 });
   }
 
   if (!isDatabaseConfigured() || !isSupabaseConfigured()) {

@@ -16,6 +16,8 @@ export type WebAccount = {
   serviceNumber: string;
   passwordHash: string;
   role: WebAccountRole;
+  emailVerified: boolean;
+  emailVerifiedAt?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -83,6 +85,8 @@ export async function createWebAccount(data: {
     serviceNumber: normalizedServiceNumber,
     passwordHash: data.passwordHash,
     role: "UNVERIFIED",
+    emailVerified: false,
+    emailVerifiedAt: undefined,
     createdAt: now,
     updatedAt: now,
   };
@@ -171,5 +175,32 @@ export async function listWebAccounts(): Promise<WebAccount[]> {
   } catch (error) {
     console.error("listWebAccounts:", error);
     return [];
+  }
+}
+
+/**
+ * Marks a web account's email as verified.
+ * Returns true on success, false on failure.
+ */
+export async function markEmailVerified(userId: string): Promise<boolean> {
+  const redis = getRedis();
+  if (!redis) return false;
+
+  try {
+    const account = await getWebAccountById(userId);
+    if (!account) return false;
+
+    const updatedAccount: WebAccount = {
+      ...account,
+      emailVerified: true,
+      emailVerifiedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await redis.set(accountKey(userId), JSON.stringify(updatedAccount));
+    return true;
+  } catch (error) {
+    console.error("markEmailVerified:", error);
+    return false;
   }
 }
