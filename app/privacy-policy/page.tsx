@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
 
               <h2>Introduction</h2>
               <p>
-                The Trinidad and Tobago Police Service Social and Welfare Association ("TTPSSWA," "we," "us," or "our") 
+                The Trinidad and Tobago Police Service Social and Welfare Association (&quot;TTPSSWA,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) 
                 is committed to protecting the privacy of our members and website visitors. This Privacy Policy explains 
                 how we collect, use, disclose, and safeguard your personal information when you use our website and 
                 services.
@@ -142,7 +142,7 @@ export default function PrivacyPolicyPage() {
               <h2>Changes to This Privacy Policy</h2>
               <p>
                 We may update this Privacy Policy from time to time. We will notify members of any material changes 
-                through our website or direct communication. The "Last Updated" date will reflect the most recent revision.
+                through our website or direct communication. The &quot;Last Updated&quot; date will reflect the most recent revision.
               </p>
               <p className="text-red-600 font-semibold">
                 [REQUIRES COMPLETION: Add effective date once policy is approved]
