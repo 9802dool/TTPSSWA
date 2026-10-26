@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { recordServiceRequest } from "@/lib/analytics-storage";
 import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
+import {
+  upsertMember,
+  createApplication,
+  uploadApplicationDocument,
+} from "@/lib/supabase/applications";
 
 export const runtime = "nodejs";
 
@@ -201,7 +207,71 @@ export async function POST(request: Request) {
     if (read.file) documents.push(read.file);
   }
 
-  const id = await recordServiceRequest("legal_aid_application", {
+  let applicationId: string | null = null;
+
+  // Save to Supabase if configured
+  if (isSupabaseConfigured()) {
+    const memberResult = await upsertMember({
+      email,
+      full_name: fullName,
+      service_number: regimentalNumber,
+      rank,
+      phone,
+      phone_country_code: phoneCountryCode,
+      phone_home: phoneHome || undefined,
+      phone_work: phoneWork || undefined,
+      address,
+      department_division: departmentDivision,
+      section_station: sectionStation,
+    });
+
+    if (memberResult) {
+      const appResult = await createApplication({
+        member_id: memberResult.member_id,
+        application_type: 'legal_aid_application',
+        application_data: {
+          regimentalNumber,
+          rank,
+          departmentDivision,
+          sectionStation,
+          address,
+          email,
+          phoneCountryCode,
+          phoneHome: phoneHome || undefined,
+          phoneWork: phoneWork || undefined,
+          phone,
+          matterType,
+          matterDescription,
+          courtOrUnit: courtOrUnit || undefined,
+          matterReference: matterReference || undefined,
+          dateReported: dateReported || undefined,
+          applicantDateSigned,
+          witnessName: witnessName || undefined,
+          witnessDate: witnessDate || undefined,
+        },
+      });
+
+      if (appResult) {
+        applicationId = appResult.application_id;
+
+        // Upload each document
+        for (const doc of documents) {
+          const docBuffer = Buffer.from(doc.base64, 'base64');
+          await uploadApplicationDocument({
+            application_id: applicationId,
+            member_id: memberResult.member_id,
+            document_type: doc.label.toLowerCase().replace(/\s+/g, '_'),
+            file: docBuffer,
+            file_name: doc.fileName,
+            mime_type: doc.mimeType,
+          });
+        }
+      }
+    }
+  }
+
+  // Also save to Redis for analytics
+  const redisId = await recordServiceRequest("legal_aid_application", {
     regimentalNumber,
     rank,
     fullName,
@@ -221,20 +291,19 @@ export async function POST(request: Request) {
     applicantDateSigned,
     witnessName: witnessName || undefined,
     witnessDate: witnessDate || undefined,
-    documents,
     form: "legal_aid_application_online",
   });
 
-  if (!id) {
+  if (!applicationId && !redisId) {
     return NextResponse.json(
       {
         ok: false,
         error:
-          "Could not save your application. Ensure Redis (Upstash) is configured for the site.",
+          "Could not save your application. Ensure Supabase or Redis is configured.",
       },
       { status: 503 },
     );
   }
 
-  return NextResponse.json({ ok: true, id });
+  return NextResponse.json({ ok: true, id: applicationId || redisId });
 }

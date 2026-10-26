@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { notifyMembershipApplicationPending } from "@/lib/member-application-notify";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
-  MAX_PHOTO_BYTES_FOR_STORAGE,
-  recordPendingMemberSignup,
-} from "@/lib/member-signup-storage";
+  upsertMember,
+  createApplication,
+  uploadApplicationDocument,
+} from "@/lib/supabase/applications";
+import type { MembershipSignupData } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
+
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5 MB
 
 const PLACEHOLDER_GIF_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
@@ -48,6 +53,13 @@ async function handleJson(request: Request) {
 }
 
 async function handleMultipart(request: Request) {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json(
+      { ok: false, error: "Application storage is not configured." },
+      { status: 503 },
+    );
+  }
+
   const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
   if (!formData) {
     return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
@@ -100,47 +112,88 @@ async function handleMultipart(request: Request) {
   if (!(facial instanceof Blob) || facial.size === 0) {
     return NextResponse.json({ ok: false, error: "Facial photograph is required." }, { status: 400 });
   }
-  const buf = Buffer.from(await facial.arrayBuffer());
-  if (buf.length > MAX_PHOTO_BYTES_FOR_STORAGE) {
-    return NextResponse.json({ ok: false, error: "Photo exceeds the maximum size." }, { status: 400 });
+  if (facial.size > MAX_PHOTO_BYTES) {
+    return NextResponse.json({ ok: false, error: "Photo must be smaller than 5 MB." }, { status: 400 });
   }
-  const photoMimeType = facial.type || "image/jpeg";
-  const photoBase64 = buf.toString("base64");
 
-  const ok = await recordPendingMemberSignup({
+  // Create or update member record
+  const memberResult = await upsertMember({
+    email,
+    full_name: fullName,
+    service_number: regimentalNumber,
+    rank,
+    phone,
+    phone_country_code: phoneCountryCode,
+    phone_home: phoneHome || undefined,
+    phone_work: phoneWork || undefined,
+    address,
+    department_division: departmentDivision,
+    section_station: sectionStation,
+    date_of_birth: dateOfBirth,
+    sex: sex as 'male' | 'female',
+    age: parseInt(age, 10),
+    financial_member: financialMember as 'yes' | 'no',
+    date_of_enlistment: dateOfEnlistment,
+  });
+
+  if (!memberResult) {
+    return NextResponse.json(
+      { ok: false, error: "Could not create member record." },
+      { status: 500 },
+    );
+  }
+
+  // Build application data
+  const applicationData: MembershipSignupData = {
     regimentalNumber,
     rank,
-    fullName,
+    departmentDivision,
+    sectionStation,
     address,
-    email,
-    phone,
     phoneCountryCode,
     phoneHome: phoneHome || undefined,
     phoneWork: phoneWork || undefined,
-    financialMember: financialMember as "yes" | "no",
-    photoMimeType,
-    photoBase64,
-    departmentDivision,
-    sectionStation,
+    phone,
     age,
-    sex: sex as "male" | "female",
+    sex: sex as 'male' | 'female',
     dateOfBirth,
     dateOfEnlistment,
+    financialMember: financialMember as 'yes' | 'no',
     declarationAccepted: true,
     applicationDateSigned,
-    beneficiaryRegimentalNumber: String(formData.get("beneficiaryRegimentalNumber") ?? "").trim() || undefined,
-    beneficiaryRank: String(formData.get("beneficiaryRank") ?? "").trim() || undefined,
     beneficiaryFullName: String(formData.get("beneficiaryFullName") ?? "").trim() || undefined,
     beneficiaryRelationship: String(formData.get("beneficiaryRelationship") ?? "").trim() || undefined,
     beneficiaryIdNumber: String(formData.get("beneficiaryIdNumber") ?? "").trim() || undefined,
     witnessName: String(formData.get("witnessName") ?? "").trim() || undefined,
+  };
+
+  // Create application
+  const appResult = await createApplication({
+    member_id: memberResult.member_id,
+    application_type: 'membership_signup',
+    application_data: applicationData,
   });
 
-  if (!ok) {
+  if (!appResult) {
     return NextResponse.json(
-      { ok: false, error: "Could not save application. Storage may be unavailable." },
-      { status: 503 },
+      { ok: false, error: "Could not save application." },
+      { status: 500 },
     );
+  }
+
+  // Upload facial photo
+  const photoUpload = await uploadApplicationDocument({
+    application_id: appResult.application_id,
+    member_id: memberResult.member_id,
+    document_type: 'facial_photo',
+    file: facial,
+    file_name: 'facial-photo.jpg',
+    mime_type: facial.type || 'image/jpeg',
+  });
+
+  if (!photoUpload) {
+    console.error('Failed to upload facial photo for application', appResult.application_id);
+    // Continue anyway - application is saved
   }
 
   void notifyMembershipApplicationPending({

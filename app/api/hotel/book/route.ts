@@ -5,6 +5,9 @@ import {
   ROOM_CAPACITY,
   type RoomCategory,
 } from "@/lib/simple-hotel-booking-storage";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { createApplication } from "@/lib/supabase/applications";
+import type { HotelBookingData } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
 
@@ -236,6 +239,37 @@ export async function POST(request: Request) {
       } catch (error) {
         console.error("hotel booking notification email:", error);
       }
+    }
+  }
+
+  // Also save to Supabase unified storage if configured
+  if (isSupabaseConfigured()) {
+    try {
+      const bookingData: HotelBookingData = {
+        guestName,
+        email,
+        phone,
+        roomCategory: roomCategory as HotelBookingData['roomCategory'],
+        roomCount,
+        checkIn,
+        checkOut,
+        guests,
+        meals: {
+          Breakfast: meals.filter(m => m.startsWith('Breakfast')).length,
+          Lunch: meals.filter(m => m.startsWith('Lunch')).length,
+          Dinner: meals.filter(m => m.startsWith('Dinner')).length,
+        },
+        specialRequests: specialRequests || undefined,
+      };
+
+      await createApplication({
+        member_id: null,
+        application_type: 'hotel_booking',
+        application_data: { ...bookingData, prismaBookingId: result.booking.id },
+      });
+    } catch (error) {
+      console.error('Failed to save hotel booking to Supabase:', error);
+      // Continue - Prisma booking already succeeded
     }
   }
 

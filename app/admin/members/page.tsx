@@ -5,6 +5,9 @@ import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
 import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
 import { getAllMemberApplications } from "@/lib/member-signup-storage";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { getMembers, getApplications } from "@/lib/supabase/applications";
+import type { Member, Application } from "@/lib/supabase/types";
 
 type Props = {
   searchParams: Promise<{ q?: string; status?: string }> | { q?: string; status?: string };
@@ -21,13 +24,98 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
     redirect("/admin/login?next=/admin/members");
   }
 
-  let allMembers: Awaited<ReturnType<typeof getAllMemberApplications>>;
+  // Fetch from both Redis (legacy) and Supabase (new)
+  let redisMembers: Awaited<ReturnType<typeof getAllMemberApplications>> = [];
+  let supabaseMembers: Member[] = [];
+  let supabaseApplications: Application[] = [];
+
   try {
-    allMembers = await getAllMemberApplications();
+    redisMembers = await getAllMemberApplications();
   } catch (e) {
-    console.error("AdminMembersDatabasePage getAllMemberApplications error:", e);
-    allMembers = [];
+    console.error("Error fetching Redis members:", e);
   }
+
+  if (isSupabaseConfigured()) {
+    try {
+      supabaseMembers = await getMembers({
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        limit: 1000,
+      });
+      supabaseApplications = await getApplications({
+        type: 'membership_signup',
+        limit: 1000,
+      });
+    } catch (e) {
+      console.error("Error fetching Supabase members:", e);
+    }
+  }
+
+  // Combine both sources for display
+  interface DisplayMember {
+    id: string;
+    fullName: string;
+    email: string;
+    regimentalNumber: string;
+    username: string | null;
+    applicationStatus: string;
+    rank: string;
+    phone: string;
+    address: string;
+    dateOfBirth: string;
+    financialMember: string;
+    photoMimeType?: string;
+    photoBase64?: string;
+    source: 'redis' | 'supabase';
+    created_at?: string;
+  }
+
+  const allMembers: DisplayMember[] = [
+    // Supabase members (primary)
+    ...supabaseMembers.map(m => {
+      // Find associated application to get status
+      const app = supabaseApplications.find(a => a.member_id === m.id);
+      const status = app?.status === 'approved' ? 'accepted' 
+                   : app?.status === 'rejected' ? 'rejected'
+                   : app?.status === 'submitted' ? 'pending'
+                   : m.member_status === 'active' ? 'accepted'
+                   : 'pending';
+
+      return {
+        id: m.id,
+        fullName: m.full_name,
+        email: m.email,
+        regimentalNumber: m.service_number || '',
+        username: m.username,
+        applicationStatus: status,
+        rank: m.rank || '',
+        phone: m.phone || '',
+        address: m.address || '',
+        dateOfBirth: m.date_of_birth || '',
+        financialMember: m.financial_member || '',
+        source: 'supabase' as const,
+        created_at: m.created_at,
+      };
+    }),
+    // Redis members (legacy - only show if not in Supabase)
+    ...redisMembers
+      .filter(rm => !supabaseMembers.some(sm => sm.email === rm.email))
+      .map(m => ({
+        id: m.id,
+        fullName: m.fullName,
+        email: m.email,
+        regimentalNumber: m.regimentalNumber,
+        username: m.username,
+        applicationStatus: m.applicationStatus,
+        rank: m.rank,
+        phone: m.phone,
+        address: m.address,
+        dateOfBirth: m.dateOfBirth || '',
+        financialMember: m.financialMember || '',
+        photoMimeType: m.photoMimeType,
+        photoBase64: m.photoBase64,
+        source: 'redis' as const,
+      })),
+  ];
 
   const statusOk =
     statusFilter === "pending" ||
@@ -36,10 +124,9 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
       ? statusFilter
       : "all";
 
-  let rows = allMembers;
-  if (statusOk !== "all") {
-    rows = rows.filter((m) => m.applicationStatus === statusOk);
-  }
+  let rows = statusOk !== "all"
+    ? allMembers.filter((m) => m.applicationStatus === statusOk)
+    : allMembers;
 
   const qLower = nameQuery.toLowerCase();
   const filtered =
@@ -186,6 +273,14 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
             </Link>
           ) : null}
         </form>
+
+        {supabaseMembers.length > 0 && (
+          <p className="text-sm text-[var(--muted)]">
+            Showing {supabaseMembers.length} from Supabase
+            {redisMembers.length > 0 && redisMembers.filter(rm => !supabaseMembers.some(sm => sm.email === rm.email)).length > 0 
+              && ` + ${redisMembers.filter(rm => !supabaseMembers.some(sm => sm.email === rm.email)).length} legacy from Redis`}
+          </p>
+        )}
 
         <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
           {filtered.length === 0 ? (
