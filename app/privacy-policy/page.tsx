@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
                 Privacy Policy
               </h1>
               <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted">
-                Last updated: October 26, 2024
+                Last updated: October 26, 2026
               </p>
             </div>
           </div>
@@ -153,9 +153,9 @@ export default function PrivacyPolicyPage() {
               <h2>Data Retention</h2>
               <p>We retain your personal information as follows:</p>
               <ul>
-                <li><strong>Active member records:</strong> Maintained for the duration of your membership and for 7 years after membership ends, as required for financial and legal record-keeping</li>
-                <li><strong>Application forms and documents:</strong> Retained for 7 years to support benefit administration and resolve any disputes</li>
-                <li><strong>Hotel booking records:</strong> Retained for 3 years for reservation management and accounting purposes</li>
+                <li><strong>Active member records:</strong> Maintained for the duration of your membership and for a proposed period of 7 years after membership ends (to be confirmed by the Association), as may be required for financial and legal record-keeping</li>
+                <li><strong>Application forms and documents:</strong> Retained for a proposed period of 7 years (to be confirmed by the Association) to support benefit administration and resolve any disputes</li>
+                <li><strong>Hotel booking records:</strong> Retained for a proposed period of 3 years (to be confirmed by the Association) for reservation management and accounting purposes</li>
                 <li><strong>Website analytics:</strong> Aggregated and anonymized data may be retained indefinitely to track trends and improve the website</li>
                 <li><strong>Session and verification codes:</strong> Automatically deleted after expiry (typically 15-30 days)</li>
               </ul>

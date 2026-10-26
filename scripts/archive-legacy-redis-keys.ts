@@ -24,16 +24,17 @@ import { getRedis } from '../lib/redis';
 
 const DRY_RUN = !process.argv.includes('--export');
 
-// Redis keys that store application data (now in Supabase)
+// Redis keys that store legacy application data (now in Supabase)
+// NOTE: member_signups:pending is the only legacy application key
+// Redis analytics keys remain in active use and should NOT be archived
 const LEGACY_KEYS = {
   memberSignupsPending: 'member_signups:pending',
-  serviceLog: 'analytics:service_requests',
 } as const;
 
 interface ArchiveData {
   exportedAt: string;
   keys: {
-    [K in keyof typeof LEGACY_KEYS]: {
+    memberSignupsPending: {
       key: string;
       type: string;
       count: number;
@@ -68,18 +69,12 @@ async function archiveLegacyKeys() {
         count: 0,
         data: [],
       },
-      serviceLog: {
-        key: LEGACY_KEYS.serviceLog,
-        type: 'list',
-        count: 0,
-        data: [],
-      },
     },
   };
 
   console.log('📥 Fetching data from Redis...\n');
 
-  // Fetch member signups
+  // Fetch member signups (the only legacy application key)
   try {
     const signups = await redis.lrange(LEGACY_KEYS.memberSignupsPending, 0, -1);
     archive.keys.memberSignupsPending.count = signups.length;
@@ -95,24 +90,7 @@ async function archiveLegacyKeys() {
     console.error(`❌ Error fetching ${LEGACY_KEYS.memberSignupsPending}:`, error);
   }
 
-  // Fetch service requests
-  try {
-    const requests = await redis.lrange(LEGACY_KEYS.serviceLog, 0, -1);
-    archive.keys.serviceLog.count = requests.length;
-    archive.keys.serviceLog.data = requests.map((item) => {
-      try {
-        return typeof item === 'string' ? JSON.parse(item) : item;
-      } catch {
-        return item;
-      }
-    });
-    console.log(`✓ ${requests.length} service request(s) in ${LEGACY_KEYS.serviceLog}`);
-  } catch (error) {
-    console.error(`❌ Error fetching ${LEGACY_KEYS.serviceLog}:`, error);
-  }
-
-  const totalRecords =
-    archive.keys.memberSignupsPending.count + archive.keys.serviceLog.count;
+  const totalRecords = archive.keys.memberSignupsPending.count;
 
   console.log(`\n📊 Total records: ${totalRecords}\n`);
 
