@@ -163,7 +163,7 @@ export function HotelPerformanceDashboard({ bookings, sessionRole }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          periodStart: metrics.roomNightsBooked >= 0 ? periodLabel : "",
+          selectedDate,
           reportType: viewMode,
         }),
       });

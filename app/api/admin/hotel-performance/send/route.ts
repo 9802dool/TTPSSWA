@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "No valid recipients" }, { status: 400 });
   }
 
-  let body: { reportType?: string };
+  let body: { reportType?: string; selectedDate?: string };
   try {
     body = await request.json();
   } catch {
@@ -71,8 +71,11 @@ export async function POST(request: Request) {
   }
 
   const isWeekly = body.reportType === "weekly";
-  const today = getTrinidadToday();
-  const range = isWeekly ? getWeekRange(today) : getMonthRange(today);
+  const selected =
+    typeof body.selectedDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(body.selectedDate)
+      ? body.selectedDate
+      : getTrinidadToday();
+  const range = isWeekly ? getWeekRange(selected) : getMonthRange(selected);
 
   try {
     const { bookings } = await loadHotelBookings();

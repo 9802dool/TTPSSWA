@@ -426,7 +426,9 @@ describe("hotel-performance-metrics", () => {
       const { start, end } = getWeekRange("2024-01-15");
 
       const startDate = new Date(start + "T04:00:00Z");
-      expect(startDate.getUTCDay()).toBe(0);
+      expect(startDate.getUTCDay()).toBe(1); // Monday
+      expect(start).toBe("2024-01-15");
+      expect(end).toBe("2024-01-22");
       
       const startMs = new Date(start + "T04:00:00Z").getTime();
       const endMs = new Date(end + "T04:00:00Z").getTime();
@@ -445,8 +447,20 @@ describe("hotel-performance-metrics", () => {
     it("should get previous period correctly", () => {
       const { start: prevStart, end: prevEnd } = getPreviousPeriod("2024-02-01", "2024-03-01", false);
 
-      expect(prevStart.startsWith("2024-01-")).toBe(true);
+      expect(prevStart).toBe("2024-01-01");
       expect(prevEnd).toBe("2024-02-01");
+    });
+
+    it("previous month of March is all of February", () => {
+      expect(getPreviousPeriod("2024-03-01", "2024-04-01", false)).toEqual({ start: "2024-02-01", end: "2024-03-01" });
+      expect(getPreviousPeriod("2024-01-01", "2024-02-01", false)).toEqual({ start: "2023-12-01", end: "2024-01-01" });
+    });
+
+    it("on a Monday the previous week is the last full Mon-Sun week", () => {
+      const cur = getWeekRange("2026-11-02"); // Monday
+      expect(cur.start).toBe("2026-11-02");
+      expect(getPreviousPeriod(cur.start, cur.end, true)).toEqual({ start: "2026-10-26", end: "2026-11-02" });
+      expect(getWeekRange("2026-11-01").start).toBe("2026-10-26"); // Sunday belongs to the week before
     });
   });
 });

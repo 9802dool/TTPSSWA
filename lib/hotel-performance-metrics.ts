@@ -112,12 +112,13 @@ export function getTrinidadToday(): string {
 export function getWeekRange(yyyymmdd: string): { start: string; end: string } {
   const date = trinidadDateToUTC(yyyymmdd);
   const dayOfWeek = date.getUTCDay();
-  const daysToSunday = dayOfWeek === 0 ? 0 : dayOfWeek;
-  const sunday = new Date(date.getTime() - daysToSunday * 86400000);
-  const nextSunday = new Date(sunday.getTime() + 7 * 86400000);
+  // Weeks run Monday-Sunday (Trinidad time)
+  const daysToMonday = (dayOfWeek + 6) % 7;
+  const monday = new Date(date.getTime() - daysToMonday * 86400000);
+  const nextMonday = new Date(monday.getTime() + 7 * 86400000);
   return {
-    start: toTrinidadDateString(sunday),
-    end: toTrinidadDateString(nextSunday),
+    start: toTrinidadDateString(monday),
+    end: toTrinidadDateString(nextMonday),
   };
 }
 
@@ -138,6 +139,12 @@ export function getPreviousPeriod(
   end: string,
   isWeekly: boolean
 ): { start: string; end: string } {
+  if (!isWeekly) {
+    // Previous calendar month (months differ in length, so don't subtract a duration)
+    const [y, m] = start.split("-").map(Number);
+    const prevMonthDay = `${m === 1 ? y - 1 : y}-${String(m === 1 ? 12 : m - 1).padStart(2, "0")}-01`;
+    return getMonthRange(prevMonthDay);
+  }
   const startDate = trinidadDateToUTC(start);
   const endDate = trinidadDateToUTC(end);
   const duration = endDate.getTime() - startDate.getTime();

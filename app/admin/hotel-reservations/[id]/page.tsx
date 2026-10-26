@@ -8,7 +8,7 @@ import { HotelBookingAdminActions } from "@/components/HotelBookingAdminActions"
 import { getHotelReservationById } from "@/lib/analytics-storage";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import { getHotelBookingMeta } from "@/lib/hotel-booking-meta";
-import { getApplicationById } from "@/lib/supabase/applications";
+import { findHotelApplication } from "@/lib/hotel-performance-data";
 
 type Props = { params: Promise<{ id: string }> | { id: string } };
 
@@ -66,9 +66,9 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
   
   let supabaseApplication: { status: string } | null = null;
   try {
-    const appData = await getApplicationById(decodedId);
-    if (appData?.application.application_type === "hotel_booking") {
-      supabaseApplication = { status: appData.application.status };
+    const found = await findHotelApplication(decodedId);
+    if (found) {
+      supabaseApplication = { status: found.status };
     }
   } catch (err) {
     console.error("Error fetching Supabase application:", err);

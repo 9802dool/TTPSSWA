@@ -4,6 +4,7 @@
  */
 
 import { getApplications } from "./supabase/applications";
+import { createServiceClient } from "./supabase/service";
 import type { Application } from "./supabase/types";
 import type { HotelBooking, RoomCategory } from "./hotel-performance-metrics";
 
@@ -132,4 +133,33 @@ export async function loadHotelBookings(): Promise<{ bookings: HotelBooking[]; s
   }
   
   return { bookings, skipped };
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Admin hotel pages use the Redis booking id (e.g. "1791305343471-t6ixt56").
+ * The Supabase application stores it as application_data.prismaBookingId (or .id on
+ * backfilled rows). Accepts either that id or the application UUID.
+ */
+export async function findHotelApplication(
+  idOrBookingId: string,
+): Promise<{ id: string; status: Application["status"] } | null> {
+  const supabase = createServiceClient();
+  if (!supabase || !idOrBookingId) return null;
+  const base = () =>
+    supabase.from("applications").select("id, status").eq("application_type", "hotel_booking");
+  if (UUID_RE.test(idOrBookingId)) {
+    const { data } = await base().eq("id", idOrBookingId).maybeSingle();
+    if (data) return data as { id: string; status: Application["status"] };
+  }
+  for (const key of ["prismaBookingId", "id"]) {
+    const { data } = await base()
+      .eq(`application_data->>${key}`, idOrBookingId)
+      .order("submitted_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) return data as { id: string; status: Application["status"] };
+  }
+  return null;
 }
