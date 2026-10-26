@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
+import { verifyAdminSession, getAdminCookieName, hasRole } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { getApplications } from "@/lib/supabase/applications";
 import type { ApplicationType, ApplicationStatus } from "@/lib/supabase/types";
@@ -10,9 +10,15 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
+  const session = token ? verifyAdminSession(token) : null;
   
-  if (!token || !verifyAdminSession(token)) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  
+  // Only super_admin can export CSV
+  if (!hasRole(session, "super_admin")) {
+    return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
   }
 
   if (!isSupabaseConfigured()) {

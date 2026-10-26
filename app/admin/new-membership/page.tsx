@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { AdminQuickAcceptButton } from "@/components/AdminQuickAcceptButton";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
-import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
+import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-auth";
 import { formatMemberPhoneDisplay } from "@/lib/member-phone";
 import { getAdminStats } from "@/lib/analytics-storage";
 import { getPendingMemberSignups } from "@/lib/member-signup-storage";
@@ -26,7 +26,9 @@ export default async function AdminNewMembershipDatabasePage({ searchParams }: P
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  if (!token || !verifyAdminSession(token)) {
+  const session = token ? verifyAdminSession(token) : null;
+  
+  if (!session) {
     redirect("/admin/login?next=/admin/new-membership");
   }
 

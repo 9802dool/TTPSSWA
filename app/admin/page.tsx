@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { AdminQuickAcceptButton } from "@/components/AdminQuickAcceptButton";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
-import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
+import { verifyAdminSession, getAdminCookieName, hasRole } from "@/lib/admin-auth";
 import { formatMemberPhoneDisplay } from "@/lib/member-phone";
 import { getAdminStats } from "@/lib/analytics-storage";
 import { getPendingMemberSignups } from "@/lib/member-signup-storage";
@@ -23,9 +23,13 @@ export default async function AdminPage({ searchParams }: Props) {
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  if (!token || !verifyAdminSession(token)) {
+  const session = token ? verifyAdminSession(token) : null;
+  
+  if (!session) {
     redirect("/admin/login?next=/admin");
   }
+  
+  const isSuperAdmin = hasRole(session, "super_admin");
 
   let stats: Awaited<ReturnType<typeof getAdminStats>>;
   let pendingSignups: Awaited<ReturnType<typeof getPendingMemberSignups>>;
@@ -114,9 +118,22 @@ export default async function AdminPage({ searchParams }: Props) {
             </h1>
             <p className="text-sm text-[var(--muted)]">
               Traffic, service requests, and pending member signups
+              {session && (
+                <span className="ml-2">
+                  • Signed in as <strong>{session.email}</strong> ({session.role.replace("_", " ")})
+                </span>
+              )}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
+            {isSuperAdmin && (
+              <Link
+                href="/admin/users"
+                className="text-sm font-medium text-[var(--brand)] hover:underline"
+              >
+                Admin Users
+              </Link>
+            )}
             <Link
               href="/admin/dashboard"
               className="text-sm font-medium text-[var(--brand)] hover:underline"

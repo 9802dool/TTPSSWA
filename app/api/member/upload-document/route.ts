@@ -4,8 +4,8 @@ import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { uploadApplicationDocument } from "@/lib/supabase/applications";
 import { verifyApplicationOwnership } from "@/lib/supabase/member-helpers";
 import { validateFile } from "@/lib/file-validation";
-import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 import { isEmailVerified } from "@/lib/verify-account-helper";
+import { getWebAccountById } from "@/lib/web-account-storage";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     }, { status: 403 });
   }
 
-  if (!isDatabaseConfigured() || !isSupabaseConfigured()) {
+  if (!isSupabaseConfigured()) {
     return NextResponse.json({ error: "Storage not configured" }, { status: 503 });
   }
 
@@ -70,14 +70,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
-  // Get user to verify ownership
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 401 });
+  // Get user account from Redis (production uses WebAccount in Upstash Redis)
+  const account = await getWebAccountById(userId);
+  if (!account) {
+    return NextResponse.json({ error: "Account not found" }, { status: 401 });
   }
 
   // Verify application belongs to this user (case-insensitive email match)
-  const ownership = await verifyApplicationOwnership(applicationId, user.email);
+  const ownership = await verifyApplicationOwnership(applicationId, account.email);
   if (!ownership) {
     return NextResponse.json({ error: "Application not found or access denied" }, { status: 403 });
   }

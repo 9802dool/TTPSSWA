@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import { getAdminCookieName, verifyAdminSession, hasRole } from "@/lib/admin-auth";
 import {
   getHotelBookingMeta,
   mergeHotelBookingMeta,
@@ -17,8 +17,15 @@ export async function PATCH(
 ) {
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  if (!token || !verifyAdminSession(token)) {
+  const session = token ? verifyAdminSession(token) : null;
+  
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+  
+  // Require at least staff role
+  if (!hasRole(session, "staff")) {
+    return NextResponse.json({ error: "Insufficient permissions." }, { status: 403 });
   }
 
   const params = await Promise.resolve(context.params);

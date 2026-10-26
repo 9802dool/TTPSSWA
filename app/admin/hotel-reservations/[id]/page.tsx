@@ -6,7 +6,7 @@ import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
 import { HotelBookingAdminActions } from "@/components/HotelBookingAdminActions";
 import { getHotelReservationById } from "@/lib/analytics-storage";
-import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import { getHotelBookingMeta } from "@/lib/hotel-booking-meta";
 
 type Props = { params: Promise<{ id: string }> | { id: string } };
@@ -53,7 +53,9 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  if (!token || !verifyAdminSession(token)) {
+  const session = token ? verifyAdminSession(token) : null;
+  
+  if (!session) {
     redirect(
       `/admin/login?next=${encodeURIComponent(`/admin/hotel-reservations/${encodeURIComponent(decodedId)}`)}`,
     );

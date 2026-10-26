@@ -7,7 +7,7 @@ import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import { MemberServiceRequestsSection } from "@/components/MemberServiceRequestsSection";
 import SiteHeader from "@/components/SiteHeader";
 import { getServiceRequestsForEmail } from "@/lib/analytics-storage";
-import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import {
   formatMemberPhoneDisplay,
   memberPhoneTelHref,
@@ -34,7 +34,9 @@ export default async function AdminMemberProfilePage({ params }: Props) {
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  if (!token || !verifyAdminSession(token)) {
+  const session = token ? verifyAdminSession(token) : null;
+  
+  if (!session) {
     redirect(
       `/admin/login?next=${encodeURIComponent(`/admin/members/${decodedId}`)}`,
     );

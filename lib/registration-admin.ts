@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import { createClient } from "@/lib/supabase/server";
 
 export async function isRegistrationAdmin(): Promise<{
@@ -8,8 +8,10 @@ export async function isRegistrationAdmin(): Promise<{
 }> {
   const cookieStore = await cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  if (token && verifyAdminSession(token)) {
-    return { ok: true, reviewerId: null };
+  const session = token ? verifyAdminSession(token) : null;
+  
+  if (session) {
+    return { ok: true, reviewerId: session.userId };
   }
 
   try {
