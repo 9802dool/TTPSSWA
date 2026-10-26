@@ -29,7 +29,7 @@ export default function BecomeAMemberPage() {
         </div>
 
         <p className="mx-auto mb-8 max-w-3xl text-center text-sm text-slate-700">
-          <strong>Quick signup</strong> (for mobile or if you don't have an account yet):
+          <strong>Quick signup</strong> (for mobile or if you don&apos;t have an account yet):
         </p>
         <MemberSignupForm />
         

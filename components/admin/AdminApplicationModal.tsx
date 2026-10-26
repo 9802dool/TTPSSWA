@@ -22,6 +22,7 @@ export function AdminApplicationModal({ application, onClose, onUpdate }: Props)
 
   useEffect(() => {
     fetchDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [application.id]);
 
   const fetchDetails = async () => {

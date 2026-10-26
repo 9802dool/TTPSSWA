@@ -90,7 +90,7 @@ export default async function MemberDashboardPage() {
 
         {validApplications.length === 0 ? (
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-8 text-center">
-            <p className="text-[var(--muted)]">You haven't submitted any applications yet.</p>
+            <p className="text-[var(--muted)]">You haven&apos;t submitted any applications yet.</p>
             <Link
               href="/membership-services"
               className="mt-4 inline-block text-sm font-medium text-[var(--brand)] hover:underline"
