@@ -6,10 +6,13 @@ import {
   mergeHotelBookingMeta,
   type HotelBookingMeta,
 } from "@/lib/hotel-booking-meta";
+import { updateApplicationStatus } from "@/lib/supabase/applications";
+import { findHotelApplication } from "@/lib/hotel-performance-data";
+import type { ApplicationStatus } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
 
-type Body = { action?: string; repliedEmailNote?: string };
+type Body = { action?: string; repliedEmailNote?: string; bookingStatus?: string };
 
 export async function PATCH(
   request: Request,
@@ -66,6 +69,45 @@ export async function PATCH(
       return NextResponse.json(
         { error: "Could not save status (storage unavailable)." },
         { status: 503 },
+      );
+    }
+  } else if (action === "update_status") {
+    const statusInput = String(body.bookingStatus ?? "").trim().toLowerCase();
+    const statusMap: Record<string, ApplicationStatus> = {
+      submitted: "submitted",
+      approved: "approved",
+      completed: "completed",
+      pending: "submitted",
+      request: "submitted",
+      confirmed: "approved",
+      "checked out": "completed",
+      cancelled: "cancelled",
+    };
+    
+    const newStatus = statusMap[statusInput];
+    if (!newStatus) {
+      return NextResponse.json({ error: "Invalid status." }, { status: 400 });
+    }
+    
+    const application = await findHotelApplication(id);
+    if (!application) {
+      return NextResponse.json(
+        { error: "No matching hotel booking application found." },
+        { status: 404 },
+      );
+    }
+
+    const success = await updateApplicationStatus(application.id, newStatus, {
+      changed_by_type: "admin",
+      changed_by_id: session.userId,
+      changed_by_name: session.email,
+      note: `Status changed to ${newStatus} by admin`,
+    });
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: "Could not update booking status." },
+        { status: 500 },
       );
     }
   } else {

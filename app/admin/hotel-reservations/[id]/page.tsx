@@ -8,6 +8,7 @@ import { HotelBookingAdminActions } from "@/components/HotelBookingAdminActions"
 import { getHotelReservationById } from "@/lib/analytics-storage";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import { getHotelBookingMeta } from "@/lib/hotel-booking-meta";
+import { findHotelApplication } from "@/lib/hotel-performance-data";
 
 type Props = { params: Promise<{ id: string }> | { id: string } };
 
@@ -62,18 +63,30 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
   }
 
   const { storageConfigured, record } = await getHotelReservationById(decodedId);
-  if (!storageConfigured) {
+  
+  let supabaseApplication: { status: string } | null = null;
+  try {
+    const found = await findHotelApplication(decodedId);
+    if (found) {
+      supabaseApplication = { status: found.status };
+    }
+  } catch (err) {
+    console.error("Error fetching Supabase application:", err);
+  }
+  
+  if (!storageConfigured && !supabaseApplication) {
     redirect("/admin/hotel-reservations");
   }
-  if (!record) {
+  if (!record && !supabaseApplication) {
     notFound();
   }
 
   const bookingMeta = await getHotelBookingMeta(decodedId);
 
-  const p = record.payload;
+  const p = record?.payload ?? {};
   const emailVal = str(p, "email");
   const phoneVal = str(p, "phone");
+  const currentStatus = supabaseApplication?.status ?? "UNKNOWN";
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
@@ -93,7 +106,7 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
               Hotel reservation
             </h1>
             <p className="text-sm text-[var(--muted)]">
-              {str(p, "fullName") || "—"} · {record.createdAt.replace("T", " ").replace(/\.\d{3}Z$/, "")}{" "}
+              {str(p, "fullName") || "—"} · {record?.createdAt.replace("T", " ").replace(/\.\d{3}Z$/, "") || "—"}{" "}
               UTC
             </p>
           </div>
@@ -116,14 +129,16 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
           <dl className="space-y-4 p-6 text-sm">
             <div>
               <dt className="text-[var(--muted)]">Record ID</dt>
-              <dd className="mt-0.5 font-mono text-xs break-all">{record.id}</dd>
+              <dd className="mt-0.5 font-mono text-xs break-all">{record?.id ?? decodedId}</dd>
             </div>
-            <div>
-              <dt className="text-[var(--muted)]">Submitted (UTC)</dt>
-              <dd className="mt-0.5 font-mono text-xs">
-                {record.createdAt.replace("T", " ").replace(/\.\d{3}Z$/, "")}
-              </dd>
-            </div>
+            {record && (
+              <div>
+                <dt className="text-[var(--muted)]">Submitted (UTC)</dt>
+                <dd className="mt-0.5 font-mono text-xs">
+                  {record.createdAt.replace("T", " ").replace(/\.\d{3}Z$/, "")}
+                </dd>
+              </div>
+            )}
             <div>
               <dt className="text-[var(--muted)]">Full name</dt>
               <dd className="mt-0.5 font-medium">{str(p, "fullName") || "—"}</dd>
@@ -195,20 +210,25 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
           </dl>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
-          <div className="border-b border-[var(--border)] bg-[var(--bg)] px-6 py-4">
-            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
-              Quotation & follow-up
-            </p>
+        {record && (
+          <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+            <div className="border-b border-[var(--border)] bg-[var(--bg)] px-6 py-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+                Quotation & follow-up
+              </p>
+            </div>
+            <div className="p-6">
+              <HotelBookingAdminActions
+                recordId={record.id}
+                initialMeta={bookingMeta}
+                storageConfigured={storageConfigured}
+                currentStatus={currentStatus}
+                isSupabaseBooking={supabaseApplication !== null}
+                sessionRole={session.role}
+              />
+            </div>
           </div>
-          <div className="p-6">
-            <HotelBookingAdminActions
-              recordId={record.id}
-              initialMeta={bookingMeta}
-              storageConfigured={storageConfigured}
-            />
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );
