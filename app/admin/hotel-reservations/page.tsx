@@ -9,6 +9,9 @@ import {
   type ServiceRequestRecord,
 } from "@/lib/analytics-storage";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { getApplications } from "@/lib/supabase/applications";
+import type { Application } from "@/lib/supabase/types";
 
 export const metadata: Metadata = {
   title: "Hotel reservations | Admin | TTPSSWA",
@@ -58,19 +61,47 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
     redirect("/admin/login?next=/admin/hotel-reservations");
   }
 
-  let db: Awaited<ReturnType<typeof getHotelReservationRecords>>;
+  // Fetch from both Redis (legacy) and Supabase (new)
+  let redisRecords: ServiceRequestRecord[] = [];
+  let supabaseApplications: Application[] = [];
+
   try {
-    db = await getHotelReservationRecords();
+    const db = await getHotelReservationRecords();
+    redisRecords = db.records;
   } catch (e) {
-    console.error("AdminHotelReservationsPage getHotelReservationRecords error:", e);
-    db = { storageConfigured: false, records: [] };
+    console.error("Error fetching Redis hotel reservations:", e);
   }
+
+  if (isSupabaseConfigured()) {
+    try {
+      supabaseApplications = await getApplications({
+        type: 'hotel_booking',
+        limit: 1000,
+      });
+    } catch (e) {
+      console.error("Error fetching Supabase hotel bookings:", e);
+    }
+  }
+
+  // Convert Supabase applications to display format
+  const supabaseRecords: ServiceRequestRecord[] = supabaseApplications.map(app => ({
+    id: app.id,
+    serviceType: 'hotel_booking',
+    createdAt: new Date(app.submitted_at).toISOString(),
+    payload: {
+      ...(app.application_data as Record<string, unknown>),
+      source: 'supabase',
+    },
+  }));
+
+  // Combine both sources
+  const allRecords = [...supabaseRecords, ...redisRecords];
 
   const qLower = nameQuery.toLowerCase();
   const filtered =
     nameQuery.length > 0
-      ? db.records.filter((row) => rowSearchBlob(row).includes(qLower))
-      : db.records;
+      ? allRecords.filter((row) => rowSearchBlob(row).includes(qLower))
+      : allRecords;
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
@@ -87,9 +118,7 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
               Hotel reservation database
             </h1>
             <p className="text-sm text-[var(--muted)]">
-              Successful submissions from the public hotel form (
-              {db.storageConfigured ? db.records.length : 0} in Redis log, up to 500
-              newest)
+              Hotel bookings from Supabase ({supabaseApplications.length}) and legacy Redis ({redisRecords.length})
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -114,14 +143,21 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
       </header>
 
       <main className="site-container space-y-6 py-10">
-        {!db.storageConfigured ? (
+        {supabaseApplications.length > 0 && (
+          <p className="text-sm text-[var(--muted)]">
+            Showing {supabaseApplications.length} from Supabase
+            {redisRecords.length > 0 && ` + ${redisRecords.length} from Redis`}
+          </p>
+        )}
+
+        {allRecords.length === 0 && !isSupabaseConfigured() ? (
           <div
             className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
             role="status"
           >
-            <p className="font-medium">Analytics storage is not configured</p>
+            <p className="font-medium">Storage is not configured</p>
             <p className="mt-1 text-sm opacity-90">
-              Hotel reservations are stored in the same Redis database as analytics. Add{" "}
+              Hotel reservations are stored in Supabase or Redis (legacy). Add{" "}
               <code className="rounded bg-black/10 px-1 py-0.5 text-xs dark:bg-white/10">
                 UPSTASH_REDIS_REST_URL
               </code>{" "}
@@ -176,11 +212,9 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
         <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
           {filtered.length === 0 ? (
             <p className="p-6 text-sm text-[var(--muted)]">
-              {!db.storageConfigured
-                ? "No data until Redis is configured."
-                : db.records.length === 0
-                  ? "No hotel reservations logged yet."
-                  : "No records match your search."}
+              {allRecords.length === 0
+                ? "No hotel reservations yet."
+                : "No records match your search."}
             </p>
           ) : (
             <table className="w-full min-w-[1180px] text-left text-sm">

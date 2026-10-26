@@ -9,6 +9,9 @@ import { formatMemberPhoneDisplay } from "@/lib/member-phone";
 import { getAdminStats } from "@/lib/analytics-storage";
 import { getPendingMemberSignups } from "@/lib/member-signup-storage";
 import { listWebAccounts } from "@/lib/web-account-storage";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { getApplications } from "@/lib/supabase/applications";
+import type { Application } from "@/lib/supabase/types";
 
 type Props = {
   searchParams: Promise<{ q?: string }> | { q?: string };
@@ -27,6 +30,8 @@ export default async function AdminPage({ searchParams }: Props) {
   let stats: Awaited<ReturnType<typeof getAdminStats>>;
   let pendingSignups: Awaited<ReturnType<typeof getPendingMemberSignups>>;
   let webAccounts: Awaited<ReturnType<typeof listWebAccounts>>;
+  let supabaseApplications: Application[] = [];
+
   try {
     stats = await getAdminStats();
   } catch (e) {
@@ -50,6 +55,26 @@ export default async function AdminPage({ searchParams }: Props) {
     console.error("AdminPage listWebAccounts error:", e);
     webAccounts = [];
   }
+
+  // Fetch applications from Supabase
+  if (isSupabaseConfigured()) {
+    try {
+      supabaseApplications = await getApplications({ limit: 1000 });
+    } catch (e) {
+      console.error("Error fetching Supabase applications:", e);
+    }
+  }
+
+  // Combine Redis service requests with Supabase applications
+  const allServiceRequests = [
+    ...stats.serviceRequests,
+    ...supabaseApplications.map(app => ({
+      id: app.id,
+      serviceType: app.application_type,
+      createdAt: app.submitted_at,
+      payload: app.application_data as Record<string, unknown>,
+    })),
+  ];
   const pathEntries = stats.visitsByPath
     ? Object.entries(stats.visitsByPath).sort((a, b) => b[1] - a[1])
     : [];
@@ -128,7 +153,14 @@ export default async function AdminPage({ searchParams }: Props) {
       </header>
 
       <main className="site-container-admin space-y-10 py-10">
-        {!stats.storageConfigured ? (
+        {supabaseApplications.length > 0 && (
+          <p className="text-sm text-[var(--muted)]">
+            Applications: {supabaseApplications.length} from Supabase
+            {stats.serviceRequests.length > 0 && ` + ${stats.serviceRequests.length} from Redis`}
+          </p>
+        )}
+
+        {!stats.storageConfigured && !isSupabaseConfigured() ? (
           <div
             className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100"
             role="status"
@@ -446,9 +478,9 @@ export default async function AdminPage({ searchParams }: Props) {
         <section>
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="text-base font-semibold">Service requests</h2>
+              <h2 className="text-base font-semibold">Service requests & Applications</h2>
               <p className="mt-1 text-sm text-[var(--muted)]">
-                Successful submissions (hotel bookings and future services).
+                All applications from Supabase and legacy service requests from Redis.
               </p>
             </div>
             <Link
@@ -459,21 +491,21 @@ export default async function AdminPage({ searchParams }: Props) {
             </Link>
           </div>
           <div className="mt-4 overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
-            {stats.serviceRequests.length === 0 ? (
+            {allServiceRequests.length === 0 ? (
               <p className="p-6 text-sm text-[var(--muted)]">
-                No service requests logged yet.
+                No applications or service requests yet.
               </p>
             ) : (
               <table className="w-full min-w-[640px] text-left text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--bg)]">
                   <tr>
                     <th className="px-4 py-3 font-medium">When (UTC)</th>
-                    <th className="px-4 py-3 font-medium">Service</th>
+                    <th className="px-4 py-3 font-medium">Type</th>
                     <th className="px-4 py-3 font-medium">Summary</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {stats.serviceRequests.map((row) => (
+                  {allServiceRequests.map((row) => (
                     <tr
                       key={row.id}
                       className="border-b border-[var(--border)] align-top last:border-0"
@@ -482,7 +514,7 @@ export default async function AdminPage({ searchParams }: Props) {
                         {row.createdAt}
                       </td>
                       <td className="px-4 py-3 capitalize">
-                        {row.serviceType.replace("_", " ")}
+                        {row.serviceType.replace(/_/g, " ")}
                       </td>
                       <td className="px-4 py-3">
                         <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-words font-mono text-xs text-[var(--fg)]">
