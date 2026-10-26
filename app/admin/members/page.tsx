@@ -67,6 +67,7 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
     photoBase64?: string;
     source: 'redis' | 'supabase';
     created_at?: string;
+    createdAt?: string;
   }
 
   const allMembers: DisplayMember[] = [
@@ -104,7 +105,7 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
         fullName: m.fullName,
         email: m.email,
         regimentalNumber: m.regimentalNumber,
-        username: m.username,
+        username: m.username || null,
         applicationStatus: m.applicationStatus,
         rank: m.rank,
         phone: m.phone,
@@ -114,6 +115,7 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
         photoMimeType: m.photoMimeType,
         photoBase64: m.photoBase64,
         source: 'redis' as const,
+        createdAt: m.createdAt,
       })),
   ];
 
@@ -322,7 +324,7 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
                       {row.applicationStatus}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[var(--muted)]">
-                      {row.createdAt}
+                      {row.created_at || row.createdAt || ''}
                     </td>
                     <td className="px-4 py-3">
                       {/* eslint-disable-next-line @next/next/no-img-element */}

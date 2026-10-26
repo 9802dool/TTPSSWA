@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { notifyMembershipApplicationPending } from "@/lib/member-application-notify";
+import {
+  MAX_PHOTO_BYTES_FOR_STORAGE,
+  recordPendingMemberSignup,
+} from "@/lib/member-signup-storage";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   upsertMember,
   createApplication,
   uploadApplicationDocument,
 } from "@/lib/supabase/applications";
-import type { MembershipSignupData } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
 
@@ -144,7 +147,7 @@ async function handleMultipart(request: Request) {
   }
 
   // Build application data
-  const applicationData: MembershipSignupData = {
+  const applicationData: Record<string, unknown> = {
     regimentalNumber,
     rank,
     departmentDivision,

@@ -73,10 +73,12 @@ async function migrateMemberSignup(signup: PendingMemberSignup): Promise<boolean
     // Update member status based on application status
     if (signup.applicationStatus === 'accepted') {
       const supabase = createServiceClient();
-      await supabase
-        .from('members')
-        .update({ member_status: 'active' })
-        .eq('id', memberResult.member_id);
+      if (supabase) {
+        await supabase
+          .from('members')
+          .update({ member_status: 'active' })
+          .eq('id', memberResult.member_id);
+      }
     }
 
     // Create application record
@@ -115,23 +117,25 @@ async function migrateMemberSignup(signup: PendingMemberSignup): Promise<boolean
     // Update application status to match Redis status
     if (signup.applicationStatus !== 'pending') {
       const supabase = createServiceClient();
-      const newStatus = signup.applicationStatus === 'accepted' ? 'approved' : 'rejected';
-      await supabase
-        .from('applications')
-        .update({
-          status: newStatus,
-          reviewed_at: new Date().toISOString(),
-        })
-        .eq('id', appResult.application_id);
+      if (supabase) {
+        const newStatus = signup.applicationStatus === 'accepted' ? 'approved' : 'rejected';
+        await supabase
+          .from('applications')
+          .update({
+            status: newStatus,
+            reviewed_at: new Date().toISOString(),
+          })
+          .eq('id', appResult.application_id);
 
-      // Record in history
-      await supabase.from('application_status_history').insert({
-        application_id: appResult.application_id,
-        from_status: 'submitted',
-        to_status: newStatus,
-        changed_by_type: 'system',
-        note: 'Migrated from Redis with existing status',
-      });
+        // Record in history
+        await supabase.from('application_status_history').insert({
+          application_id: appResult.application_id,
+          from_status: 'submitted',
+          to_status: newStatus,
+          changed_by_type: 'system',
+          note: 'Migrated from Redis with existing status',
+        });
+      }
     }
 
     // Upload facial photo if present

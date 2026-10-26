@@ -33,6 +33,7 @@ export async function upsertMember(data: {
   date_of_enlistment?: string;
 }): Promise<{ member_id: string; is_new: boolean } | null> {
   const supabase = createServiceClient();
+  if (!supabase) return null;
 
   // Try to find existing member by email or service number
   let existingMember: Member | null = null;
@@ -100,7 +101,7 @@ export async function upsertMember(data: {
       phone_work: data.phone_work || null,
       address: data.address || null,
       department_division: data.department_division || null,
-      section_station: data.section_section || null,
+      section_station: data.section_station || null,
       date_of_birth: data.date_of_birth || null,
       sex: data.sex || null,
       age: data.age || null,
@@ -131,6 +132,7 @@ export async function createApplication(data: {
   legacy_redis_id?: string;
 }): Promise<{ application_id: string } | null> {
   const supabase = createServiceClient();
+  if (!supabase) return null;
 
   const { data: app, error } = await supabase
     .from('applications')
@@ -174,6 +176,7 @@ export async function uploadApplicationDocument(data: {
   mime_type: string;
 }): Promise<{ document_id: string } | null> {
   const supabase = createServiceClient();
+  if (!supabase) return null;
 
   // Generate unique storage path
   const timestamp = Date.now();
@@ -182,7 +185,9 @@ export async function uploadApplicationDocument(data: {
   const storagePath = `${data.application_id}/${timestamp}-${randomSuffix}-${sanitizedName}`;
 
   // Upload to storage
-  const fileBuffer = data.file instanceof Buffer ? data.file : Buffer.from(await data.file.arrayBuffer());
+  const fileBuffer = data.file instanceof Buffer 
+    ? data.file 
+    : Buffer.from(await (data.file as Blob).arrayBuffer());
   
   const { error: uploadError } = await supabase.storage
     .from('application-documents')
@@ -228,6 +233,7 @@ export async function uploadApplicationDocument(data: {
  */
 export async function getDocumentSignedUrl(storagePath: string): Promise<string | null> {
   const supabase = createServiceClient();
+  if (!supabase) return null;
 
   const { data, error } = await supabase.storage
     .from('application-documents')
@@ -252,6 +258,7 @@ export async function getApplications(filters?: {
   offset?: number;
 }): Promise<Application[]> {
   const supabase = createServiceClient();
+  if (!supabase) return [];
 
   let query = supabase
     .from('applications')
@@ -296,6 +303,7 @@ export async function getApplicationById(
   history: ApplicationStatusHistory[];
 } | null> {
   const supabase = createServiceClient();
+  if (!supabase) return null;
 
   const { data: app, error: appError } = await supabase
     .from('applications')
@@ -355,6 +363,7 @@ export async function updateApplicationStatus(
   },
 ): Promise<boolean> {
   const supabase = createServiceClient();
+  if (!supabase) return false;
 
   // Get current status
   const { data: current } = await supabase
@@ -418,6 +427,7 @@ export async function getMembers(filters?: {
   offset?: number;
 }): Promise<Member[]> {
   const supabase = createServiceClient();
+  if (!supabase) return [];
 
   let query = supabase
     .from('members')
@@ -459,6 +469,7 @@ export async function getMemberWithApplications(
   memberId: string,
 ): Promise<{ member: Member; applications: Application[] } | null> {
   const supabase = createServiceClient();
+  if (!supabase) return null;
 
   const { data: member, error: memberError } = await supabase
     .from('members')

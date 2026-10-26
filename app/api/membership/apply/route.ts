@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { getSessionUserId } from "@/lib/session-user";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
@@ -6,7 +7,6 @@ import {
   createApplication,
   getApplications,
 } from "@/lib/supabase/applications";
-import type { FormalMembershipData } from "@/lib/supabase/types";
 import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -126,7 +126,7 @@ export async function POST(request: Request) {
   }
 
   // Create application
-  const applicationData: FormalMembershipData = {
+  const applicationData: Record<string, unknown> = {
     stationDivision,
     nisNumber,
     bankName,

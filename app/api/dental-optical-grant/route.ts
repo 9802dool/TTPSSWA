@@ -204,7 +204,7 @@ export async function POST(request: Request) {
 
     if (memberResult) {
       // Create application
-      const applicationData: DentalOpticalGrantData = {
+      const applicationData: Record<string, unknown> = {
         regimentalNumber,
         rank,
         departmentDivision,
