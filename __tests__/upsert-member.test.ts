@@ -1,0 +1,80 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+type Row = Record<string, unknown>;
+const state = vi.hoisted(() => ({
+  members: [] as Row[],
+  updates: 0,
+  inserts: [] as Row[],
+}));
+
+function builder(table: string) {
+  const filters: [string, unknown][] = [];
+  let op: "select" | "insert" | "update" = "select";
+  let payload: Row | null = null;
+  const run = () => {
+    if (op === "update") {
+      state.updates++;
+      return { data: null, error: null };
+    }
+    if (op === "insert") {
+      const row = { id: `new-${state.inserts.length + 1}`, ...payload };
+      state.inserts.push(row);
+      return { data: row, error: null };
+    }
+    const rows = state.members.filter((m) => filters.every(([k, v]) => m[k] === v));
+    return { data: rows[0] ?? null, error: rows[0] ? null : { code: "PGRST116" } };
+  };
+  const b: Record<string, unknown> = {
+    select: () => b,
+    eq: (k: string, v: unknown) => { filters.push([k, v]); return b; },
+    ilike: (k: string, v: unknown) => { filters.push([k, v]); return b; },
+    limit: () => b,
+    update: (p: Row) => { op = "update"; payload = p; return b; },
+    insert: (p: Row) => { op = "insert"; payload = p; return b; },
+    single: async () => run(),
+    maybeSingle: async () => { const r = run(); return { data: r.data, error: null }; },
+    then: (res: (v: unknown) => unknown) => Promise.resolve(run()).then(res),
+  };
+  void table;
+  return b;
+}
+
+vi.mock("@/lib/supabase/service", () => ({
+  createServiceClient: () => ({ from: (t: string) => builder(t) }),
+}));
+vi.mock("../lib/supabase/service", () => ({
+  createServiceClient: () => ({ from: (t: string) => builder(t) }),
+}));
+
+import { upsertMember } from "../lib/supabase/applications";
+
+beforeEach(() => {
+  state.members = [];
+  state.updates = 0;
+  state.inserts = [];
+});
+
+describe("upsertMember (public submissions)", () => {
+  it("creates a new member when none matches", async () => {
+    const r = await upsertMember({ email: "new@example.com", full_name: "New Person", service_number: "999" });
+    expect(r).toMatchObject({ is_new: true });
+    expect(state.inserts).toHaveLength(1);
+    expect(state.updates).toBe(0);
+  });
+
+  it("links an existing member by email without updating their profile", async () => {
+    state.members = [{ id: "m1", email: "real@example.com", full_name: "Real Name", address: "Real Address" }];
+    const r = await upsertMember({ email: "real@example.com", full_name: "Attacker", address: "Fake Address" });
+    expect(r).toEqual({ member_id: "m1", is_new: false });
+    expect(state.updates).toBe(0);
+    expect(state.inserts).toHaveLength(0);
+    expect(state.members[0]).toMatchObject({ full_name: "Real Name", address: "Real Address" });
+  });
+
+  it("links an existing member by service number without updating their profile", async () => {
+    state.members = [{ id: "m2", email: "other@example.com", service_number: "12345", full_name: "Real" }];
+    const r = await upsertMember({ email: "12345@placeholder.local", full_name: "X", service_number: "12345" });
+    expect(r).toEqual({ member_id: "m2", is_new: false });
+    expect(state.updates).toBe(0);
+  });
+});

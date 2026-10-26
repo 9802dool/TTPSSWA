@@ -54,7 +54,6 @@ export interface Application {
   application_type: ApplicationType;
   status: ApplicationStatus;
   application_data: Record<string, unknown>;
-  submitted_data: Record<string, unknown> | null;
   admin_notes: string | null;
   reviewed_by: string | null;
   reviewed_at: string | null;

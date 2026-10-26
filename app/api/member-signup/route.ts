@@ -250,15 +250,12 @@ async function handleMultipart(request: Request) {
     witnessName: String(formData.get("witnessName") ?? "").trim() || undefined,
   };
 
-  // If existing member, preserve submitted data
-  const submittedData = memberResult.is_new ? null : applicationData;
 
   // Create application
   const appResult = await createApplication({
     member_id: memberResult.member_id,
     application_type: 'membership_signup',
     application_data: applicationData,
-    submitted_data: submittedData,
   });
 
   if (!appResult) {
@@ -284,7 +281,7 @@ async function handleMultipart(request: Request) {
   }
 
   // Send admin notification
-  void sendAdminNotification({
+  await sendAdminNotification({
     applicationType: 'membership_signup',
     applicantName: fullName,
     applicantEmail: email,
@@ -292,13 +289,16 @@ async function handleMultipart(request: Request) {
     applicationId: appResult.application_id,
   });
 
-  // Send applicant confirmation (existing notifyMembershipApplicationPending already does this)
-  void notifyMembershipApplicationPending({
+  // Applicant confirmation (email/WhatsApp). Awaited so serverless does not cut it off;
+  // failures are logged and never block the submission.
+  await notifyMembershipApplicationPending({
     fullName,
     email,
     regimentalNumber,
     phoneCountryCode,
     phone,
+  }).catch((error) => {
+    console.error("Membership pending notification failed:", error);
   });
 
   return NextResponse.json({ ok: true });

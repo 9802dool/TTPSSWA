@@ -8,7 +8,7 @@ import {
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
-import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
+import { sendAdminNotification } from "@/lib/email-notifications";
 
 export const runtime = "nodejs";
 
@@ -209,14 +209,11 @@ export async function POST(request: Request) {
     witnessName,
   };
 
-  // If existing member, preserve submitted data
-  const submittedData = memberResult.is_new ? null : applicationData;
 
   const appResult = await createApplication({
     member_id: memberResult.member_id,
     application_type: 'merit_salary_deduction',
     application_data: applicationData,
-    submitted_data: submittedData,
   });
 
   if (!appResult) {
@@ -239,19 +236,13 @@ export async function POST(request: Request) {
     mime_type: uploaded.type || 'application/octet-stream',
   });
 
-  // Send notifications (failures are logged but don't block success)
-  void sendAdminNotification({
+  // Notify admins. This form collects no applicant email (the member record uses a
+  // placeholder address), so no applicant confirmation is sent.
+  await sendAdminNotification({
     applicationType: 'merit_salary_deduction',
     applicantName: fullName,
-    applicantEmail: placeholderEmail,
+    applicantEmail: '(not provided)',
     applicantServiceNumber: regimentalNumber,
-    applicationId: appResult.application_id,
-  });
-
-  void sendApplicantConfirmation({
-    applicationType: 'merit_salary_deduction',
-    applicantName: fullName,
-    applicantEmail: placeholderEmail,
     applicationId: appResult.application_id,
   });
 

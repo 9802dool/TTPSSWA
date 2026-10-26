@@ -14,7 +14,7 @@ import type {
  * 
  * IMPORTANT: Does NOT overwrite existing member records from public submissions.
  * When an existing member is found, returns their ID without updating their profile.
- * The submitted data should be stored in application.submitted_data instead.
+ * The submitted form data is kept as-is in application.application_data.
  */
 export async function upsertMember(data: {
   email: string;
@@ -63,7 +63,7 @@ export async function upsertMember(data: {
   if (existingMember) {
     // Found existing member - do NOT overwrite their profile
     // Return their ID so the application can be linked
-    // The caller should store submitted data in application.submitted_data
+    // The submitted form data is preserved in application.application_data
     return { member_id: existingMember.id, is_new: false };
   }
 
@@ -109,7 +109,6 @@ export async function createApplication(data: {
   member_id?: string | null;
   application_type: ApplicationType;
   application_data: Record<string, unknown>;
-  submitted_data?: Record<string, unknown> | null;
   legacy_redis_id?: string;
 }): Promise<{ application_id: string } | null> {
   const supabase = createServiceClient();
@@ -122,7 +121,6 @@ export async function createApplication(data: {
       application_type: data.application_type,
       status: 'submitted',
       application_data: data.application_data,
-      submitted_data: data.submitted_data || null,
       legacy_redis_id: data.legacy_redis_id || null,
       submitted_at: new Date().toISOString(),
     })

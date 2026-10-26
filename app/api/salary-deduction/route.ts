@@ -254,14 +254,11 @@ export async function POST(request: Request) {
     electronicSignature,
   };
 
-  // If existing member, preserve submitted data
-  const submittedData = memberResult.is_new ? null : applicationData;
 
   const appResult = await createApplication({
     member_id: memberResult.member_id,
     application_type: 'salary_deduction',
     application_data: applicationData,
-    submitted_data: submittedData,
   });
 
   if (!appResult) {
@@ -275,7 +272,7 @@ export async function POST(request: Request) {
   }
 
   // Send notifications (failures are logged but don't block success)
-  void sendAdminNotification({
+  await sendAdminNotification({
     applicationType: 'salary_deduction',
     applicantName: fullName,
     applicantEmail: email,
@@ -283,7 +280,7 @@ export async function POST(request: Request) {
     applicationId: appResult.application_id,
   });
 
-  void sendApplicantConfirmation({
+  await sendApplicantConfirmation({
     applicationType: 'salary_deduction',
     applicantName: fullName,
     applicantEmail: email,

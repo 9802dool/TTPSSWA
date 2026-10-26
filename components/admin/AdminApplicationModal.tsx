@@ -173,21 +173,6 @@ export function AdminApplicationModal({ application, onClose, onUpdate }: Props)
             </div>
           )}
 
-          {/* Submitted Data (for existing members) */}
-          {application.submitted_data && (
-            <details>
-              <summary className="cursor-pointer text-sm font-semibold text-amber-600 dark:text-amber-400">
-                ⚠️ Submitted Data (from anonymous submission)
-              </summary>
-              <p className="mt-2 text-xs text-[var(--muted)]">
-                This application matched an existing member. The data below is what was actually submitted in the form,
-                which may differ from the stored member profile.
-              </p>
-              <pre className="mt-2 overflow-auto rounded-lg bg-[var(--bg)] p-3 text-xs">
-                {JSON.stringify(application.submitted_data, null, 2)}
-              </pre>
-            </details>
-          )}
 
           {/* Application Data */}
           <details>

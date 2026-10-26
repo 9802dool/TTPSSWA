@@ -107,7 +107,6 @@ export async function sendAdminNotification(params: AdminNotificationParams): Pr
     return;
   }
 
-  const resend = new Resend(apiKey);
   const typeLabel = APPLICATION_TYPE_LABELS[params.applicationType] || params.applicationType;
   const subject = `New Application: ${typeLabel}`;
   
@@ -126,6 +125,7 @@ export async function sendAdminNotification(params: AdminNotificationParams): Pr
   ].join('\n');
 
   try {
+    const resend = new Resend(apiKey);
     await resend.emails.send({
       from: fromEmail,
       to: adminEmails,
@@ -158,7 +158,10 @@ export async function sendApplicantConfirmation(params: ApplicantConfirmationPar
     return;
   }
 
-  const resend = new Resend(apiKey);
+  if (!params.applicantEmail || params.applicantEmail.endsWith('@placeholder.local')) {
+    return;
+  }
+
   const typeLabel = APPLICATION_TYPE_LABELS[params.applicationType] || params.applicationType;
   const subject = `TTPSSWA Application Received: ${typeLabel}`;
   
@@ -178,6 +181,7 @@ export async function sendApplicantConfirmation(params: ApplicantConfirmationPar
   ].join('\n');
 
   try {
+    const resend = new Resend(apiKey);
     await resend.emails.send({
       from: fromEmail,
       to: [params.applicantEmail],

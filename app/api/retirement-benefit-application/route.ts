@@ -285,14 +285,11 @@ export async function POST(request: Request) {
     witnessDate: witnessDate || undefined,
   };
 
-  // If existing member, preserve submitted data
-  const submittedData = memberResult.is_new ? null : applicationData;
 
   const appResult = await createApplication({
     member_id: memberResult.member_id,
     application_type: 'retirement_benefit_application',
     application_data: applicationData,
-    submitted_data: submittedData,
   });
 
   if (!appResult) {
@@ -316,7 +313,7 @@ export async function POST(request: Request) {
   });
 
   // Send notifications (failures are logged but don't block success)
-  void sendAdminNotification({
+  await sendAdminNotification({
     applicationType: 'retirement_benefit_application',
     applicantName: fullName,
     applicantEmail: email,
@@ -324,7 +321,7 @@ export async function POST(request: Request) {
     applicationId: appResult.application_id,
   });
 
-  void sendApplicantConfirmation({
+  await sendApplicantConfirmation({
     applicationType: 'retirement_benefit_application',
     applicantName: fullName,
     applicantEmail: email,
