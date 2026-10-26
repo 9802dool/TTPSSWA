@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { recordServiceRequest } from "@/lib/analytics-storage";
 import { Resend } from "resend";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
+import { createApplication } from "@/lib/supabase/applications";
+import type { HotelBookingData } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
 
@@ -20,13 +23,50 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
+  const guestName = typeof body.guestName === "string" ? body.guestName.trim() : 
+                   typeof body.fullName === "string" ? body.fullName.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
-  if (!fullName || !email) {
-    return NextResponse.json({ error: "Full name and email are required." }, { status: 400 });
+  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
+  
+  if (!guestName || !email) {
+    return NextResponse.json({ error: "Guest name and email are required." }, { status: 400 });
   }
 
-  const id = await recordServiceRequest("hotel_booking", body);
+  let applicationId: string | null = null;
+
+  // Save to Supabase if configured
+  if (isSupabaseConfigured() && phone) {
+    try {
+      const bookingData: Record<string, unknown> = {
+        guestName,
+        email,
+        phone,
+        roomCategory: (body.roomCategory as HotelBookingData['roomCategory']) || 'DOUBLE_OCCUPANCY',
+        roomCount: typeof body.roomCount === 'number' ? body.roomCount : 1,
+        checkIn: typeof body.checkIn === 'string' ? body.checkIn : '',
+        checkOut: typeof body.checkOut === 'string' ? body.checkOut : '',
+        guests: typeof body.guests === 'number' ? body.guests : 1,
+        meals: (body.meals as HotelBookingData['meals']) || { Breakfast: 0, Lunch: 0, Dinner: 0 },
+        specialRequests: typeof body.specialRequests === 'string' ? body.specialRequests : undefined,
+      };
+
+      const result = await createApplication({
+        member_id: null,
+        application_type: 'hotel_booking',
+        application_data: bookingData,
+      });
+
+      if (result) {
+        applicationId = result.application_id;
+      }
+    } catch (error) {
+      console.error('Failed to save hotel booking to Supabase:', error);
+    }
+  }
+
+  // Also save to Redis for analytics
+  const redisId = await recordServiceRequest("hotel_booking", body);
+  const id = applicationId || redisId;
 
   const notify = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim();
   const apiKey = process.env.RESEND_API_KEY?.trim();
@@ -40,7 +80,7 @@ export async function POST(request: Request) {
         to: [notify],
         replyTo: email ? [email] : undefined,
         subject: `TTPSSWA hotel request${id ? ` [${id}]` : ""}`,
-        text: [`Guest: ${fullName}`, `Email: ${email}`, "", JSON.stringify(body, null, 2)].join(
+        text: [`Guest: ${guestName}`, `Email: ${email}`, "", JSON.stringify(body, null, 2)].join(
           "\n",
         ),
       });
@@ -53,7 +93,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         error:
-          "Booking storage is unavailable. Configure Upstash Redis and/or Resend, or use email below.",
+          "Booking storage is unavailable. Configure Supabase or Redis and/or Resend, or use email below.",
         mailtoHref: buildMailtoFallback(body),
       },
       { status: 503 },

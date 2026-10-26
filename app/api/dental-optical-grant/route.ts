@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { recordServiceRequest } from "@/lib/analytics-storage";
 import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
+import {
+  upsertMember,
+  createApplication,
+  uploadApplicationDocument,
+} from "@/lib/supabase/applications";
+import type { DentalOpticalGrantData } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
 
@@ -174,16 +181,74 @@ export async function POST(request: Request) {
     );
   }
 
-  const documents = [
-    {
-      label: "Original receipt and/or invoice",
-      fileName,
-      mimeType: uploaded.type || "application/octet-stream",
-      base64: Buffer.from(await uploaded.arrayBuffer()).toString("base64"),
-    },
-  ];
+  let applicationId: string | null = null;
 
-  const id = await recordServiceRequest("dental_optical_grant", {
+  // Save to Supabase if configured
+  if (isSupabaseConfigured()) {
+    // Create or update member
+    const memberResult = await upsertMember({
+      email,
+      full_name: fullName,
+      service_number: regimentalNumber,
+      rank,
+      phone,
+      phone_country_code: phoneCountryCode,
+      phone_home: phoneHome || undefined,
+      phone_work: phoneWork || undefined,
+      address,
+      department_division: departmentDivision,
+      section_station: sectionStation,
+      sex: sex as 'male' | 'female',
+      age: parseInt(age, 10),
+    });
+
+    if (memberResult) {
+      // Create application
+      const applicationData: Record<string, unknown> = {
+        regimentalNumber,
+        rank,
+        departmentDivision,
+        sectionStation,
+        memberCategory: memberCategory as 'srp' | 'municipal',
+        address,
+        email,
+        phoneCountryCode,
+        phoneHome: phoneHome || undefined,
+        phoneWork: phoneWork || undefined,
+        phone,
+        age,
+        sex: sex as 'male' | 'female',
+        grantType,
+        grantAppliedFor,
+        previousGrant: previousGrant || undefined,
+        documentsList,
+        applicantDateSigned,
+      };
+
+      const appResult = await createApplication({
+        member_id: memberResult.member_id,
+        application_type: 'dental_optical_grant',
+        application_data: applicationData,
+      });
+
+      if (appResult) {
+        applicationId = appResult.application_id;
+
+        // Upload document
+        await uploadApplicationDocument({
+          application_id: applicationId,
+          member_id: memberResult.member_id,
+          document_type: 'receipt_invoice',
+          file: uploaded,
+          file_name: fileName,
+          mime_type: uploaded.type || 'application/octet-stream',
+        });
+      }
+    }
+  }
+
+  // Also save to Redis for backward compatibility (analytics)
+  const redisId = await recordServiceRequest("dental_optical_grant", {
     regimentalNumber,
     rank,
     fullName,
@@ -202,21 +267,20 @@ export async function POST(request: Request) {
     grantAppliedFor,
     previousGrant: previousGrant || undefined,
     documentsList,
-    documents,
     applicantDateSigned,
     form: "dental_optical_grant_online",
   });
 
-  if (!id) {
+  if (!applicationId && !redisId) {
     return NextResponse.json(
       {
         ok: false,
         error:
-          "Could not save your application. Ensure Redis (Upstash) is configured for the site.",
+          "Could not save your application. Ensure Supabase or Redis (Upstash) is configured.",
       },
       { status: 503 },
     );
   }
 
-  return NextResponse.json({ ok: true, id });
+  return NextResponse.json({ ok: true, id: applicationId || redisId });
 }

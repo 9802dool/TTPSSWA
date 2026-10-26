@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { recordServiceRequest } from "@/lib/analytics-storage";
 import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
+import {
+  upsertMember,
+  createApplication,
+} from "@/lib/supabase/applications";
 
 export const runtime = "nodejs";
 
@@ -131,7 +136,65 @@ export async function POST(request: Request) {
     );
   }
 
-  const id = await recordServiceRequest("salary_deduction", {
+  let applicationId: string | null = null;
+
+  // Save to Supabase if configured
+  if (isSupabaseConfigured()) {
+    const memberResult = await upsertMember({
+      email,
+      full_name: fullName,
+      service_number: regimentalNumber,
+      rank,
+      phone,
+      phone_country_code: phoneCountryCode,
+      phone_home: phoneHome || undefined,
+      phone_work: phoneWork || undefined,
+      address,
+      department_division: departmentDivision,
+      section_station: sectionStation,
+      date_of_birth: dateOfBirth,
+      sex: sex as 'male' | 'female',
+      age: parseInt(age, 10),
+      date_of_enlistment: dateOfEnlistment,
+    });
+
+    if (memberResult) {
+      const appResult = await createApplication({
+        member_id: memberResult.member_id,
+        application_type: 'salary_deduction',
+        application_data: {
+          regimentalNumber,
+          rank,
+          departmentDivision,
+          sectionStation,
+          address,
+          email,
+          age,
+          sex,
+          dateOfBirth,
+          dateOfEnlistment,
+          phoneCountryCode,
+          phoneHome: phoneHome || undefined,
+          phoneWork: phoneWork || undefined,
+          phone,
+          commencementDate,
+          witnessName: witnessName || undefined,
+          witnessDate: witnessDate || undefined,
+          applicantDateSigned,
+          authMonthlyDeduction,
+          policyAcknowledgment,
+          electronicSignature,
+        },
+      });
+
+      if (appResult) {
+        applicationId = appResult.application_id;
+      }
+    }
+  }
+
+  // Also save to Redis for analytics
+  const redisId = await recordServiceRequest("salary_deduction", {
     regimentalNumber,
     rank,
     fullName,
@@ -154,16 +217,16 @@ export async function POST(request: Request) {
     form: "salary_deduction_online",
   });
 
-  if (!id) {
+  if (!applicationId && !redisId) {
     return NextResponse.json(
       {
         ok: false,
         error:
-          "Could not save your form. Ensure Redis (Upstash) is configured for the site.",
+          "Could not save your form. Ensure Supabase or Redis is configured.",
       },
       { status: 503 },
     );
   }
 
-  return NextResponse.json({ ok: true, id });
+  return NextResponse.json({ ok: true, id: applicationId || redisId });
 }
