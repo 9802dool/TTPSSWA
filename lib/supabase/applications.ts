@@ -39,16 +39,17 @@ export async function upsertMember(data: {
   const supabase = createServiceClient();
   if (!supabase) return null;
 
-  // Try to find existing member by email or service number
+  // Try to find existing member by email (case-insensitive) or service number
   let existingMember: Member | null = null;
   
   if (data.email) {
+    // Use RPC function for case-insensitive email lookup
     const { data: byEmail } = await supabase
-      .from('members')
-      .select('*')
-      .eq('email', data.email)
-      .single();
-    existingMember = byEmail;
+      .rpc('get_member_by_email_lower', {
+        search_email: data.email
+      })
+      .maybeSingle();
+    existingMember = byEmail as Member | null;
   }
 
   if (!existingMember && data.service_number) {
@@ -67,11 +68,11 @@ export async function upsertMember(data: {
     return { member_id: existingMember.id, is_new: false };
   }
 
-  // Create new member
+  // Create new member with lowercased email
   const { data: newMember, error } = await supabase
     .from('members')
     .insert({
-      email: data.email,
+      email: data.email.toLowerCase(),
       service_number: data.service_number || null,
       full_name: data.full_name,
       rank: data.rank || null,

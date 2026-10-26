@@ -19,12 +19,20 @@ const PLACEHOLDER_GIF_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEA
 
 /** Mobile app: minimal JSON application without a website login. */
 async function handleJson(request: Request) {
-  let body: { fullName?: string; email?: string; phone?: string };
+  const clientIP = getClientIP(request);
+
+  let body: { fullName?: string; email?: string; phone?: string; website?: string };
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
+
+  // Spam protection: honeypot check (if present in JSON body)
+  if (body.website && checkHoneypot(body.website)) {
+    return NextResponse.json({ ok: true });
+  }
+
   const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
   const phone = typeof body.phone === "string" ? body.phone.trim() : "";
@@ -39,6 +47,30 @@ async function handleJson(request: Request) {
     return NextResponse.json(
       { error: "Application storage is not configured." },
       { status: 503 },
+    );
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `member-signup:ip:${clientIP}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { error: "Too many submissions. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by email
+  const emailLimit = await checkRateLimit(
+    `member-signup:email:${email}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!emailLimit.success) {
+    return NextResponse.json(
+      { error: "Too many submissions from this email. Please try again later." },
+      { status: 429 },
     );
   }
 

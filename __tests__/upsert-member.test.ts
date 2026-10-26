@@ -39,11 +39,32 @@ function builder(table: string) {
   return b;
 }
 
+function rpcHandler(funcName: string, params: Record<string, unknown>) {
+  if (funcName === "get_member_by_email_lower") {
+    const searchEmail = (params.search_email as string).toLowerCase();
+    const member = state.members.find((m) => 
+      typeof m.email === "string" && m.email.toLowerCase() === searchEmail
+    );
+    return {
+      maybeSingle: async () => ({ data: member ?? null, error: null }),
+    };
+  }
+  return {
+    maybeSingle: async () => ({ data: null, error: null }),
+  };
+}
+
 vi.mock("@/lib/supabase/service", () => ({
-  createServiceClient: () => ({ from: (t: string) => builder(t) }),
+  createServiceClient: () => ({ 
+    from: (t: string) => builder(t),
+    rpc: (fn: string, p: Record<string, unknown>) => rpcHandler(fn, p),
+  }),
 }));
 vi.mock("../lib/supabase/service", () => ({
-  createServiceClient: () => ({ from: (t: string) => builder(t) }),
+  createServiceClient: () => ({ 
+    from: (t: string) => builder(t),
+    rpc: (fn: string, p: Record<string, unknown>) => rpcHandler(fn, p),
+  }),
 }));
 
 import { upsertMember } from "../lib/supabase/applications";
@@ -60,6 +81,8 @@ describe("upsertMember (public submissions)", () => {
     expect(r).toMatchObject({ is_new: true });
     expect(state.inserts).toHaveLength(1);
     expect(state.updates).toBe(0);
+    // Verify email is lowercased
+    expect(state.inserts[0].email).toBe("new@example.com");
   });
 
   it("links an existing member by email without updating their profile", async () => {
@@ -69,6 +92,19 @@ describe("upsertMember (public submissions)", () => {
     expect(state.updates).toBe(0);
     expect(state.inserts).toHaveLength(0);
     expect(state.members[0]).toMatchObject({ full_name: "Real Name", address: "Real Address" });
+  });
+
+  it("matches emails case-insensitively", async () => {
+    state.members = [{ id: "m1", email: "user@example.com", full_name: "Real Name" }];
+    const r = await upsertMember({ email: "USER@EXAMPLE.COM", full_name: "Someone", service_number: "999" });
+    expect(r).toEqual({ member_id: "m1", is_new: false });
+    expect(state.inserts).toHaveLength(0);
+  });
+
+  it("stores new member emails in lowercase", async () => {
+    const r = await upsertMember({ email: "MixedCase@Example.COM", full_name: "Test User" });
+    expect(r).toMatchObject({ is_new: true });
+    expect(state.inserts[0].email).toBe("mixedcase@example.com");
   });
 
   it("links an existing member by service number without updating their profile", async () => {
