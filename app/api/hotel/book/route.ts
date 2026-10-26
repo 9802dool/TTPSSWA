@@ -218,7 +218,7 @@ export async function POST(request: Request) {
   if (guests > maxGuests) {
     return NextResponse.json(
       {
-        message: `${roomCategory.replace(/_/g, " ")} rooms accommodate up to ${capacity} guest${capacity === 1 ? "" : "s"} each. With ${roomCount} room${roomCount === 1 ? "" : "s"}, maximum ${maxGuests} guest${maxGuests === 1 ? "" : "s"}.`,
+        message: `${roomCategory.replace(/_/g, " ")} rooms accommodate up to ${capacity} guests each. With ${roomCount} room${roomCount === 1 ? "" : "s"}, maximum ${maxGuests} guest${maxGuests === 1 ? "" : "s"}.`,
       },
       { status: 400 },
     );

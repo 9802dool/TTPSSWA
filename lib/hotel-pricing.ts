@@ -30,15 +30,15 @@ export type MealType = keyof typeof MEAL_PRICES;
  */
 export const ROOM_CAPACITIES = {
   PRESIDENTIAL_SUITE: 2,
-  SINGLE_OCCUPANCY: 1,
-  DOUBLE_OCCUPANCY: 2,
+  SINGLE_OCCUPANCY: 2,
+  DOUBLE_OCCUPANCY: 4,
 } as const;
 
 /**
  * Check-in and check-out times
  */
 export const CHECK_IN_TIME = "3:00 PM";
-export const CHECK_OUT_TIME = "11:00 AM";
+export const CHECK_OUT_TIME = "12:00 PM";
 
 /**
  * Hotel contact information

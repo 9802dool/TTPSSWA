@@ -217,7 +217,7 @@ export default function SimpleBookingForm() {
     const maxGuests = capacity * roomCount;
 
     if (guests > maxGuests) {
-      return `${formData.roomCategory.replace(/_/g, " ")} rooms accommodate up to ${capacity} guest${capacity === 1 ? "" : "s"} each. With ${roomCount} room${roomCount === 1 ? "" : "s"}, you can have up to ${maxGuests} guest${maxGuests === 1 ? "" : "s"}.`;
+      return `${formData.roomCategory.replace(/_/g, " ")} rooms accommodate up to ${capacity} guests each. With ${roomCount} room${roomCount === 1 ? "" : "s"}, you can have up to ${maxGuests} guest${maxGuests === 1 ? "" : "s"}.`;
     }
     return null;
   }
@@ -593,7 +593,7 @@ export default function SimpleBookingForm() {
                       </div>
                       <div className="mt-2 border-t border-slate-200 pt-2">
                         <p className="text-xs text-slate-500">
-                          Capacity: {ROOM_CAPACITIES[room.id]} guest{ROOM_CAPACITIES[room.id] === 1 ? "" : "s"}
+                          Capacity: {ROOM_CAPACITIES[room.id]} guests
                         </p>
                       </div>
                     </div>

@@ -163,7 +163,7 @@ describe("Hotel Booking API", () => {
         ...validBooking,
         roomCategory: "SINGLE_OCCUPANCY",
         roomCount: 1,
-        guests: 2, // Single occupancy = 1 guest max per room
+        guests: 3, // Single occupancy = 2 guests max per room
       };
 
       const request = createRequest(booking);
@@ -186,7 +186,7 @@ describe("Hotel Booking API", () => {
           roomCount: 2,
           checkIn: "2026-12-01",
           checkOut: "2026-12-05",
-          guests: 4, // 2 rooms × 2 capacity = 4 max
+          guests: 8, // 2 rooms × 4 capacity = 8 max
           meals: [],
           specialRequests: "",
           status: "CONFIRMED",
@@ -199,7 +199,7 @@ describe("Hotel Booking API", () => {
         ...validBooking,
         roomCategory: "DOUBLE_OCCUPANCY",
         roomCount: 2,
-        guests: 4,
+        guests: 8,
         meals: { Breakfast: 0, Lunch: 0, Dinner: 0 },
       };
 
@@ -223,6 +223,41 @@ describe("Hotel Booking API", () => {
 
       expect(response.status).toBe(400);
       expect(data.message).toContain("accommodate up to 2 guest");
+    });
+
+    it("should allow 2 guests in single occupancy", async () => {
+      vi.mocked(reserveHotelRoom).mockResolvedValue({
+        ok: true,
+        booking: {
+          id: "test-booking-single",
+          guestName: "John Doe",
+          email: "john@example.com",
+          phone: "1-868-555-1234",
+          roomCategory: "SINGLE_OCCUPANCY",
+          roomCount: 1,
+          checkIn: "2026-12-01",
+          checkOut: "2026-12-05",
+          guests: 2, // Single occupancy = 2 guests max
+          meals: [],
+          specialRequests: "",
+          status: "CONFIRMED",
+          createdAt: "2026-10-26T12:00:00Z",
+          updatedAt: "2026-10-26T12:00:00Z",
+        },
+      });
+
+      const booking = {
+        ...validBooking,
+        roomCategory: "SINGLE_OCCUPANCY",
+        roomCount: 1,
+        guests: 2,
+        meals: { Breakfast: 0, Lunch: 0, Dinner: 0 },
+      };
+
+      const request = createRequest(booking);
+      const response = await POST(request);
+
+      expect(response.status).toBe(201);
     });
   });
 

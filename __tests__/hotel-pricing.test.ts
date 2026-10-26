@@ -189,8 +189,8 @@ describe("Hotel Pricing", () => {
 
     it("should have correct room capacities", () => {
       expect(ROOM_CAPACITIES.PRESIDENTIAL_SUITE).toBe(2);
-      expect(ROOM_CAPACITIES.SINGLE_OCCUPANCY).toBe(1);
-      expect(ROOM_CAPACITIES.DOUBLE_OCCUPANCY).toBe(2);
+      expect(ROOM_CAPACITIES.SINGLE_OCCUPANCY).toBe(2);
+      expect(ROOM_CAPACITIES.DOUBLE_OCCUPANCY).toBe(4);
     });
   });
 });
