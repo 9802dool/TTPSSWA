@@ -159,6 +159,12 @@ export default async function AdminPage({ searchParams }: Props) {
               Hotel reservations
             </Link>
             <Link
+              href="/admin/hotel-performance"
+              className="text-sm text-[var(--brand)] hover:underline"
+            >
+              Hotel performance
+            </Link>
+            <Link
               href="/"
               className="text-sm text-[var(--brand)] hover:underline"
             >

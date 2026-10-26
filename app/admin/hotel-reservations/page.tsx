@@ -125,6 +125,12 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Link
+              href="/admin/hotel-performance"
+              className="text-sm font-medium text-[var(--brand)] hover:underline"
+            >
+              Hotel Performance
+            </Link>
+            <Link
               href="/admin/new-membership"
               className="text-sm font-medium text-[var(--brand)] hover:underline"
             >

@@ -19,19 +19,26 @@ export function HotelBookingAdminActions({
   recordId,
   initialMeta,
   storageConfigured,
+  currentStatus,
+  hasPrismaBooking,
 }: {
   recordId: string;
   initialMeta: HotelBookingMeta | null;
   storageConfigured: boolean;
+  currentStatus?: string;
+  hasPrismaBooking?: boolean;
 }) {
   const [meta, setMeta] = useState<HotelBookingMeta>(initialMeta ?? {});
   const [replyNote, setReplyNote] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState(currentStatus ?? "CONFIRMED");
+  const [statusSuccess, setStatusSuccess] = useState<string | null>(null);
 
-  async function patch(body: { action: string; repliedEmailNote?: string }) {
+  async function patch(body: { action: string; repliedEmailNote?: string; bookingStatus?: string }) {
     setBusy(true);
     setErr(null);
+    setStatusSuccess(null);
     const res = await fetch(
       `/api/admin/hotel-bookings/${encodeURIComponent(recordId)}`,
       {
@@ -51,6 +58,9 @@ export function HotelBookingAdminActions({
     }
     if (data.meta) setMeta(data.meta);
     if (body.action === "replied") setReplyNote("");
+    if (body.action === "update_status") {
+      setStatusSuccess("Status updated successfully. Refresh to see changes.");
+    }
   }
 
   if (!storageConfigured) {
@@ -64,6 +74,42 @@ export function HotelBookingAdminActions({
 
   return (
     <div className="space-y-4">
+      {hasPrismaBooking && (
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--bg)] p-4">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+            Update Booking Status
+          </p>
+          <p className="mt-1 text-xs text-[var(--muted)]">
+            Change the booking status in the database for performance metrics.
+          </p>
+          <div className="mt-3 flex items-center gap-3">
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="rounded-md border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--fg)] outline-none focus:ring-2 focus:ring-[var(--brand)]"
+              disabled={busy}
+            >
+              <option value="PENDING">Pending</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="CANCELLED">Cancelled</option>
+              <option value="CHECKED_OUT">Checked Out</option>
+            </select>
+            <button
+              type="button"
+              disabled={busy || selectedStatus === currentStatus}
+              onClick={() => patch({ action: "update_status", bookingStatus: selectedStatus })}
+              className="site-btn-admin-primary disabled:opacity-50"
+            >
+              {busy ? "Saving…" : "Update Status"}
+            </button>
+          </div>
+          {statusSuccess && (
+            <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+              {statusSuccess}
+            </p>
+          )}
+        </div>
+      )}
       <dl className="space-y-2 text-sm">
         <div className="flex flex-wrap justify-between gap-2">
           <dt className="text-[var(--muted)]">Quotation email sent</dt>

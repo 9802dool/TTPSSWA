@@ -6,10 +6,11 @@ import {
   mergeHotelBookingMeta,
   type HotelBookingMeta,
 } from "@/lib/hotel-booking-meta";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 
 export const runtime = "nodejs";
 
-type Body = { action?: string; repliedEmailNote?: string };
+type Body = { action?: string; repliedEmailNote?: string; bookingStatus?: string };
 
 export async function PATCH(
   request: Request,
@@ -66,6 +67,33 @@ export async function PATCH(
       return NextResponse.json(
         { error: "Could not save status (storage unavailable)." },
         { status: 503 },
+      );
+    }
+  } else if (action === "update_status") {
+    if (!isDatabaseConfigured()) {
+      return NextResponse.json(
+        { error: "Database not configured." },
+        { status: 503 },
+      );
+    }
+    
+    const status = String(body.bookingStatus ?? "").trim().toUpperCase();
+    const validStatuses = ["PENDING", "CONFIRMED", "CANCELLED", "CHECKED_OUT"];
+    
+    if (!validStatuses.includes(status)) {
+      return NextResponse.json({ error: "Invalid status." }, { status: 400 });
+    }
+    
+    try {
+      await prisma.hotelBooking.update({
+        where: { id },
+        data: { status: status as "PENDING" | "CONFIRMED" | "CANCELLED" | "CHECKED_OUT" },
+      });
+    } catch (err) {
+      console.error("Error updating booking status:", err);
+      return NextResponse.json(
+        { error: "Could not update booking status." },
+        { status: 500 },
       );
     }
   } else {
