@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { recordServiceRequest } from "@/lib/analytics-storage";
 import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
@@ -291,125 +290,99 @@ export async function POST(request: Request) {
     documents.push(read.file);
   }
 
-  let applicationId: string | null = null;
-
-  // Save to Supabase if configured
-  if (isSupabaseConfigured()) {
-    const memberResult = await upsertMember({
-      email,
-      full_name: fullName,
-      service_number: regimentalNumber,
-      rank,
-      phone,
-      phone_country_code: phoneCountryCode,
-      phone_home: phoneHome || undefined,
-      phone_work: phoneWork || undefined,
-      address,
-      date_of_birth: dateOfBirth,
-      age: parseInt(age, 10),
-    });
-
-    if (memberResult) {
-      const appResult = await createApplication({
-        member_id: memberResult.member_id,
-        application_type: 'merit_loan_application',
-        application_data: {
-          dateOfApplication,
-          regimentalNumber,
-          rank,
-          address,
-          email,
-          phoneCountryCode,
-          phoneHome: phoneHome || undefined,
-          phoneWork: phoneWork || undefined,
-          phone,
-          maritalStatus,
-          dateOfBirth,
-          age,
-          numberOfDependents,
-          employer,
-          divisionBranchSection,
-          employmentType,
-          yearsOfService,
-          amountRequestedTTD,
-          priorMeritLoanApplied,
-          purposeOfLoan,
-          currentNetSalaryTTD,
-          totalSalaryDeductionsTTD,
-          repaymentInstallmentTTD,
-          repaymentPeriodMonths,
-          applicantDateSigned,
-          signatureRegimentalNumber,
-          signatureRank,
-          witnessName: witnessName || undefined,
-          witnessDate: witnessDate || undefined,
-        },
-      });
-
-      if (appResult) {
-        applicationId = appResult.application_id;
-
-        // Upload documents
-        for (const doc of documents) {
-          const docBuffer = Buffer.from(doc.base64, 'base64');
-          await uploadApplicationDocument({
-            application_id: applicationId,
-            member_id: memberResult.member_id,
-            document_type: doc.label.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
-            file: docBuffer,
-            file_name: doc.fileName,
-            mime_type: doc.mimeType,
-          });
-        }
-      }
-    }
-  }
-
-  // Also save to Redis for analytics
-  const redisId = await recordServiceRequest("merit_loan_application", {
-    dateOfApplication,
-    regimentalNumber,
-    rank,
-    fullName,
-    address,
-    email,
-    phoneCountryCode,
-    phoneHome: phoneHome || undefined,
-    phoneWork: phoneWork || undefined,
-    phone,
-    maritalStatus,
-    dateOfBirth,
-    age,
-    numberOfDependents,
-    employer,
-    divisionBranchSection,
-    employmentType,
-    yearsOfService,
-    amountRequestedTTD,
-    priorMeritLoanApplied,
-    purposeOfLoan,
-    currentNetSalaryTTD,
-    totalSalaryDeductionsTTD,
-    repaymentInstallmentTTD,
-    repaymentPeriodMonths,
-    applicantDateSigned,
-    signatureRegimentalNumber,
-    signatureRank,
-    witnessName: witnessName || undefined,
-    witnessDate: witnessDate || undefined,
-    form: "merit_loan_application_online",
-  });
-
-  if (!applicationId && !redisId) {
+  // Save to Supabase
+  if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          "Could not save your application. Ensure Supabase or Redis is configured.",
+        error: "Application storage is not configured.",
       },
       { status: 503 },
     );
   }
 
-  return NextResponse.json({ ok: true, id: applicationId || redisId });
+  const memberResult = await upsertMember({
+    email,
+    full_name: fullName,
+    service_number: regimentalNumber,
+    rank,
+    phone,
+    phone_country_code: phoneCountryCode,
+    phone_home: phoneHome || undefined,
+    phone_work: phoneWork || undefined,
+    address,
+    date_of_birth: dateOfBirth,
+    age: parseInt(age, 10),
+  });
+
+  if (!memberResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not create member record.",
+      },
+      { status: 500 },
+    );
+  }
+
+  const appResult = await createApplication({
+    member_id: memberResult.member_id,
+    application_type: 'merit_loan_application',
+    application_data: {
+      dateOfApplication,
+      regimentalNumber,
+      rank,
+      address,
+      email,
+      phoneCountryCode,
+      phoneHome: phoneHome || undefined,
+      phoneWork: phoneWork || undefined,
+      phone,
+      maritalStatus,
+      dateOfBirth,
+      age,
+      numberOfDependents,
+      employer,
+      divisionBranchSection,
+      employmentType,
+      yearsOfService,
+      amountRequestedTTD,
+      priorMeritLoanApplied,
+      purposeOfLoan,
+      currentNetSalaryTTD,
+      totalSalaryDeductionsTTD,
+      repaymentInstallmentTTD,
+      repaymentPeriodMonths,
+      applicantDateSigned,
+      signatureRegimentalNumber,
+      signatureRank,
+      witnessName: witnessName || undefined,
+      witnessDate: witnessDate || undefined,
+    },
+  });
+
+  if (!appResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not save application.",
+      },
+      { status: 500 },
+    );
+  }
+
+  // Upload documents
+  for (const doc of documents) {
+    const docBuffer = Buffer.from(doc.base64, 'base64');
+    await uploadApplicationDocument({
+      application_id: appResult.application_id,
+      member_id: memberResult.member_id,
+      document_type: doc.label.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+      file: docBuffer,
+      file_name: doc.fileName,
+      mime_type: doc.mimeType,
+    });
+  }
+
+  return NextResponse.json({ ok: true, id: appResult.application_id });
 }

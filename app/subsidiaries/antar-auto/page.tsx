@@ -5,7 +5,7 @@ import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Antar Auto | TTPSSWA",
-  description: "TTPSSWA partner — Antar Auto.",
+  description: "TTPSSWA partner — Antar Auto Repairs And Parts.",
 };
 
 export default function AntarAutoPage() {
@@ -31,16 +31,16 @@ export default function AntarAutoPage() {
                 ← Home
               </Link>
               <Link
-                href="/subsidiaries"
+                href="/partnership"
                 className="inline-flex font-medium text-sky-200 underline-offset-4 transition hover:text-white hover:underline"
               >
-                ← Subsidiaries
+                ← Partnership
               </Link>
             </p>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Antar Auto</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              Automotive services and member benefits through this partner. Information will appear here as programs
-              are confirmed.
+              Antar Auto Repairs And Parts is a partner organization offering exclusive member benefits. 
+              For full details on discounts and services, visit our <Link href="/partnership/antar-auto-repairs-and-parts" className="underline hover:text-white">Partnership page</Link>.
             </p>
           </div>
         </section>

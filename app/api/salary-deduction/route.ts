@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
-import { recordServiceRequest } from "@/lib/analytics-storage";
 import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   upsertMember,
   createApplication,
 } from "@/lib/supabase/applications";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
+import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -24,9 +26,36 @@ function validateOptionalPhoneDigits(digitsStr: string, label: string): string |
 }
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
+
   const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
   if (!formData) {
     return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
+  }
+
+  // Spam protection: honeypot check (silent rejection)
+  if (checkHoneypot(formData.get("website"))) {
+    return NextResponse.json({ ok: true, id: "spam-rejected" });
+  }
+
+  // Spam protection: minimum fill time check (only if token is provided)
+  const formToken = String(formData.get("formToken") ?? "").trim();
+  const tokenCheck = verifyFormToken(formToken || null, 3);
+  // Only reject if token was provided but invalid (skipCheck means token not provided)
+  if (!tokenCheck.valid && !tokenCheck.skipCheck) {
+    return NextResponse.json({ ok: true, id: "spam-rejected" });
+  }
+
+  // Turnstile verification (only if configured)
+  if (isTurnstileConfigured()) {
+    const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
+    const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { ok: false, error: "Verification failed. Please try again." },
+        { status: 400 },
+      );
+    }
   }
 
   const regimentalNumber = String(formData.get("regimentalNumber") ?? "").trim();
@@ -136,97 +165,106 @@ export async function POST(request: Request) {
     );
   }
 
-  let applicationId: string | null = null;
-
-  // Save to Supabase if configured
-  if (isSupabaseConfigured()) {
-    const memberResult = await upsertMember({
-      email,
-      full_name: fullName,
-      service_number: regimentalNumber,
-      rank,
-      phone,
-      phone_country_code: phoneCountryCode,
-      phone_home: phoneHome || undefined,
-      phone_work: phoneWork || undefined,
-      address,
-      department_division: departmentDivision,
-      section_station: sectionStation,
-      date_of_birth: dateOfBirth,
-      sex: sex as 'male' | 'female',
-      age: parseInt(age, 10),
-      date_of_enlistment: dateOfEnlistment,
-    });
-
-    if (memberResult) {
-      const appResult = await createApplication({
-        member_id: memberResult.member_id,
-        application_type: 'salary_deduction',
-        application_data: {
-          regimentalNumber,
-          rank,
-          departmentDivision,
-          sectionStation,
-          address,
-          email,
-          age,
-          sex,
-          dateOfBirth,
-          dateOfEnlistment,
-          phoneCountryCode,
-          phoneHome: phoneHome || undefined,
-          phoneWork: phoneWork || undefined,
-          phone,
-          commencementDate,
-          witnessName: witnessName || undefined,
-          witnessDate: witnessDate || undefined,
-          applicantDateSigned,
-          authMonthlyDeduction,
-          policyAcknowledgment,
-          electronicSignature,
-        },
-      });
-
-      if (appResult) {
-        applicationId = appResult.application_id;
-      }
-    }
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `salary-deduction:ip:${clientIP}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { ok: false, error: "Too many submissions. Please try again later." },
+      { status: 429 },
+    );
   }
 
-  // Also save to Redis for analytics
-  const redisId = await recordServiceRequest("salary_deduction", {
-    regimentalNumber,
-    rank,
-    fullName,
-    departmentDivision,
-    sectionStation,
-    address,
-    email,
-    age,
-    sex,
-    dateOfBirth,
-    dateOfEnlistment,
-    phoneCountryCode,
-    phoneHome: phoneHome || undefined,
-    phoneWork: phoneWork || undefined,
-    phone,
-    commencementDate,
-    witnessName: witnessName || undefined,
-    witnessDate: witnessDate || undefined,
-    applicantDateSigned,
-    form: "salary_deduction_online",
-  });
+  // Rate limiting by regimental number
+  const regNumLimit = await checkRateLimit(
+    `salary-deduction:regnum:${regimentalNumber}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!regNumLimit.success) {
+    return NextResponse.json(
+      { ok: false, error: "Too many submissions from this account. Please try again later." },
+      { status: 429 },
+    );
+  }
 
-  if (!applicationId && !redisId) {
+  // Save to Supabase
+  if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          "Could not save your form. Ensure Supabase or Redis is configured.",
+        error: "Application storage is not configured.",
       },
       { status: 503 },
     );
   }
 
-  return NextResponse.json({ ok: true, id: applicationId || redisId });
+  const memberResult = await upsertMember({
+    email,
+    full_name: fullName,
+    service_number: regimentalNumber,
+    rank,
+    phone,
+    phone_country_code: phoneCountryCode,
+    phone_home: phoneHome || undefined,
+    phone_work: phoneWork || undefined,
+    address,
+    department_division: departmentDivision,
+    section_station: sectionStation,
+    date_of_birth: dateOfBirth,
+    sex: sex as 'male' | 'female',
+    age: parseInt(age, 10),
+    date_of_enlistment: dateOfEnlistment,
+  });
+
+  if (!memberResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not create member record.",
+      },
+      { status: 500 },
+    );
+  }
+
+  const appResult = await createApplication({
+    member_id: memberResult.member_id,
+    application_type: 'salary_deduction',
+    application_data: {
+      regimentalNumber,
+      rank,
+      departmentDivision,
+      sectionStation,
+      address,
+      email,
+      age,
+      sex,
+      dateOfBirth,
+      dateOfEnlistment,
+      phoneCountryCode,
+      phoneHome: phoneHome || undefined,
+      phoneWork: phoneWork || undefined,
+      phone,
+      commencementDate,
+      witnessName: witnessName || undefined,
+      witnessDate: witnessDate || undefined,
+      applicantDateSigned,
+      authMonthlyDeduction,
+      policyAcknowledgment,
+      electronicSignature,
+    },
+  });
+
+  if (!appResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not save application.",
+      },
+      { status: 500 },
+    );
+  }
+
+  return NextResponse.json({ ok: true, id: appResult.application_id });
 }

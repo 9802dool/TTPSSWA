@@ -1,9 +1,5 @@
 import { NextResponse } from "next/server";
 import { notifyMembershipApplicationPending } from "@/lib/member-application-notify";
-import {
-  MAX_PHOTO_BYTES_FOR_STORAGE,
-  recordPendingMemberSignup,
-} from "@/lib/member-signup-storage";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   upsertMember,
@@ -37,24 +33,53 @@ async function handleJson(request: Request) {
       { status: 400 },
     );
   }
-  const ok = await recordPendingMemberSignup({
-    regimentalNumber: "—",
-    rank: "—",
-    fullName,
-    address: "Submitted via TTPSSWA mobile app — complete full application on the website if requested.",
-    email,
-    phone,
-    phoneCountryCode: "+1868",
-    financialMember: "yes",
-    photoMimeType: "image/gif",
-    photoBase64: PLACEHOLDER_GIF_BASE64,
-  });
-  if (!ok) {
+
+  if (!isSupabaseConfigured()) {
     return NextResponse.json(
-      { error: "Could not save application. Storage may be unavailable." },
+      { error: "Application storage is not configured." },
       { status: 503 },
     );
   }
+
+  // Create minimal member application from mobile app
+  const memberResult = await upsertMember({
+    email,
+    full_name: fullName,
+    phone,
+    phone_country_code: "+1868",
+    service_number: "—",
+    rank: "—",
+    address: "Submitted via TTPSSWA mobile app — complete full application on the website if requested.",
+    financial_member: "yes",
+  });
+
+  if (!memberResult) {
+    return NextResponse.json(
+      { error: "Could not create member record." },
+      { status: 500 },
+    );
+  }
+
+  const appResult = await createApplication({
+    member_id: memberResult.member_id,
+    application_type: 'membership_signup',
+    application_data: {
+      regimentalNumber: "—",
+      rank: "—",
+      phone,
+      phoneCountryCode: "+1868",
+      financialMember: "yes",
+      source: "mobile_app",
+    },
+  });
+
+  if (!appResult) {
+    return NextResponse.json(
+      { error: "Could not save application." },
+      { status: 500 },
+    );
+  }
+
   return NextResponse.json({ ok: true }, { status: 201 });
 }
 

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { recordServiceRequest } from "@/lib/analytics-storage";
 import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
@@ -224,115 +223,89 @@ export async function POST(request: Request) {
     );
   }
 
-  const documents = [
-    {
-      label: "Departmental order / retirement letter",
-      fileName,
-      mimeType: uploaded.type || "application/octet-stream",
-      base64: Buffer.from(await uploaded.arrayBuffer()).toString("base64"),
-    },
-  ];
-
-  let applicationId: string | null = null;
-
-  // Save to Supabase if configured
-  if (isSupabaseConfigured()) {
-    const memberResult = await upsertMember({
-      email,
-      full_name: fullName,
-      service_number: regimentalNumber,
-      rank,
-      phone,
-      phone_country_code: phoneCountryCode,
-      phone_home: phoneHome || undefined,
-      phone_work: phoneWork || undefined,
-      address,
-      department_division: departmentDivision,
-      section_station: sectionStation,
-      sex: sex as 'male' | 'female',
-      age: parseInt(age, 10),
-    });
-
-    if (memberResult) {
-      const appResult = await createApplication({
-        member_id: memberResult.member_id,
-        application_type: 'retirement_benefit_application',
-        application_data: {
-          dateOfApplication,
-          regimentalNumber,
-          rank,
-          departmentDivision,
-          sectionStation,
-          address,
-          email,
-          phoneCountryCode,
-          phoneHome: phoneHome || undefined,
-          phoneWork: phoneWork || undefined,
-          phone,
-          age,
-          sex,
-          guardianLifeHealthPlan,
-          effectiveRetirementDate,
-          departmentalOrderReference,
-          departmentalOrderCopyConfirmed: true,
-          applicantDateSigned,
-          witnessName: witnessName || undefined,
-          witnessDate: witnessDate || undefined,
-        },
-      });
-
-      if (appResult) {
-        applicationId = appResult.application_id;
-
-        // Upload document
-        await uploadApplicationDocument({
-          application_id: applicationId,
-          member_id: memberResult.member_id,
-          document_type: 'departmental_order',
-          file: uploaded,
-          file_name: fileName,
-          mime_type: uploaded.type || 'application/octet-stream',
-        });
-      }
-    }
-  }
-
-  // Also save to Redis for analytics
-  const redisId = await recordServiceRequest("retirement_benefit_application", {
-    dateOfApplication,
-    regimentalNumber,
-    rank,
-    fullName,
-    departmentDivision,
-    sectionStation,
-    address,
-    email,
-    phoneCountryCode,
-    phoneHome: phoneHome || undefined,
-    phoneWork: phoneWork || undefined,
-    phone,
-    age,
-    sex,
-    guardianLifeHealthPlan,
-    effectiveRetirementDate,
-    departmentalOrderReference,
-    departmentalOrderCopyConfirmed: true,
-    applicantDateSigned,
-    witnessName: witnessName || undefined,
-    witnessDate: witnessDate || undefined,
-    form: "retirement_benefit_application_online",
-  });
-
-  if (!applicationId && !redisId) {
+  // Save to Supabase
+  if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          "Could not save your application. Ensure Supabase or Redis is configured.",
+        error: "Application storage is not configured.",
       },
       { status: 503 },
     );
   }
 
-  return NextResponse.json({ ok: true, id: applicationId || redisId });
+  const memberResult = await upsertMember({
+    email,
+    full_name: fullName,
+    service_number: regimentalNumber,
+    rank,
+    phone,
+    phone_country_code: phoneCountryCode,
+    phone_home: phoneHome || undefined,
+    phone_work: phoneWork || undefined,
+    address,
+    department_division: departmentDivision,
+    section_station: sectionStation,
+    sex: sex as 'male' | 'female',
+    age: parseInt(age, 10),
+  });
+
+  if (!memberResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not create member record.",
+      },
+      { status: 500 },
+    );
+  }
+
+  const appResult = await createApplication({
+    member_id: memberResult.member_id,
+    application_type: 'retirement_benefit_application',
+    application_data: {
+      dateOfApplication,
+      regimentalNumber,
+      rank,
+      departmentDivision,
+      sectionStation,
+      address,
+      email,
+      phoneCountryCode,
+      phoneHome: phoneHome || undefined,
+      phoneWork: phoneWork || undefined,
+      phone,
+      age,
+      sex,
+      guardianLifeHealthPlan,
+      effectiveRetirementDate,
+      departmentalOrderReference,
+      departmentalOrderCopyConfirmed: true,
+      applicantDateSigned,
+      witnessName: witnessName || undefined,
+      witnessDate: witnessDate || undefined,
+    },
+  });
+
+  if (!appResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not save application.",
+      },
+      { status: 500 },
+    );
+  }
+
+  // Upload document
+  await uploadApplicationDocument({
+    application_id: appResult.application_id,
+    member_id: memberResult.member_id,
+    document_type: 'departmental_order',
+    file: uploaded,
+    file_name: fileName,
+    mime_type: uploaded.type || 'application/octet-stream',
+  });
+
+  return NextResponse.json({ ok: true, id: appResult.application_id });
 }
