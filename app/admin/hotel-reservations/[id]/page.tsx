@@ -8,7 +8,7 @@ import { HotelBookingAdminActions } from "@/components/HotelBookingAdminActions"
 import { getHotelReservationById } from "@/lib/analytics-storage";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import { getHotelBookingMeta } from "@/lib/hotel-booking-meta";
-import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getApplicationById } from "@/lib/supabase/applications";
 
 type Props = { params: Promise<{ id: string }> | { id: string } };
 
@@ -64,22 +64,20 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
 
   const { storageConfigured, record } = await getHotelReservationById(decodedId);
   
-  let prismaBooking: { status: string } | null = null;
-  if (isDatabaseConfigured()) {
-    try {
-      prismaBooking = await prisma.hotelBooking.findUnique({
-        where: { id: decodedId },
-        select: { status: true },
-      });
-    } catch (err) {
-      console.error("Error fetching Prisma booking:", err);
+  let supabaseApplication: { status: string } | null = null;
+  try {
+    const appData = await getApplicationById(decodedId);
+    if (appData?.application.application_type === "hotel_booking") {
+      supabaseApplication = { status: appData.application.status };
     }
+  } catch (err) {
+    console.error("Error fetching Supabase application:", err);
   }
   
-  if (!storageConfigured && !prismaBooking) {
+  if (!storageConfigured && !supabaseApplication) {
     redirect("/admin/hotel-reservations");
   }
-  if (!record && !prismaBooking) {
+  if (!record && !supabaseApplication) {
     notFound();
   }
 
@@ -88,7 +86,7 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
   const p = record?.payload ?? {};
   const emailVal = str(p, "email");
   const phoneVal = str(p, "phone");
-  const currentStatus = prismaBooking?.status ?? "UNKNOWN";
+  const currentStatus = supabaseApplication?.status ?? "UNKNOWN";
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
@@ -110,11 +108,6 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
             <p className="text-sm text-[var(--muted)]">
               {str(p, "fullName") || "—"} · {record?.createdAt.replace("T", " ").replace(/\.\d{3}Z$/, "") || "—"}{" "}
               UTC
-              {prismaBooking && (
-                <span className="ml-2 rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5 text-xs font-medium">
-                  {currentStatus}
-                </span>
-              )}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -230,7 +223,8 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
                 initialMeta={bookingMeta}
                 storageConfigured={storageConfigured}
                 currentStatus={currentStatus}
-                hasPrismaBooking={prismaBooking !== null}
+                isSupabaseBooking={supabaseApplication !== null}
+                sessionRole={session.role}
               />
             </div>
           </div>

@@ -13,9 +13,11 @@ import {
   type TrendDataPoint,
 } from "@/lib/hotel-performance-metrics";
 import { formatTTD } from "@/lib/hotel-pricing";
+import type { AdminRole } from "@/lib/admin-auth";
 
 interface Props {
   bookings: HotelBooking[];
+  sessionRole: AdminRole;
 }
 
 function formatPercent(value: number, includeSign = false): string {
@@ -101,9 +103,11 @@ function TrendChart({ data, metric, label }: {
   );
 }
 
-export function HotelPerformanceDashboard({ bookings }: Props) {
+export function HotelPerformanceDashboard({ bookings, sessionRole }: Props) {
   const [viewMode, setViewMode] = useState<"weekly" | "monthly">("monthly");
   const [selectedDate, setSelectedDate] = useState(getTrinidadToday());
+  const [sendingReport, setSendingReport] = useState(false);
+  const [sendReportMessage, setSendReportMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const { metrics, trendData, periodLabel } = useMemo(() => {
     const isWeekly = viewMode === "weekly";
@@ -119,8 +123,8 @@ export function HotelPerformanceDashboard({ bookings }: Props) {
     const trendData = calculateTrendData(bookings, isWeekly, 12);
     
     const periodLabel = isWeekly
-      ? `Week of ${range.start.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
-      : range.start.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+      ? `Week of ${new Date(range.start + "T04:00:00Z").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/Port_of_Spain" })}`
+      : new Date(range.start + "T04:00:00Z").toLocaleDateString("en-US", { month: "long", year: "numeric", timeZone: "America/Port_of_Spain" });
     
     return { metrics, trendData, periodLabel };
   }, [bookings, viewMode, selectedDate]);
@@ -137,13 +141,54 @@ export function HotelPerformanceDashboard({ bookings }: Props) {
   };
 
   const navigatePeriod = (direction: number) => {
-    const newDate = new Date(selectedDate);
+    const range = viewMode === "weekly" ? getWeekRange(selectedDate) : getMonthRange(selectedDate);
+    const startDate = new Date(range.start + "T04:00:00Z");
     if (viewMode === "weekly") {
-      newDate.setDate(newDate.getDate() + direction * 7);
+      startDate.setUTCDate(startDate.getUTCDate() + direction * 7);
     } else {
-      newDate.setMonth(newDate.getMonth() + direction);
+      startDate.setUTCMonth(startDate.getUTCMonth() + direction);
     }
-    setSelectedDate(newDate);
+    const year = startDate.getUTCFullYear();
+    const month = String(startDate.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(startDate.getUTCDate()).padStart(2, "0");
+    setSelectedDate(`${year}-${month}-${day}`);
+  };
+
+  const handleSendReport = async () => {
+    setSendingReport(true);
+    setSendReportMessage(null);
+    
+    try {
+      const response = await fetch("/api/admin/hotel-performance/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          periodStart: metrics.roomNightsBooked >= 0 ? periodLabel : "",
+          reportType: viewMode,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        setSendReportMessage({ 
+          type: "success", 
+          text: `Report sent successfully to ${data.sent || 0} recipient(s)` 
+        });
+      } else {
+        setSendReportMessage({ 
+          type: "error", 
+          text: data.error || "Failed to send report" 
+        });
+      }
+    } catch (error) {
+      setSendReportMessage({ 
+        type: "error", 
+        text: "Network error sending report" 
+      });
+    } finally {
+      setSendingReport(false);
+    }
   };
 
   return (
@@ -194,13 +239,42 @@ export function HotelPerformanceDashboard({ bookings }: Props) {
           </button>
         </div>
 
-        <button
-          onClick={handleExport}
-          className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
-        >
-          Export CSV
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleExport}
+            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium hover:bg-[var(--surface)]"
+          >
+            Export CSV
+          </button>
+          {sessionRole === "super_admin" && (
+            <button
+              onClick={handleSendReport}
+              disabled={sendingReport}
+              className="rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+            >
+              {sendingReport ? "Sending..." : "Send Summary Now"}
+            </button>
+          )}
+        </div>
       </div>
+
+      {sendReportMessage && (
+        <div
+          className={`rounded-lg border p-4 text-sm ${
+            sendReportMessage.type === "success"
+              ? "border-green-200 bg-green-50 text-green-900 dark:border-green-900 dark:bg-green-950/40 dark:text-green-100"
+              : "border-red-200 bg-red-50 text-red-900 dark:border-red-900 dark:bg-red-950/40 dark:text-red-100"
+          }`}
+        >
+          {sendReportMessage.text}
+        </div>
+      )}
+
+      {metrics.skippedLegacyBookings > 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          <strong>Note:</strong> {metrics.skippedLegacyBookings} legacy booking(s) from before Oct 26, 2026 were skipped (incompatible data format).
+        </div>
+      )}
 
       <section>
         <h2 className="mb-4 text-base font-semibold">Revenue</h2>

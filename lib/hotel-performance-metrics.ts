@@ -1,30 +1,31 @@
 /**
  * Hotel Performance Metrics
  * Pure calculation functions for executive reporting
- * All dates in America/Port_of_Spain timezone
+ * All dates in America/Port_of_Spain timezone (UTC-4, no DST)
+ * Data source: Supabase public.applications where application_type='hotel_booking'
  */
 
 import { HOTEL_RATES, MEAL_PRICES, calculateNights } from "./hotel-pricing";
 
-export type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "CHECKED_OUT";
+export type ApplicationStatus = "submitted" | "under_review" | "approved" | "rejected" | "completed" | "cancelled";
 export type RoomCategory = "PRESIDENTIAL_SUITE" | "SINGLE_OCCUPANCY" | "DOUBLE_OCCUPANCY";
 
 export interface HotelBooking {
   id: string;
   guestName: string;
-  serviceNumber: string | null;
   email: string;
   phone: string;
-  roomCategory: RoomCategory;
+  roomCategory: RoomCategory | null;
   roomCount: number;
-  checkIn: Date;
-  checkOut: Date;
+  checkIn: string;
+  checkOut: string;
   guests: number;
-  meals: string[];
+  meals: { Breakfast: number; Lunch: number; Dinner: number };
   specialRequests: string | null;
-  status: BookingStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  isMember: boolean;
+  status: ApplicationStatus;
+  submittedAt: string;
+  isLegacy: boolean;
 }
 
 export interface PeriodMetrics {
@@ -48,6 +49,7 @@ export interface PeriodMetrics {
   memberSplit: number;
   averageLengthOfStay: number;
   averageLeadTime: number;
+  skippedLegacyBookings: number;
 }
 
 export interface ComparisonMetrics extends PeriodMetrics {
@@ -78,94 +80,122 @@ const ROOM_INVENTORY = {
   DOUBLE_OCCUPANCY: 4,
 } as const;
 
-function getTrinidadDate(date: Date): Date {
-  const trinidadTime = new Date(
-    date.toLocaleString("en-US", { timeZone: "America/Port_of_Spain" })
-  );
-  return trinidadTime;
+/**
+ * Trinidad is UTC-4 all year (no DST).
+ * Returns YYYY-MM-DD in Trinidad time for a UTC Date.
+ */
+function toTrinidadDateString(utcDate: Date): string {
+  const MS_OFFSET = 4 * 60 * 60 * 1000;
+  const trinidadMs = utcDate.getTime() - MS_OFFSET;
+  const trinidadDate = new Date(trinidadMs);
+  return trinidadDate.toISOString().split("T")[0];
 }
 
-export function getTrinidadToday(): Date {
-  return getTrinidadDate(new Date());
+/**
+ * Parse YYYY-MM-DD string to Trinidad midnight as UTC instant.
+ * Trinidad midnight = 04:00 UTC
+ */
+function trinidadDateToUTC(yyyymmdd: string): Date {
+  const MS_OFFSET = 4 * 60 * 60 * 1000;
+  const parts = yyyymmdd.split("-");
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const day = parseInt(parts[2], 10);
+  const localMidnight = Date.UTC(year, month, day, 0, 0, 0, 0);
+  return new Date(localMidnight + MS_OFFSET);
 }
 
-export function getWeekRange(date: Date): { start: Date; end: Date } {
-  const trinidad = getTrinidadDate(date);
-  const day = trinidad.getDay();
-  const diff = trinidad.getDate() - day;
-  const start = new Date(trinidad.setDate(diff));
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 7);
-  return { start, end };
+export function getTrinidadToday(): string {
+  return toTrinidadDateString(new Date());
 }
 
-export function getMonthRange(date: Date): { start: Date; end: Date } {
-  const trinidad = getTrinidadDate(date);
-  const start = new Date(trinidad.getFullYear(), trinidad.getMonth(), 1);
-  const end = new Date(trinidad.getFullYear(), trinidad.getMonth() + 1, 1);
-  return { start, end };
+export function getWeekRange(yyyymmdd: string): { start: string; end: string } {
+  const date = trinidadDateToUTC(yyyymmdd);
+  const dayOfWeek = date.getUTCDay();
+  const daysToSunday = dayOfWeek === 0 ? 0 : dayOfWeek;
+  const sunday = new Date(date.getTime() - daysToSunday * 86400000);
+  const nextSunday = new Date(sunday.getTime() + 7 * 86400000);
+  return {
+    start: toTrinidadDateString(sunday),
+    end: toTrinidadDateString(nextSunday),
+  };
+}
+
+export function getMonthRange(yyyymmdd: string): { start: string; end: string } {
+  const date = trinidadDateToUTC(yyyymmdd);
+  const year = date.getUTCFullYear();
+  const month = date.getUTCMonth();
+  const firstDay = new Date(Date.UTC(year, month, 1, 4, 0, 0));
+  const nextMonth = new Date(Date.UTC(year, month + 1, 1, 4, 0, 0));
+  return {
+    start: toTrinidadDateString(firstDay),
+    end: toTrinidadDateString(nextMonth),
+  };
 }
 
 export function getPreviousPeriod(
-  start: Date,
-  end: Date,
+  start: string,
+  end: string,
   isWeekly: boolean
-): { start: Date; end: Date } {
-  const duration = end.getTime() - start.getTime();
-  const prevEnd = new Date(start);
-  const prevStart = new Date(start.getTime() - duration);
-  return { start: prevStart, end: prevEnd };
+): { start: string; end: string } {
+  const startDate = trinidadDateToUTC(start);
+  const endDate = trinidadDateToUTC(end);
+  const duration = endDate.getTime() - startDate.getTime();
+  const prevEnd = startDate;
+  const prevStart = new Date(startDate.getTime() - duration);
+  return {
+    start: toTrinidadDateString(prevStart),
+    end: toTrinidadDateString(prevEnd),
+  };
 }
 
-function isMember(booking: HotelBooking): boolean {
-  return booking.serviceNumber != null && booking.serviceNumber.trim() !== "";
+function isInPeriod(dateYYYYMMDD: string, start: string, end: string): boolean {
+  return dateYYYYMMDD >= start && dateYYYYMMDD < end;
 }
 
-function isInPeriod(date: Date, start: Date, end: Date): boolean {
-  return date >= start && date < end;
+function isConfirmedOrCompleted(status: ApplicationStatus): boolean {
+  return status === "approved" || status === "completed";
 }
 
 function calculateRoomRevenue(
   booking: HotelBooking,
   nights: number
 ): number {
-  const member = isMember(booking);
-  const rates = member ? HOTEL_RATES.member : HOTEL_RATES.nonMember;
+  const rates = booking.isMember ? HOTEL_RATES.member : HOTEL_RATES.nonMember;
+  if (!booking.roomCategory) return 0;
   const rate = rates[booking.roomCategory];
   return rate * booking.roomCount * nights;
 }
 
-function calculateMealRevenue(booking: HotelBooking): number {
+function calculateMealRevenue(booking: HotelBooking, nightsInPeriod: number, totalNights: number): number {
+  if (totalNights === 0) return 0;
+  const prorateRatio = nightsInPeriod / totalNights;
+  
   let total = 0;
-  for (const meal of booking.meals) {
-    const mealName = meal as keyof typeof MEAL_PRICES;
-    if (MEAL_PRICES[mealName]) {
-      total += MEAL_PRICES[mealName];
-    }
-  }
-  return total;
+  total += booking.meals.Breakfast * MEAL_PRICES.Breakfast;
+  total += booking.meals.Lunch * MEAL_PRICES.Lunch;
+  total += booking.meals.Dinner * MEAL_PRICES.Dinner;
+  
+  return total * prorateRatio;
 }
 
 function countRoomNights(
   bookings: HotelBooking[],
-  start: Date,
-  end: Date,
+  start: string,
+  end: string,
   roomCategory?: RoomCategory
 ): number {
   let total = 0;
   for (const booking of bookings) {
     if (roomCategory && booking.roomCategory !== roomCategory) continue;
-    if (booking.status !== "CONFIRMED" && booking.status !== "CHECKED_OUT") continue;
+    if (!isConfirmedOrCompleted(booking.status)) continue;
+    if (!booking.roomCategory) continue;
     
     const checkIn = booking.checkIn >= start ? booking.checkIn : start;
     const checkOut = booking.checkOut <= end ? booking.checkOut : end;
     
     if (checkIn < checkOut) {
-      const nights = calculateNights(
-        checkIn.toISOString().split("T")[0],
-        checkOut.toISOString().split("T")[0]
-      );
+      const nights = calculateNights(checkIn, checkOut);
       total += nights * booking.roomCount;
     }
   }
@@ -173,12 +203,11 @@ function countRoomNights(
 }
 
 function calculateAvailableRoomNights(
-  start: Date,
-  end: Date,
+  start: string,
+  end: string,
   roomCategory?: RoomCategory
 ): number {
-  const msPerDay = 24 * 60 * 60 * 1000;
-  const days = Math.floor((end.getTime() - start.getTime()) / msPerDay);
+  const days = calculateNights(start, end);
   
   if (roomCategory) {
     return days * ROOM_INVENTORY[roomCategory];
@@ -193,34 +222,32 @@ function calculateAvailableRoomNights(
 
 export function calculatePeriodMetrics(
   bookings: HotelBooking[],
-  periodStart: Date,
-  periodEnd: Date
+  periodStart: string,
+  periodEnd: string
 ): PeriodMetrics {
   const periodBookings = bookings.filter(
-    (b) => isInPeriod(b.checkIn, periodStart, periodEnd) || 
-           (b.checkIn < periodStart && b.checkOut > periodStart)
+    (b) => {
+      const checkInInPeriod = isInPeriod(b.checkIn, periodStart, periodEnd);
+      const spansIntoPeriod = b.checkIn < periodStart && b.checkOut > periodStart;
+      return checkInInPeriod || spansIntoPeriod;
+    }
   );
 
-  const confirmedOrCheckedOut = periodBookings.filter(
-    (b) => b.status === "CONFIRMED" || b.status === "CHECKED_OUT"
-  );
+  const confirmedOrCompleted = periodBookings.filter((b) => isConfirmedOrCompleted(b.status) && !b.isLegacy);
 
   let roomRevenue = 0;
   let mealRevenue = 0;
-  let totalNights = 0;
 
-  for (const booking of confirmedOrCheckedOut) {
+  for (const booking of confirmedOrCompleted) {
     const checkIn = booking.checkIn >= periodStart ? booking.checkIn : periodStart;
     const checkOut = booking.checkOut <= periodEnd ? booking.checkOut : periodEnd;
     
     if (checkIn < checkOut) {
-      const nights = calculateNights(
-        checkIn.toISOString().split("T")[0],
-        checkOut.toISOString().split("T")[0]
-      );
-      roomRevenue += calculateRoomRevenue(booking, nights);
-      mealRevenue += calculateMealRevenue(booking);
-      totalNights += nights;
+      const nightsInPeriod = calculateNights(checkIn, checkOut);
+      const totalNights = calculateNights(booking.checkIn, booking.checkOut);
+      
+      roomRevenue += calculateRoomRevenue(booking, nightsInPeriod);
+      mealRevenue += calculateMealRevenue(booking, nightsInPeriod, totalNights);
     }
   }
 
@@ -258,51 +285,50 @@ export function calculatePeriodMetrics(
     ? (occupancyByRoomType.DOUBLE_OCCUPANCY.booked / occupancyByRoomType.DOUBLE_OCCUPANCY.available) * 100
     : 0;
 
-  const bookingRequestsReceived = periodBookings.filter((b) =>
-    isInPeriod(b.createdAt, periodStart, periodEnd)
-  ).length;
-  
   const requestsInPeriod = periodBookings.filter((b) =>
-    isInPeriod(b.createdAt, periodStart, periodEnd)
+    isInPeriod(b.submittedAt.split("T")[0], periodStart, periodEnd) && !b.isLegacy
   );
   
+  const bookingRequestsReceived = requestsInPeriod.length;
+  
   const bookingRequestsConfirmed = requestsInPeriod.filter(
-    (b) => b.status === "CONFIRMED" || b.status === "CHECKED_OUT"
+    (b) => isConfirmedOrCompleted(b.status)
   ).length;
   
   const bookingRequestsCancelled = requestsInPeriod.filter(
-    (b) => b.status === "CANCELLED"
+    (b) => b.status === "cancelled" || b.status === "rejected"
   ).length;
   
   const confirmationRate = bookingRequestsReceived > 0
     ? (bookingRequestsConfirmed / bookingRequestsReceived) * 100
     : 0;
 
-  const memberBookings = confirmedOrCheckedOut.filter(isMember).length;
-  const nonMemberBookings = confirmedOrCheckedOut.filter((b) => !isMember(b)).length;
-  const memberSplit = confirmedOrCheckedOut.length > 0
-    ? (memberBookings / confirmedOrCheckedOut.length) * 100
+  const memberBookings = confirmedOrCompleted.filter((b) => b.isMember).length;
+  const nonMemberBookings = confirmedOrCompleted.filter((b) => !b.isMember).length;
+  const memberSplit = confirmedOrCompleted.length > 0
+    ? (memberBookings / confirmedOrCompleted.length) * 100
     : 0;
 
-  const totalLengthOfStay = confirmedOrCheckedOut.reduce((sum, b) => {
-    const nights = calculateNights(
-      b.checkIn.toISOString().split("T")[0],
-      b.checkOut.toISOString().split("T")[0]
-    );
+  const totalLengthOfStay = confirmedOrCompleted.reduce((sum, b) => {
+    const nights = calculateNights(b.checkIn, b.checkOut);
     return sum + nights;
   }, 0);
-  const averageLengthOfStay = confirmedOrCheckedOut.length > 0
-    ? totalLengthOfStay / confirmedOrCheckedOut.length
+  const averageLengthOfStay = confirmedOrCompleted.length > 0
+    ? totalLengthOfStay / confirmedOrCompleted.length
     : 0;
 
-  const totalLeadTime = confirmedOrCheckedOut.reduce((sum, b) => {
-    const leadTimeMs = b.checkIn.getTime() - b.createdAt.getTime();
+  const totalLeadTime = confirmedOrCompleted.reduce((sum, b) => {
+    const submittedDate = new Date(b.submittedAt);
+    const checkInDate = trinidadDateToUTC(b.checkIn);
+    const leadTimeMs = checkInDate.getTime() - submittedDate.getTime();
     const leadTimeDays = leadTimeMs / (24 * 60 * 60 * 1000);
-    return sum + leadTimeDays;
+    return sum + Math.max(0, leadTimeDays);
   }, 0);
-  const averageLeadTime = confirmedOrCheckedOut.length > 0
-    ? totalLeadTime / confirmedOrCheckedOut.length
+  const averageLeadTime = confirmedOrCompleted.length > 0
+    ? totalLeadTime / confirmedOrCompleted.length
     : 0;
+
+  const skippedLegacyBookings = periodBookings.filter((b) => b.isLegacy).length;
 
   return {
     roomRevenue,
@@ -321,13 +347,14 @@ export function calculatePeriodMetrics(
     memberSplit,
     averageLengthOfStay,
     averageLeadTime,
+    skippedLegacyBookings,
   };
 }
 
 export function calculateComparisonMetrics(
   bookings: HotelBooking[],
-  periodStart: Date,
-  periodEnd: Date,
+  periodStart: string,
+  periodEnd: string,
   isWeekly: boolean
 ): ComparisonMetrics {
   const currentMetrics = calculatePeriodMetrics(bookings, periodStart, periodEnd);
@@ -368,22 +395,29 @@ export function calculateTrendData(
   const today = getTrinidadToday();
   
   for (let i = periods - 1; i >= 0; i--) {
-    let periodStart: Date;
-    let periodEnd: Date;
+    let periodStart: string;
+    let periodEnd: string;
     let label: string;
     
     if (isWeekly) {
-      const weekDate = new Date(today);
-      weekDate.setDate(weekDate.getDate() - (i * 7));
-      const range = getWeekRange(weekDate);
+      const targetDate = trinidadDateToUTC(today);
+      targetDate.setUTCDate(targetDate.getUTCDate() - (i * 7));
+      const targetDateStr = toTrinidadDateString(targetDate);
+      const range = getWeekRange(targetDateStr);
       periodStart = range.start;
       periodEnd = range.end;
-      label = `${periodStart.getMonth() + 1}/${periodStart.getDate()}`;
+      const [, m, d] = periodStart.split("-");
+      label = `${parseInt(m, 10)}/${parseInt(d, 10)}`;
     } else {
-      periodStart = new Date(today.getFullYear(), today.getMonth() - i, 1);
-      periodEnd = new Date(today.getFullYear(), today.getMonth() - i + 1, 1);
+      const targetDate = trinidadDateToUTC(today);
+      targetDate.setUTCMonth(targetDate.getUTCMonth() - i);
+      const targetDateStr = toTrinidadDateString(targetDate);
+      const range = getMonthRange(targetDateStr);
+      periodStart = range.start;
+      periodEnd = range.end;
       const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      label = `${monthNames[periodStart.getMonth()]} ${periodStart.getFullYear()}`;
+      const [year, month] = periodStart.split("-");
+      label = `${monthNames[parseInt(month, 10) - 1]} ${year}`;
     }
     
     const metrics = calculatePeriodMetrics(bookings, periodStart, periodEnd);
@@ -411,6 +445,11 @@ export function generateCSV(
   rows.push("TTPSSWA Hotel Performance Report");
   rows.push(`Period: ${periodLabel}`);
   rows.push("");
+  
+  if (metrics.skippedLegacyBookings > 0) {
+    rows.push(`Note: ${metrics.skippedLegacyBookings} legacy booking(s) were skipped (pre-Oct 26 data)`);
+    rows.push("");
+  }
   
   rows.push("SUMMARY METRICS");
   rows.push("Metric,Current Period,Change vs Previous (%)");

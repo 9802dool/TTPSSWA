@@ -24,7 +24,6 @@ enum BookingStatus {
   PENDING
   CONFIRMED
   CANCELLED
-  CHECKED_OUT
 }
 
 // Web Authentication Account

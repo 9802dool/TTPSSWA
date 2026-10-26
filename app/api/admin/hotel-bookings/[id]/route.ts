@@ -6,7 +6,8 @@ import {
   mergeHotelBookingMeta,
   type HotelBookingMeta,
 } from "@/lib/hotel-booking-meta";
-import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { updateApplicationStatus } from "@/lib/supabase/applications";
+import type { ApplicationStatus } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
 
@@ -70,27 +71,28 @@ export async function PATCH(
       );
     }
   } else if (action === "update_status") {
-    if (!isDatabaseConfigured()) {
-      return NextResponse.json(
-        { error: "Database not configured." },
-        { status: 503 },
-      );
-    }
+    const statusInput = String(body.bookingStatus ?? "").trim().toLowerCase();
+    const statusMap: Record<string, ApplicationStatus> = {
+      pending: "submitted",
+      request: "submitted",
+      confirmed: "approved",
+      "checked out": "completed",
+      cancelled: "cancelled",
+    };
     
-    const status = String(body.bookingStatus ?? "").trim().toUpperCase();
-    const validStatuses = ["PENDING", "CONFIRMED", "CANCELLED", "CHECKED_OUT"];
-    
-    if (!validStatuses.includes(status)) {
+    const newStatus = statusMap[statusInput];
+    if (!newStatus) {
       return NextResponse.json({ error: "Invalid status." }, { status: 400 });
     }
     
-    try {
-      await prisma.hotelBooking.update({
-        where: { id },
-        data: { status: status as "PENDING" | "CONFIRMED" | "CANCELLED" | "CHECKED_OUT" },
-      });
-    } catch (err) {
-      console.error("Error updating booking status:", err);
+    const success = await updateApplicationStatus(id, newStatus, {
+      changed_by_type: "admin",
+      changed_by_id: session.userId,
+      changed_by_name: session.email,
+      note: `Status changed to ${newStatus} by admin`,
+    });
+    
+    if (!success) {
       return NextResponse.json(
         { error: "Could not update booking status." },
         { status: 500 },

@@ -7,25 +7,26 @@ import {
   getWeekRange,
   getMonthRange,
   getPreviousPeriod,
+  getTrinidadToday,
   type HotelBooking,
 } from "../lib/hotel-performance-metrics";
 
 const createBooking = (overrides: Partial<HotelBooking> = {}): HotelBooking => ({
   id: "test-id",
   guestName: "Test Guest",
-  serviceNumber: null,
   email: "test@example.com",
   phone: "1234567890",
   roomCategory: "SINGLE_OCCUPANCY",
   roomCount: 1,
-  checkIn: new Date("2024-01-15T00:00:00Z"),
-  checkOut: new Date("2024-01-17T00:00:00Z"),
+  checkIn: "2024-01-15",
+  checkOut: "2024-01-17",
   guests: 2,
-  meals: [],
+  meals: { Breakfast: 0, Lunch: 0, Dinner: 0 },
   specialRequests: null,
-  status: "CONFIRMED",
-  createdAt: new Date("2024-01-10T00:00:00Z"),
-  updatedAt: new Date("2024-01-10T00:00:00Z"),
+  isMember: false,
+  status: "approved",
+  submittedAt: "2024-01-10T00:00:00Z",
+  isLegacy: false,
   ...overrides,
 });
 
@@ -34,19 +35,19 @@ describe("hotel-performance-metrics", () => {
     it("should calculate basic metrics for a single booking", () => {
       const bookings = [
         createBooking({
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
           roomCategory: "SINGLE_OCCUPANCY",
           roomCount: 1,
-          serviceNumber: null,
-          meals: [],
+          isMember: false,
+          meals: { Breakfast: 0, Lunch: 0, Dinner: 0 },
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01")
+        "2024-01-01",
+        "2024-02-01"
       );
 
       expect(metrics.roomRevenue).toBe(440 * 1 * 2);
@@ -61,25 +62,25 @@ describe("hotel-performance-metrics", () => {
     it("should calculate member vs non-member revenue correctly", () => {
       const bookings = [
         createBooking({
-          serviceNumber: "12345",
+          isMember: true,
           roomCategory: "SINGLE_OCCUPANCY",
           roomCount: 1,
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
         createBooking({
-          serviceNumber: null,
+          isMember: false,
           roomCategory: "SINGLE_OCCUPANCY",
           roomCount: 1,
-          checkIn: new Date("2024-01-20"),
-          checkOut: new Date("2024-01-22"),
+          checkIn: "2024-01-20",
+          checkOut: "2024-01-22",
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01")
+        "2024-01-01",
+        "2024-02-01"
       );
 
       expect(metrics.roomRevenue).toBe(385 * 2 + 440 * 2);
@@ -88,44 +89,44 @@ describe("hotel-performance-metrics", () => {
       expect(metrics.memberSplit).toBe(50);
     });
 
-    it("should calculate meal revenue", () => {
+    it("should calculate meal revenue prorated by nights in period", () => {
       const bookings = [
         createBooking({
-          meals: ["Breakfast", "Lunch", "Dinner"],
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          meals: { Breakfast: 3, Lunch: 3, Dinner: 3 },
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01")
+        "2024-01-01",
+        "2024-02-01"
       );
 
-      expect(metrics.mealRevenue).toBe(55 + 75 + 70);
+      expect(metrics.mealRevenue).toBe((55 + 75 + 70) * 3);
     });
 
     it("should exclude cancelled bookings from revenue", () => {
       const bookings = [
         createBooking({
-          status: "CONFIRMED",
+          status: "approved",
           roomCategory: "SINGLE_OCCUPANCY",
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
         createBooking({
-          status: "CANCELLED",
+          status: "cancelled",
           roomCategory: "SINGLE_OCCUPANCY",
-          checkIn: new Date("2024-01-20"),
-          checkOut: new Date("2024-01-22"),
+          checkIn: "2024-01-20",
+          checkOut: "2024-01-22",
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01")
+        "2024-01-01",
+        "2024-02-01"
       );
 
       expect(metrics.roomRevenue).toBe(440 * 2);
@@ -135,20 +136,20 @@ describe("hotel-performance-metrics", () => {
       expect(metrics.confirmationRate).toBe(50);
     });
 
-    it("should include checked out bookings in revenue", () => {
+    it("should include completed bookings in revenue", () => {
       const bookings = [
         createBooking({
-          status: "CHECKED_OUT",
+          status: "completed",
           roomCategory: "SINGLE_OCCUPANCY",
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01")
+        "2024-01-01",
+        "2024-02-01"
       );
 
       expect(metrics.roomRevenue).toBe(440 * 2);
@@ -160,15 +161,15 @@ describe("hotel-performance-metrics", () => {
         createBooking({
           roomCategory: "PRESIDENTIAL_SUITE",
           roomCount: 1,
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-15"),
-        new Date("2024-01-17")
+        "2024-01-15",
+        "2024-01-17"
       );
 
       const totalRooms = 2 + 2 + 4;
@@ -183,21 +184,21 @@ describe("hotel-performance-metrics", () => {
         createBooking({
           roomCategory: "PRESIDENTIAL_SUITE",
           roomCount: 1,
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
         createBooking({
           roomCategory: "DOUBLE_OCCUPANCY",
           roomCount: 2,
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-16"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-16",
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-15"),
-        new Date("2024-01-17")
+        "2024-01-15",
+        "2024-01-17"
       );
 
       expect(metrics.occupancyByRoomType.PRESIDENTIAL_SUITE.booked).toBe(2);
@@ -216,19 +217,19 @@ describe("hotel-performance-metrics", () => {
     it("should calculate average length of stay", () => {
       const bookings = [
         createBooking({
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
         createBooking({
-          checkIn: new Date("2024-01-20"),
-          checkOut: new Date("2024-01-24"),
+          checkIn: "2024-01-20",
+          checkOut: "2024-01-24",
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01")
+        "2024-01-01",
+        "2024-02-01"
       );
 
       expect(metrics.averageLengthOfStay).toBe((2 + 4) / 2);
@@ -237,42 +238,66 @@ describe("hotel-performance-metrics", () => {
     it("should calculate average lead time", () => {
       const bookings = [
         createBooking({
-          createdAt: new Date("2024-01-10"),
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          submittedAt: "2024-01-10T00:00:00Z",
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
         createBooking({
-          createdAt: new Date("2024-01-15"),
-          checkIn: new Date("2024-01-25"),
-          checkOut: new Date("2024-01-27"),
+          submittedAt: "2024-01-15T00:00:00Z",
+          checkIn: "2024-01-25",
+          checkOut: "2024-01-27",
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01")
+        "2024-01-01",
+        "2024-02-01"
       );
 
-      expect(metrics.averageLeadTime).toBe((5 + 10) / 2);
+      expect(metrics.averageLeadTime).toBeCloseTo((5 + 10) / 2, 0);
     });
 
     it("should handle bookings spanning period boundaries", () => {
       const bookings = [
         createBooking({
-          checkIn: new Date("2024-01-30"),
-          checkOut: new Date("2024-02-02"),
+          checkIn: "2024-01-30",
+          checkOut: "2024-02-02",
           roomCount: 1,
         }),
       ];
 
       const metrics = calculatePeriodMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01")
+        "2024-01-01",
+        "2024-02-01"
       );
 
       expect(metrics.roomNightsBooked).toBe(2);
+    });
+
+    it("should skip legacy bookings", () => {
+      const bookings = [
+        createBooking({
+          isLegacy: true,
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
+        }),
+        createBooking({
+          isLegacy: false,
+          checkIn: "2024-01-20",
+          checkOut: "2024-01-22",
+        }),
+      ];
+
+      const metrics = calculatePeriodMetrics(
+        bookings,
+        "2024-01-01",
+        "2024-02-01"
+      );
+
+      expect(metrics.skippedLegacyBookings).toBe(1);
+      expect(metrics.bookingRequestsReceived).toBe(1);
     });
   });
 
@@ -280,23 +305,23 @@ describe("hotel-performance-metrics", () => {
     it("should calculate comparison percentages correctly", () => {
       const bookings = [
         createBooking({
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
           roomCategory: "SINGLE_OCCUPANCY",
-          createdAt: new Date("2024-01-10"),
+          submittedAt: "2024-01-10T00:00:00Z",
         }),
         createBooking({
-          checkIn: new Date("2023-12-15"),
-          checkOut: new Date("2023-12-17"),
+          checkIn: "2023-12-15",
+          checkOut: "2023-12-17",
           roomCategory: "SINGLE_OCCUPANCY",
-          createdAt: new Date("2023-12-10"),
+          submittedAt: "2023-12-10T00:00:00Z",
         }),
       ];
 
       const metrics = calculateComparisonMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01"),
+        "2024-01-01",
+        "2024-02-01",
         false
       );
 
@@ -307,25 +332,25 @@ describe("hotel-performance-metrics", () => {
     it("should show increase when current period has more revenue", () => {
       const bookings = [
         createBooking({
-          checkIn: new Date("2024-02-15"),
-          checkOut: new Date("2024-02-17"),
+          checkIn: "2024-02-15",
+          checkOut: "2024-02-17",
           roomCategory: "SINGLE_OCCUPANCY",
           roomCount: 2,
-          createdAt: new Date("2024-02-10"),
+          submittedAt: "2024-02-10T00:00:00Z",
         }),
         createBooking({
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
           roomCategory: "SINGLE_OCCUPANCY",
           roomCount: 1,
-          createdAt: new Date("2024-01-10"),
+          submittedAt: "2024-01-10T00:00:00Z",
         }),
       ];
 
       const metrics = calculateComparisonMetrics(
         bookings,
-        new Date("2024-02-01"),
-        new Date("2024-03-01"),
+        "2024-02-01",
+        "2024-03-01",
         false
       );
 
@@ -337,8 +362,8 @@ describe("hotel-performance-metrics", () => {
     it("should generate trend data for 12 weeks", () => {
       const bookings = [
         createBooking({
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
       ];
 
@@ -356,8 +381,8 @@ describe("hotel-performance-metrics", () => {
     it("should generate trend data for 12 months", () => {
       const bookings = [
         createBooking({
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
         }),
       ];
 
@@ -371,16 +396,16 @@ describe("hotel-performance-metrics", () => {
     it("should generate valid CSV output", () => {
       const bookings = [
         createBooking({
-          checkIn: new Date("2024-01-15"),
-          checkOut: new Date("2024-01-17"),
+          checkIn: "2024-01-15",
+          checkOut: "2024-01-17",
           roomCategory: "SINGLE_OCCUPANCY",
         }),
       ];
 
       const metrics = calculateComparisonMetrics(
         bookings,
-        new Date("2024-01-01"),
-        new Date("2024-02-01"),
+        "2024-01-01",
+        "2024-02-01",
         false
       );
 
@@ -398,33 +423,30 @@ describe("hotel-performance-metrics", () => {
 
   describe("date range utilities", () => {
     it("should get week range correctly", () => {
-      const date = new Date("2024-01-15");
-      const { start, end } = getWeekRange(date);
+      const { start, end } = getWeekRange("2024-01-15");
 
-      expect(start.getDay()).toBe(0);
-      const diffMs = end.getTime() - start.getTime();
-      const diffDays = diffMs / (1000 * 60 * 60 * 24);
+      const startDate = new Date(start + "T04:00:00Z");
+      expect(startDate.getUTCDay()).toBe(0);
+      
+      const startMs = new Date(start + "T04:00:00Z").getTime();
+      const endMs = new Date(end + "T04:00:00Z").getTime();
+      const diffDays = (endMs - startMs) / (1000 * 60 * 60 * 24);
       expect(diffDays).toBe(7);
     });
 
     it("should get month range correctly", () => {
-      const date = new Date("2024-01-15");
-      const { start, end } = getMonthRange(date);
+      const { start, end } = getMonthRange("2024-01-15");
 
-      expect(start.getDate()).toBe(1);
-      expect(start.getMonth()).toBe(0);
-      expect(end.getDate()).toBe(1);
-      expect(end.getMonth()).toBe(1);
+      expect(start.endsWith("-01")).toBe(true);
+      expect(end.startsWith("2024-02-")).toBe(true);
+      expect(end.endsWith("-01")).toBe(true);
     });
 
     it("should get previous period correctly", () => {
-      const start = new Date("2024-02-01");
-      const end = new Date("2024-03-01");
-      const { start: prevStart, end: prevEnd } = getPreviousPeriod(start, end, false);
+      const { start: prevStart, end: prevEnd } = getPreviousPeriod("2024-02-01", "2024-03-01", false);
 
-      expect(prevStart.getMonth()).toBe(0);
-      expect(prevEnd.getMonth()).toBe(1);
-      expect(prevEnd.getDate()).toBe(1);
+      expect(prevStart.startsWith("2024-01-")).toBe(true);
+      expect(prevEnd).toBe("2024-02-01");
     });
   });
 });

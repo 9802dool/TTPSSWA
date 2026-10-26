@@ -6,45 +6,12 @@ import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
 import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import { HotelPerformanceDashboard } from "@/components/HotelPerformanceDashboard";
-import { PrismaClient } from "@prisma/client";
-import type { HotelBooking } from "@/lib/hotel-performance-metrics";
+import { loadHotelBookings } from "@/lib/hotel-performance-data";
 
 export const metadata: Metadata = {
   title: "Hotel Performance | Admin | TTPSSWA",
   description: "Executive hotel performance metrics and analytics.",
 };
-
-async function getHotelBookings(): Promise<HotelBooking[]> {
-  const prisma = new PrismaClient();
-  try {
-    const bookings = await prisma.hotelBooking.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    
-    return bookings.map((b) => ({
-      id: b.id,
-      guestName: b.guestName,
-      serviceNumber: b.serviceNumber,
-      email: b.email,
-      phone: b.phone,
-      roomCategory: b.roomCategory as "PRESIDENTIAL_SUITE" | "SINGLE_OCCUPANCY" | "DOUBLE_OCCUPANCY",
-      roomCount: b.roomCount,
-      checkIn: b.checkIn,
-      checkOut: b.checkOut,
-      guests: b.guests,
-      meals: b.meals,
-      specialRequests: b.specialRequests,
-      status: b.status as "PENDING" | "CONFIRMED" | "CANCELLED" | "CHECKED_OUT",
-      createdAt: b.createdAt,
-      updatedAt: b.updatedAt,
-    }));
-  } catch (error) {
-    console.error("Error fetching hotel bookings:", error);
-    return [];
-  } finally {
-    await prisma.$disconnect();
-  }
-}
 
 export default async function AdminHotelPerformancePage() {
   const cookieStore = cookies();
@@ -55,7 +22,7 @@ export default async function AdminHotelPerformancePage() {
     redirect("/admin/login?next=/admin/hotel-performance");
   }
 
-  const bookings = await getHotelBookings();
+  const { bookings, skipped } = await loadHotelBookings();
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--fg)]">
@@ -72,7 +39,7 @@ export default async function AdminHotelPerformancePage() {
               Hotel Performance
             </h1>
             <p className="text-sm text-[var(--muted)]">
-              Executive metrics and trends ({bookings.length} booking{bookings.length === 1 ? "" : "s"})
+              Executive metrics and trends ({bookings.length} booking{bookings.length === 1 ? "" : "s"}{skipped > 0 ? `, ${skipped} legacy skipped` : ""})
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -91,7 +58,7 @@ export default async function AdminHotelPerformancePage() {
       </header>
 
       <main className="site-container py-10">
-        <HotelPerformanceDashboard bookings={bookings} />
+        <HotelPerformanceDashboard bookings={bookings} sessionRole={session.role} />
       </main>
     </div>
   );
