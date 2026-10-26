@@ -10,8 +10,8 @@ import {
   getApplicationById,
 } from "@/lib/supabase/applications";
 import { MemberApplicationCard } from "@/components/member/MemberApplicationCard";
-import { isDatabaseConfigured, prisma } from "@/lib/prisma";
 import { getAccountVerificationStatus } from "@/lib/verify-account-helper";
+import { getWebAccountById } from "@/lib/web-account-storage";
 
 export const metadata = {
   title: "My Dashboard | TTPSSWA",
@@ -25,17 +25,7 @@ export default async function MemberDashboardPage() {
     redirect("/login?next=/member/dashboard");
   }
 
-  if (!isDatabaseConfigured()) {
-    return (
-      <DashboardShell>
-        <p className="text-sm text-red-700">
-          Account database is not configured. Contact site administrator.
-        </p>
-      </DashboardShell>
-    );
-  }
-
-  // Check email verification status
+  // Check email verification status (uses Redis WebAccount)
   const verificationStatus = await getAccountVerificationStatus(userId);
   
   if (!verificationStatus) {
@@ -74,16 +64,16 @@ export default async function MemberDashboardPage() {
     );
   }
 
-  // Get user account from Prisma
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  // Get user account from Redis (production uses WebAccount in Upstash Redis)
+  const account = await getWebAccountById(userId);
   
-  if (!user) {
+  if (!account) {
     redirect("/login?next=/member/dashboard");
   }
 
   if (!isSupabaseConfigured()) {
     return (
-      <DashboardShell userName={user.fullName}>
+      <DashboardShell userName={account.fullName}>
         <p className="text-sm text-amber-700">
           Application storage is not yet configured. Your applications will appear here once the system is set up.
         </p>
@@ -93,11 +83,11 @@ export default async function MemberDashboardPage() {
 
   // Resolve member record by case-insensitive email match
   const { getMemberByEmail } = await import('@/lib/supabase/member-helpers');
-  const member = await getMemberByEmail(user.email);
+  const member = await getMemberByEmail(account.email);
 
   if (!member) {
     return (
-      <DashboardShell userName={user.fullName}>
+      <DashboardShell userName={account.fullName}>
         <p className="text-sm text-amber-700">
           No member record found. Your applications will appear here once you submit one or are registered by an administrator.
         </p>
@@ -122,7 +112,7 @@ export default async function MemberDashboardPage() {
   const validApplications = applicationsWithDetails.filter(Boolean);
 
   return (
-    <DashboardShell userName={user.fullName}>
+    <DashboardShell userName={account.fullName}>
       <div className="space-y-6">
         <div>
           <h2 className="text-xl font-semibold text-[var(--fg)]">My Applications</h2>
