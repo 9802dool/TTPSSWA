@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 const COOKIE = "ttpsswa_member";
@@ -54,4 +55,12 @@ export function verifyMemberSession(token: string): string | null {
   } catch {
     return null;
   }
+}
+
+/** Server-side helper to get the current member's user ID from the session cookie. */
+export function getMemberSessionUserId(): string | null {
+  const cookieStore = cookies();
+  const token = cookieStore.get(COOKIE)?.value;
+  if (!token) return null;
+  return verifyMemberSession(token);
 }
