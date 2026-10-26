@@ -5,7 +5,7 @@ import {
   authenticateAdmin,
   checkBootstrapAdmin,
   hasAnyAdmins,
-  createAdminUser,
+  bootstrapFirstAdmin,
 } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 
@@ -72,13 +72,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create first super_admin with the bootstrap password
-    const result = await createAdminUser({
-      email,
-      full_name: "Super Administrator",
-      password,
-      role: "super_admin",
-    });
+    // Use atomic bootstrap function with advisory lock
+    const result = await bootstrapFirstAdmin(email, "Super Administrator", password);
 
     if ("error" in result) {
       return NextResponse.json(

@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AdminTable from "@/components/admin/AdminTable";
 import SiteHeader from "@/components/SiteHeader";
-import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import { isRegistrationAdmin } from "@/lib/registration-admin";
 import { createClient, isSupabaseConfigured } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
@@ -14,7 +14,8 @@ export const dynamic = "force-dynamic";
 export default async function AdminDashboardPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  const siteAdmin = Boolean(token && verifyAdminSession(token));
+  const session = token ? verifyAdminSession(token) : null;
+  const siteAdmin = Boolean(session);
   const admin = siteAdmin ? { ok: true } : await isRegistrationAdmin();
 
   if (!admin.ok) {

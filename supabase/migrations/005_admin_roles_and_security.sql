@@ -31,6 +31,10 @@ CREATE INDEX IF NOT EXISTS idx_admin_users_active ON public.admin_users(active) 
 -- Enable RLS
 ALTER TABLE public.admin_users ENABLE ROW LEVEL SECURITY;
 
+-- Revoke any public access first
+REVOKE ALL ON public.admin_users FROM anon;
+REVOKE ALL ON public.admin_users FROM authenticated;
+
 -- RLS Policy: Only service role can access
 DROP POLICY IF EXISTS "Service role full access to admin_users" ON public.admin_users;
 CREATE POLICY "Service role full access to admin_users"
@@ -39,11 +43,64 @@ TO service_role
 USING (true)
 WITH CHECK (true);
 
--- Update trigger for updated_at
+-- Update trigger for updated_at (make idempotent)
+DROP TRIGGER IF EXISTS update_admin_users_updated_at ON public.admin_users;
 CREATE TRIGGER update_admin_users_updated_at
 BEFORE UPDATE ON public.admin_users
 FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
+
+-- Atomic bootstrap function with advisory lock
+-- Creates first super_admin only if no admins exist
+DROP FUNCTION IF EXISTS bootstrap_first_admin(TEXT, TEXT, TEXT);
+
+CREATE OR REPLACE FUNCTION bootstrap_first_admin(
+  p_email TEXT,
+  p_full_name TEXT,
+  p_password_hash TEXT
+)
+RETURNS TABLE (
+  success BOOLEAN,
+  admin_id UUID,
+  message TEXT
+) AS $$
+DECLARE
+  v_admin_id UUID;
+  v_existing_count INTEGER;
+  v_lock_acquired BOOLEAN;
+BEGIN
+  -- Try to acquire advisory lock (key: 1234567890)
+  -- This prevents concurrent bootstrap attempts
+  v_lock_acquired := pg_try_advisory_xact_lock(1234567890);
+  
+  IF NOT v_lock_acquired THEN
+    RETURN QUERY SELECT false, NULL::UUID, 'Another bootstrap is in progress';
+    RETURN;
+  END IF;
+  
+  -- Check if any admins already exist
+  SELECT COUNT(*) INTO v_existing_count FROM public.admin_users;
+  
+  IF v_existing_count > 0 THEN
+    RETURN QUERY SELECT false, NULL::UUID, 'Admin accounts already exist';
+    RETURN;
+  END IF;
+  
+  -- Create the first super_admin
+  INSERT INTO public.admin_users (email, full_name, password_hash, role, active)
+  VALUES (lower(p_email), p_full_name, p_password_hash, 'super_admin', true)
+  RETURNING id INTO v_admin_id;
+  
+  RETURN QUERY SELECT true, v_admin_id, 'First super_admin created successfully';
+END;
+$$ LANGUAGE plpgsql VOLATILE SECURITY INVOKER
+SET search_path = '';
+
+-- Lock down the bootstrap function
+REVOKE ALL ON FUNCTION bootstrap_first_admin(TEXT, TEXT, TEXT) FROM PUBLIC;
+REVOKE ALL ON FUNCTION bootstrap_first_admin(TEXT, TEXT, TEXT) FROM anon;
+REVOKE ALL ON FUNCTION bootstrap_first_admin(TEXT, TEXT, TEXT) FROM authenticated;
+GRANT EXECUTE ON FUNCTION bootstrap_first_admin(TEXT, TEXT, TEXT) TO service_role;
 
 -- Admin action log (extends application_status_history with admin context)
 -- Add admin_user_id to track who made changes

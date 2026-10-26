@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
-import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
+import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-auth";
 import { getAllMemberApplications } from "@/lib/member-signup-storage";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { getMembers, getApplications } from "@/lib/supabase/applications";
@@ -20,7 +20,9 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  if (!token || !verifyAdminSession(token)) {
+  const session = token ? verifyAdminSession(token) : null;
+  
+  if (!session) {
     redirect("/admin/login?next=/admin/members");
   }
 

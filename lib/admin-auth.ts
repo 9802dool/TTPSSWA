@@ -188,6 +188,7 @@ export async function listAdminUsers(): Promise<AdminUser[]> {
 
 /**
  * Create a new admin user (super_admin only).
+ * For bootstrap (first admin), use bootstrapFirstAdmin instead.
  */
 export async function createAdminUser(data: {
   email: string;
@@ -231,6 +232,41 @@ export async function createAdminUser(data: {
   }
 
   return { id: admin.id };
+}
+
+/**
+ * Bootstrap first super_admin atomically using advisory lock.
+ * Prevents race conditions when multiple requests try to bootstrap simultaneously.
+ */
+export async function bootstrapFirstAdmin(
+  email: string,
+  fullName: string,
+  password: string,
+): Promise<{ id: string } | { error: string }> {
+  const supabase = createServiceClient();
+  if (!supabase) return { error: "Supabase not configured" };
+
+  const passwordHash = hashPassword(password);
+
+  const { data, error } = await supabase.rpc("bootstrap_first_admin", {
+    p_email: email.toLowerCase(),
+    p_full_name: fullName,
+    p_password_hash: passwordHash,
+  });
+
+  if (error) {
+    console.error("Bootstrap error:", error);
+    return { error: "Failed to bootstrap first admin" };
+  }
+
+  // data is an array with one row: { success, admin_id, message }
+  const result = Array.isArray(data) ? data[0] : data;
+  
+  if (!result || !result.success) {
+    return { error: result?.message || "Bootstrap failed" };
+  }
+
+  return { id: result.admin_id };
 }
 
 /**
@@ -287,15 +323,20 @@ export function hasRole(session: AdminSession | null, minRole: AdminRole): boole
 
 /**
  * Check if any admin users exist in the database.
+ * Returns true if error occurs (fail closed - assume admins exist for safety).
  */
 export async function hasAnyAdmins(): Promise<boolean> {
   const supabase = createServiceClient();
-  if (!supabase) return false;
+  if (!supabase) return true; // Fail closed - assume admins exist
 
   const { count, error } = await supabase
     .from("admin_users")
     .select("*", { count: "exact", head: true });
 
-  if (error) return false;
+  if (error) {
+    console.error("hasAnyAdmins error:", error);
+    return true; // Fail closed - assume admins exist on error
+  }
+  
   return (count ?? 0) > 0;
 }
