@@ -73,9 +73,9 @@ describe("Hotel Booking API", () => {
     isMember: true,
     membershipNumber: "12345",
     meals: {
-      Breakfast: 16,
-      Lunch: 0,
-      Dinner: 8,
+      includeBreakfast: true,
+      includeLunch: false,
+      includeDinner: true,
     },
     specialRequests: "Late check-in requested",
   };
@@ -109,8 +109,8 @@ describe("Hotel Booking API", () => {
       expect(response.status).toBe(201);
       expect(data.booking).toBeDefined();
       expect(data.estimatedTotal).toBeDefined();
-      // 2 rooms × 4 nights × 715 (member rate) + meals (16×55 + 8×70)
-      expect(data.estimatedTotal).toBe(2 * 4 * 715 + 16 * 55 + 8 * 70);
+      // 2 rooms × 4 nights × 715 (member rate) + meals (4 guests × 4 nights: 16 breakfast + 16 dinner)
+      expect(data.estimatedTotal).toBe(2 * 4 * 715 + 16 * 55 + 16 * 70);
     });
 
     it("should accept a valid non-member booking", async () => {
@@ -145,7 +145,7 @@ describe("Hotel Booking API", () => {
         guests: 2,
         isMember: false,
         membershipNumber: "",
-        meals: { Breakfast: 0, Lunch: 0, Dinner: 0 },
+        meals: { includeBreakfast: false, includeLunch: false, includeDinner: false },
       };
 
       const request = createRequest(booking);
@@ -200,7 +200,7 @@ describe("Hotel Booking API", () => {
         roomCategory: "DOUBLE_OCCUPANCY",
         roomCount: 2,
         guests: 8,
-        meals: { Breakfast: 0, Lunch: 0, Dinner: 0 },
+        meals: { includeBreakfast: false, includeLunch: false, includeDinner: false },
       };
 
       const request = createRequest(booking);
@@ -251,7 +251,7 @@ describe("Hotel Booking API", () => {
         roomCategory: "SINGLE_OCCUPANCY",
         roomCount: 1,
         guests: 2,
-        meals: { Breakfast: 0, Lunch: 0, Dinner: 0 },
+        meals: { includeBreakfast: false, includeLunch: false, includeDinner: false },
       };
 
       const request = createRequest(booking);
@@ -388,9 +388,9 @@ describe("Hotel Booking API", () => {
         guests: 2,
         isMember: false,
         meals: {
-          Breakfast: 6, // 2 guests × 3 nights
-          Lunch: 6,
-          Dinner: 6,
+          includeBreakfast: true,
+          includeLunch: true,
+          includeDinner: true,
         },
       };
 
@@ -399,7 +399,7 @@ describe("Hotel Booking API", () => {
       const data = await response.json();
 
       expect(response.status).toBe(201);
-      // 2 rooms × 3 nights × 440 (non-member) + meals (6×55 + 6×75 + 6×70)
+      // 2 rooms × 3 nights × 440 (non-member) + meals (2 guests × 3 nights = 6 of each)
       const expectedRooms = 2 * 3 * 440;
       const expectedMeals = 6 * 55 + 6 * 75 + 6 * 70;
       expect(data.estimatedTotal).toBe(expectedRooms + expectedMeals);
@@ -413,7 +413,7 @@ describe("Hotel Booking API", () => {
         checkIn: "2026-12-01",
         checkOut: "2026-12-03", // 2 nights
         guests: 2,
-        meals: { Breakfast: 0, Lunch: 0, Dinner: 0 },
+        meals: { includeBreakfast: false, includeLunch: false, includeDinner: false },
       };
 
       // Member booking

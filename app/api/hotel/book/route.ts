@@ -27,33 +27,34 @@ function isRoomCategory(value: string): value is RoomCategory {
   return Object.hasOwn(ROOM_CAPACITY, value);
 }
 
-function parseMealCounts(value: unknown): {
-  breakfast: number;
-  lunch: number;
-  dinner: number;
+function parseMealSelections(value: unknown): {
+  includeBreakfast: boolean;
+  includeLunch: boolean;
+  includeDinner: boolean;
   valid: boolean;
 } {
   if (typeof value !== "object" || value === null) {
-    return { breakfast: 0, lunch: 0, dinner: 0, valid: false };
+    return { includeBreakfast: false, includeLunch: false, includeDinner: false, valid: true };
   }
 
   const meals = value as Record<string, unknown>;
-  const breakfast = Number(meals.Breakfast ?? 0);
-  const lunch = Number(meals.Lunch ?? 0);
-  const dinner = Number(meals.Dinner ?? 0);
+  
+  // Accept either boolean flags or the nested object format from the form
+  let includeBreakfast = false;
+  let includeLunch = false;
+  let includeDinner = false;
 
-  if (
-    !Number.isInteger(breakfast) ||
-    !Number.isInteger(lunch) ||
-    !Number.isInteger(dinner) ||
-    breakfast < 0 ||
-    lunch < 0 ||
-    dinner < 0
-  ) {
-    return { breakfast: 0, lunch: 0, dinner: 0, valid: false };
+  if (typeof meals.includeBreakfast === "boolean") {
+    includeBreakfast = meals.includeBreakfast;
+  }
+  if (typeof meals.includeLunch === "boolean") {
+    includeLunch = meals.includeLunch;
+  }
+  if (typeof meals.includeDinner === "boolean") {
+    includeDinner = meals.includeDinner;
   }
 
-  return { breakfast, lunch, dinner, valid: true };
+  return { includeBreakfast, includeLunch, includeDinner, valid: true };
 }
 
 export async function POST(request: Request) {
@@ -111,7 +112,7 @@ export async function POST(request: Request) {
   const isMember = Boolean(body.isMember);
   const membershipNumber =
     typeof body.membershipNumber === "string" ? body.membershipNumber.trim() : "";
-  const mealCounts = parseMealCounts(body.meals);
+  const mealSelections = parseMealSelections(body.meals);
   const specialRequests =
     typeof body.specialRequests === "string"
       ? body.specialRequests.trim().slice(0, 2000)
@@ -136,13 +137,6 @@ export async function POST(request: Request) {
   if (guests < 1 || guests > 10) {
     return NextResponse.json(
       { message: "Number of guests must be between 1 and 10." },
-      { status: 400 },
-    );
-  }
-
-  if (!mealCounts.valid) {
-    return NextResponse.json(
-      { message: "Invalid meal quantities." },
       { status: 400 },
     );
   }
@@ -226,24 +220,30 @@ export async function POST(request: Request) {
 
   // Calculate server-side estimate
   const nights = calculateNights(checkIn, checkOut);
+  
+  // Server-side meal calculation: guests × nights for each selected meal
+  // Cap at a reasonable maximum (e.g., 10 guests × 30 nights = 300 per meal)
+  const maxMealCount = 300;
+  const mealCounts = {
+    Breakfast: mealSelections.includeBreakfast ? Math.min(guests * nights, maxMealCount) : 0,
+    Lunch: mealSelections.includeLunch ? Math.min(guests * nights, maxMealCount) : 0,
+    Dinner: mealSelections.includeDinner ? Math.min(guests * nights, maxMealCount) : 0,
+  };
+  
   const estimate = calculateBookingTotal({
     roomCategory: roomCategory as PricingRoomCategory,
     roomCount,
     nights,
     isMember,
-    meals: {
-      Breakfast: mealCounts.breakfast,
-      Lunch: mealCounts.lunch,
-      Dinner: mealCounts.dinner,
-    },
+    meals: mealCounts,
   });
 
   // Format meals for storage
   const meals: string[] = [];
-  if (mealCounts.breakfast > 0)
-    meals.push(`Breakfast x${mealCounts.breakfast}`);
-  if (mealCounts.lunch > 0) meals.push(`Lunch x${mealCounts.lunch}`);
-  if (mealCounts.dinner > 0) meals.push(`Dinner x${mealCounts.dinner}`);
+  if (mealCounts.Breakfast > 0)
+    meals.push(`Breakfast x${mealCounts.Breakfast}`);
+  if (mealCounts.Lunch > 0) meals.push(`Lunch x${mealCounts.Lunch}`);
+  if (mealCounts.Dinner > 0) meals.push(`Dinner x${mealCounts.Dinner}`);
 
   const result = await reserveHotelRoom({
     guestName,
@@ -354,7 +354,7 @@ export async function POST(request: Request) {
               ? "** Member rate applied - verify membership before final invoice **"
               : "",
             "",
-            "Status: CONFIRMED",
+            "Status: Booking request – pending confirmation",
           ]
             .filter(Boolean)
             .join("\n"),
@@ -378,9 +378,9 @@ export async function POST(request: Request) {
         checkOut,
         guests,
         meals: {
-          Breakfast: mealCounts.breakfast,
-          Lunch: mealCounts.lunch,
-          Dinner: mealCounts.dinner,
+          Breakfast: mealCounts.Breakfast,
+          Lunch: mealCounts.Lunch,
+          Dinner: mealCounts.Dinner,
         },
         specialRequests: specialRequests || undefined,
       };
