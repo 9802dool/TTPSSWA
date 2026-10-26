@@ -19,14 +19,16 @@ export function generateFormToken(): string {
 /**
  * Verify a form token and check minimum fill time.
  * Returns { valid: true } if the token is valid and enough time has passed.
- * Returns { valid: false, reason: string } otherwise.
+ * Returns { valid: true, skipCheck: true } if no token provided (allows forms without the field).
+ * Returns { valid: false, reason: string } if token is present but invalid.
  */
 export function verifyFormToken(
   token: string | null | undefined,
   minFillTimeSeconds: number = 3,
-): { valid: boolean; reason?: string } {
-  if (!token || typeof token !== "string") {
-    return { valid: false, reason: "missing_token" };
+): { valid: boolean; skipCheck?: boolean; reason?: string } {
+  // If no token provided, allow the submission (form may not have been updated yet)
+  if (!token || typeof token !== "string" || token === "") {
+    return { valid: true, skipCheck: true };
   }
 
   const parts = token.split(":");

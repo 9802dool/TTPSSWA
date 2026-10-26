@@ -106,10 +106,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
 
-  // Spam protection: minimum fill time check (silent rejection)
+  // Spam protection: minimum fill time check (only if token is provided)
   const formToken = String(formData.get("formToken") ?? "").trim();
   const tokenCheck = verifyFormToken(formToken || null, 3);
-  if (!tokenCheck.valid) {
+  // Only reject if token was provided but invalid (skipCheck means token not provided)
+  if (!tokenCheck.valid && !tokenCheck.skipCheck) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
 

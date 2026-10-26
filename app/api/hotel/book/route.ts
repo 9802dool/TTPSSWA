@@ -75,10 +75,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Booking successful." }, { status: 201 });
   }
 
-  // Spam protection: minimum fill time check (silent rejection)
+  // Spam protection: minimum fill time check (only if token is provided)
   const formToken = typeof body.formToken === "string" ? body.formToken : null;
   const tokenCheck = verifyFormToken(formToken, 3);
-  if (!tokenCheck.valid) {
+  // Only reject if token was provided but invalid (skipCheck means token not provided)
+  if (!tokenCheck.valid && !tokenCheck.skipCheck) {
     return NextResponse.json({ message: "Booking successful." }, { status: 201 });
   }
 
