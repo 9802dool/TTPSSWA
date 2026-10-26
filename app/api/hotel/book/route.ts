@@ -11,53 +11,50 @@ import type { HotelBookingData } from "@/lib/supabase/types";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
+import {
+  ROOM_CAPACITIES,
+  calculateBookingTotal,
+  calculateNights,
+  type RoomCategory as PricingRoomCategory,
+} from "@/lib/hotel-pricing";
 
 export const runtime = "nodejs";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MEAL_OPTIONS = ["Breakfast", "Lunch", "Dinner"] as const;
-const ALLOWED_MEALS = new Set<string>(MEAL_OPTIONS);
 
 function isRoomCategory(value: string): value is RoomCategory {
   return Object.hasOwn(ROOM_CAPACITY, value);
 }
 
-function parseMeals(value: unknown): { meals: string[]; valid: boolean } {
-  if (Array.isArray(value)) {
-    const meals = Array.from(
-      new Set(
-        value.filter(
-          (meal): meal is string =>
-            typeof meal === "string" && ALLOWED_MEALS.has(meal),
-        ),
-      ),
-    ).map((meal) => `${meal} x1`);
-    return { meals, valid: true };
+function parseMealSelections(value: unknown): {
+  includeBreakfast: boolean;
+  includeLunch: boolean;
+  includeDinner: boolean;
+  valid: boolean;
+} {
+  if (typeof value !== "object" || value === null) {
+    return { includeBreakfast: false, includeLunch: false, includeDinner: false, valid: true };
   }
 
-  if (value === undefined || value === null) {
-    return { meals: [], valid: true };
+  const meals = value as Record<string, unknown>;
+  
+  // Accept either boolean flags or the nested object format from the form
+  let includeBreakfast = false;
+  let includeLunch = false;
+  let includeDinner = false;
+
+  if (typeof meals.includeBreakfast === "boolean") {
+    includeBreakfast = meals.includeBreakfast;
+  }
+  if (typeof meals.includeLunch === "boolean") {
+    includeLunch = meals.includeLunch;
+  }
+  if (typeof meals.includeDinner === "boolean") {
+    includeDinner = meals.includeDinner;
   }
 
-  if (typeof value !== "object") {
-    return { meals: [], valid: false };
-  }
-
-  const quantities = value as Record<string, unknown>;
-  const meals: string[] = [];
-  for (const meal of MEAL_OPTIONS) {
-    const rawQuantity = quantities[meal];
-    if (rawQuantity === undefined || rawQuantity === "") continue;
-
-    const quantity = Number(rawQuantity);
-    if (!Number.isInteger(quantity) || quantity < 0 || quantity > 10) {
-      return { meals: [], valid: false };
-    }
-    if (quantity > 0) meals.push(`${meal} x${quantity}`);
-  }
-
-  return { meals, valid: true };
+  return { includeBreakfast, includeLunch, includeDinner, valid: true };
 }
 
 export async function POST(request: Request) {
@@ -85,7 +82,14 @@ export async function POST(request: Request) {
 
   // Turnstile verification (only if configured)
   if (isTurnstileConfigured()) {
-    const turnstileToken = typeof body.turnstileToken === "string" ? body.turnstileToken : null;
+    const turnstileToken =
+      typeof body.turnstileToken === "string" ? body.turnstileToken : null;
+    if (!turnstileToken) {
+      return NextResponse.json(
+        { message: "Security verification required. Please refresh and try again." },
+        { status: 400 },
+      );
+    }
     const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIP);
     if (!turnstileResult.success) {
       return NextResponse.json(
@@ -105,8 +109,10 @@ export async function POST(request: Request) {
   const checkOut = typeof body.checkOut === "string" ? body.checkOut.trim() : "";
   const roomCount = Number(body.roomCount);
   const guests = Number(body.guests);
-  const parsedMeals = parseMeals(body.meals);
-  const meals = parsedMeals.meals;
+  const isMember = Boolean(body.isMember);
+  const membershipNumber =
+    typeof body.membershipNumber === "string" ? body.membershipNumber.trim() : "";
+  const mealSelections = parseMealSelections(body.meals);
   const specialRequests =
     typeof body.specialRequests === "string"
       ? body.specialRequests.trim().slice(0, 2000)
@@ -122,7 +128,10 @@ export async function POST(request: Request) {
     !Number.isInteger(roomCount) ||
     !Number.isInteger(guests)
   ) {
-    return NextResponse.json({ message: "All fields are required." }, { status: 400 });
+    return NextResponse.json(
+      { message: "All required fields must be completed." },
+      { status: 400 },
+    );
   }
 
   if (guests < 1 || guests > 10) {
@@ -132,16 +141,9 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!parsedMeals.valid) {
-    return NextResponse.json(
-      { message: "Meal quantities must be whole numbers between 0 and 10." },
-      { status: 400 },
-    );
-  }
-
   if (!EMAIL_RE.test(email)) {
     return NextResponse.json(
-      { message: "Enter a valid email address." },
+      { message: "Please enter a valid email address." },
       { status: 400 },
     );
   }
@@ -165,14 +167,17 @@ export async function POST(request: Request) {
   );
   if (!emailLimit.success) {
     return NextResponse.json(
-      { message: "Too many booking attempts for this email. Please try again later." },
+      {
+        message:
+          "Too many booking attempts for this email. Please try again later.",
+      },
       { status: 429 },
     );
   }
 
   if (!isRoomCategory(roomCategory)) {
     return NextResponse.json(
-      { message: "Choose a valid room category." },
+      { message: "Please choose a valid room category." },
       { status: 400 },
     );
   }
@@ -188,7 +193,7 @@ export async function POST(request: Request) {
 
   if (!DATE_RE.test(checkIn) || !DATE_RE.test(checkOut)) {
     return NextResponse.json(
-      { message: "Enter valid check-in and check-out dates." },
+      { message: "Please enter valid check-in and check-out dates." },
       { status: 400 },
     );
   }
@@ -199,6 +204,46 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
+
+  // Validate guest capacity
+  const capacity =
+    ROOM_CAPACITIES[roomCategory as PricingRoomCategory] ?? 2;
+  const maxGuests = capacity * roomCount;
+  if (guests > maxGuests) {
+    return NextResponse.json(
+      {
+        message: `${roomCategory.replace(/_/g, " ")} rooms accommodate up to ${capacity} guests each. With ${roomCount} room${roomCount === 1 ? "" : "s"}, maximum ${maxGuests} guest${maxGuests === 1 ? "" : "s"}.`,
+      },
+      { status: 400 },
+    );
+  }
+
+  // Calculate server-side estimate
+  const nights = calculateNights(checkIn, checkOut);
+  
+  // Server-side meal calculation: guests × nights for each selected meal
+  // Cap at a reasonable maximum (e.g., 10 guests × 30 nights = 300 per meal)
+  const maxMealCount = 300;
+  const mealCounts = {
+    Breakfast: mealSelections.includeBreakfast ? Math.min(guests * nights, maxMealCount) : 0,
+    Lunch: mealSelections.includeLunch ? Math.min(guests * nights, maxMealCount) : 0,
+    Dinner: mealSelections.includeDinner ? Math.min(guests * nights, maxMealCount) : 0,
+  };
+  
+  const estimate = calculateBookingTotal({
+    roomCategory: roomCategory as PricingRoomCategory,
+    roomCount,
+    nights,
+    isMember,
+    meals: mealCounts,
+  });
+
+  // Format meals for storage
+  const meals: string[] = [];
+  if (mealCounts.Breakfast > 0)
+    meals.push(`Breakfast x${mealCounts.Breakfast}`);
+  if (mealCounts.Lunch > 0) meals.push(`Lunch x${mealCounts.Lunch}`);
+  if (mealCounts.Dinner > 0) meals.push(`Dinner x${mealCounts.Dinner}`);
 
   const result = await reserveHotelRoom({
     guestName,
@@ -217,7 +262,7 @@ export async function POST(request: Request) {
     const label = roomCategory.replaceAll("_", " ").toLowerCase();
     return NextResponse.json(
       {
-        message: `Sorry, ${roomCount} ${label} room${roomCount === 1 ? "" : "s"} are not available for those dates.`,
+        message: `Sorry, ${roomCount} ${label} room${roomCount === 1 ? "" : "s"} ${roomCount === 1 ? "is" : "are"} not available for those dates.`,
       },
       { status: 409 },
     );
@@ -243,22 +288,30 @@ export async function POST(request: Request) {
       const guestEmail = await resend.emails.send({
         from,
         to: [email],
-        subject: "Thank you for your TTPSSWA hotel booking",
+        subject: "Thank you for your TTPSSWA hotel booking request",
         text: [
           `Hello ${guestName},`,
           "",
-          "Thank you for your booking with the TTPSSWA Noel Chase Hotel and Conference Centre.",
-          "Your booking request has been received and recorded.",
-          "You will receive another email shortly with your invoice.",
+          "Thank you for your booking request with the TTPSSWA Noel Chase Hotel and Conference Centre.",
+          "Your request has been received and recorded.",
+          "You will receive a confirmation email shortly with your invoice and payment instructions.",
           "",
           `Booking reference: ${result.booking.id}`,
           `Room category: ${roomCategory.replaceAll("_", " ")}`,
           `Number of rooms: ${roomCount}`,
           `Check-in: ${checkIn}`,
           `Check-out: ${checkOut}`,
+          `Guests: ${guests}`,
+          `Estimated total: TTD $${estimate.total.toLocaleString("en-TT")}`,
+          "",
+          isMember
+            ? "Member rates are subject to verification of your membership status."
+            : "",
           "",
           "TTPSSWA",
-        ].join("\n"),
+        ]
+          .filter(Boolean)
+          .join("\n"),
       });
       if (guestEmail.error) {
         console.error("hotel guest acknowledgment email:", guestEmail.error);
@@ -284,11 +337,27 @@ export async function POST(request: Request) {
             `Number of rooms: ${roomCount}`,
             `Check-in: ${checkIn}`,
             `Check-out: ${checkOut}`,
+            `Nights: ${nights}`,
             `Guests: ${guests}`,
+            `Member: ${isMember ? "Yes" : "No"}`,
+            isMember && membershipNumber
+              ? `Membership number: ${membershipNumber}`
+              : "",
             `Meals: ${meals.length > 0 ? meals.join(", ") : "None"}`,
             `Special requests: ${specialRequests || "None"}`,
-            "Status: CONFIRMED",
-          ].join("\n"),
+            "",
+            `ESTIMATED TOTAL: TTD $${estimate.total.toLocaleString("en-TT")}`,
+            `- Rooms: TTD $${estimate.roomsSubtotal.toLocaleString("en-TT")}`,
+            `- Meals: TTD $${estimate.mealsSubtotal.toLocaleString("en-TT")}`,
+            "",
+            isMember
+              ? "** Member rate applied - verify membership before final invoice **"
+              : "",
+            "",
+            "Status: Booking request – pending confirmation",
+          ]
+            .filter(Boolean)
+            .join("\n"),
         });
       } catch (error) {
         console.error("hotel booking notification email:", error);
@@ -303,34 +372,41 @@ export async function POST(request: Request) {
         guestName,
         email,
         phone,
-        roomCategory: roomCategory as HotelBookingData['roomCategory'],
+        roomCategory: roomCategory as HotelBookingData["roomCategory"],
         roomCount,
         checkIn,
         checkOut,
         guests,
         meals: {
-          Breakfast: meals.filter(m => m.startsWith('Breakfast')).length,
-          Lunch: meals.filter(m => m.startsWith('Lunch')).length,
-          Dinner: meals.filter(m => m.startsWith('Dinner')).length,
+          Breakfast: mealCounts.Breakfast,
+          Lunch: mealCounts.Lunch,
+          Dinner: mealCounts.Dinner,
         },
         specialRequests: specialRequests || undefined,
       };
 
       await createApplication({
         member_id: null,
-        application_type: 'hotel_booking',
-        application_data: { ...bookingData, prismaBookingId: result.booking.id },
+        application_type: "hotel_booking",
+        application_data: {
+          ...bookingData,
+          prismaBookingId: result.booking.id,
+          isMember,
+          membershipNumber: membershipNumber || undefined,
+          estimatedTotal: estimate.total,
+        },
       });
     } catch (error) {
-      console.error('Failed to save hotel booking to Supabase:', error);
+      console.error("Failed to save hotel booking to Supabase:", error);
       // Continue - Prisma booking already succeeded
     }
   }
 
   return NextResponse.json(
     {
-      message: "Booking successful.",
+      message: "Booking request received.",
       booking: result.booking,
+      estimatedTotal: estimate.total,
       guestEmailSent,
     },
     { status: 201 },
