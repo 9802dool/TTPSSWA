@@ -52,7 +52,7 @@ export default function AboutPage() {
               standards in line with association rules and national policy.
             </p>
             <p className="mt-4 text-muted dark:text-slate-400">
-              Explore membership, subsidiary locations, and partnership opportunities through the main navigation, or
+              Explore membership, subsidiary locations, and partnership programs through the main navigation, or
               contact the association office for more information.
             </p>
           </div>

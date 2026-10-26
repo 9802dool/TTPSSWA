@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { recordServiceRequest } from "@/lib/analytics-storage";
+import { isSupabaseConfigured } from "@/lib/supabase/server";
+import {
+  upsertMember,
+  createApplication,
+  uploadApplicationDocument,
+} from "@/lib/supabase/applications";
 
 export const runtime = "nodejs";
 
@@ -94,49 +99,82 @@ export async function POST(request: Request) {
     );
   }
 
-  const documents = [
-    {
-      label: "Completed and signed salary deduction form",
-      fileName,
-      mimeType: uploaded.type || "application/octet-stream",
-      base64: Buffer.from(await uploaded.arrayBuffer()).toString("base64"),
-    },
-  ];
-
-  const id = await recordServiceRequest("merit_salary_deduction", {
-    regimentalNumber,
-    rank,
-    fullName,
-    address,
-    divisionBranchSection,
-    workplaceAddress,
-    deductionSumWords,
-    deductionSumDollars,
-    startMonth,
-    startYear,
-    endMonth,
-    endYear,
-    resumeAmount: resumeAmount || undefined,
-    resumeMonth: resumeMonth || undefined,
-    resumeYear: resumeYear || undefined,
-    nameInBlockLetters,
-    signatureRegimentalNumber,
-    signatureRank,
-    signedDate,
-    witnessName,
-    documents,
-    form: "merit_salary_deduction_online",
-  });
-
-  if (!id) {
+  // Save to Supabase
+  if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
         ok: false,
-        error: "Could not save your form. Ensure Redis (Upstash) is configured for the site.",
+        error: "Application storage is not configured.",
       },
       { status: 503 },
     );
   }
 
-  return NextResponse.json({ ok: true, id });
+  // For merit salary deduction, we may not have full member info,
+  // so create a minimal member record with what we have
+  const memberResult = await upsertMember({
+    email: `${regimentalNumber.replace(/\s+/g, '')}@placeholder.local`,
+    full_name: fullName,
+    service_number: regimentalNumber,
+    rank,
+    address,
+  });
+
+  if (!memberResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not create member record.",
+      },
+      { status: 500 },
+    );
+  }
+
+  const appResult = await createApplication({
+    member_id: memberResult.member_id,
+    application_type: 'salary_deduction',
+    application_data: {
+      regimentalNumber,
+      rank,
+      address,
+      divisionBranchSection,
+      workplaceAddress,
+      deductionSumWords,
+      deductionSumDollars,
+      startMonth,
+      startYear,
+      endMonth,
+      endYear,
+      resumeAmount: resumeAmount || undefined,
+      resumeMonth: resumeMonth || undefined,
+      resumeYear: resumeYear || undefined,
+      nameInBlockLetters,
+      signatureRegimentalNumber,
+      signatureRank,
+      signedDate,
+      witnessName,
+    },
+  });
+
+  if (!appResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not save application.",
+      },
+      { status: 500 },
+    );
+  }
+
+  // Upload document
+  await uploadApplicationDocument({
+    application_id: appResult.application_id,
+    member_id: memberResult.member_id,
+    document_type: 'signed_salary_deduction_form',
+    file: uploaded,
+    file_name: fileName,
+    mime_type: uploaded.type || 'application/octet-stream',
+  });
+
+  return NextResponse.json({ ok: true, id: appResult.application_id });
 }

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { recordServiceRequest } from "@/lib/analytics-storage";
 import { isAllowedMembershipPhoneCountryCode } from "@/lib/phone-country-codes";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
@@ -207,103 +206,88 @@ export async function POST(request: Request) {
     if (read.file) documents.push(read.file);
   }
 
-  let applicationId: string | null = null;
-
-  // Save to Supabase if configured
-  if (isSupabaseConfigured()) {
-    const memberResult = await upsertMember({
-      email,
-      full_name: fullName,
-      service_number: regimentalNumber,
-      rank,
-      phone,
-      phone_country_code: phoneCountryCode,
-      phone_home: phoneHome || undefined,
-      phone_work: phoneWork || undefined,
-      address,
-      department_division: departmentDivision,
-      section_station: sectionStation,
-    });
-
-    if (memberResult) {
-      const appResult = await createApplication({
-        member_id: memberResult.member_id,
-        application_type: 'legal_aid_application',
-        application_data: {
-          regimentalNumber,
-          rank,
-          departmentDivision,
-          sectionStation,
-          address,
-          email,
-          phoneCountryCode,
-          phoneHome: phoneHome || undefined,
-          phoneWork: phoneWork || undefined,
-          phone,
-          matterType,
-          matterDescription,
-          courtOrUnit: courtOrUnit || undefined,
-          matterReference: matterReference || undefined,
-          dateReported: dateReported || undefined,
-          applicantDateSigned,
-          witnessName: witnessName || undefined,
-          witnessDate: witnessDate || undefined,
-        },
-      });
-
-      if (appResult) {
-        applicationId = appResult.application_id;
-
-        // Upload each document
-        for (const doc of documents) {
-          const docBuffer = Buffer.from(doc.base64, 'base64');
-          await uploadApplicationDocument({
-            application_id: applicationId,
-            member_id: memberResult.member_id,
-            document_type: doc.label.toLowerCase().replace(/\s+/g, '_'),
-            file: docBuffer,
-            file_name: doc.fileName,
-            mime_type: doc.mimeType,
-          });
-        }
-      }
-    }
-  }
-
-  // Also save to Redis for analytics
-  const redisId = await recordServiceRequest("legal_aid_application", {
-    regimentalNumber,
-    rank,
-    fullName,
-    departmentDivision,
-    sectionStation,
-    address,
-    email,
-    phoneCountryCode,
-    phoneHome: phoneHome || undefined,
-    phoneWork: phoneWork || undefined,
-    phone,
-    matterType,
-    matterDescription,
-    courtOrUnit: courtOrUnit || undefined,
-    matterReference: matterReference || undefined,
-    dateReported: dateReported || undefined,
-    applicantDateSigned,
-    witnessName: witnessName || undefined,
-    witnessDate: witnessDate || undefined,
-    form: "legal_aid_application_online",
-  });
-
-  if (!applicationId && !redisId) {
+  // Save to Supabase
+  if (!isSupabaseConfigured()) {
     return NextResponse.json(
       {
         ok: false,
-        error:
-          "Could not save your application. Ensure Supabase or Redis is configured.",
+        error: "Application storage is not configured.",
       },
       { status: 503 },
     );
   }
 
-  return NextResponse.json({ ok: true, id: applicationId || redisId });
+  const memberResult = await upsertMember({
+    email,
+    full_name: fullName,
+    service_number: regimentalNumber,
+    rank,
+    phone,
+    phone_country_code: phoneCountryCode,
+    phone_home: phoneHome || undefined,
+    phone_work: phoneWork || undefined,
+    address,
+    department_division: departmentDivision,
+    section_station: sectionStation,
+  });
+
+  if (!memberResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not create member record.",
+      },
+      { status: 500 },
+    );
+  }
+
+  const appResult = await createApplication({
+    member_id: memberResult.member_id,
+    application_type: 'legal_aid_application',
+    application_data: {
+      regimentalNumber,
+      rank,
+      departmentDivision,
+      sectionStation,
+      address,
+      email,
+      phoneCountryCode,
+      phoneHome: phoneHome || undefined,
+      phoneWork: phoneWork || undefined,
+      phone,
+      matterType,
+      matterDescription,
+      courtOrUnit: courtOrUnit || undefined,
+      matterReference: matterReference || undefined,
+      dateReported: dateReported || undefined,
+      applicantDateSigned,
+      witnessName: witnessName || undefined,
+      witnessDate: witnessDate || undefined,
+    },
+  });
+
+  if (!appResult) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: "Could not save application.",
+      },
+      { status: 500 },
+    );
+  }
+
+  // Upload each document
+  for (const doc of documents) {
+    const docBuffer = Buffer.from(doc.base64, 'base64');
+    await uploadApplicationDocument({
+      application_id: appResult.application_id,
+      member_id: memberResult.member_id,
+      document_type: doc.label.toLowerCase().replace(/\s+/g, '_'),
+      file: docBuffer,
+      file_name: doc.fileName,
+      mime_type: doc.mimeType,
+    });
+  }
+
+  return NextResponse.json({ ok: true, id: appResult.application_id });
 }
