@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
                 Privacy Policy
               </h1>
               <p className="mx-auto mt-3 max-w-2xl text-center text-sm leading-relaxed text-muted">
-                <strong className="text-red-600">DRAFT</strong> — This privacy policy is a template for review and completion by the Association.
+                Last Updated: October 26, 2026
               </p>
             </div>
           </div>
@@ -32,14 +32,6 @@ export default function PrivacyPolicyPage() {
         <div className="site-container px-4 py-12 sm:px-6">
           <div className="mx-auto max-w-4xl">
             <article className="prose prose-slate max-w-none dark:prose-invert">
-              <div className="rounded-lg border-2 border-red-300 bg-red-50 p-4 dark:border-red-700 dark:bg-red-950">
-                <p className="text-sm font-semibold text-red-800 dark:text-red-200">
-                  <strong>IMPORTANT:</strong> This is a draft privacy policy template. The Association must review, 
-                  customize, and approve this content before it becomes official. Items requiring attention are 
-                  marked below.
-                </p>
-              </div>
-
               <h2>Introduction</h2>
               <p>
                 The Trinidad and Tobago Police Service Social and Welfare Association (&quot;TTPSSWA,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) 

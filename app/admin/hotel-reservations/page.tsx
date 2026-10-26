@@ -8,7 +8,7 @@ import {
   getHotelReservationRecords,
   type ServiceRequestRecord,
 } from "@/lib/analytics-storage";
-import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { getApplications } from "@/lib/supabase/applications";
 import type { Application } from "@/lib/supabase/types";
@@ -57,7 +57,9 @@ export default async function AdminHotelReservationsPage({ searchParams }: Props
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  if (!token || !verifyAdminSession(token)) {
+  const session = token ? verifyAdminSession(token) : null;
+  
+  if (!session) {
     redirect("/admin/login?next=/admin/hotel-reservations");
   }
 

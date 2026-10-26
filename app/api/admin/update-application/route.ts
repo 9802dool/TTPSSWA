@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
+import { verifyAdminSession, getAdminCookieName, hasRole } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { updateApplicationStatus, getApplicationById } from "@/lib/supabase/applications";
 import type { ApplicationStatus } from "@/lib/supabase/types";
@@ -11,9 +11,15 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
+  const session = token ? verifyAdminSession(token) : null;
   
-  if (!token || !verifyAdminSession(token)) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  
+  // Check if user has at least staff role
+  if (!hasRole(session, "staff")) {
+    return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
   }
 
   if (!isSupabaseConfigured()) {
@@ -56,14 +62,14 @@ export async function POST(request: Request) {
   // Get application details before update for email
   const appDetails = await getApplicationById(applicationId);
 
-  // Update status
+  // Update status with admin user info
   const success = await updateApplicationStatus(
     applicationId,
     status,
     {
       changed_by_type: 'admin',
-      changed_by_id: 'admin',
-      changed_by_name: 'Administrator',
+      changed_by_id: session.userId,
+      changed_by_name: session.email,
       note: note || undefined,
       admin_notes: adminNotes || undefined,
     }

@@ -5,7 +5,7 @@ import SiteHeader from "@/components/SiteHeader";
 
 export const metadata: Metadata = {
   title: "Antar Auto | TTPSSWA",
-  description: "TTPSSWA subsidiary — Antar Auto.",
+  description: "TTPSSWA partner — Antar Auto.",
 };
 
 export default function AntarAutoPage() {
@@ -39,7 +39,7 @@ export default function AntarAutoPage() {
             </p>
             <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Antar Auto</h1>
             <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-300">
-              Automotive services and member benefits through this subsidiary. Information will appear here as programs
+              Automotive services and member benefits through this partner. Information will appear here as programs
               are confirmed.
             </p>
           </div>

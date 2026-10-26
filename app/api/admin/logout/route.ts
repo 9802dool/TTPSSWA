@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminCookieName } from "@/lib/admin-session";
+import { getAdminCookieName } from "@/lib/admin-auth";
 
 export const runtime = "nodejs";
 

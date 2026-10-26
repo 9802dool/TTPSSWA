@@ -2,15 +2,35 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { safeInternalNextPath } from "@/lib/safe-next-path";
 
 export function AdminLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [bootstrapMode, setBootstrapMode] = useState(false);
+  const [checkingBootstrap, setCheckingBootstrap] = useState(true);
+
+  useEffect(() => {
+    // Check if we should show bootstrap mode
+    fetch("/api/admin/check-bootstrap")
+      .then((res) => res.json())
+      .then((data: { needsBootstrap?: boolean }) => {
+        if (data.needsBootstrap) {
+          setBootstrapMode(true);
+        }
+      })
+      .catch(() => {
+        // Ignore errors, default to normal login
+      })
+      .finally(() => {
+        setCheckingBootstrap(false);
+      });
+  }, []);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -20,11 +40,16 @@ export function AdminLoginForm() {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({
+          email: bootstrapMode ? email : undefined,
+          password,
+          bootstrap: bootstrapMode,
+        }),
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         error?: string;
+        bootstrap?: boolean;
       };
       if (!res.ok) {
         setError(data.error ?? "Sign-in failed.");
@@ -39,13 +64,70 @@ export function AdminLoginForm() {
     }
   }
 
+  if (checkingBootstrap) {
+    return (
+      <div className="mx-auto w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
+        <div className="h-48 animate-pulse space-y-4">
+          <div className="h-4 rounded bg-[var(--border)]" />
+          <div className="h-4 rounded bg-[var(--border)]" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-8 shadow-sm">
-      <h1 className="text-xl font-semibold tracking-tight">Administration</h1>
+      <h1 className="text-xl font-semibold tracking-tight">
+        {bootstrapMode ? "Bootstrap Admin Account" : "Administration"}
+      </h1>
       <p className="mt-2 text-sm text-[var(--muted)]">
-        Sign in for analytics, service requests, and the members profile database.
+        {bootstrapMode
+          ? "Create the first super admin account using ADMIN_PASSWORD."
+          : "Sign in for analytics, service requests, and the members profile database."}
       </p>
       <form onSubmit={(e) => void onSubmit(e)} className="mt-8 space-y-4">
+        {bootstrapMode && (
+          <div>
+            <label
+              htmlFor="admin-email"
+              className="block text-sm font-medium text-[var(--fg)]"
+            >
+              Email
+            </label>
+            <input
+              id="admin-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[var(--fg)] outline-none ring-[var(--brand)] focus:ring-2"
+              placeholder="your@email.com"
+              required
+            />
+          </div>
+        )}
+        {!bootstrapMode && (
+          <div>
+            <label
+              htmlFor="admin-email"
+              className="block text-sm font-medium text-[var(--fg)]"
+            >
+              Email
+            </label>
+            <input
+              id="admin-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[var(--fg)] outline-none ring-[var(--brand)] focus:ring-2"
+              placeholder="your@email.com"
+              required
+            />
+          </div>
+        )}
         <div>
           <label
             htmlFor="admin-password"
@@ -57,12 +139,17 @@ export function AdminLoginForm() {
             id="admin-password"
             name="password"
             type="password"
-            autoComplete="current-password"
+            autoComplete={bootstrapMode ? "new-password" : "current-password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[var(--fg)] outline-none ring-[var(--brand)] focus:ring-2"
             required
           />
+          {bootstrapMode && (
+            <p className="mt-1 text-xs text-[var(--muted)]">
+              Use ADMIN_PASSWORD from environment variables
+            </p>
+          )}
         </div>
         {error ? (
           <p className="text-sm text-red-600 dark:text-red-400" role="alert">
@@ -74,7 +161,7 @@ export function AdminLoginForm() {
           disabled={busy}
           className="site-btn-block-primary w-full disabled:opacity-60"
         >
-          {busy ? "Signing in…" : "Sign in"}
+          {busy ? "Signing in…" : bootstrapMode ? "Create & Sign In" : "Sign in"}
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-[var(--muted)]">
