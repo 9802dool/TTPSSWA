@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { getAdminCookieName, verifyAdminSession } from "@/lib/admin-session";
+import { getAdminCookieName, verifyAdminSession, hasRole } from "@/lib/admin-auth";
 import { setMemberApplicationStatus } from "@/lib/member-signup-storage";
 
 export const runtime = "nodejs";
@@ -8,8 +8,15 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
-  if (!token || !verifyAdminSession(token)) {
+  const session = token ? verifyAdminSession(token) : null;
+  
+  if (!session) {
     return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
+  }
+  
+  // Require at least staff role
+  if (!hasRole(session, "staff")) {
+    return NextResponse.json({ ok: false, error: "Insufficient permissions." }, { status: 403 });
   }
 
   let id = "";

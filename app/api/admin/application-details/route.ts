@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-session";
+import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { getApplicationById } from "@/lib/supabase/applications";
 
@@ -9,8 +9,9 @@ export const runtime = "nodejs";
 export async function GET(request: Request) {
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
+  const session = token ? verifyAdminSession(token) : null;
   
-  if (!token || !verifyAdminSession(token)) {
+  if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
