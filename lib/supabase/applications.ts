@@ -403,8 +403,18 @@ export async function updateApplicationStatus(
     return false;
   }
 
-  // Record in history
-  await supabase.from('application_status_history').insert({
+  // Record in history with admin user tracking
+  const historyData: {
+    application_id: string;
+    from_status: ApplicationStatus | null;
+    to_status: ApplicationStatus;
+    changed_by_type: 'admin' | 'system' | 'member';
+    changed_by_id: string | null;
+    changed_by_name: string | null;
+    note: string | null;
+    admin_user_id?: string | null;
+    admin_email?: string | null;
+  } = {
     application_id: applicationId,
     from_status: oldStatus,
     to_status: newStatus,
@@ -412,7 +422,15 @@ export async function updateApplicationStatus(
     changed_by_id: options?.changed_by_id || null,
     changed_by_name: options?.changed_by_name || null,
     note: options?.note || null,
-  });
+  };
+
+  // If changed by admin, record admin_user_id and admin_email
+  if (options?.changed_by_type === 'admin' && options?.changed_by_id) {
+    historyData.admin_user_id = options.changed_by_id;
+    historyData.admin_email = options.changed_by_name || null;
+  }
+
+  await supabase.from('application_status_history').insert(historyData);
 
   return true;
 }
