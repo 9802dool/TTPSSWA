@@ -1,9 +1,21 @@
 import { NextResponse } from "next/server";
 import { getAdminCookieName, signAdminSession } from "@/lib/admin-session";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
+
+  // Rate limiting by IP for admin login
+  const ipLimit = await checkRateLimit(`admin-login:ip:${clientIP}`, RATE_LIMITS.login);
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { ok: false, error: "Too many login attempts. Please try again later." },
+      { status: 429 },
+    );
+  }
+
   let password = "";
   try {
     const body = (await request.json()) as { password?: string };

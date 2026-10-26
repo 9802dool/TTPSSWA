@@ -7,6 +7,9 @@ import {
   createApplication,
   uploadApplicationDocument,
 } from "@/lib/supabase/applications";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
+import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -75,9 +78,35 @@ function validateOptionalPhoneDigits(digitsStr: string, label: string): string |
 }
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
+
   const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
   if (!formData) {
     return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
+  }
+
+  // Spam protection: honeypot check (silent rejection)
+  if (checkHoneypot(formData.get("website"))) {
+    return NextResponse.json({ ok: true, id: "spam-rejected" });
+  }
+
+  // Spam protection: minimum fill time check (silent rejection)
+  const formToken = String(formData.get("formToken") ?? "").trim();
+  const tokenCheck = verifyFormToken(formToken || null, 3);
+  if (!tokenCheck.valid) {
+    return NextResponse.json({ ok: true, id: "spam-rejected" });
+  }
+
+  // Turnstile verification (only if configured)
+  if (isTurnstileConfigured()) {
+    const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
+    const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { ok: false, error: "Verification failed. Please try again." },
+        { status: 400 },
+      );
+    }
   }
 
   const dateOfApplication = String(formData.get("dateOfApplication") ?? "").trim();
@@ -182,6 +211,30 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { ok: false, error: "Please choose a valid country code." },
       { status: 400 },
+    );
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `merit-loan:ip:${clientIP}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { ok: false, error: "Too many submissions. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by email
+  const emailLimit = await checkRateLimit(
+    `merit-loan:email:${email}`,
+    RATE_LIMITS.applicationForm,
+  );
+  if (!emailLimit.success) {
+    return NextResponse.json(
+      { ok: false, error: "Too many submissions from this email. Please try again later." },
+      { status: 429 },
     );
   }
 

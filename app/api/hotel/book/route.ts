@@ -8,6 +8,9 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { createApplication } from "@/lib/supabase/applications";
 import type { HotelBookingData } from "@/lib/supabase/types";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
+import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 
 export const runtime = "nodejs";
 
@@ -58,11 +61,37 @@ function parseMeals(value: unknown): { meals: string[]; valid: boolean } {
 }
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
+
   let body: Record<string, unknown>;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ message: "Invalid JSON body." }, { status: 400 });
+  }
+
+  // Spam protection: honeypot check (silent rejection)
+  if (checkHoneypot(body.website)) {
+    return NextResponse.json({ message: "Booking successful." }, { status: 201 });
+  }
+
+  // Spam protection: minimum fill time check (silent rejection)
+  const formToken = typeof body.formToken === "string" ? body.formToken : null;
+  const tokenCheck = verifyFormToken(formToken, 3);
+  if (!tokenCheck.valid) {
+    return NextResponse.json({ message: "Booking successful." }, { status: 201 });
+  }
+
+  // Turnstile verification (only if configured)
+  if (isTurnstileConfigured()) {
+    const turnstileToken = typeof body.turnstileToken === "string" ? body.turnstileToken : null;
+    const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIP);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { message: "Verification failed. Please try again." },
+        { status: 400 },
+      );
+    }
   }
 
   const guestName = typeof body.guestName === "string" ? body.guestName.trim() : "";
@@ -113,6 +142,30 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { message: "Enter a valid email address." },
       { status: 400 },
+    );
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(
+    `hotel-booking:ip:${clientIP}`,
+    RATE_LIMITS.hotelBooking,
+  );
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { message: "Too many booking attempts. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by email
+  const emailLimit = await checkRateLimit(
+    `hotel-booking:email:${email}`,
+    RATE_LIMITS.hotelBooking,
+  );
+  if (!emailLimit.success) {
+    return NextResponse.json(
+      { message: "Too many booking attempts for this email. Please try again later." },
+      { status: 429 },
     );
   }
 

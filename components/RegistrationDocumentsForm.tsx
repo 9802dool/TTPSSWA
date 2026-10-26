@@ -18,7 +18,7 @@ export function RegistrationDocumentsForm() {
     setLoading(true);
     const result = await submitRegistrationForm(new FormData(event.currentTarget));
     setLoading(false);
-    if (result.error) {
+    if ("error" in result && result.error) {
       setError(result.error);
       return;
     }

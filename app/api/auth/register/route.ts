@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import { hashPassword } from "@/lib/password-hash";
 import { createWebAccount } from "@/lib/web-account-storage";
 import { sendVerificationEmail } from "@/lib/email-verification";
+import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
+  const clientIP = getClientIP(request);
   let body: {
     fullName?: unknown;
     email?: unknown;
@@ -29,6 +31,24 @@ export async function POST(request: Request) {
 
   if (!fullName || !email || !serviceNumber || !password) {
     return NextResponse.json({ message: "All fields are required." }, { status: 400 });
+  }
+
+  // Rate limiting by IP
+  const ipLimit = await checkRateLimit(`register:ip:${clientIP}`, RATE_LIMITS.register);
+  if (!ipLimit.success) {
+    return NextResponse.json(
+      { message: "Too many registration attempts. Please try again later." },
+      { status: 429 },
+    );
+  }
+
+  // Rate limiting by email
+  const emailLimit = await checkRateLimit(`register:email:${email}`, RATE_LIMITS.register);
+  if (!emailLimit.success) {
+    return NextResponse.json(
+      { message: "Too many registration attempts for this email. Please try again later." },
+      { status: 429 },
+    );
   }
 
   if (!EMAIL_RE.test(email)) {
