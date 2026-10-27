@@ -17,6 +17,8 @@ export interface HotelBooking {
   phone: string;
   roomCategory: RoomCategory | null;
   roomCount: number;
+  /** Every room type in the booking (one entry for single-type bookings). */
+  rooms?: { roomCategory: RoomCategory; roomCount: number }[];
   checkIn: string;
   checkOut: string;
   guests: number;
@@ -169,9 +171,20 @@ function calculateRoomRevenue(
   nights: number
 ): number {
   const rates = booking.isMember ? HOTEL_RATES.member : HOTEL_RATES.nonMember;
-  if (!booking.roomCategory) return 0;
-  const rate = rates[booking.roomCategory];
-  return rate * booking.roomCount * nights;
+  return bookingRoomLines(booking).reduce(
+    (sum, line) => sum + rates[line.roomCategory] * line.roomCount * nights,
+    0,
+  );
+}
+
+/** Room lines for a booking, falling back to the single-category fields. */
+export function bookingRoomLines(
+  booking: HotelBooking,
+): { roomCategory: RoomCategory; roomCount: number }[] {
+  if (booking.rooms && booking.rooms.length > 0) return booking.rooms;
+  return booking.roomCategory
+    ? [{ roomCategory: booking.roomCategory, roomCount: booking.roomCount }]
+    : [];
 }
 
 function calculateMealRevenue(booking: HotelBooking, nightsInPeriod: number, totalNights: number): number {
@@ -194,16 +207,18 @@ function countRoomNights(
 ): number {
   let total = 0;
   for (const booking of bookings) {
-    if (roomCategory && booking.roomCategory !== roomCategory) continue;
     if (!isConfirmedOrCompleted(booking.status)) continue;
-    if (!booking.roomCategory) continue;
+    const lines = bookingRoomLines(booking).filter(
+      (line) => !roomCategory || line.roomCategory === roomCategory,
+    );
+    if (lines.length === 0) continue;
     
     const checkIn = booking.checkIn >= start ? booking.checkIn : start;
     const checkOut = booking.checkOut <= end ? booking.checkOut : end;
     
     if (checkIn < checkOut) {
       const nights = calculateNights(checkIn, checkOut);
-      total += nights * booking.roomCount;
+      total += nights * lines.reduce((sum, line) => sum + line.roomCount, 0);
     }
   }
   return total;

@@ -106,6 +106,8 @@ export function aggregateNightsAvailability(
   for (const rec of records) {
     if (rec.serviceType !== "hotel_booking" || !rec.payload) continue;
     const p = rec.payload as Record<string, unknown>;
+    // Cancelled bookings no longer hold rooms (matches the reservation script).
+    if (p.status === "CANCELLED") continue;
     const ci = String(p.checkInDate ?? "").trim();
     const co = String(p.checkOutDate ?? "").trim();
     if (!ci || !co) continue;

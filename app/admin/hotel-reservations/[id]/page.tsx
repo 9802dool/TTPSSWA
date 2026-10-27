@@ -20,6 +20,35 @@ function str(p: Record<string, unknown>, key: string): string {
 }
 
 function roomMixOrRooms(p: Record<string, unknown>): string {
+  // Check for multi-room format first (Redis uses roomLines, Supabase uses rooms)
+  const lines = Array.isArray(p.roomLines) ? p.roomLines : Array.isArray(p.rooms) ? p.rooms : null;
+  if (lines && lines.length > 0) {
+    const parts: string[] = [];
+    let totalCount = 0;
+    
+    for (const room of lines) {
+      if (typeof room === 'object' && room !== null) {
+        const r = room as Record<string, unknown>;
+        const category = String(r.roomCategory || '');
+        const count = Number(r.roomCount || 0);
+        
+        if (count > 0) {
+          totalCount += count;
+          const label = category === 'PRESIDENTIAL_SUITE' ? 'Presidential Suite'
+            : category === 'SINGLE_OCCUPANCY' ? 'Single Occupancy'
+            : category === 'DOUBLE_OCCUPANCY' ? 'Double Occupancy'
+            : category;
+          parts.push(`${label} ×${count}`);
+        }
+      }
+    }
+    
+    if (parts.length > 0) {
+      return `${parts.join(", ")} (${totalCount} total)`;
+    }
+  }
+  
+  // Legacy format
   const pres = Number(p.presidentialSuite ?? 0);
   const fb = Number(p.fullBedRoom ?? 0);
   const db = Number(p.doubleBedRoom ?? 0);
@@ -32,6 +61,40 @@ function roomMixOrRooms(p: Record<string, unknown>): string {
     return `${parts.join(", ")} (${str(p, "rooms") || "?"} total)`;
   }
   return str(p, "rooms") || "—";
+}
+
+function getMealsSummary(p: Record<string, unknown>): string {
+  // Check for per-guest meal selections
+  if (Array.isArray(p.guestMealSelections) && p.guestMealSelections.length > 0) {
+    const breakfastCount = p.guestMealSelections.filter((g: any) => g?.breakfast).length;
+    const lunchCount = p.guestMealSelections.filter((g: any) => g?.lunch).length;
+    const dinnerCount = p.guestMealSelections.filter((g: any) => g?.dinner).length;
+    
+    const parts: string[] = [];
+    if (breakfastCount > 0) parts.push(`${breakfastCount} guest(s) with breakfast`);
+    if (lunchCount > 0) parts.push(`${lunchCount} guest(s) with lunch`);
+    if (dinnerCount > 0) parts.push(`${dinnerCount} guest(s) with dinner`);
+    
+    return parts.length > 0 ? parts.join(", ") : "None";
+  }
+  
+  // Redis booking records store meals as display strings, e.g. "Breakfast x6 (3 guests × 2 nights)"
+  if (Array.isArray(p.meals)) {
+    const parts = p.meals.filter((m): m is string => typeof m === "string" && m.trim() !== "");
+    return parts.length > 0 ? parts.join(", ") : "None";
+  }
+
+  // Legacy aggregate format
+  if (typeof p.meals === 'object' && p.meals !== null) {
+    const meals = p.meals as Record<string, unknown>;
+    const parts: string[] = [];
+    if (Number(meals.Breakfast || 0) > 0) parts.push(`Breakfast ×${meals.Breakfast}`);
+    if (Number(meals.Lunch || 0) > 0) parts.push(`Lunch ×${meals.Lunch}`);
+    if (Number(meals.Dinner || 0) > 0) parts.push(`Dinner ×${meals.Dinner}`);
+    return parts.length > 0 ? parts.join(", ") : "None";
+  }
+  
+  return "—";
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -202,9 +265,13 @@ export default async function AdminHotelReservationDetailPage({ params }: Props)
               </div>
             ) : null}
             <div>
+              <dt className="text-[var(--muted)]">Meals</dt>
+              <dd className="mt-0.5 leading-relaxed">{getMealsSummary(p)}</dd>
+            </div>
+            <div>
               <dt className="text-[var(--muted)]">Notes</dt>
               <dd className="mt-0.5 whitespace-pre-wrap leading-relaxed">
-                {str(p, "notes") || "—"}
+                {str(p, "notes") || str(p, "specialRequests") || "—"}
               </dd>
             </div>
           </dl>

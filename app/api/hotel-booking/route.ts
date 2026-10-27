@@ -1,160 +1,73 @@
 import { NextResponse } from "next/server";
-import { recordServiceRequest } from "@/lib/analytics-storage";
-import { Resend } from "resend";
-import { isSupabaseConfigured } from "@/lib/supabase/server";
-import { createApplication } from "@/lib/supabase/applications";
-import type { HotelBookingData } from "@/lib/supabase/types";
-import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
-import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
-import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
-import { parseEmailList } from "@/lib/email-notifications";
+import { POST as bookHotel } from "@/app/api/hotel/book/route";
 
 export const runtime = "nodejs";
 
-function buildMailtoFallback(payload: Record<string, unknown>): string {
-  const fullName = String(payload.fullName ?? "");
-  const email = String(payload.email ?? "");
-  const subject = encodeURIComponent("TTPSSWA hotel reservation request");
-  const body = encodeURIComponent(JSON.stringify(payload, null, 2));
-  return `mailto:?subject=${subject}&body=${body}`;
-}
-
+/**
+ * Legacy endpoint (older HotelReservationForm payloads). It maps the old
+ * field names onto /api/hotel/book so every booking goes through the same
+ * validation, server-side pricing and atomic per-room-type reservation.
+ */
 export async function POST(request: Request) {
-  const clientIP = getClientIP(request);
-
   let body: Record<string, unknown>;
   try {
-    body = await request.json();
+    body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  // Spam protection: honeypot check (silent rejection)
-  if (checkHoneypot(body.website)) {
-    // Return success to hide that we detected spam
-    return NextResponse.json({ ok: true }, { status: 201 });
+  const str = (v: unknown) => (typeof v === "string" ? v : undefined);
+  const count = (v: unknown) => {
+    const n = Number(v ?? 0);
+    return Number.isFinite(n) ? n : NaN;
+  };
+
+  let rooms: unknown = body.rooms;
+  if (!Array.isArray(rooms) && body.roomCategory === undefined) {
+    rooms = [
+      { roomCategory: "PRESIDENTIAL_SUITE", roomCount: count(body.presidentialSuite) },
+      { roomCategory: "SINGLE_OCCUPANCY", roomCount: count(body.fullBedRoom) },
+      { roomCategory: "DOUBLE_OCCUPANCY", roomCount: count(body.doubleBedRoom) },
+    ].filter((r) => r.roomCount !== 0);
   }
 
-  // Spam protection: minimum fill time check (only if token is provided)
-  const formToken = typeof body.formToken === "string" ? body.formToken : null;
-  const tokenCheck = verifyFormToken(formToken, 3);
-  // Only reject if token was provided but invalid (skipCheck means token not provided)
-  if (!tokenCheck.valid && !tokenCheck.skipCheck) {
-    return NextResponse.json({ ok: true }, { status: 201 });
-  }
+  const notes = [str(body.specialRequests) ?? str(body.notes), body.children ? `Children: ${String(body.children)}` : ""]
+    .filter(Boolean)
+    .join("\n");
 
-  // Turnstile verification (reject if configured and token is missing or invalid)
-  if (isTurnstileConfigured()) {
-    const turnstileToken = typeof body.turnstileToken === "string" ? body.turnstileToken : null;
-    const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIP);
-    if (!turnstileResult.success) {
-      return NextResponse.json(
-        { error: "Verification failed. Please try again." },
-        { status: 400 },
-      );
-    }
-  }
+  const mapped: Record<string, unknown> = {
+    guestName: str(body.guestName) ?? str(body.fullName),
+    email: body.email,
+    phone: body.phone,
+    checkIn: str(body.checkIn) ?? str(body.checkInDate),
+    checkOut: str(body.checkOut) ?? str(body.checkOutDate),
+    guests: Number(body.guests),
+    isMember: body.isMember === true,
+    membershipNumber: body.membershipNumber,
+    specialRequests: notes,
+    meals: body.meals,
+    guestMealSelections: body.guestMealSelections,
+    turnstileToken: body.turnstileToken,
+    website: body.website,
+    formToken: body.formToken,
+    ...(Array.isArray(rooms)
+      ? { rooms }
+      : { roomCategory: body.roomCategory, roomCount: body.roomCount }),
+  };
 
-  const guestName = typeof body.guestName === "string" ? body.guestName.trim() : 
-                   typeof body.fullName === "string" ? body.fullName.trim() : "";
-  const email = typeof body.email === "string" ? body.email.trim() : "";
-  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
-  
-  if (!guestName || !email) {
-    return NextResponse.json({ error: "Guest name and email are required." }, { status: 400 });
-  }
-
-  // Rate limiting by IP
-  const ipLimit = await checkRateLimit(
-    `hotel-booking:ip:${clientIP}`,
-    RATE_LIMITS.hotelBooking,
+  const headers = new Headers(request.headers);
+  headers.set("content-type", "application/json");
+  const res = await bookHotel(
+    new Request(new URL("/api/hotel/book", request.url), {
+      method: "POST",
+      headers,
+      body: JSON.stringify(mapped),
+    }),
   );
-  if (!ipLimit.success) {
-    return NextResponse.json(
-      { error: "Too many booking attempts. Please try again later." },
-      { status: 429 },
-    );
-  }
-
-  // Rate limiting by email
-  const emailLimit = await checkRateLimit(
-    `hotel-booking:email:${email}`,
-    RATE_LIMITS.hotelBooking,
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+  // Legacy clients read `error` on failure.
+  return NextResponse.json(
+    res.ok ? { ok: true, ...data } : { error: data.message ?? "Booking failed.", ...data },
+    { status: res.status },
   );
-  if (!emailLimit.success) {
-    return NextResponse.json(
-      { error: "Too many booking attempts for this email. Please try again later." },
-      { status: 429 },
-    );
-  }
-
-  let applicationId: string | null = null;
-
-  // Save to Supabase if configured
-  if (isSupabaseConfigured() && phone) {
-    try {
-      const bookingData: Record<string, unknown> = {
-        guestName,
-        email,
-        phone,
-        roomCategory: (body.roomCategory as HotelBookingData['roomCategory']) || 'DOUBLE_OCCUPANCY',
-        roomCount: typeof body.roomCount === 'number' ? body.roomCount : 1,
-        checkIn: typeof body.checkIn === 'string' ? body.checkIn : '',
-        checkOut: typeof body.checkOut === 'string' ? body.checkOut : '',
-        guests: typeof body.guests === 'number' ? body.guests : 1,
-        meals: (body.meals as HotelBookingData['meals']) || { Breakfast: 0, Lunch: 0, Dinner: 0 },
-        specialRequests: typeof body.specialRequests === 'string' ? body.specialRequests : undefined,
-      };
-
-      const result = await createApplication({
-        member_id: null,
-        application_type: 'hotel_booking',
-        application_data: bookingData,
-      });
-
-      if (result) {
-        applicationId = result.application_id;
-      }
-    } catch (error) {
-      console.error('Failed to save hotel booking to Supabase:', error);
-    }
-  }
-
-  // Also save to Redis for analytics
-  const redisId = await recordServiceRequest("hotel_booking", body);
-  const id = applicationId || redisId;
-
-  const notifyEmails = parseEmailList(process.env.HOTEL_BOOKING_NOTIFY_EMAIL);
-  const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (notifyEmails.length > 0 && apiKey) {
-    try {
-      const resend = new Resend(apiKey);
-      const from =
-        process.env.BOOKING_FROM_EMAIL?.trim() || "TTPSSWA Bookings <onboarding@resend.dev>";
-      await resend.emails.send({
-        from,
-        to: notifyEmails,
-        replyTo: email ? [email] : undefined,
-        subject: `TTPSSWA hotel request${id ? ` [${id}]` : ""}`,
-        text: [`Guest: ${guestName}`, `Email: ${email}`, "", JSON.stringify(body, null, 2)].join(
-          "\n",
-        ),
-      });
-    } catch (e) {
-      console.error("hotel-booking email:", e);
-    }
-  }
-
-  if (!id && notifyEmails.length === 0) {
-    return NextResponse.json(
-      {
-        error:
-          "Booking storage is unavailable. Configure Supabase or Redis and/or Resend, or use email below.",
-        mailtoHref: buildMailtoFallback(body),
-      },
-      { status: 503 },
-    );
-  }
-
-  return NextResponse.json({ ok: true, id }, { status: 201 });
 }
