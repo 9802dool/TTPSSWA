@@ -279,7 +279,7 @@ export async function POST(request: Request) {
       const result = await createApplication({
         member_id: null,
         application_type: 'hotel_booking',
-        application_data: bookingData as Record<string, unknown>,
+        application_data: bookingData as unknown as Record<string, unknown>,
       });
 
       if (result) {

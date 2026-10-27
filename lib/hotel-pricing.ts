@@ -336,5 +336,8 @@ export function formatTTD(amount: number): string {
  * Format room category for display
  */
 export function formatRoomCategory(category: RoomCategory): string {
-  return category.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return category
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }

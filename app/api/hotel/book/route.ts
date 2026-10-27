@@ -388,6 +388,7 @@ export async function POST(request: Request) {
         guestName,
         email,
         phone,
+        rooms: [{ roomCategory: roomCategory as HotelBookingData["rooms"][0]["roomCategory"], roomCount }],
         roomCategory: roomCategory as HotelBookingData["roomCategory"],
         roomCount,
         checkIn,
