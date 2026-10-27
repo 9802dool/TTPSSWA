@@ -4,7 +4,8 @@ import { NextRequest } from "next/server";
 
 // Mock external dependencies
 vi.mock("../lib/simple-hotel-booking-storage", () => ({
-  reserveHotelRoom: vi.fn(),
+  reserveHotelRooms: vi.fn(),
+  normalizeRoomLines: (lines: { roomCategory: string; roomCount: number }[]) => lines,
   ROOM_CAPACITY: {
     PRESIDENTIAL_SUITE: 2,
     SINGLE_OCCUPANCY: 2,
@@ -46,7 +47,7 @@ vi.mock("resend", () => ({
   })),
 }));
 
-import { reserveHotelRoom } from "../lib/simple-hotel-booking-storage";
+import { reserveHotelRooms } from "../lib/simple-hotel-booking-storage";
 
 describe("Hotel Booking API", () => {
   beforeEach(() => {
@@ -67,6 +68,7 @@ describe("Hotel Booking API", () => {
     phone: "1-868-555-1234",
     roomCategory: "DOUBLE_OCCUPANCY",
     roomCount: 2,
+    roomLines: [{ roomCategory: "DOUBLE_OCCUPANCY", roomCount: 2 }],
     checkIn: "2026-12-01",
     checkOut: "2026-12-05",
     guests: 4,
@@ -82,7 +84,7 @@ describe("Hotel Booking API", () => {
 
   describe("Successful bookings", () => {
     it("should accept a valid member booking and calculate estimate", async () => {
-      vi.mocked(reserveHotelRoom).mockResolvedValue({
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
         ok: true,
         booking: {
           id: "test-booking-123",
@@ -91,6 +93,7 @@ describe("Hotel Booking API", () => {
           phone: "1-868-555-1234",
           roomCategory: "DOUBLE_OCCUPANCY",
           roomCount: 2,
+          roomLines: [{ roomCategory: "DOUBLE_OCCUPANCY", roomCount: 2 }],
           checkIn: "2026-12-01",
           checkOut: "2026-12-05",
           guests: 4,
@@ -114,7 +117,7 @@ describe("Hotel Booking API", () => {
     });
 
     it("should accept a valid non-member booking", async () => {
-      vi.mocked(reserveHotelRoom).mockResolvedValue({
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
         ok: true,
         booking: {
           id: "test-booking-456",
@@ -123,6 +126,7 @@ describe("Hotel Booking API", () => {
           phone: "1-868-555-5678",
           roomCategory: "PRESIDENTIAL_SUITE",
           roomCount: 1,
+          roomLines: [{ roomCategory: "PRESIDENTIAL_SUITE", roomCount: 1 }],
           checkIn: "2026-12-10",
           checkOut: "2026-12-15",
           guests: 2,
@@ -140,6 +144,7 @@ describe("Hotel Booking API", () => {
         email: "jane@example.com",
         roomCategory: "PRESIDENTIAL_SUITE",
         roomCount: 1,
+        roomLines: [{ roomCategory: "PRESIDENTIAL_SUITE", roomCount: 1 }],
         checkIn: "2026-12-10",
         checkOut: "2026-12-15",
         guests: 2,
@@ -179,6 +184,7 @@ describe("Hotel Booking API", () => {
         ...validBooking,
         roomCategory: "SINGLE_OCCUPANCY",
         roomCount: 1,
+        roomLines: [{ roomCategory: "SINGLE_OCCUPANCY", roomCount: 1 }],
         guests: 3, // Single occupancy = 2 guests max per room
       };
 
@@ -191,7 +197,7 @@ describe("Hotel Booking API", () => {
     });
 
     it("should accept guests within capacity", async () => {
-      vi.mocked(reserveHotelRoom).mockResolvedValue({
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
         ok: true,
         booking: {
           id: "test-booking-789",
@@ -200,6 +206,7 @@ describe("Hotel Booking API", () => {
           phone: "1-868-555-1234",
           roomCategory: "DOUBLE_OCCUPANCY",
           roomCount: 2,
+          roomLines: [{ roomCategory: "DOUBLE_OCCUPANCY", roomCount: 2 }],
           checkIn: "2026-12-01",
           checkOut: "2026-12-05",
           guests: 8, // 2 rooms × 4 capacity = 8 max
@@ -215,6 +222,7 @@ describe("Hotel Booking API", () => {
         ...validBooking,
         roomCategory: "DOUBLE_OCCUPANCY",
         roomCount: 2,
+        roomLines: [{ roomCategory: "DOUBLE_OCCUPANCY", roomCount: 2 }],
         guests: 8,
         meals: { includeBreakfast: false, includeLunch: false, includeDinner: false },
       };
@@ -230,6 +238,7 @@ describe("Hotel Booking API", () => {
         ...validBooking,
         roomCategory: "PRESIDENTIAL_SUITE",
         roomCount: 1,
+        roomLines: [{ roomCategory: "PRESIDENTIAL_SUITE", roomCount: 1 }],
         guests: 3, // Presidential = 2 guests max
       };
 
@@ -242,7 +251,7 @@ describe("Hotel Booking API", () => {
     });
 
     it("should allow 2 guests in single occupancy", async () => {
-      vi.mocked(reserveHotelRoom).mockResolvedValue({
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
         ok: true,
         booking: {
           id: "test-booking-single",
@@ -251,6 +260,7 @@ describe("Hotel Booking API", () => {
           phone: "1-868-555-1234",
           roomCategory: "SINGLE_OCCUPANCY",
           roomCount: 1,
+          roomLines: [{ roomCategory: "SINGLE_OCCUPANCY", roomCount: 1 }],
           checkIn: "2026-12-01",
           checkOut: "2026-12-05",
           guests: 2, // Single occupancy = 2 guests max
@@ -266,6 +276,7 @@ describe("Hotel Booking API", () => {
         ...validBooking,
         roomCategory: "SINGLE_OCCUPANCY",
         roomCount: 1,
+        roomLines: [{ roomCategory: "SINGLE_OCCUPANCY", roomCount: 1 }],
         guests: 2,
         meals: { includeBreakfast: false, includeLunch: false, includeDinner: false },
       };
@@ -339,13 +350,13 @@ describe("Hotel Booking API", () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.message).toContain("between 1 and 10");
+      expect(data.message).toContain("between 1 and 24");
     });
   });
 
   describe("Availability handling", () => {
     it("should return 409 when rooms are full", async () => {
-      vi.mocked(reserveHotelRoom).mockResolvedValue({
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
         ok: false,
         reason: "full",
       });
@@ -359,7 +370,7 @@ describe("Hotel Booking API", () => {
     });
 
     it("should return 503 when storage is unavailable", async () => {
-      vi.mocked(reserveHotelRoom).mockResolvedValue({
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
         ok: false,
         reason: "unavailable",
       });
@@ -375,7 +386,7 @@ describe("Hotel Booking API", () => {
 
   describe("Estimate calculation", () => {
     it("should calculate estimate with all meals", async () => {
-      vi.mocked(reserveHotelRoom).mockResolvedValue({
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
         ok: true,
         booking: {
           id: "test-booking-meals",
@@ -384,6 +395,7 @@ describe("Hotel Booking API", () => {
           phone: "1-868-555-0000",
           roomCategory: "SINGLE_OCCUPANCY",
           roomCount: 2,
+          roomLines: [{ roomCategory: "SINGLE_OCCUPANCY", roomCount: 2 }],
           checkIn: "2026-12-01",
           checkOut: "2026-12-04",
           guests: 2,
@@ -399,6 +411,7 @@ describe("Hotel Booking API", () => {
         ...validBooking,
         roomCategory: "SINGLE_OCCUPANCY",
         roomCount: 2,
+        roomLines: [{ roomCategory: "SINGLE_OCCUPANCY", roomCount: 2 }],
         checkIn: "2026-12-01",
         checkOut: "2026-12-04", // 3 nights
         guests: 2,
@@ -426,6 +439,7 @@ describe("Hotel Booking API", () => {
         ...validBooking,
         roomCategory: "DOUBLE_OCCUPANCY",
         roomCount: 1,
+        roomLines: [{ roomCategory: "DOUBLE_OCCUPANCY", roomCount: 1 }],
         checkIn: "2026-12-01",
         checkOut: "2026-12-03", // 2 nights
         guests: 2,
@@ -433,7 +447,7 @@ describe("Hotel Booking API", () => {
       };
 
       // Member booking
-      vi.mocked(reserveHotelRoom).mockResolvedValue({
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
         ok: true,
         booking: {
           id: "member-booking",
@@ -442,6 +456,7 @@ describe("Hotel Booking API", () => {
           phone: baseBooking.phone,
           roomCategory: baseBooking.roomCategory as "DOUBLE_OCCUPANCY",
           roomCount: baseBooking.roomCount,
+          roomLines: [{ roomCategory: baseBooking.roomCategory as "DOUBLE_OCCUPANCY", roomCount: baseBooking.roomCount }],
           checkIn: baseBooking.checkIn,
           checkOut: baseBooking.checkOut,
           guests: baseBooking.guests,
@@ -458,7 +473,7 @@ describe("Hotel Booking API", () => {
       const memberData = await memberResponse.json();
 
       // Non-member booking
-      vi.mocked(reserveHotelRoom).mockResolvedValue({
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
         ok: true,
         booking: {
           id: "non-member-booking",
@@ -467,6 +482,7 @@ describe("Hotel Booking API", () => {
           phone: baseBooking.phone,
           roomCategory: baseBooking.roomCategory as "DOUBLE_OCCUPANCY",
           roomCount: baseBooking.roomCount,
+          roomLines: [{ roomCategory: baseBooking.roomCategory as "DOUBLE_OCCUPANCY", roomCount: baseBooking.roomCount }],
           checkIn: baseBooking.checkIn,
           checkOut: baseBooking.checkOut,
           guests: baseBooking.guests,

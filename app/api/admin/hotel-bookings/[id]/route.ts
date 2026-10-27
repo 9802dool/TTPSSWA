@@ -8,6 +8,7 @@ import {
 } from "@/lib/hotel-booking-meta";
 import { updateApplicationStatus } from "@/lib/supabase/applications";
 import { findHotelApplication } from "@/lib/hotel-performance-data";
+import { setHotelBookingRedisStatus } from "@/lib/simple-hotel-booking-storage";
 import type { ApplicationStatus } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
@@ -90,7 +91,20 @@ export async function PATCH(
     }
     
     const application = await findHotelApplication(id);
+    // Keep the Redis availability hold in step with the status: cancelling
+    // releases the room-nights, any other status keeps (or re-applies) them.
+    // Supabase's prismaBookingId is the Redis id when the page id is a UUID.
+    const redisId = application?.bookingId ?? id;
+    const redisUpdated = await setHotelBookingRedisStatus(
+      redisId,
+      newStatus === "cancelled" ? "CANCELLED" : "CONFIRMED",
+    );
+
     if (!application) {
+      if (redisUpdated) {
+        const meta = (await getHotelBookingMeta(id)) ?? ({} as HotelBookingMeta);
+        return NextResponse.json({ ok: true, meta, redisOnly: true });
+      }
       return NextResponse.json(
         { error: "No matching hotel booking application found." },
         { status: 404 },

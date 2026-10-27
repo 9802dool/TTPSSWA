@@ -20,12 +20,13 @@ function str(p: Record<string, unknown>, key: string): string {
 }
 
 function roomMixOrRooms(p: Record<string, unknown>): string {
-  // Check for multi-room format first
-  if (Array.isArray(p.rooms) && p.rooms.length > 0) {
+  // Check for multi-room format first (Redis uses roomLines, Supabase uses rooms)
+  const lines = Array.isArray(p.roomLines) ? p.roomLines : Array.isArray(p.rooms) ? p.rooms : null;
+  if (lines && lines.length > 0) {
     const parts: string[] = [];
     let totalCount = 0;
     
-    for (const room of p.rooms) {
+    for (const room of lines) {
       if (typeof room === 'object' && room !== null) {
         const r = room as Record<string, unknown>;
         const category = String(r.roomCategory || '');
@@ -77,6 +78,12 @@ function getMealsSummary(p: Record<string, unknown>): string {
     return parts.length > 0 ? parts.join(", ") : "None";
   }
   
+  // Redis booking records store meals as display strings, e.g. "Breakfast x6 (3 guests × 2 nights)"
+  if (Array.isArray(p.meals)) {
+    const parts = p.meals.filter((m): m is string => typeof m === "string" && m.trim() !== "");
+    return parts.length > 0 ? parts.join(", ") : "None";
+  }
+
   // Legacy aggregate format
   if (typeof p.meals === 'object' && p.meals !== null) {
     const meals = p.meals as Record<string, unknown>;

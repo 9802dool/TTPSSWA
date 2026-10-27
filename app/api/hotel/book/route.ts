@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { reserveHotelRooms } from "@/lib/simple-hotel-booking-storage";
 import {
-  reserveHotelRoom,
-  ROOM_CAPACITY,
-  type RoomCategory,
-} from "@/lib/simple-hotel-booking-storage";
+  MAX_GUESTS,
+  describeLines,
+  parseGuestMeals,
+  parseRoomLines,
+} from "@/lib/hotel-booking-request";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { createApplication } from "@/lib/supabase/applications";
 import type { HotelBookingData } from "@/lib/supabase/types";
@@ -13,52 +15,18 @@ import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { parseEmailList } from "@/lib/email-notifications";
 import {
+  HOTEL_RATES,
   ROOM_CAPACITIES,
-  calculateBookingTotal,
+  calculateMultiRoomBookingTotal,
   calculateNights,
+  formatRoomCategory,
   getTrinidadLocalDate,
-  type RoomCategory as PricingRoomCategory,
 } from "@/lib/hotel-pricing";
 
 export const runtime = "nodejs";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function isRoomCategory(value: string): value is RoomCategory {
-  return Object.hasOwn(ROOM_CAPACITY, value);
-}
-
-function parseMealSelections(value: unknown): {
-  includeBreakfast: boolean;
-  includeLunch: boolean;
-  includeDinner: boolean;
-  valid: boolean;
-} {
-  if (typeof value !== "object" || value === null) {
-    return { includeBreakfast: false, includeLunch: false, includeDinner: false, valid: true };
-  }
-
-  const meals = value as Record<string, unknown>;
-  
-  // Accept either boolean flags or the nested object format from the form
-  let includeBreakfast = false;
-  let includeLunch = false;
-  let includeDinner = false;
-
-  if (typeof meals.includeBreakfast === "boolean") {
-    includeBreakfast = meals.includeBreakfast;
-  }
-  if (typeof meals.includeLunch === "boolean") {
-    includeLunch = meals.includeLunch;
-  }
-  if (typeof meals.includeDinner === "boolean") {
-    includeDinner = meals.includeDinner;
-  }
-
-  return { includeBreakfast, includeLunch, includeDinner, valid: true };
-}
-
 export async function POST(request: Request) {
   const clientIP = getClientIP(request);
 
@@ -101,44 +69,31 @@ export async function POST(request: Request) {
     }
   }
 
-  const guestName = typeof body.guestName === "string" ? body.guestName.trim() : "";
+  const guestName = typeof body.guestName === "string" ? body.guestName.trim().slice(0, 200) : "";
   const email =
-    typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
-  const phone = typeof body.phone === "string" ? body.phone.trim() : "";
-  const roomCategory =
-    typeof body.roomCategory === "string" ? body.roomCategory.trim() : "";
+    typeof body.email === "string" ? body.email.trim().toLowerCase().slice(0, 254) : "";
+  const phone = typeof body.phone === "string" ? body.phone.trim().slice(0, 50) : "";
   const checkIn = typeof body.checkIn === "string" ? body.checkIn.trim() : "";
   const checkOut = typeof body.checkOut === "string" ? body.checkOut.trim() : "";
-  const roomCount = Number(body.roomCount);
   const guests = Number(body.guests);
-  const isMember = Boolean(body.isMember);
+  const isMember = body.isMember === true;
   const membershipNumber =
-    typeof body.membershipNumber === "string" ? body.membershipNumber.trim() : "";
-  const mealSelections = parseMealSelections(body.meals);
+    typeof body.membershipNumber === "string" ? body.membershipNumber.trim().slice(0, 50) : "";
   const specialRequests =
     typeof body.specialRequests === "string"
       ? body.specialRequests.trim().slice(0, 2000)
       : "";
 
-  if (
-    !guestName ||
-    !email ||
-    !phone ||
-    !roomCategory ||
-    !checkIn ||
-    !checkOut ||
-    !Number.isInteger(roomCount) ||
-    !Number.isInteger(guests)
-  ) {
+  if (!guestName || !email || !phone || !checkIn || !checkOut || !Number.isInteger(guests)) {
     return NextResponse.json(
       { message: "All required fields must be completed." },
       { status: 400 },
     );
   }
 
-  if (guests < 1 || guests > 10) {
+  if (guests < 1 || guests > MAX_GUESTS) {
     return NextResponse.json(
-      { message: "Number of guests must be between 1 and 10." },
+      { message: `Number of guests must be between 1 and ${MAX_GUESTS}.` },
       { status: 400 },
     );
   }
@@ -177,20 +132,9 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!isRoomCategory(roomCategory)) {
-    return NextResponse.json(
-      { message: "Please choose a valid room category." },
-      { status: 400 },
-    );
-  }
-
-  if (roomCount < 1 || roomCount > ROOM_CAPACITY[roomCategory]) {
-    return NextResponse.json(
-      {
-        message: `Number of rooms must be between 1 and ${ROOM_CAPACITY[roomCategory]} for this category.`,
-      },
-      { status: 400 },
-    );
+  const roomLines = parseRoomLines(body);
+  if (typeof roomLines === "string") {
+    return NextResponse.json({ message: roomLines }, { status: 400 });
   }
 
   if (!DATE_RE.test(checkIn) || !DATE_RE.test(checkOut)) {
@@ -214,59 +158,69 @@ export async function POST(request: Request) {
     );
   }
 
-  if (calculateNights(checkIn, checkOut) > 30) {
+  const nights = calculateNights(checkIn, checkOut);
+  if (nights > 30) {
     return NextResponse.json(
       { message: "Bookings are limited to 30 nights. Please contact the hotel for longer stays." },
       { status: 400 },
     );
   }
 
-  // Validate guest capacity
-  const capacity =
-    ROOM_CAPACITIES[roomCategory as PricingRoomCategory] ?? 2;
-  const maxGuests = capacity * roomCount;
+  // Guest capacity across every selected room
+  const maxGuests = roomLines.reduce(
+    (sum, l) => sum + ROOM_CAPACITIES[l.roomCategory] * l.roomCount,
+    0,
+  );
   if (guests > maxGuests) {
     return NextResponse.json(
       {
-        message: `${roomCategory.replace(/_/g, " ")} rooms accommodate up to ${capacity} guests each. With ${roomCount} room${roomCount === 1 ? "" : "s"}, maximum ${maxGuests} guest${maxGuests === 1 ? "" : "s"}.`,
+        message: `The selected rooms (${describeLines(roomLines)}) accommodate up to ${maxGuests} guest${maxGuests === 1 ? "" : "s"}. Please add rooms or reduce the number of guests.`,
       },
       { status: 400 },
     );
   }
 
-  // Calculate server-side estimate
-  const nights = calculateNights(checkIn, checkOut);
-  
-  // Server-side meal calculation: guests × nights for each selected meal
-  // Cap at a reasonable maximum (e.g., 10 guests × 30 nights = 300 per meal)
-  const maxMealCount = 300;
-  const mealCounts = {
-    Breakfast: mealSelections.includeBreakfast ? Math.min(guests * nights, maxMealCount) : 0,
-    Lunch: mealSelections.includeLunch ? Math.min(guests * nights, maxMealCount) : 0,
-    Dinner: mealSelections.includeDinner ? Math.min(guests * nights, maxMealCount) : 0,
-  };
-  
-  const estimate = calculateBookingTotal({
-    roomCategory: roomCategory as PricingRoomCategory,
-    roomCount,
+  const guestMealSelections = parseGuestMeals(body, guests);
+  if (typeof guestMealSelections === "string") {
+    return NextResponse.json({ message: guestMealSelections }, { status: 400 });
+  }
+
+  // All prices are computed here from the published rates; client totals are ignored.
+  const estimate = calculateMultiRoomBookingTotal({
+    rooms: roomLines,
     nights,
     isMember,
-    meals: mealCounts,
+    guestMealSelections,
   });
+  const mealCounts = {
+    Breakfast: estimate.mealBreakdown?.breakfast.totalMeals ?? 0,
+    Lunch: estimate.mealBreakdown?.lunch.totalMeals ?? 0,
+    Dinner: estimate.mealBreakdown?.dinner.totalMeals ?? 0,
+  };
+  const mealGuests = {
+    Breakfast: estimate.mealBreakdown?.breakfast.guestCount ?? 0,
+    Lunch: estimate.mealBreakdown?.lunch.guestCount ?? 0,
+    Dinner: estimate.mealBreakdown?.dinner.guestCount ?? 0,
+  };
 
-  // Format meals for storage
   const meals: string[] = [];
-  if (mealCounts.Breakfast > 0)
-    meals.push(`Breakfast x${mealCounts.Breakfast}`);
-  if (mealCounts.Lunch > 0) meals.push(`Lunch x${mealCounts.Lunch}`);
-  if (mealCounts.Dinner > 0) meals.push(`Dinner x${mealCounts.Dinner}`);
+  for (const meal of ["Breakfast", "Lunch", "Dinner"] as const) {
+    if (mealCounts[meal] > 0) {
+      meals.push(`${meal} x${mealCounts[meal]} (${mealGuests[meal]} guest${mealGuests[meal] === 1 ? "" : "s"} × ${nights} night${nights === 1 ? "" : "s"})`);
+    }
+  }
+  const rates = isMember ? HOTEL_RATES.member : HOTEL_RATES.nonMember;
+  const roomLinesText = estimate.roomLineItems.map(
+    (l) =>
+      `- ${formatRoomCategory(l.roomCategory)} ×${l.roomCount} × ${nights} night${nights === 1 ? "" : "s"} @ TTD $${rates[l.roomCategory].toLocaleString("en-TT")} = TTD $${l.subtotal.toLocaleString("en-TT")}`,
+  );
+  const totalRooms = roomLines.reduce((s, l) => s + l.roomCount, 0);
 
-  const result = await reserveHotelRoom({
+  const result = await reserveHotelRooms({
     guestName,
     email,
     phone,
-    roomCategory,
-    roomCount,
+    roomLines,
     checkIn,
     checkOut,
     guests,
@@ -275,10 +229,14 @@ export async function POST(request: Request) {
   });
 
   if (!result.ok && result.reason === "full") {
-    const label = roomCategory.replaceAll("_", " ").toLowerCase();
+    const which = result.category
+      ? roomLines.find((l) => l.roomCategory === result.category)
+      : undefined;
     return NextResponse.json(
       {
-        message: `Sorry, ${roomCount} ${label} room${roomCount === 1 ? "" : "s"} ${roomCount === 1 ? "is" : "are"} not available for those dates.`,
+        message: which
+          ? `Sorry, ${which.roomCount} ${formatRoomCategory(which.roomCategory)} room${which.roomCount === 1 ? "" : "s"} ${which.roomCount === 1 ? "is" : "are"} not available for every night of those dates.`
+          : "Sorry, the selected rooms are not available for those dates.",
       },
       { status: 409 },
     );
@@ -290,6 +248,22 @@ export async function POST(request: Request) {
       { status: 503 },
     );
   }
+
+  const summaryLines = [
+    `Booking reference: ${result.booking.id}`,
+    `Rooms: ${describeLines(roomLines)} (${totalRooms} total)`,
+    `Check-in: ${checkIn}`,
+    `Check-out: ${checkOut}`,
+    `Nights: ${nights}`,
+    `Guests: ${guests}`,
+    `Meals: ${meals.length > 0 ? meals.join(", ") : "None"}`,
+  ];
+  const costLines = [
+    `ESTIMATED TOTAL: TTD $${estimate.total.toLocaleString("en-TT")}`,
+    ...roomLinesText,
+    `- Rooms subtotal: TTD $${estimate.roomsSubtotal.toLocaleString("en-TT")}`,
+    `- Meals subtotal: TTD $${estimate.mealsSubtotal.toLocaleString("en-TT")}`,
+  ];
 
   const notifyEmails = parseEmailList(process.env.HOTEL_BOOKING_NOTIFY_EMAIL);
   const apiKey = process.env.RESEND_API_KEY?.trim();
@@ -312,13 +286,9 @@ export async function POST(request: Request) {
           "Your request has been received and recorded.",
           "You will receive a confirmation email shortly with your invoice and payment instructions.",
           "",
-          `Booking reference: ${result.booking.id}`,
-          `Room category: ${roomCategory.replaceAll("_", " ")}`,
-          `Number of rooms: ${roomCount}`,
-          `Check-in: ${checkIn}`,
-          `Check-out: ${checkOut}`,
-          `Guests: ${guests}`,
-          `Estimated total: TTD $${estimate.total.toLocaleString("en-TT")}`,
+          ...summaryLines,
+          "",
+          ...costLines,
           "",
           isMember
             ? "Member rates are subject to verification of your membership status."
@@ -326,7 +296,7 @@ export async function POST(request: Request) {
           "",
           "TTPSSWA",
         ]
-          .filter(Boolean)
+          .filter((line, i, arr) => line !== "" || arr[i - 1] !== "")
           .join("\n"),
       });
       if (guestEmail.error) {
@@ -344,32 +314,23 @@ export async function POST(request: Request) {
           from,
           to: notifyEmails,
           replyTo: [email],
-          subject: `Confirmed TTPSSWA hotel booking [${result.booking.id}]`,
+          subject: `New TTPSSWA hotel booking request [${result.booking.id}] – ${describeLines(roomLines)}`,
           text: [
             `Guest: ${guestName}`,
             `Email: ${email}`,
             `Phone: ${phone}`,
-            `Room category: ${roomCategory.replaceAll("_", " ")}`,
-            `Number of rooms: ${roomCount}`,
-            `Check-in: ${checkIn}`,
-            `Check-out: ${checkOut}`,
-            `Nights: ${nights}`,
-            `Guests: ${guests}`,
+            ...summaryLines,
             `Member: ${isMember ? "Yes" : "No"}`,
             isMember && membershipNumber
               ? `Membership number: ${membershipNumber}`
               : "",
-            `Meals: ${meals.length > 0 ? meals.join(", ") : "None"}`,
             `Special requests: ${specialRequests || "None"}`,
             "",
-            `ESTIMATED TOTAL: TTD $${estimate.total.toLocaleString("en-TT")}`,
-            `- Rooms: TTD $${estimate.roomsSubtotal.toLocaleString("en-TT")}`,
-            `- Meals: TTD $${estimate.mealsSubtotal.toLocaleString("en-TT")}`,
+            ...costLines,
             "",
             isMember
               ? "** Member rate applied - verify membership before final invoice **"
               : "",
-            "",
             "Status: Booking request – pending confirmation",
           ]
             .filter(Boolean)
@@ -388,17 +349,15 @@ export async function POST(request: Request) {
         guestName,
         email,
         phone,
-        rooms: [{ roomCategory: roomCategory as HotelBookingData["rooms"][0]["roomCategory"], roomCount }],
-        roomCategory: roomCategory as HotelBookingData["roomCategory"],
-        roomCount,
+        rooms: roomLines,
+        // Single-type bookings keep the legacy fields for older readers.
+        roomCategory: roomLines.length === 1 ? roomLines[0].roomCategory : undefined,
+        roomCount: totalRooms,
         checkIn,
         checkOut,
         guests,
-        meals: {
-          Breakfast: mealCounts.Breakfast,
-          Lunch: mealCounts.Lunch,
-          Dinner: mealCounts.Dinner,
-        },
+        meals: mealCounts,
+        guestMealSelections,
         specialRequests: specialRequests || undefined,
       };
 
@@ -411,11 +370,13 @@ export async function POST(request: Request) {
           isMember,
           membershipNumber: membershipNumber || undefined,
           estimatedTotal: estimate.total,
+          roomsSubtotal: estimate.roomsSubtotal,
+          mealsSubtotal: estimate.mealsSubtotal,
         },
       });
     } catch (error) {
       console.error("Failed to save hotel booking to Supabase:", error);
-      // Continue - Prisma booking already succeeded
+      // Continue - the Redis reservation already succeeded
     }
   }
 
@@ -424,6 +385,8 @@ export async function POST(request: Request) {
       message: "Booking request received.",
       booking: result.booking,
       estimatedTotal: estimate.total,
+      roomsSubtotal: estimate.roomsSubtotal,
+      mealsSubtotal: estimate.mealsSubtotal,
       guestEmailSent,
     },
     { status: 201 },

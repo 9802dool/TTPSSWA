@@ -9,12 +9,15 @@ import {
   CHECK_IN_TIME,
   CHECK_OUT_TIME,
   HOTEL_CONTACT,
-  calculateBookingTotal,
+  calculateMultiRoomBookingTotal,
   calculateNights,
   getTrinidadLocalDate,
   formatTTD,
+  type GuestMealSelection,
   type RoomCategory,
 } from "@/lib/hotel-pricing";
+
+const MAX_GUESTS = 24;
 
 const MEAL_OPTIONS = ["Breakfast", "Lunch", "Dinner"] as const;
 type MealOption = (typeof MEAL_OPTIONS)[number];
@@ -43,22 +46,27 @@ const ROOM_OPTIONS = [
   },
 ] as const;
 
+type RoomCounts = Record<RoomCategory, number>;
+type MealFlags = { breakfast: boolean; lunch: boolean; dinner: boolean };
+const NO_MEALS: MealFlags = { breakfast: false, lunch: false, dinner: false };
+const MEAL_KEYS: Record<MealOption, keyof MealFlags> = {
+  Breakfast: "breakfast",
+  Lunch: "lunch",
+  Dinner: "dinner",
+};
+
 type FormState = {
   guestName: string;
   email: string;
   phone: string;
-  roomCategory: RoomCategory;
-  roomCount: string;
+  roomCounts: RoomCounts;
   checkIn: string;
   checkOut: string;
   guests: string;
   isMember: boolean;
   membershipNumber: string;
-  meals: {
-    includeBreakfast: boolean;
-    includeLunch: boolean;
-    includeDinner: boolean;
-  };
+  /** One entry per guest, index-aligned with guest number. */
+  guestMeals: MealFlags[];
   specialRequests: string;
 };
 
@@ -66,20 +74,22 @@ const INITIAL_FORM: FormState = {
   guestName: "",
   email: "",
   phone: "",
-  roomCategory: "DOUBLE_OCCUPANCY",
-  roomCount: "1",
+  roomCounts: { PRESIDENTIAL_SUITE: 0, SINGLE_OCCUPANCY: 0, DOUBLE_OCCUPANCY: 1 },
   checkIn: "",
   checkOut: "",
   guests: "1",
   isMember: false,
   membershipNumber: "",
-  meals: {
-    includeBreakfast: false,
-    includeLunch: false,
-    includeDinner: false,
-  },
+  guestMeals: [NO_MEALS],
   specialRequests: "",
 };
+
+function roomLinesOf(counts: RoomCounts) {
+  return ROOM_OPTIONS.filter((r) => counts[r.id] > 0).map((r) => ({
+    roomCategory: r.id as RoomCategory,
+    roomCount: counts[r.id],
+  }));
+}
 
 const inputClass =
   "mt-1 w-full rounded-lg border border-slate-300 bg-white p-2.5 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30 text-base font-medium";
@@ -106,12 +116,13 @@ type AvailabilityData = {
 
 type BookingConfirmation = {
   id: string;
-  roomCategory: RoomCategory;
-  roomCount: number;
+  roomLines: { roomCategory: RoomCategory; roomCount: number }[];
   checkIn: string;
   checkOut: string;
   guests: number;
   estimatedTotal: number;
+  roomsSubtotal: number;
+  mealsSubtotal: number;
   isMember: boolean;
 };
 
@@ -136,27 +147,27 @@ export default function SimpleBookingForm() {
     [formData.checkIn, formData.checkOut],
   );
 
-  const mealQuantities = useMemo(() => {
-    const totalGuests = parseInt(formData.guests) || 0;
-    const maxMealCount = 300; // Same cap as server
-    return {
-      Breakfast: formData.meals.includeBreakfast ? Math.min(totalGuests * nights, maxMealCount) : 0,
-      Lunch: formData.meals.includeLunch ? Math.min(totalGuests * nights, maxMealCount) : 0,
-      Dinner: formData.meals.includeDinner ? Math.min(totalGuests * nights, maxMealCount) : 0,
-    };
-  }, [formData.meals, formData.guests, nights]);
+  const guestCount = Math.max(0, Math.min(MAX_GUESTS, parseInt(formData.guests) || 0));
+  const roomLines = useMemo(() => roomLinesOf(formData.roomCounts), [formData.roomCounts]);
+  const totalRooms = roomLines.reduce((sum, l) => sum + l.roomCount, 0);
+  const guestMealSelections: GuestMealSelection[] = useMemo(
+    () =>
+      Array.from({ length: guestCount }, (_, guestIndex) => ({
+        guestIndex,
+        ...(formData.guestMeals[guestIndex] ?? NO_MEALS),
+      })),
+    [formData.guestMeals, guestCount],
+  );
 
   const estimate = useMemo(() => {
-    if (!nights || nights <= 0) return null;
-    const roomCount = parseInt(formData.roomCount) || 1;
-    return calculateBookingTotal({
-      roomCategory: formData.roomCategory,
-      roomCount,
+    if (!nights || nights <= 0 || roomLines.length === 0) return null;
+    return calculateMultiRoomBookingTotal({
+      rooms: roomLines,
       nights,
       isMember: formData.isMember,
-      meals: mealQuantities,
+      guestMealSelections,
     });
-  }, [formData.roomCategory, formData.roomCount, nights, formData.isMember, mealQuantities]);
+  }, [roomLines, nights, formData.isMember, guestMealSelections]);
 
   // Fetch availability when dates change
   useEffect(() => {
@@ -205,22 +216,58 @@ export default function SimpleBookingForm() {
     setMessage(null);
   }
 
-  function updateMeal(meal: "includeBreakfast" | "includeLunch" | "includeDinner", value: boolean) {
+  function setRoomCount(category: RoomCategory, count: number) {
     setFormData((current) => ({
       ...current,
-      meals: { ...current.meals, [meal]: value },
+      roomCounts: { ...current.roomCounts, [category]: count },
     }));
     setMessage(null);
   }
 
-  function getCapacityError(): string | null {
-    const capacity = ROOM_CAPACITIES[formData.roomCategory];
-    const guests = parseInt(formData.guests) || 0;
-    const roomCount = parseInt(formData.roomCount) || 1;
-    const maxGuests = capacity * roomCount;
+  function setGuests(value: string) {
+    const n = Math.max(0, Math.min(MAX_GUESTS, parseInt(value) || 0));
+    setFormData((current) => ({
+      ...current,
+      guests: value,
+      guestMeals: Array.from({ length: n }, (_, i) => current.guestMeals[i] ?? NO_MEALS),
+    }));
+    setMessage(null);
+  }
 
-    if (guests > maxGuests) {
-      return `${formData.roomCategory.replace(/_/g, " ")} rooms accommodate up to ${capacity} guests each. With ${roomCount} room${roomCount === 1 ? "" : "s"}, you can have up to ${maxGuests} guest${maxGuests === 1 ? "" : "s"}.`;
+  function setGuestMeal(guestIndex: number, key: keyof MealFlags, value: boolean) {
+    setFormData((current) => {
+      const guestMeals = Array.from(
+        { length: Math.max(current.guestMeals.length, guestIndex + 1) },
+        (_, i) => current.guestMeals[i] ?? NO_MEALS,
+      );
+      guestMeals[guestIndex] = { ...guestMeals[guestIndex], [key]: value };
+      return { ...current, guestMeals };
+    });
+    setMessage(null);
+  }
+
+  function setMealForAll(key: keyof MealFlags, value: boolean) {
+    setFormData((current) => ({
+      ...current,
+      guestMeals: Array.from({ length: guestCount }, (_, i) => ({
+        ...(current.guestMeals[i] ?? NO_MEALS),
+        [key]: value,
+      })),
+    }));
+    setMessage(null);
+  }
+
+  const maxGuestCapacity = roomLines.reduce(
+    (sum, l) => sum + ROOM_CAPACITIES[l.roomCategory] * l.roomCount,
+    0,
+  );
+
+  function getCapacityError(): string | null {
+    if (totalRooms === 0) return "Please choose at least one room.";
+    const guests = parseInt(formData.guests) || 0;
+    if (guests > MAX_GUESTS) return `Bookings are limited to ${MAX_GUESTS} guests.`;
+    if (guests > maxGuestCapacity) {
+      return `The selected room${totalRooms === 1 ? "" : "s"} accommodate${totalRooms === 1 ? "s" : ""} up to ${maxGuestCapacity} guest${maxGuestCapacity === 1 ? "" : "s"}. Add rooms or reduce the number of guests.`;
     }
     return null;
   }
@@ -243,8 +290,17 @@ export default function SimpleBookingForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
-          meals: mealQuantities,
+          guestName: formData.guestName,
+          email: formData.email,
+          phone: formData.phone,
+          checkIn: formData.checkIn,
+          checkOut: formData.checkOut,
+          guests: parseInt(formData.guests) || 0,
+          isMember: formData.isMember,
+          membershipNumber: formData.membershipNumber,
+          specialRequests: formData.specialRequests,
+          rooms: roomLines,
+          guestMealSelections,
           ...(turnstileToken ? { turnstileToken } : {}),
         }),
       });
@@ -256,13 +312,14 @@ export default function SimpleBookingForm() {
         message?: string;
         booking?: {
           id: string;
-          roomCategory: RoomCategory;
-          roomCount: number;
+          roomLines: { roomCategory: RoomCategory; roomCount: number }[];
           checkIn: string;
           checkOut: string;
           guests: number;
         };
         estimatedTotal?: number;
+        roomsSubtotal?: number;
+        mealsSubtotal?: number;
         guestEmailSent?: boolean;
       };
 
@@ -273,12 +330,13 @@ export default function SimpleBookingForm() {
       if (data.booking && data.estimatedTotal !== undefined) {
         setConfirmation({
           id: data.booking.id,
-          roomCategory: data.booking.roomCategory,
-          roomCount: data.booking.roomCount,
+          roomLines: data.booking.roomLines ?? roomLines,
           checkIn: data.booking.checkIn,
           checkOut: data.booking.checkOut,
           guests: data.booking.guests,
           estimatedTotal: data.estimatedTotal,
+          roomsSubtotal: data.roomsSubtotal ?? 0,
+          mealsSubtotal: data.mealsSubtotal ?? 0,
           isMember: formData.isMember,
         });
         setFormData(INITIAL_FORM);
@@ -344,10 +402,14 @@ export default function SimpleBookingForm() {
               <p className="mt-1 font-mono text-sm font-medium text-slate-900">{confirmation.id}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase text-slate-500">Room Type</p>
-              <p className="mt-1 text-sm font-medium text-slate-900">
-                {confirmation.roomCategory.replace(/_/g, " ")}
-              </p>
+              <p className="text-xs font-semibold uppercase text-slate-500">Rooms</p>
+              <ul className="mt-1 space-y-0.5 text-sm font-medium text-slate-900">
+                {confirmation.roomLines.map((l) => (
+                  <li key={l.roomCategory}>
+                    {ROOM_OPTIONS.find((r) => r.id === l.roomCategory)?.title ?? l.roomCategory} × {l.roomCount}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
@@ -366,9 +428,9 @@ export default function SimpleBookingForm() {
 
           <div className="grid grid-cols-2 gap-4 border-b border-slate-200 pb-4">
             <div>
-              <p className="text-xs font-semibold uppercase text-slate-500">Rooms</p>
+              <p className="text-xs font-semibold uppercase text-slate-500">Stay</p>
               <p className="mt-1 text-sm font-medium text-slate-900">
-                {confirmation.roomCount} × {roomNights} night{roomNights === 1 ? "" : "s"}
+                {confirmation.roomLines.reduce((s, l) => s + l.roomCount, 0)} room(s) × {roomNights} night{roomNights === 1 ? "" : "s"}
               </p>
             </div>
             <div>
@@ -379,6 +441,11 @@ export default function SimpleBookingForm() {
 
           <div>
             <p className="text-xs font-semibold uppercase text-slate-500">Estimated Total</p>
+            {confirmation.roomsSubtotal > 0 && (
+              <p className="mt-1 text-xs text-slate-600">
+                Rooms {formatTTD(confirmation.roomsSubtotal)} · Meals {formatTTD(confirmation.mealsSubtotal)}
+              </p>
+            )}
             <p className="mt-1 text-2xl font-bold text-slate-900">
               {formatTTD(confirmation.estimatedTotal)} <span className="text-sm font-normal text-slate-600">TTD</span>
             </p>
@@ -412,9 +479,11 @@ export default function SimpleBookingForm() {
   }
 
   const capacityWarning = getCapacityError();
-  const selectedRoom = ROOM_OPTIONS.find((r) => r.id === formData.roomCategory);
-  const roomAvailable = availableByCategory?.[formData.roomCategory];
-  const isRoomFull = roomAvailable !== undefined && roomAvailable < parseInt(formData.roomCount || "1");
+  const unavailableLine = roomLines.find((l) => {
+    const available = availableByCategory?.[l.roomCategory];
+    return available !== undefined && available < l.roomCount;
+  });
+  const isRoomFull = unavailableLine !== undefined;
 
   return (
     <div className="mx-auto my-8 max-w-3xl rounded-xl border border-slate-200 bg-white p-5 shadow-md sm:p-7">
@@ -423,8 +492,8 @@ export default function SimpleBookingForm() {
           Hotel Booking Request
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Select a room category and quantity, choose your dates, and confirm
-          your accommodation.
+          Choose your dates, pick one or more rooms of any type, select meals
+          for each guest, and confirm your accommodation.
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-slate-600">
           <span>Check-in: {CHECK_IN_TIME}</span>
@@ -531,19 +600,24 @@ export default function SimpleBookingForm() {
 
         <fieldset>
           <legend className="mb-3 block text-sm font-semibold text-slate-900">
-            3. Choose a room category<span className="text-red-600">*</span>
+            3. Choose your rooms<span className="text-red-600">*</span>
+            <span className="mt-1 block text-xs font-normal text-slate-600">
+              Mix room types as needed, e.g. 1 Presidential + 1 Single + 1 Double.
+            </span>
           </legend>
           {availabilityLoading && formData.checkIn && formData.checkOut && (
             <p className="mb-3 text-sm text-blue-600">Checking availability...</p>
           )}
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {ROOM_OPTIONS.map((room) => {
-              const selected = formData.roomCategory === room.id;
+              const count = formData.roomCounts[room.id];
+              const selected = count > 0;
               const memberRate = HOTEL_RATES.member[room.id];
               const nonMemberRate = HOTEL_RATES.nonMember[room.id];
               const activeRate = formData.isMember ? memberRate : nonMemberRate;
               const available = availableByCategory?.[room.id];
               const isFull = available !== undefined && available === 0;
+              const maxSelectable = Math.min(room.maxCount, available ?? room.maxCount);
 
               return (
                 <article
@@ -616,53 +690,30 @@ export default function SimpleBookingForm() {
                       ))}
                     </ul>
 
-                    {selected && (
-                      <div className="mt-3">
-                        <label
-                          htmlFor={`hotel-room-count-${room.id}`}
-                          className="block text-xs font-semibold text-slate-900"
-                        >
-                          Number of rooms<span className="text-red-600">*</span>
-                        </label>
-                        <select
-                          id={`hotel-room-count-${room.id}`}
-                          value={formData.roomCount}
-                          onChange={(event) => update("roomCount", event.target.value)}
-                          className={inputClass}
-                        >
-                          {Array.from({ length: room.maxCount }, (_, index) => (
-                            <option key={index + 1} value={String(index + 1)}>
-                              {index + 1}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      aria-pressed={selected}
-                      disabled={isFull}
-                      onClick={() =>
-                        setFormData((current) => ({
-                          ...current,
-                          roomCategory: room.id,
-                          roomCount:
-                            current.roomCategory === room.id
-                              ? current.roomCount
-                              : "1",
-                        }))
-                      }
-                      className={`mt-3 w-full rounded-lg px-3 py-2 text-xs font-semibold transition ${
-                        selected
-                          ? "bg-blue-600 text-white"
-                          : isFull
-                            ? "cursor-not-allowed border border-slate-300 bg-slate-100 text-slate-400"
-                            : "border border-blue-600 text-blue-700 hover:bg-blue-50"
-                      }`}
-                    >
-                      {isFull ? "Fully booked" : selected ? "Room selected" : "Select room"}
-                    </button>
+                    <div className="mt-3">
+                      <label
+                        htmlFor={`hotel-room-count-${room.id}`}
+                        className="block text-xs font-semibold text-slate-900"
+                      >
+                        Number of rooms
+                      </label>
+                      <select
+                        id={`hotel-room-count-${room.id}`}
+                        value={String(count)}
+                        disabled={isFull && count === 0}
+                        onChange={(event) => setRoomCount(room.id, Number(event.target.value))}
+                        className={inputClass}
+                      >
+                        {Array.from({ length: Math.max(maxSelectable, count) + 1 }, (_, index) => (
+                          <option key={index} value={String(index)}>
+                            {index === 0 ? "None" : index}
+                          </option>
+                        ))}
+                      </select>
+                      {isFull && (
+                        <p className="mt-1 text-xs font-semibold text-red-700">Fully booked for these dates</p>
+                      )}
+                    </div>
                   </div>
                 </article>
               );
@@ -729,11 +780,11 @@ export default function SimpleBookingForm() {
                 type="number"
                 required
                 min={1}
-                max={10}
+                max={MAX_GUESTS}
                 inputMode="numeric"
                 className={inputClass}
                 value={formData.guests}
-                onChange={(event) => update("guests", event.target.value)}
+                onChange={(event) => setGuests(event.target.value)}
                 aria-invalid={capacityWarning ? "true" : "false"}
                 aria-describedby={capacityWarning ? "guest-capacity-error" : undefined}
               />
@@ -751,66 +802,72 @@ export default function SimpleBookingForm() {
             5. Meal options
           </legend>
           <p className="mt-1 text-xs text-slate-600">
-            Select which meals to include for all guests for each day of your stay.
-            {nights > 0 && (
-              <span className="ml-1 font-medium">
-                ({parseInt(formData.guests) || 0} guests × {nights} night{nights === 1 ? "" : "s"})
-              </span>
-            )}
+            Choose meals for each guest. Each ticked meal is charged per guest, per night
+            {nights > 0 ? ` (${nights} night${nights === 1 ? "" : "s"})` : ""}.
           </p>
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="mt-3 flex flex-wrap gap-2">
             {MEAL_OPTIONS.map((meal) => {
-              const quantity = mealQuantities[meal];
-              const price = MEAL_PRICES[meal];
-              const total = quantity * price;
+              const key = MEAL_KEYS[meal];
+              const all = guestCount > 0 && guestMealSelections.every((g) => g[key]);
               return (
-                <div
+                <button
                   key={meal}
-                  className="rounded-lg border border-slate-200 bg-slate-50 p-3"
+                  type="button"
+                  onClick={() => setMealForAll(key, !all)}
+                  disabled={guestCount === 0}
+                  className="rounded-full border border-blue-600 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-50 disabled:opacity-50"
                 >
-                  <label
-                    htmlFor={`hotel-meal-${meal.toLowerCase()}`}
-                    className="flex cursor-pointer items-start gap-3"
-                  >
-                    <input
-                      id={`hotel-meal-${meal.toLowerCase()}`}
-                      type="checkbox"
-                      checked={
-                        meal === "Breakfast"
-                          ? formData.meals.includeBreakfast
-                          : meal === "Lunch"
-                            ? formData.meals.includeLunch
-                            : formData.meals.includeDinner
-                      }
-                      onChange={(e) =>
-                        updateMeal(
-                          meal === "Breakfast"
-                            ? "includeBreakfast"
-                            : meal === "Lunch"
-                              ? "includeLunch"
-                              : "includeDinner",
-                          e.target.checked,
-                        )
-                      }
-                      className="mt-0.5 h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div className="flex-1">
-                      <span className="block text-sm font-semibold text-slate-900">
-                        {meal}
-                      </span>
-                      <span className="mt-0.5 block text-xs text-slate-600">
-                        {formatTTD(price)} per person
-                      </span>
-                      {quantity > 0 && (
-                        <span className="mt-1 block text-xs font-medium text-blue-700">
-                          {quantity} × {formatTTD(price)} = {formatTTD(total)}
-                        </span>
-                      )}
-                    </div>
-                  </label>
-                </div>
+                  {all ? `Remove ${meal.toLowerCase()} for all` : `${meal} for all guests`}
+                </button>
               );
             })}
+          </div>
+          <div className="mt-3 overflow-hidden rounded-lg border border-slate-200">
+            <div className="hidden grid-cols-[1fr_repeat(3,5.5rem)] gap-2 bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700 sm:grid">
+              <span>Guest</span>
+              {MEAL_OPTIONS.map((meal) => (
+                <span key={meal} className="text-center">
+                  {meal} ({formatTTD(MEAL_PRICES[meal])})
+                </span>
+              ))}
+            </div>
+            <ul className="divide-y divide-slate-200">
+              {guestMealSelections.map((g) => (
+                <li
+                  key={g.guestIndex}
+                  className="grid grid-cols-1 gap-2 px-3 py-2 sm:grid-cols-[1fr_repeat(3,5.5rem)] sm:items-center"
+                >
+                  <span className="text-sm font-semibold text-slate-900">Guest {g.guestIndex + 1}</span>
+                  <div className="flex flex-wrap gap-x-4 gap-y-2 sm:contents">
+                    {MEAL_OPTIONS.map((meal) => {
+                      const key = MEAL_KEYS[meal];
+                      const id = `hotel-meal-${g.guestIndex}-${key}`;
+                      return (
+                        <label
+                          key={meal}
+                          htmlFor={id}
+                          className="flex min-h-[44px] cursor-pointer items-center gap-2 sm:justify-center"
+                        >
+                          <input
+                            id={id}
+                            type="checkbox"
+                            checked={g[key]}
+                            onChange={(e) => setGuestMeal(g.guestIndex, key, e.target.checked)}
+                            className="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                          />
+                          <span className="text-sm text-slate-800 sm:sr-only">
+                            {meal} <span className="text-xs text-slate-500">({formatTTD(MEAL_PRICES[meal])})</span>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </li>
+              ))}
+              {guestCount === 0 && (
+                <li className="px-3 py-3 text-sm text-slate-600">Enter the number of guests to choose meals.</li>
+              )}
+            </ul>
           </div>
         </fieldset>
 
@@ -836,21 +893,30 @@ export default function SimpleBookingForm() {
           <div className="rounded-lg border border-slate-300 bg-slate-50 p-5">
             <h3 className="text-sm font-bold text-slate-900">Estimated Total</h3>
             <div className="mt-3 space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-slate-700">
-                  {parseInt(formData.roomCount)} room{parseInt(formData.roomCount) === 1 ? "" : "s"} × {nights} night{nights === 1 ? "" : "s"} × {formatTTD(
-                    formData.isMember
-                      ? HOTEL_RATES.member[formData.roomCategory]
-                      : HOTEL_RATES.nonMember[formData.roomCategory],
-                  )}
-                </span>
-                <span className="font-semibold text-slate-900">
-                  {formatTTD(estimate.roomsSubtotal)}
-                </span>
-              </div>
+              {estimate.roomLineItems.map((line) => (
+                <div key={line.roomCategory} className="flex justify-between gap-3">
+                  <span className="text-slate-700">
+                    {ROOM_OPTIONS.find((r) => r.id === line.roomCategory)?.title} × {line.roomCount} × {nights} night{nights === 1 ? "" : "s"} × {formatTTD(
+                      formData.isMember
+                        ? HOTEL_RATES.member[line.roomCategory]
+                        : HOTEL_RATES.nonMember[line.roomCategory],
+                    )}
+                  </span>
+                  <span className="shrink-0 font-semibold text-slate-900">{formatTTD(line.subtotal)}</span>
+                </div>
+              ))}
               {estimate.mealsSubtotal > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-slate-700">Meals</span>
+                <div className="flex justify-between gap-3">
+                  <span className="text-slate-700">
+                    Meals
+                    {estimate.mealBreakdown && (
+                      <span className="block text-xs text-slate-500">
+                        {MEAL_OPTIONS.filter((m) => estimate.mealBreakdown![MEAL_KEYS[m]].totalMeals > 0)
+                          .map((m) => `${m} ×${estimate.mealBreakdown![MEAL_KEYS[m]].totalMeals}`)
+                          .join(" · ")}
+                      </span>
+                    )}
+                  </span>
                   <span className="font-semibold text-slate-900">
                     {formatTTD(estimate.mealsSubtotal)}
                   </span>
@@ -892,6 +958,13 @@ export default function SimpleBookingForm() {
             </a>
           </div>
         </div>
+
+        {unavailableLine && (
+          <p role="alert" className="text-sm font-medium text-red-700">
+            Only {availableByCategory?.[unavailableLine.roomCategory] ?? 0}{" "}
+            {ROOM_OPTIONS.find((r) => r.id === unavailableLine.roomCategory)?.title} room(s) are free for every night of these dates.
+          </p>
+        )}
 
         <TurnstileWidget onToken={setTurnstileToken} />
 

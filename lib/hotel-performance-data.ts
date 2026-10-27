@@ -16,6 +16,30 @@ function parseRoomCategory(data: Record<string, unknown>): RoomCategory | null {
   return null;
 }
 
+/**
+ * Room lines from a stored booking: the multi-room `rooms` array when present,
+ * otherwise the single roomCategory/roomCount fields. Duplicate categories merge.
+ */
+export function parseRoomLines(
+  data: Record<string, unknown>,
+): { roomCategory: RoomCategory; roomCount: number }[] {
+  const totals = new Map<RoomCategory, number>();
+  if (Array.isArray(data.rooms) && data.rooms.length > 0) {
+    for (const item of data.rooms) {
+      if (typeof item !== "object" || item === null) continue;
+      const r = item as Record<string, unknown>;
+      const category = parseRoomCategory(r);
+      const count = Math.floor(Number(r.roomCount));
+      if (!category || !Number.isFinite(count) || count < 1) continue;
+      totals.set(category, (totals.get(category) ?? 0) + count);
+    }
+  } else {
+    const category = parseRoomCategory(data);
+    if (category) totals.set(category, parseRoomCount(data));
+  }
+  return Array.from(totals, ([roomCategory, roomCount]) => ({ roomCategory, roomCount }));
+}
+
 function parseRoomCount(data: Record<string, unknown>): number {
   const rc = Number(data.roomCount ?? data.rooms ?? 1);
   return Number.isFinite(rc) && rc > 0 ? Math.floor(rc) : 1;
@@ -74,7 +98,9 @@ function parseMeals(data: Record<string, unknown>): { Breakfast: number; Lunch: 
 }
 
 function isLegacyFormat(data: Record<string, unknown>): boolean {
-  const hasNewFields = "roomCategory" in data && "roomCount" in data && "checkIn" in data;
+  const hasNewFields =
+    "checkIn" in data &&
+    (("roomCategory" in data && "roomCount" in data) || Array.isArray(data.rooms));
   const hasLegacyFields = "presidentialSuite" in data || "fullBedRoom" in data || "doubleBedRoom" in data;
   return !hasNewFields && hasLegacyFields;
 }
@@ -110,10 +136,6 @@ export async function loadHotelBookings(filters?: {
     query = query.lte('application_data->>checkIn', filters.endDate);
   }
 
-  // Filter by room category using JSON operators
-  if (filters?.roomCategory) {
-    query = query.eq('application_data->>roomCategory', filters.roomCategory);
-  }
 
   const { data: applications, error } = await query;
   
@@ -136,75 +158,40 @@ export async function loadHotelBookings(filters?: {
       continue;
     }
     
+    const rooms = parseRoomLines(data);
     const checkIn = parseCheckIn(data);
     const checkOut = parseCheckOut(data);
     
-    if (!checkIn || !checkOut) {
+    if (rooms.length === 0 || !checkIn || !checkOut) {
+      skipped++;
+      continue;
+    }
+    // Multi-room filter: keep the booking when any line matches.
+    if (filters?.roomCategory && !rooms.some((r) => r.roomCategory === filters.roomCategory)) {
       skipped++;
       continue;
     }
     
-    // Handle multi-room bookings: expand to individual room records
-    const rooms = data.rooms;
-    if (Array.isArray(rooms) && rooms.length > 0) {
-      // Multi-room format - create one booking record per room type
-      for (const room of rooms) {
-        if (typeof room !== 'object' || room === null) continue;
-        
-        const r = room as Record<string, unknown>;
-        const roomCategory = parseRoomCategory(r);
-        const roomCount = parseRoomCount(r);
-        
-        if (!roomCategory || roomCount <= 0) continue;
-        
-        const booking: HotelBooking = {
-          id: `${app.id}-${roomCategory}`,  // Unique ID per room type
-          guestName: String(data.guestName ?? data.fullName ?? ""),
-          email: String(data.email ?? ""),
-          phone: String(data.phone ?? ""),
-          roomCategory,
-          roomCount,
-          checkIn,
-          checkOut,
-          guests: Math.max(1, Math.floor(Number(data.guests ?? 1))),
-          meals: parseMeals(data),
-          specialRequests: typeof data.specialRequests === "string" ? data.specialRequests : null,
-          isMember: isMember(data),
-          status: app.status,
-          submittedAt: app.submitted_at,
-          isLegacy: false,
-        };
-        
-        bookings.push(booking);
-      }
-    } else {
-      // Legacy single-room format
-      const roomCategory = parseRoomCategory(data);
-      if (!roomCategory) {
-        skipped++;
-        continue;
-      }
-      
-      const booking: HotelBooking = {
-        id: app.id,
-        guestName: String(data.guestName ?? data.fullName ?? ""),
-        email: String(data.email ?? ""),
-        phone: String(data.phone ?? ""),
-        roomCategory,
-        roomCount: parseRoomCount(data),
-        checkIn,
-        checkOut,
-        guests: Math.max(1, Math.floor(Number(data.guests ?? 1))),
-        meals: parseMeals(data),
-        specialRequests: typeof data.specialRequests === "string" ? data.specialRequests : null,
-        isMember: isMember(data),
-        status: app.status,
-        submittedAt: app.submitted_at,
-        isLegacy: false,
-      };
-      
-      bookings.push(booking);
-    }
+    const booking: HotelBooking = {
+      id: app.id,
+      guestName: String(data.guestName ?? data.fullName ?? ""),
+      email: String(data.email ?? ""),
+      phone: String(data.phone ?? ""),
+      roomCategory: rooms.length === 1 ? rooms[0].roomCategory : null,
+      roomCount: rooms.reduce((sum, r) => sum + r.roomCount, 0),
+      rooms,
+      checkIn,
+      checkOut,
+      guests: Math.max(1, Math.floor(Number(data.guests ?? 1))),
+      meals: parseMeals(data),
+      specialRequests: typeof data.specialRequests === "string" ? data.specialRequests : null,
+      isMember: isMember(data),
+      status: app.status,
+      submittedAt: app.submitted_at,
+      isLegacy: false,
+    };
+    
+    bookings.push(booking);
   }
   
   return { bookings, skipped };
@@ -217,16 +204,30 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
  * The Supabase application stores it as application_data.prismaBookingId (or .id on
  * backfilled rows). Accepts either that id or the application UUID.
  */
+type FoundHotelApplication = {
+  id: string;
+  status: Application["status"];
+  /** Redis booking id stored on the Supabase row, when present. */
+  bookingId: string | null;
+};
+
 export async function findHotelApplication(
   idOrBookingId: string,
-): Promise<{ id: string; status: Application["status"] } | null> {
+): Promise<FoundHotelApplication | null> {
   const supabase = createServiceClient();
   if (!supabase || !idOrBookingId) return null;
   const base = () =>
-    supabase.from("applications").select("id, status").eq("application_type", "hotel_booking");
+    supabase
+      .from("applications")
+      .select("id, status, bookingId:application_data->>prismaBookingId")
+      .eq("application_type", "hotel_booking");
+  const shape = (d: unknown) => {
+    const r = d as { id: string; status: Application["status"]; bookingId?: unknown };
+    return { id: r.id, status: r.status, bookingId: typeof r.bookingId === "string" ? r.bookingId : null };
+  };
   if (UUID_RE.test(idOrBookingId)) {
     const { data } = await base().eq("id", idOrBookingId).maybeSingle();
-    if (data) return data as { id: string; status: Application["status"] };
+    if (data) return shape(data);
   }
   for (const key of ["prismaBookingId", "id"]) {
     const { data } = await base()
@@ -234,7 +235,7 @@ export async function findHotelApplication(
       .order("submitted_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    if (data) return data as { id: string; status: Application["status"] };
+    if (data) return shape(data);
   }
   return null;
 }
