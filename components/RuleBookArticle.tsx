@@ -7,7 +7,11 @@ function scrollToHash() {
   if (!hash) return;
   const id = decodeURIComponent(hash.replace(/\+/g, ' '));
   const el = document.getElementById(id);
-  el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!el) return;
+  const reduce =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
 }
 
 type Props = {
@@ -26,5 +30,7 @@ export default function RuleBookArticle({ html, className }: Props) {
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
-  return <article className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+  const articleClass = ['rule-book-body', className].filter(Boolean).join(' ');
+
+  return <article className={articleClass} dangerouslySetInnerHTML={{ __html: html }} />;
 }
