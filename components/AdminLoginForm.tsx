@@ -32,17 +32,29 @@ export function AdminLoginForm() {
       });
   }, []);
 
-  async function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
+    // Read the live field values as well as React state: iOS/iPadOS Safari
+    // autofill can fill inputs without firing onChange.
+    const form = new FormData(e.currentTarget);
+    const submittedEmail = (String(form.get("email") ?? "") || email).trim();
+    const submittedPassword = String(form.get("password") ?? "") || password;
+    if (!submittedEmail) {
+      setError("Email is required.");
+      return;
+    }
+    setEmail(submittedEmail);
+    setPassword(submittedPassword);
     setBusy(true);
     try {
       const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: bootstrapMode ? email : undefined,
-          password,
+          // Always send the email: regular login looks the admin up by email.
+          email: submittedEmail,
+          password: submittedPassword,
           bootstrap: bootstrapMode,
         }),
       });
@@ -52,7 +64,11 @@ export function AdminLoginForm() {
         bootstrap?: boolean;
       };
       if (!res.ok) {
-        setError(data.error ?? "Sign-in failed.");
+        setError(
+          res.status === 429
+            ? "Too many sign-in attempts from this network. Please wait 5 minutes and try again."
+            : (data.error ?? "Sign-in failed."),
+        );
         return;
       }
       const nextRaw = searchParams.get("next");
@@ -98,7 +114,11 @@ export function AdminLoginForm() {
               id="admin-email"
               name="email"
               type="email"
-              autoComplete="email"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[var(--fg)] outline-none ring-[var(--brand)] focus:ring-2"
@@ -119,7 +139,11 @@ export function AdminLoginForm() {
               id="admin-email"
               name="email"
               type="email"
-              autoComplete="email"
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              inputMode="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-[var(--fg)] outline-none ring-[var(--brand)] focus:ring-2"
