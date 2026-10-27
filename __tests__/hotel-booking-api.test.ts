@@ -158,6 +158,22 @@ describe("Hotel Booking API", () => {
   });
 
   describe("Capacity validation", () => {
+    it("should reject a check-in date in the past", async () => {
+      const response = await POST(
+        createRequest({ ...validBooking, checkIn: "2020-01-01", checkOut: "2020-01-03" }),
+      );
+      expect(response.status).toBe(400);
+      expect((await response.json()).message).toMatch(/past/i);
+    });
+
+    it("should reject stays longer than 30 nights", async () => {
+      const response = await POST(
+        createRequest({ ...validBooking, checkIn: "2026-12-01", checkOut: "2027-01-15" }),
+      );
+      expect(response.status).toBe(400);
+      expect((await response.json()).message).toMatch(/30 nights/);
+    });
+
     it("should reject when guests exceed room capacity", async () => {
       const booking = {
         ...validBooking,
