@@ -16,6 +16,7 @@ import {
   ROOM_CAPACITIES,
   calculateBookingTotal,
   calculateNights,
+  getTrinidadLocalDate,
   type RoomCategory as PricingRoomCategory,
 } from "@/lib/hotel-pricing";
 
@@ -202,6 +203,20 @@ export async function POST(request: Request) {
   if (checkIn >= checkOut) {
     return NextResponse.json(
       { message: "Check-out date must be after check-in date." },
+      { status: 400 },
+    );
+  }
+
+  if (checkIn < getTrinidadLocalDate()) {
+    return NextResponse.json(
+      { message: "Check-in date cannot be in the past." },
+      { status: 400 },
+    );
+  }
+
+  if (calculateNights(checkIn, checkOut) > 30) {
+    return NextResponse.json(
+      { message: "Bookings are limited to 30 nights. Please contact the hotel for longer stays." },
       { status: 400 },
     );
   }

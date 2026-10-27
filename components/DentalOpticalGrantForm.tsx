@@ -24,6 +24,9 @@ const line =
 
 const label = "whitespace-nowrap text-xs font-bold uppercase";
 
+/** Same as `label` but allowed to wrap (long questions on narrow screens). */
+const labelWrap = "whitespace-normal text-xs font-bold uppercase";
+
 const MAX_DOCUMENT_BYTES = MAX_DIRECT_UPLOAD_FILE_BYTES;
 
 const DOCUMENTS = [{ name: "grantReceiptInvoiceDoc", label: "the original receipt and/or invoice" }] as const;
@@ -321,11 +324,11 @@ export function DentalOpticalGrantForm() {
             </label>
           </fieldset>
 
-          <div className="mb-3 flex items-end gap-2">
-            <label htmlFor="dog-previousGrant" className={`${label} whitespace-normal`}>
+          <div className="mb-3 flex flex-wrap items-end gap-2 sm:flex-nowrap">
+            <label htmlFor="dog-previousGrant" className={labelWrap}>
               Have you ever received any grant? If yes please state
             </label>
-            <input id="dog-previousGrant" name="previousGrant" type="text" className={line} />
+            <input id="dog-previousGrant" name="previousGrant" type="text" className={`${line} min-w-[10rem] flex-1`} />
           </div>
 
           <div className="mb-3 flex items-end gap-2">

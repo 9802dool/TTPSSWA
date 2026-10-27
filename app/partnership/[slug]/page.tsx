@@ -169,7 +169,7 @@ export default async function PartnershipProgramPage({ params }: Props) {
                         rel="noopener noreferrer"
                         className={
                           isPartnerHighlight
-                            ? "text-ink underline decoration-slate-400 underline-offset-2 hover:text-brand"
+                            ? "break-all text-ink underline decoration-slate-400 underline-offset-2 hover:text-brand"
                             : "text-brand underline hover:text-brand-hover"
                         }
                       >

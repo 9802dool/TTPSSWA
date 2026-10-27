@@ -25,6 +25,9 @@ const line =
 
 const label = "whitespace-nowrap text-xs font-bold uppercase";
 
+/** Same as `label` but allowed to wrap (long questions on narrow screens). */
+const labelWrap = "whitespace-normal text-xs font-bold uppercase";
+
 const CATEGORIES = [
   "Legal Representation",
   "Judicial Review",
@@ -389,7 +392,7 @@ export function LegalAidApplicationForm() {
         <p className="my-4 text-center text-[11px] font-bold uppercase">Complete in block letters</p>
 
         <div className="mb-3">
-          <label htmlFor="la-offenceParticulars" className={`${label} block whitespace-normal`}>
+          <label htmlFor="la-offenceParticulars" className={`${labelWrap} block`}>
             1. Particulars of alleged offence(s)
           </label>
           <textarea
@@ -435,7 +438,7 @@ export function LegalAidApplicationForm() {
         </div>
 
         <div className="mb-3">
-          <label htmlFor="la-moneyPaid" className={`${label} block whitespace-normal`}>
+          <label htmlFor="la-moneyPaid" className={`${labelWrap} block`}>
             6. Money paid by applicant (if any){" "}
             <span className="font-normal normal-case">(Please attach original receipt)</span>
           </label>
@@ -487,7 +490,7 @@ export function LegalAidApplicationForm() {
           <div className="mt-3 space-y-3">
             {LEGAL_AID_DOCUMENTS.map((doc) => (
               <div key={doc.name}>
-                <label htmlFor={`la-${doc.name}`} className={`${label} block whitespace-normal`}>
+                <label htmlFor={`la-${doc.name}`} className={`${labelWrap} block`}>
                   {doc.label}
                   {doc.required ? <span className="text-red-600"> *</span> : null}
                 </label>
@@ -526,7 +529,7 @@ export function LegalAidApplicationForm() {
             </label>
           </div>
           <div className="flex items-end gap-2">
-            <span className={`${label} whitespace-normal`}>
+            <span className={labelWrap}>
               3. If no, please state amount outstanding $
             </span>
             <input type="text" className={line} />
