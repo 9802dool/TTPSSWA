@@ -7,6 +7,7 @@ import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { getApplications } from "@/lib/supabase/applications";
 import { AdminApplicationsTable } from "@/components/admin/AdminApplicationsTable";
+import { AutoSubmitSelect } from "@/components/admin/AutoSubmitSelect";
 import type { ApplicationType, ApplicationStatus } from "@/lib/supabase/types";
 
 type Props = {
@@ -43,17 +44,24 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
   }
 
   // Fetch applications with filters
-  let applications = await getApplications({
-    type: typeFilter !== 'all' ? typeFilter : undefined,
-    status: statusFilter !== 'all' ? statusFilter : undefined,
-    limit: 500,
-  });
+  let applications: Awaited<ReturnType<typeof getApplications>> = [];
+  let loadError: string | null = null;
+  try {
+    applications = await getApplications({
+      type: typeFilter !== 'all' ? typeFilter : undefined,
+      status: statusFilter !== 'all' ? statusFilter : undefined,
+      limit: 500,
+    });
+  } catch (err) {
+    console.error("Admin applications: failed to load", err);
+    loadError = "Applications could not be loaded. Please refresh, or try again shortly.";
+  }
 
   // Client-side search filter (on application data)
   if (searchQuery) {
     const qLower = searchQuery.toLowerCase();
     applications = applications.filter(app => {
-      const data = app.application_data as Record<string, unknown>;
+      const data = (app.application_data ?? {}) as Record<string, unknown>;
       const searchableText = JSON.stringify(data).toLowerCase();
       return searchableText.includes(qLower) || app.id.includes(qLower);
     });
@@ -82,13 +90,9 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
           {/* Type Filter */}
           <div>
             <label className="block text-xs font-medium text-[var(--muted)]">Application Type</label>
-            <select
+            <AutoSubmitSelect
+              param="type"
               value={typeFilter}
-              onChange={(e) => {
-                const url = new URL(window.location.href);
-                url.searchParams.set('type', e.target.value);
-                window.location.href = url.toString();
-              }}
               className="mt-1 rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--fg)]"
             >
               <option value="all">All Types</option>
@@ -101,19 +105,15 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
               <option value="salary_deduction">Salary Deduction</option>
               <option value="merit_salary_deduction">Merit Salary Deduction</option>
               <option value="hotel_booking">Hotel Booking</option>
-            </select>
+            </AutoSubmitSelect>
           </div>
 
           {/* Status Filter */}
           <div>
             <label className="block text-xs font-medium text-[var(--muted)]">Status</label>
-            <select
+            <AutoSubmitSelect
+              param="status"
               value={statusFilter}
-              onChange={(e) => {
-                const url = new URL(window.location.href);
-                url.searchParams.set('status', e.target.value);
-                window.location.href = url.toString();
-              }}
               className="mt-1 rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-[var(--fg)]"
             >
               <option value="all">All Statuses</option>
@@ -122,7 +122,7 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
               <option value="completed">Completed</option>
-            </select>
+            </AutoSubmitSelect>
           </div>
 
           {/* Search */}
@@ -147,6 +147,12 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
             </form>
           </div>
         </div>
+
+        {loadError ? (
+          <p className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+            {loadError}
+          </p>
+        ) : null}
 
         <AdminApplicationsTable applications={applications} />
       </div>

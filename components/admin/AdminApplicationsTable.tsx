@@ -55,7 +55,7 @@ export function AdminApplicationsTable({ applications }: Props) {
           </thead>
           <tbody>
             {applications.map((app) => {
-              const data = app.application_data as Record<string, unknown>;
+              const data = (app.application_data ?? {}) as Record<string, unknown>;
               const applicantName = String(data.fullName || data.guestName || 'N/A');
               const applicantEmail = String(data.email || 'N/A');
 
@@ -65,11 +65,7 @@ export function AdminApplicationsTable({ applications }: Props) {
                   className="border-b border-[var(--border)] last:border-0"
                 >
                   <td className="whitespace-nowrap px-4 py-3 text-xs text-[var(--muted)]">
-                    {new Date(app.submitted_at).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
+                    {formatSubmittedDate(app.submitted_at)}
                   </td>
                   <td className="px-4 py-3">
                     {APPLICATION_TYPE_LABELS[app.application_type] || app.application_type}
@@ -81,8 +77,8 @@ export function AdminApplicationsTable({ applications }: Props) {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[app.status]}`}>
-                      {app.status.replace('_', ' ')}
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[app.status] ?? ''}`}>
+                      {String(app.status ?? 'unknown').replace(/_/g, ' ')}
                     </span>
                   </td>
                   <td className="px-4 py-3">
@@ -112,4 +108,12 @@ export function AdminApplicationsTable({ applications }: Props) {
       )}
     </>
   );
+}
+
+function formatSubmittedDate(value: string | null | undefined): string {
+  if (!value) return "—";
+  const d = new Date(value);
+  return Number.isNaN(d.getTime())
+    ? "—"
+    : d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
