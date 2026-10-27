@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { safeInternalNextPath } from "@/lib/safe-next-path";
 
 export function AdminLoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,8 +72,12 @@ export function AdminLoginForm() {
       }
       const nextRaw = searchParams.get("next");
       const dest = safeInternalNextPath(nextRaw) ?? "/admin";
-      router.push(dest);
-      router.refresh();
+      // Full navigation so the new httpOnly cookie is always sent with the
+      // next request (client-side router.push can reuse a cached redirect).
+      window.location.assign(dest);
+      return;
+    } catch {
+      setError("Could not reach the server. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
@@ -176,7 +179,10 @@ export function AdminLoginForm() {
           )}
         </div>
         {error ? (
-          <p className="text-sm text-red-600 dark:text-red-400" role="alert">
+          <p
+            className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300"
+            role="alert"
+          >
             {error}
           </p>
         ) : null}
