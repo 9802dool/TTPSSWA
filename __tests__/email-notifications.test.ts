@@ -7,7 +7,7 @@ vi.mock("resend", () => ({
   },
 }));
 
-import { sendAdminNotification, sendApplicantConfirmation } from "../lib/email-notifications";
+import { sendAdminNotification, sendApplicantConfirmation, parseEmailList } from "../lib/email-notifications";
 
 beforeEach(() => {
   send.mockReset();
@@ -64,5 +64,50 @@ describe("email notifications", () => {
       applicationId: "x",
     });
     expect(send).not.toHaveBeenCalled();
+  });
+});
+
+describe("parseEmailList", () => {
+  it("parses comma-separated email addresses", () => {
+    expect(parseEmailList("a@example.org, b@example.org")).toEqual([
+      "a@example.org",
+      "b@example.org",
+    ]);
+  });
+
+  it("trims whitespace from each address", () => {
+    expect(parseEmailList("  a@example.org  ,   b@example.org  ")).toEqual([
+      "a@example.org",
+      "b@example.org",
+    ]);
+  });
+
+  it("filters out empty entries", () => {
+    expect(parseEmailList("a@example.org,,b@example.org,")).toEqual([
+      "a@example.org",
+      "b@example.org",
+    ]);
+  });
+
+  it("returns empty array for null or undefined", () => {
+    expect(parseEmailList(null)).toEqual([]);
+    expect(parseEmailList(undefined)).toEqual([]);
+  });
+
+  it("returns empty array for empty string", () => {
+    expect(parseEmailList("")).toEqual([]);
+    expect(parseEmailList("  ")).toEqual([]);
+  });
+
+  it("handles single email address", () => {
+    expect(parseEmailList("a@example.org")).toEqual(["a@example.org"]);
+  });
+
+  it("handles three or more addresses", () => {
+    expect(parseEmailList("a@example.org, b@example.org, c@example.org")).toEqual([
+      "a@example.org",
+      "b@example.org",
+      "c@example.org",
+    ]);
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import HotelAvailabilityCalendar from "@/components/HotelAvailabilityCalendar";
 import {
   eachNight,
@@ -391,6 +392,7 @@ export default function HotelReservationForm() {
   const [availError, setAvailError] = useState<string | null>(null);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [pickingField, setPickingField] = useState<"checkIn" | "checkOut">("checkIn");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const update = useCallback((key: keyof FormState, value: string) => {
     setForm((prev) => {
@@ -493,7 +495,8 @@ export default function HotelReservationForm() {
     setSubmitError(null); setMailtoFallbackHref(null); setSubmitting(true);
     try {
       const total = sumRooms(form);
-      const res = await fetch("/api/hotel-booking", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, rooms: String(total) }) });
+      const payload = { ...form, rooms: String(total), turnstileToken };
+      const res = await fetch("/api/hotel-booking", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const data = (await res.json().catch(() => ({}))) as { error?: string; mailtoHref?: string };
       if (!res.ok) { setSubmitError(data.error || "Something went wrong."); setMailtoFallbackHref(typeof data.mailtoHref === "string" ? data.mailtoHref : null); return; }
       setSubmitted(true);
@@ -761,6 +764,11 @@ export default function HotelReservationForm() {
             </h2>
             <textarea id="hr-notes" name="notes" rows={3} value={form.notes} onChange={(e) => update("notes", e.target.value)} className={`${fieldClass} mt-4 resize-y`} placeholder="Accessibility, dietary, late arrival, etc." />
           </section>
+
+          {/* Turnstile spam protection */}
+          <div className="mt-8">
+            <TurnstileWidget onToken={setTurnstileToken} />
+          </div>
 
           {/* Submit — mobile only (desktop uses sticky card) */}
           <div className="lg:hidden">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import {
   AssociationFormHeader,
   AssociationOfficersFooter,
@@ -19,6 +20,7 @@ const MAX_DOCUMENT_BYTES = 800 * 1024;
 export function MeritSalaryDeductionForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -39,6 +41,11 @@ export function MeritSalaryDeductionForm() {
       setStatus("error");
       setMessage("The signed salary deduction form must be 800 KB or smaller.");
       return;
+    }
+
+    // Add Turnstile token if available
+    if (turnstileToken) {
+      fd.set("turnstileToken", turnstileToken);
     }
 
     setStatus("loading");
@@ -324,6 +331,10 @@ export function MeritSalaryDeductionForm() {
           </div>
 
           <AssociationOfficersFooter variant="meritSalary" dated="Feb 2026" />
+
+          <div className="mt-6">
+            <TurnstileWidget onToken={setTurnstileToken} />
+          </div>
 
           {message ? (
             <p

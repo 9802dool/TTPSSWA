@@ -11,6 +11,7 @@ import type { HotelBookingData } from "@/lib/supabase/types";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
+import { parseEmailList } from "@/lib/email-notifications";
 import {
   ROOM_CAPACITIES,
   calculateBookingTotal,
@@ -80,7 +81,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "Booking successful." }, { status: 201 });
   }
 
-  // Turnstile verification (only if configured)
+  // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
     const turnstileToken =
       typeof body.turnstileToken === "string" ? body.turnstileToken : null;
@@ -275,7 +276,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const notify = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim();
+  const notifyEmails = parseEmailList(process.env.HOTEL_BOOKING_NOTIFY_EMAIL);
   const apiKey = process.env.RESEND_API_KEY?.trim();
   let guestEmailSent = false;
   if (apiKey) {
@@ -322,11 +323,11 @@ export async function POST(request: Request) {
       console.error("hotel guest acknowledgment email:", error);
     }
 
-    if (notify) {
+    if (notifyEmails.length > 0) {
       try {
         await resend.emails.send({
           from,
-          to: [notify],
+          to: notifyEmails,
           replyTo: [email],
           subject: `Confirmed TTPSSWA hotel booking [${result.booking.id}]`,
           text: [

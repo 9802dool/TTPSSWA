@@ -7,6 +7,7 @@ import type { HotelBookingData } from "@/lib/supabase/types";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
+import { parseEmailList } from "@/lib/email-notifications";
 
 export const runtime = "nodejs";
 
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true }, { status: 201 });
   }
 
-  // Turnstile verification (only if configured)
+  // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
     const turnstileToken = typeof body.turnstileToken === "string" ? body.turnstileToken : null;
     const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIP);
@@ -123,16 +124,16 @@ export async function POST(request: Request) {
   const redisId = await recordServiceRequest("hotel_booking", body);
   const id = applicationId || redisId;
 
-  const notify = process.env.HOTEL_BOOKING_NOTIFY_EMAIL?.trim();
+  const notifyEmails = parseEmailList(process.env.HOTEL_BOOKING_NOTIFY_EMAIL);
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  if (notify && apiKey) {
+  if (notifyEmails.length > 0 && apiKey) {
     try {
       const resend = new Resend(apiKey);
       const from =
         process.env.BOOKING_FROM_EMAIL?.trim() || "TTPSSWA Bookings <onboarding@resend.dev>";
       await resend.emails.send({
         from,
-        to: [notify],
+        to: notifyEmails,
         replyTo: email ? [email] : undefined,
         subject: `TTPSSWA hotel request${id ? ` [${id}]` : ""}`,
         text: [`Guest: ${guestName}`, `Email: ${email}`, "", JSON.stringify(body, null, 2)].join(
@@ -144,7 +145,7 @@ export async function POST(request: Request) {
     }
   }
 
-  if (!id && !(notify && apiKey)) {
+  if (!id && notifyEmails.length === 0) {
     return NextResponse.json(
       {
         error:

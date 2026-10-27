@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import {
   AssociationFormHeader,
   AssociationOfficersFooter,
@@ -20,6 +21,7 @@ const MAX_DOCUMENT_BYTES = 800 * 1024;
 export function RetirementBenefitForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -44,6 +46,11 @@ export function RetirementBenefitForm() {
       setStatus("error");
       setMessage("The departmental order or retirement letter must be 800 KB or smaller.");
       return;
+    }
+
+    // Add Turnstile token if available
+    if (turnstileToken) {
+      fd.set("turnstileToken", turnstileToken);
     }
 
     setStatus("loading");
@@ -378,6 +385,10 @@ export function RetirementBenefitForm() {
           </fieldset>
 
           <AssociationOfficersFooter variant="retirement" dated="April 2026" />
+
+          <div className="mt-6">
+            <TurnstileWidget onToken={setTurnstileToken} />
+          </div>
 
           {message ? (
             <p

@@ -21,7 +21,7 @@ const PLACEHOLDER_GIF_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEA
 async function handleJson(request: Request) {
   const clientIP = getClientIP(request);
 
-  let body: { fullName?: string; email?: string; phone?: string; website?: string };
+  let body: { fullName?: string; email?: string; phone?: string; website?: string; turnstileToken?: string };
   try {
     body = await request.json();
   } catch {
@@ -31,6 +31,18 @@ async function handleJson(request: Request) {
   // Spam protection: honeypot check (if present in JSON body)
   if (body.website && checkHoneypot(body.website)) {
     return NextResponse.json({ ok: true });
+  }
+
+  // Turnstile verification (reject if configured and token is missing or invalid)
+  if (isTurnstileConfigured()) {
+    const turnstileToken = typeof body.turnstileToken === "string" ? body.turnstileToken : null;
+    const turnstileResult = await verifyTurnstileToken(turnstileToken, clientIP);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { error: "Verification failed. Please try again." },
+        { status: 400 },
+      );
+    }
   }
 
   const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
@@ -144,7 +156,7 @@ async function handleMultipart(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // Turnstile verification (only if configured)
+  // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
     const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
     const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);

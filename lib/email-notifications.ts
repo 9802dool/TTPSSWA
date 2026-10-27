@@ -79,6 +79,18 @@ interface AdminNotificationParams {
 }
 
 /**
+ * Parse a comma-separated list of email addresses.
+ * Returns an array of trimmed, non-empty email addresses.
+ */
+export function parseEmailList(emailsRaw: string | undefined | null): string[] {
+  if (!emailsRaw) return [];
+  return emailsRaw
+    .split(',')
+    .map(e => e.trim())
+    .filter(e => e.length > 0);
+}
+
+/**
  * Send admin notification email about a new application submission.
  * Emails are sent to ADMIN_NOTIFY_EMAIL (comma-separated), falling back to HOTEL_BOOKING_NOTIFY_EMAIL.
  * Failures are logged but do not throw - submission must always succeed.
@@ -97,10 +109,7 @@ export async function sendAdminNotification(params: AdminNotificationParams): Pr
     return;
   }
 
-  const adminEmails = adminEmailsRaw
-    .split(',')
-    .map(e => e.trim())
-    .filter(e => e.length > 0);
+  const adminEmails = parseEmailList(adminEmailsRaw);
 
   if (adminEmails.length === 0) {
     console.log('No valid admin emails configured');

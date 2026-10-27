@@ -10,6 +10,7 @@ export function isTurnstileConfigured(): boolean {
 /**
  * Verify a Turnstile token with Cloudflare.
  * Returns { success: true } if valid, { success: false, error: string } otherwise.
+ * When Turnstile is not configured, returns { success: false, error: "Turnstile not configured" }.
  */
 export async function verifyTurnstileToken(
   token: string | null | undefined,

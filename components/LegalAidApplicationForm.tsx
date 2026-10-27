@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import Link from "next/link";
 import {
   AssociationFormHeader,
@@ -53,6 +54,7 @@ function matterTypeFromCategories(categories: string[]): "criminal" | "disciplin
 export function LegalAidApplicationForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -111,6 +113,11 @@ export function LegalAidApplicationForm() {
         .filter(Boolean)
         .join("\n"),
     );
+
+    // Add Turnstile token if available
+    if (turnstileToken) {
+      fd.set("turnstileToken", turnstileToken);
+    }
 
     setStatus("loading");
     try {
@@ -498,6 +505,10 @@ export function LegalAidApplicationForm() {
         </fieldset>
 
         <AssociationOfficersFooter variant="membership" />
+
+        <div className="mt-6">
+          <TurnstileWidget onToken={setTurnstileToken} />
+        </div>
 
         {message ? (
           <p

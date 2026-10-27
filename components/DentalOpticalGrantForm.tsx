@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import {
   AssociationFormHeader,
   AssociationOfficersFooter,
@@ -20,6 +21,7 @@ const MAX_DOCUMENT_BYTES = 800 * 1024;
 export function DentalOpticalGrantForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -49,6 +51,11 @@ export function DentalOpticalGrantForm() {
       setStatus("error");
       setMessage("The receipt or invoice must be 800 KB or smaller.");
       return;
+    }
+
+    // Add Turnstile token if available
+    if (turnstileToken) {
+      fd.set("turnstileToken", turnstileToken);
     }
 
     setStatus("loading");
@@ -398,6 +405,10 @@ export function DentalOpticalGrantForm() {
             />
           </div>
           <p className="mt-2 text-[11px]">PDF, JPG, or PNG. Maximum 800 KB. This upload is not part of the printed form.</p>
+        </div>
+
+        <div className="mt-6">
+          <TurnstileWidget onToken={setTurnstileToken} />
         </div>
 
         {message ? (

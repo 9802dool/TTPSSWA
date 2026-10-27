@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
 import Link from "next/link";
 import {
   AssociationFormHeader,
@@ -32,6 +33,7 @@ const MERIT_DOCUMENTS = [
 export function MeritLoanForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -59,6 +61,11 @@ export function MeritLoanForm() {
         setMessage(`${doc.label} must be 800 KB or smaller.`);
         return;
       }
+    }
+
+    // Add Turnstile token if available
+    if (turnstileToken) {
+      fd.set("turnstileToken", turnstileToken);
     }
 
     setStatus("loading");
@@ -514,6 +521,10 @@ export function MeritLoanForm() {
         </p>
 
         <AssociationOfficersFooter variant="merit" />
+
+        <div className="mt-6">
+          <TurnstileWidget onToken={setTurnstileToken} />
+        </div>
 
         {message ? (
           <p

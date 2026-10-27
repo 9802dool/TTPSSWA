@@ -114,7 +114,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
 
-  // Turnstile verification (only if configured)
+  // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
     const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
     const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
