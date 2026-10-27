@@ -10,6 +10,7 @@ import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
+import { validateFile, getExtensionForMimeType } from "@/lib/file-validation";
 
 export const runtime = "nodejs";
 
@@ -19,52 +20,40 @@ function optionalDigits(s: unknown): string {
     .replace(/\D/g, "");
 }
 
-const MAX_DOCUMENT_BYTES = 800 * 1024;
-
 const MERIT_DOCUMENTS = [
   { name: "idDocument", label: "ID card / passport / driver's permit" },
   { name: "payslipDocument", label: "Payslip" },
 ] as const;
-
-const ALLOWED_DOCUMENT_TYPES = new Set(["application/pdf", "image/jpeg", "image/png"]);
-
-function documentExtension(fileName: string): string {
-  const dot = fileName.lastIndexOf(".");
-  return dot >= 0 ? fileName.slice(dot + 1).toLowerCase() : "";
-}
-
-function isAllowedDocument(file: Blob, fileName: string): boolean {
-  if (ALLOWED_DOCUMENT_TYPES.has(file.type)) return true;
-  return ["pdf", "jpg", "jpeg", "png"].includes(documentExtension(fileName));
-}
 
 async function readMeritDocument(
   formData: FormData,
   name: string,
   label: string,
 ): Promise<
-  | { ok: true; file: { label: string; fileName: string; mimeType: string; base64: string } }
+  | { ok: true; file: { label: string; fileName: string; mimeType: string; blob: Blob } }
   | { ok: false; error: string }
 > {
   const value = formData.get(name);
   if (!(value instanceof Blob) || value.size === 0) {
     return { ok: false, error: `Please upload ${label}.` };
   }
-  const fileName = value instanceof File && value.name ? value.name : `${name}.bin`;
-  if (value.size > MAX_DOCUMENT_BYTES) {
-    return { ok: false, error: `${label} must be 800 KB or smaller.` };
+
+  // Validate file type and size with magic byte checking
+  const validation = await validateFile(value);
+  if (!validation.valid) {
+    return { ok: false, error: `${label}: ${validation.error}` };
   }
-  if (!isAllowedDocument(value, fileName)) {
-    return { ok: false, error: `${label} must be a PDF, JPG, or PNG file.` };
-  }
-  const base64 = Buffer.from(await value.arrayBuffer()).toString("base64");
+
+  const fileExtension = getExtensionForMimeType(validation.mimeType);
+  const fileName = value instanceof File && value.name ? value.name : `${name}${fileExtension}`;
+  
   return {
     ok: true,
     file: {
       label,
       fileName,
-      mimeType: value.type || "application/octet-stream",
-      base64,
+      mimeType: validation.mimeType,
+      blob: value,
     },
   };
 }
@@ -281,7 +270,7 @@ export async function POST(request: Request) {
     label: string;
     fileName: string;
     mimeType: string;
-    base64: string;
+    blob: Blob;
   }[] = [];
   for (const doc of MERIT_DOCUMENTS) {
     const read = await readMeritDocument(formData, doc.name, doc.label);
@@ -376,17 +365,24 @@ export async function POST(request: Request) {
     );
   }
 
-  // Upload documents
+  // Upload documents - fail if any upload fails
   for (const doc of documents) {
-    const docBuffer = Buffer.from(doc.base64, 'base64');
-    await uploadApplicationDocument({
+    const uploadResult = await uploadApplicationDocument({
       application_id: appResult.application_id,
       member_id: memberResult.member_id,
       document_type: doc.label.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
-      file: docBuffer,
+      file: doc.blob,
       file_name: doc.fileName,
       mime_type: doc.mimeType,
     });
+
+    if (!uploadResult) {
+      console.error(`Failed to upload ${doc.label} for application`, appResult.application_id);
+      return NextResponse.json(
+        { ok: false, error: `Failed to upload ${doc.label}. Please try again.` },
+        { status: 500 },
+      );
+    }
   }
 
   // Send notifications (failures are logged but don't block success)

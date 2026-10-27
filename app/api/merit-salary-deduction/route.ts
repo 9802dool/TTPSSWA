@@ -9,16 +9,9 @@ import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { sendAdminNotification } from "@/lib/email-notifications";
+import { validateFile, getExtensionForMimeType } from "@/lib/file-validation";
 
 export const runtime = "nodejs";
-
-const MAX_DOCUMENT_BYTES = 800 * 1024;
-const ALLOWED_DOCUMENT_TYPES = new Set(["application/pdf", "image/jpeg", "image/png"]);
-
-function documentExtension(fileName: string): string {
-  const dot = fileName.lastIndexOf(".");
-  return dot >= 0 ? fileName.slice(dot + 1).toLowerCase() : "";
-}
 
 function yearFromSuffix(value: string): string {
   const digits = value.replace(/\D/g, "");
@@ -137,21 +130,11 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   }
-  const fileName = uploaded instanceof File && uploaded.name ? uploaded.name : "signed-salary-deduction.bin";
-  if (uploaded.size > MAX_DOCUMENT_BYTES) {
-    return NextResponse.json(
-      { ok: false, error: "The signed salary deduction form must be 800 KB or smaller." },
-      { status: 400 },
-    );
-  }
-  const allowed =
-    ALLOWED_DOCUMENT_TYPES.has(uploaded.type) ||
-    ["pdf", "jpg", "jpeg", "png"].includes(documentExtension(fileName));
-  if (!allowed) {
-    return NextResponse.json(
-      { ok: false, error: "The signed form must be a PDF, JPG, or PNG file." },
-      { status: 400 },
-    );
+
+  // Validate file type and size with magic byte checking
+  const validation = await validateFile(uploaded);
+  if (!validation.valid) {
+    return NextResponse.json({ ok: false, error: validation.error }, { status: 400 });
   }
 
   // Save to Supabase
@@ -226,15 +209,25 @@ export async function POST(request: Request) {
     );
   }
 
-  // Upload document
-  await uploadApplicationDocument({
+  // Upload document with validated type
+  const fileExtension = getExtensionForMimeType(validation.mimeType);
+  const fileName = uploaded instanceof File && uploaded.name ? uploaded.name : `signed-salary-deduction${fileExtension}`;
+  const uploadResult = await uploadApplicationDocument({
     application_id: appResult.application_id,
     member_id: memberResult.member_id,
     document_type: 'signed_salary_deduction_form',
     file: uploaded,
     file_name: fileName,
-    mime_type: uploaded.type || 'application/octet-stream',
+    mime_type: validation.mimeType,
   });
+
+  if (!uploadResult) {
+    console.error('Failed to upload signed salary deduction form for application', appResult.application_id);
+    return NextResponse.json(
+      { ok: false, error: "Failed to upload document. Please try again." },
+      { status: 500 },
+    );
+  }
 
   // Notify admins. This form collects no applicant email (the member record uses a
   // placeholder address), so no applicant confirmation is sent.
