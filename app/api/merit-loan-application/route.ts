@@ -349,6 +349,7 @@ export async function POST(request: Request) {
 
   // Build application data
   const applicationData: Record<string, unknown> = {
+    fullName,
     dateOfApplication,
     regimentalNumber,
     rank,

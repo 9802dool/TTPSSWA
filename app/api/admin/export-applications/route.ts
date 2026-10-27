@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyAdminSession, getAdminCookieName, hasRole } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
-import { getApplications } from "@/lib/supabase/applications";
+import { getApplications, getMemberNamesByIds } from "@/lib/supabase/applications";
+import { getApplicantDisplayName } from "@/lib/applicant-name";
 import type { ApplicationType, ApplicationStatus } from "@/lib/supabase/types";
 
 export const runtime = "nodejs";
@@ -48,6 +49,8 @@ export async function GET(request: Request) {
     'Admin Notes',
   ];
 
+  const memberNames = await getMemberNamesByIds(applications.map((app) => app.member_id));
+
   const rows = applications.map(app => {
     const data = app.application_data as Record<string, unknown>;
     return [
@@ -55,7 +58,7 @@ export async function GET(request: Request) {
       app.application_type,
       app.status,
       app.submitted_at,
-      String(data.fullName || data.guestName || ''),
+      getApplicantDisplayName(data, app.member_id ? memberNames[app.member_id] : undefined),
       String(data.email || ''),
       String(data.phone || ''),
       String(data.regimentalNumber || data.serviceNumber || ''),

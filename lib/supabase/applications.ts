@@ -279,6 +279,34 @@ export async function getApplications(filters?: {
 }
 
 /**
+ * Looks up members.full_name for a set of member ids (used as the applicant
+ * name fallback for forms that do not store fullName in application_data).
+ */
+export async function getMemberNamesByIds(memberIds: readonly (string | null | undefined)[]): Promise<Record<string, string>> {
+  const ids = Array.from(new Set(memberIds.filter((id): id is string => typeof id === 'string' && id.length > 0)));
+  if (ids.length === 0) return {};
+  const supabase = createServiceClient();
+  if (!supabase) return {};
+
+  const names: Record<string, string> = {};
+  // Chunk to keep the PostgREST `in` filter URL short.
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data, error } = await supabase
+      .from('members')
+      .select('id, full_name')
+      .in('id', ids.slice(i, i + 200));
+    if (error) {
+      console.error('Error fetching member names:', error);
+      continue;
+    }
+    for (const row of (data ?? []) as { id: string; full_name: string | null }[]) {
+      if (row.full_name) names[row.id] = row.full_name;
+    }
+  }
+  return names;
+}
+
+/**
  * Builds a PostgREST `.or()` filter that matches `search` (case-insensitive,
  * substring) in any of `columns`. User input is reduced to a safe character set
  * and double-quoted, so it cannot inject extra filters through `,`, `(`, `)`,
