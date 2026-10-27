@@ -3,15 +3,17 @@ import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   upsertMember,
   createApplication,
-  uploadApplicationDocument,
   deleteApplicationAndDocuments,
 } from "@/lib/supabase/applications";
+import {
+  verifyUploadedFile,
+  moveUploadedFile,
+  recordUploadedDocument,
+} from "@/lib/supabase/direct-upload";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { sendAdminNotification } from "@/lib/email-notifications";
-import { MAX_UPLOAD_TOTAL_BYTES, UPLOAD_TOO_LARGE_MESSAGE, totalUploadBytes } from "@/lib/upload-limits";
-import { validateFile, getExtensionForMimeType } from "@/lib/file-validation";
 
 export const runtime = "nodejs";
 
@@ -25,22 +27,20 @@ function yearFromSuffix(value: string): string {
 export async function POST(request: Request) {
   const clientIP = getClientIP(request);
 
-  const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
-  if (!formData) {
-    return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
   }
 
   // Spam protection: honeypot check (silent rejection)
-  if (totalUploadBytes(formData) > MAX_UPLOAD_TOTAL_BYTES) {
-    return NextResponse.json({ ok: false, error: UPLOAD_TOO_LARGE_MESSAGE }, { status: 413 });
-  }
-
-  if (checkHoneypot(formData.get("website"))) {
+  if (checkHoneypot(body.website)) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
 
   // Spam protection: minimum fill time check (only if token is provided)
-  const formToken = String(formData.get("formToken") ?? "").trim();
+  const formToken = String(body.formToken ?? "").trim();
   const tokenCheck = verifyFormToken(formToken || null, 3);
   // Only reject if token was provided but invalid (skipCheck means token not provided)
   if (!tokenCheck.valid && !tokenCheck.skipCheck) {
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
 
   // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
-    const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
+    const turnstileToken = String(body.turnstileToken ?? "").trim();
     const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
     if (!turnstileResult.success) {
       return NextResponse.json(
@@ -59,26 +59,35 @@ export async function POST(request: Request) {
     }
   }
 
-  const regimentalNumber = String(formData.get("regimentalNumber") ?? "").trim();
-  const rank = String(formData.get("rank") ?? "").trim();
-  const fullName = String(formData.get("fullName") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
-  const divisionBranchSection = String(formData.get("divisionBranchSection") ?? "").trim();
-  const workplaceAddress = String(formData.get("workplaceAddress") ?? "").trim();
-  const deductionSumWords = String(formData.get("deductionSumWords") ?? "").trim();
-  const deductionSumDollars = String(formData.get("deductionSumDollars") ?? "").trim();
-  const startMonth = String(formData.get("startMonth") ?? "").trim();
-  const startYear = yearFromSuffix(String(formData.get("startYear") ?? ""));
-  const endMonth = String(formData.get("endMonth") ?? "").trim();
-  const endYear = yearFromSuffix(String(formData.get("endYear") ?? ""));
-  const resumeAmount = String(formData.get("resumeAmount") ?? "").trim();
-  const resumeMonth = String(formData.get("resumeMonth") ?? "").trim();
-  const resumeYear = yearFromSuffix(String(formData.get("resumeYear") ?? ""));
-  const nameInBlockLetters = String(formData.get("nameInBlockLetters") ?? "").trim();
-  const signatureRegimentalNumber = String(formData.get("signatureRegimentalNumber") ?? "").trim();
-  const signatureRank = String(formData.get("signatureRank") ?? "").trim();
-  const signedDate = String(formData.get("signedDate") ?? "").trim();
-  const witnessName = String(formData.get("witnessName") ?? "").trim();
+  const regimentalNumber = String(body.regimentalNumber ?? "").trim();
+  const rank = String(body.rank ?? "").trim();
+  const fullName = String(body.fullName ?? "").trim();
+  const address = String(body.address ?? "").trim();
+  const divisionBranchSection = String(body.divisionBranchSection ?? "").trim();
+  const workplaceAddress = String(body.workplaceAddress ?? "").trim();
+  const deductionSumWords = String(body.deductionSumWords ?? "").trim();
+  const deductionSumDollars = String(body.deductionSumDollars ?? "").trim();
+  const startMonth = String(body.startMonth ?? "").trim();
+  const startYear = yearFromSuffix(String(body.startYear ?? ""));
+  const endMonth = String(body.endMonth ?? "").trim();
+  const endYear = yearFromSuffix(String(body.endYear ?? ""));
+  const resumeAmount = String(body.resumeAmount ?? "").trim();
+  const resumeMonth = String(body.resumeMonth ?? "").trim();
+  const resumeYear = yearFromSuffix(String(body.resumeYear ?? ""));
+  const nameInBlockLetters = String(body.nameInBlockLetters ?? "").trim();
+  const signatureRegimentalNumber = String(body.signatureRegimentalNumber ?? "").trim();
+  const signatureRank = String(body.signatureRank ?? "").trim();
+  const signedDate = String(body.signedDate ?? "").trim();
+  const witnessName = String(body.witnessName ?? "").trim();
+
+  // Document uploads (direct-to-storage)
+  const uploads = Array.isArray(body.uploads) ? body.uploads : [];
+  if (uploads.length !== 1) {
+    return NextResponse.json(
+      { ok: false, error: "Please upload the signed authorization document." },
+      { status: 400 },
+    );
+  }
 
   if (
     !regimentalNumber ||
@@ -129,18 +138,29 @@ export async function POST(request: Request) {
     );
   }
 
-  const uploaded = formData.get("signedSalaryDeduction");
-  if (!(uploaded instanceof Blob) || uploaded.size === 0) {
+  // Verify uploaded document
+  const upload = uploads[0];
+  if (
+    typeof upload !== 'object' ||
+    upload === null ||
+    typeof upload.path !== 'string' ||
+    typeof upload.token !== 'string' ||
+    typeof upload.fileName !== 'string'
+  ) {
     return NextResponse.json(
-      { ok: false, error: "Please upload the completed and signed salary deduction form." },
+      { ok: false, error: "Invalid upload data." },
       { status: 400 },
     );
   }
 
-  // Validate file type and size with magic byte checking
-  const validation = await validateFile(uploaded);
-  if (!validation.valid) {
-    return NextResponse.json({ ok: false, error: validation.error }, { status: 400 });
+  const uploadInfo = upload as { path: string; token: string; fileName: string };
+  const verification = await verifyUploadedFile(uploadInfo.path, uploadInfo.token);
+  
+  if (!verification.ok) {
+    return NextResponse.json(
+      { ok: false, error: `Document verification failed: ${verification.error}` },
+      { status: 400 },
+    );
   }
 
   // Save to Supabase
@@ -215,24 +235,37 @@ export async function POST(request: Request) {
     );
   }
 
-  // Upload document with validated type
-  const fileExtension = getExtensionForMimeType(validation.mimeType);
-  const fileName = uploaded instanceof File && uploaded.name ? uploaded.name : `signed-salary-deduction${fileExtension}`;
-  const uploadResult = await uploadApplicationDocument({
+  // Move uploaded document to final location and record metadata
+  const moveResult = await moveUploadedFile(
+    uploadInfo.path,
+    appResult.application_id,
+    uploadInfo.fileName,
+  );
+
+  if (!moveResult.ok) {
+    console.error('Failed to move uploaded file:', moveResult.error);
+    await deleteApplicationAndDocuments(appResult.application_id);
+    return NextResponse.json(
+      { ok: false, error: `Failed to process uploaded document. Please try again.` },
+      { status: 500 },
+    );
+  }
+
+  const recordResult = await recordUploadedDocument({
     application_id: appResult.application_id,
     member_id: memberResult.member_id,
     document_type: 'signed_salary_deduction_form',
-    file: uploaded,
-    file_name: fileName,
-    mime_type: validation.mimeType,
+    file_name: uploadInfo.fileName,
+    mime_type: verification.mimeType,
+    file_size: verification.size,
+    storage_path: moveResult.path,
   });
 
-  if (!uploadResult) {
-    console.error('Failed to upload signed salary deduction form for application', appResult.application_id);
-
+  if (!recordResult) {
+    console.error('Failed to record document metadata');
     await deleteApplicationAndDocuments(appResult.application_id);
     return NextResponse.json(
-      { ok: false, error: "Failed to upload document. Please try again." },
+      { ok: false, error: `Failed to process uploaded document. Please try again.` },
       { status: 500 },
     );
   }

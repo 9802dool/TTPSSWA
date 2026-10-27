@@ -4,15 +4,17 @@ import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   upsertMember,
   createApplication,
-  uploadApplicationDocument,
   deleteApplicationAndDocuments,
 } from "@/lib/supabase/applications";
+import {
+  verifyUploadedFile,
+  moveUploadedFile,
+  recordUploadedDocument,
+} from "@/lib/supabase/direct-upload";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
-import { MAX_UPLOAD_TOTAL_BYTES, UPLOAD_TOO_LARGE_MESSAGE, totalUploadBytes } from "@/lib/upload-limits";
-import { validateFile, getExtensionForMimeType } from "@/lib/file-validation";
 
 export const runtime = "nodejs";
 
@@ -33,22 +35,20 @@ function validateOptionalPhoneDigits(digitsStr: string, label: string): string |
 export async function POST(request: Request) {
   const clientIP = getClientIP(request);
 
-  const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
-  if (!formData) {
-    return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
   }
 
   // Spam protection: honeypot check (silent rejection)
-  if (totalUploadBytes(formData) > MAX_UPLOAD_TOTAL_BYTES) {
-    return NextResponse.json({ ok: false, error: UPLOAD_TOO_LARGE_MESSAGE }, { status: 413 });
-  }
-
-  if (checkHoneypot(formData.get("website"))) {
+  if (checkHoneypot(body.website)) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
 
   // Spam protection: minimum fill time check (only if token is provided)
-  const formToken = String(formData.get("formToken") ?? "").trim();
+  const formToken = String(body.formToken ?? "").trim();
   const tokenCheck = verifyFormToken(formToken || null, 3);
   // Only reject if token was provided but invalid (skipCheck means token not provided)
   if (!tokenCheck.valid && !tokenCheck.skipCheck) {
@@ -57,7 +57,7 @@ export async function POST(request: Request) {
 
   // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
-    const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
+    const turnstileToken = String(body.turnstileToken ?? "").trim();
     const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
     if (!turnstileResult.success) {
       return NextResponse.json(
@@ -67,28 +67,37 @@ export async function POST(request: Request) {
     }
   }
 
-  const dateOfApplication = String(formData.get("dateOfApplication") ?? "").trim();
-  const regimentalNumber = String(formData.get("regimentalNumber") ?? "").trim();
-  const rank = String(formData.get("rank") ?? "").trim();
-  const fullName = String(formData.get("fullName") ?? "").trim();
-  const departmentDivision = String(formData.get("departmentDivision") ?? "").trim();
-  const sectionStation = String(formData.get("sectionStation") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const phoneCountryCode = String(formData.get("phoneCountryCode") ?? "").trim();
-  const phoneHome = optionalDigits(formData.get("phoneHome"));
-  const phoneWork = optionalDigits(formData.get("phoneWork"));
-  const phone = optionalDigits(formData.get("phone"));
-  const age = String(formData.get("age") ?? "").trim();
-  const sex = String(formData.get("sex") ?? "").trim();
-  const guardianLifeHealthPlan = String(formData.get("guardianLifeHealthPlan") ?? "").trim();
-  const effectiveRetirementDate = String(formData.get("effectiveRetirementDate") ?? "").trim();
-  const departmentalOrderReference = String(formData.get("departmentalOrderReference") ?? "").trim();
-  const declarationAccurate = String(formData.get("declarationAccurate") ?? "").trim();
-  const electronicSignature = String(formData.get("electronicSignature") ?? "").trim();
-  const applicantDateSigned = String(formData.get("applicantDateSigned") ?? "").trim();
-  const witnessName = String(formData.get("witnessName") ?? "").trim();
-  const witnessDate = String(formData.get("witnessDate") ?? "").trim();
+  const dateOfApplication = String(body.dateOfApplication ?? "").trim();
+  const regimentalNumber = String(body.regimentalNumber ?? "").trim();
+  const rank = String(body.rank ?? "").trim();
+  const fullName = String(body.fullName ?? "").trim();
+  const departmentDivision = String(body.departmentDivision ?? "").trim();
+  const sectionStation = String(body.sectionStation ?? "").trim();
+  const address = String(body.address ?? "").trim();
+  const email = String(body.email ?? "").trim();
+  const phoneCountryCode = String(body.phoneCountryCode ?? "").trim();
+  const phoneHome = optionalDigits(body.phoneHome);
+  const phoneWork = optionalDigits(body.phoneWork);
+  const phone = optionalDigits(body.phone);
+  const age = String(body.age ?? "").trim();
+  const sex = String(body.sex ?? "").trim();
+  const guardianLifeHealthPlan = String(body.guardianLifeHealthPlan ?? "").trim();
+  const effectiveRetirementDate = String(body.effectiveRetirementDate ?? "").trim();
+  const departmentalOrderReference = String(body.departmentalOrderReference ?? "").trim();
+  const declarationAccurate = String(body.declarationAccurate ?? "").trim();
+  const electronicSignature = String(body.electronicSignature ?? "").trim();
+  const applicantDateSigned = String(body.applicantDateSigned ?? "").trim();
+  const witnessName = String(body.witnessName ?? "").trim();
+  const witnessDate = String(body.witnessDate ?? "").trim();
+
+  // Document uploads (direct-to-storage)
+  const uploads = Array.isArray(body.uploads) ? body.uploads : [];
+  if (uploads.length !== 1) {
+    return NextResponse.json(
+      { ok: false, error: "Please upload the departmental order document." },
+      { status: 400 },
+    );
+  }
 
   if (
     !dateOfApplication ||
@@ -198,18 +207,29 @@ export async function POST(request: Request) {
     );
   }
 
-  const uploaded = formData.get("departmentalOrderDocument");
-  if (!(uploaded instanceof Blob) || uploaded.size === 0) {
+  // Verify uploaded document
+  const upload = uploads[0];
+  if (
+    typeof upload !== 'object' ||
+    upload === null ||
+    typeof upload.path !== 'string' ||
+    typeof upload.token !== 'string' ||
+    typeof upload.fileName !== 'string'
+  ) {
     return NextResponse.json(
-      { ok: false, error: "Please attach a copy of the departmental order or retirement letter." },
+      { ok: false, error: "Invalid upload data." },
       { status: 400 },
     );
   }
 
-  // Validate file type and size with magic byte checking
-  const validation = await validateFile(uploaded);
-  if (!validation.valid) {
-    return NextResponse.json({ ok: false, error: validation.error }, { status: 400 });
+  const uploadInfo = upload as { path: string; token: string; fileName: string };
+  const verification = await verifyUploadedFile(uploadInfo.path, uploadInfo.token);
+  
+  if (!verification.ok) {
+    return NextResponse.json(
+      { ok: false, error: `Document verification failed: ${verification.error}` },
+      { status: 400 },
+    );
   }
 
   // Save to Supabase
@@ -290,24 +310,37 @@ export async function POST(request: Request) {
     );
   }
 
-  // Upload document with validated type
-  const fileExtension = getExtensionForMimeType(validation.mimeType);
-  const fileName = uploaded instanceof File && uploaded.name ? uploaded.name : `departmental-order${fileExtension}`;
-  const uploadResult = await uploadApplicationDocument({
+  // Move uploaded document to final location and record metadata
+  const moveResult = await moveUploadedFile(
+    uploadInfo.path,
+    appResult.application_id,
+    uploadInfo.fileName,
+  );
+
+  if (!moveResult.ok) {
+    console.error('Failed to move uploaded file:', moveResult.error);
+    await deleteApplicationAndDocuments(appResult.application_id);
+    return NextResponse.json(
+      { ok: false, error: `Failed to process uploaded document. Please try again.` },
+      { status: 500 },
+    );
+  }
+
+  const recordResult = await recordUploadedDocument({
     application_id: appResult.application_id,
     member_id: memberResult.member_id,
     document_type: 'departmental_order',
-    file: uploaded,
-    file_name: fileName,
-    mime_type: validation.mimeType,
+    file_name: uploadInfo.fileName,
+    mime_type: verification.mimeType,
+    file_size: verification.size,
+    storage_path: moveResult.path,
   });
 
-  if (!uploadResult) {
-    console.error('Failed to upload departmental order for application', appResult.application_id);
-
+  if (!recordResult) {
+    console.error('Failed to record document metadata');
     await deleteApplicationAndDocuments(appResult.application_id);
     return NextResponse.json(
-      { ok: false, error: "Failed to upload document. Please try again." },
+      { ok: false, error: `Failed to process uploaded document. Please try again.` },
       { status: 500 },
     );
   }

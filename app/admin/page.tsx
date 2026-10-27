@@ -14,12 +14,14 @@ import { getApplications } from "@/lib/supabase/applications";
 import type { Application } from "@/lib/supabase/types";
 
 type Props = {
-  searchParams: Promise<{ q?: string }> | { q?: string };
+  searchParams: Promise<{ q?: string; page?: string; limit?: string }> | { q?: string; page?: string; limit?: string };
 };
 
 export default async function AdminPage({ searchParams }: Props) {
   const sp = await Promise.resolve(searchParams);
   const nameQuery = (sp.q ?? "").trim();
+  const page = Math.max(1, parseInt(sp.page ?? "1", 10));
+  const limit = Math.min(100, Math.max(10, parseInt(sp.limit ?? "50", 10)));
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
@@ -60,10 +62,13 @@ export default async function AdminPage({ searchParams }: Props) {
     webAccounts = [];
   }
 
-  // Fetch applications from Supabase
+  // Fetch applications from Supabase with pagination
   if (isSupabaseConfigured()) {
     try {
-      supabaseApplications = await getApplications({ limit: 1000 });
+      supabaseApplications = await getApplications({ 
+        limit,
+        offset: (page - 1) * limit,
+      });
     } catch (e) {
       console.error("Error fetching Supabase applications:", e);
     }

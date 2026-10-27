@@ -237,13 +237,14 @@ export async function getApplications(filters?: {
   member_id?: string;
   limit?: number;
   offset?: number;
+  count?: boolean;
 }): Promise<Application[]> {
   const supabase = createServiceClient();
   if (!supabase) return [];
 
   let query = supabase
     .from('applications')
-    .select('*')
+    .select('*', { count: filters?.count ? 'exact' : undefined })
     .order('submitted_at', { ascending: false });
 
   if (filters?.type) {
@@ -270,6 +271,51 @@ export async function getApplications(filters?: {
   }
 
   return data || [];
+}
+
+/**
+ * Gets members with server-side pagination, filtering, and search.
+ */
+export async function getMembersPaginated(filters?: {
+  status?: string;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<{ members: Member[]; total: number }> {
+  const supabase = createServiceClient();
+  if (!supabase) return { members: [], total: 0 };
+
+  let query = supabase
+    .from('members')
+    .select('*', { count: 'exact' })
+    .order('created_at', { ascending: false });
+
+  if (filters?.status && filters.status !== 'all') {
+    query = query.eq('member_status', filters.status);
+  }
+
+  if (filters?.search) {
+    // Search across multiple fields using OR
+    const searchLower = filters.search.toLowerCase();
+    query = query.or(
+      `full_name.ilike.%${searchLower}%,email.ilike.%${searchLower}%,service_number.ilike.%${searchLower}%,username.ilike.%${searchLower}%`
+    );
+  }
+
+  if (filters?.offset !== undefined && filters?.limit) {
+    query = query.range(filters.offset, filters.offset + filters.limit - 1);
+  } else if (filters?.limit) {
+    query = query.limit(filters.limit);
+  }
+
+  const { data, error, count } = await query;
+
+  if (error) {
+    console.error('Error fetching members:', error);
+    return { members: [], total: 0 };
+  }
+
+  return { members: data || [], total: count || 0 };
 }
 
 /**

@@ -87,8 +87,42 @@ function isMember(data: Record<string, unknown>): boolean {
   return typeof serviceNumber === "string" && serviceNumber.trim().length > 0;
 }
 
-export async function loadHotelBookings(): Promise<{ bookings: HotelBooking[]; skipped: number }> {
-  const applications = await getApplications({ type: "hotel_booking" });
+export async function loadHotelBookings(filters?: {
+  startDate?: string;
+  endDate?: string;
+  roomCategory?: RoomCategory;
+}): Promise<{ bookings: HotelBooking[]; skipped: number }> {
+  const supabase = createServiceClient();
+  if (!supabase) return { bookings: [], skipped: 0 };
+
+  // Build query with SQL-level filtering
+  let query = supabase
+    .from('applications')
+    .select('*')
+    .eq('application_type', 'hotel_booking')
+    .order('submitted_at', { ascending: false });
+
+  // Filter by date range using JSON operators
+  if (filters?.startDate) {
+    query = query.gte('application_data->checkIn', filters.startDate);
+  }
+  if (filters?.endDate) {
+    query = query.lte('application_data->checkIn', filters.endDate);
+  }
+
+  // Filter by room category using JSON operators
+  if (filters?.roomCategory) {
+    query = query.eq('application_data->roomCategory', filters.roomCategory);
+  }
+
+  const { data: applications, error } = await query;
+  
+  if (error) {
+    console.error('Error fetching hotel bookings:', error);
+    return { bookings: [], skipped: 0 };
+  }
+
+  if (!applications) return { bookings: [], skipped: 0 };
   
   const bookings: HotelBooking[] = [];
   let skipped = 0;

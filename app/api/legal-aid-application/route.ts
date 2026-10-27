@@ -4,15 +4,17 @@ import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   upsertMember,
   createApplication,
-  uploadApplicationDocument,
   deleteApplicationAndDocuments,
 } from "@/lib/supabase/applications";
+import {
+  verifyUploadedFile,
+  moveUploadedFile,
+  recordUploadedDocument,
+} from "@/lib/supabase/direct-upload";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
-import { MAX_UPLOAD_TOTAL_BYTES, UPLOAD_TOO_LARGE_MESSAGE, totalUploadBytes } from "@/lib/upload-limits";
-import { validateFile, getExtensionForMimeType } from "@/lib/file-validation";
 
 export const runtime = "nodejs";
 
@@ -34,43 +36,6 @@ const LEGAL_AID_DOCUMENTS = [
   },
 ] as const;
 
-async function readLegalAidDocument(
-  formData: FormData,
-  name: string,
-  label: string,
-  required: boolean,
-): Promise<
-  | { ok: true; file: { label: string; fileName: string; mimeType: string; blob: Blob } | null }
-  | { ok: false; error: string }
-> {
-  const value = formData.get(name);
-  if (!(value instanceof Blob) || value.size === 0) {
-    if (required) {
-      return { ok: false, error: `Please upload ${label}.` };
-    }
-    return { ok: true, file: null };
-  }
-
-  // Validate file type and size with magic byte checking
-  const validation = await validateFile(value);
-  if (!validation.valid) {
-    return { ok: false, error: `${label}: ${validation.error}` };
-  }
-
-  const fileExtension = getExtensionForMimeType(validation.mimeType);
-  const fileName = value instanceof File && value.name ? value.name : `${name}${fileExtension}`;
-  
-  return {
-    ok: true,
-    file: {
-      label,
-      fileName,
-      mimeType: validation.mimeType,
-      blob: value,
-    },
-  };
-}
-
 function validateOptionalPhoneDigits(digitsStr: string, label: string): string | null {
   if (!digitsStr) return null;
   if (digitsStr.length < 6 || digitsStr.length > 15) {
@@ -82,22 +47,20 @@ function validateOptionalPhoneDigits(digitsStr: string, label: string): string |
 export async function POST(request: Request) {
   const clientIP = getClientIP(request);
 
-  const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
-  if (!formData) {
-    return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
   }
 
   // Spam protection: honeypot check (silent rejection)
-  if (totalUploadBytes(formData) > MAX_UPLOAD_TOTAL_BYTES) {
-    return NextResponse.json({ ok: false, error: UPLOAD_TOO_LARGE_MESSAGE }, { status: 413 });
-  }
-
-  if (checkHoneypot(formData.get("website"))) {
+  if (checkHoneypot(body.website)) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
 
   // Spam protection: minimum fill time check (only if token is provided)
-  const formToken = String(formData.get("formToken") ?? "").trim();
+  const formToken = String(body.formToken ?? "").trim();
   const tokenCheck = verifyFormToken(formToken || null, 3);
   // Only reject if token was provided but invalid (skipCheck means token not provided)
   if (!tokenCheck.valid && !tokenCheck.skipCheck) {
@@ -106,7 +69,7 @@ export async function POST(request: Request) {
 
   // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
-    const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
+    const turnstileToken = String(body.turnstileToken ?? "").trim();
     const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
     if (!turnstileResult.success) {
       return NextResponse.json(
@@ -116,27 +79,30 @@ export async function POST(request: Request) {
     }
   }
 
-  const regimentalNumber = String(formData.get("regimentalNumber") ?? "").trim();
-  const rank = String(formData.get("rank") ?? "").trim();
-  const fullName = String(formData.get("fullName") ?? "").trim();
-  const departmentDivision = String(formData.get("departmentDivision") ?? "").trim();
-  const sectionStation = String(formData.get("sectionStation") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const phoneCountryCode = String(formData.get("phoneCountryCode") ?? "").trim();
-  const phoneHome = optionalDigits(formData.get("phoneHome"));
-  const phoneWork = optionalDigits(formData.get("phoneWork"));
-  const phone = optionalDigits(formData.get("phone"));
-  const matterType = String(formData.get("matterType") ?? "").trim();
-  const matterDescription = String(formData.get("matterDescription") ?? "").trim();
-  const courtOrUnit = String(formData.get("courtOrUnit") ?? "").trim();
-  const matterReference = String(formData.get("matterReference") ?? "").trim();
-  const dateReported = String(formData.get("dateReported") ?? "").trim();
-  const declarationAccurate = String(formData.get("declarationAccurate") ?? "").trim();
-  const electronicSignature = String(formData.get("electronicSignature") ?? "").trim();
-  const applicantDateSigned = String(formData.get("applicantDateSigned") ?? "").trim();
-  const witnessName = String(formData.get("witnessName") ?? "").trim();
-  const witnessDate = String(formData.get("witnessDate") ?? "").trim();
+  const regimentalNumber = String(body.regimentalNumber ?? "").trim();
+  const rank = String(body.rank ?? "").trim();
+  const fullName = String(body.fullName ?? "").trim();
+  const departmentDivision = String(body.departmentDivision ?? "").trim();
+  const sectionStation = String(body.sectionStation ?? "").trim();
+  const address = String(body.address ?? "").trim();
+  const email = String(body.email ?? "").trim();
+  const phoneCountryCode = String(body.phoneCountryCode ?? "").trim();
+  const phoneHome = optionalDigits(body.phoneHome);
+  const phoneWork = optionalDigits(body.phoneWork);
+  const phone = optionalDigits(body.phone);
+  const matterType = String(body.matterType ?? "").trim();
+  const matterDescription = String(body.matterDescription ?? "").trim();
+  const courtOrUnit = String(body.courtOrUnit ?? "").trim();
+  const matterReference = String(body.matterReference ?? "").trim();
+  const dateReported = String(body.dateReported ?? "").trim();
+  const declarationAccurate = String(body.declarationAccurate ?? "").trim();
+  const electronicSignature = String(body.electronicSignature ?? "").trim();
+  const applicantDateSigned = String(body.applicantDateSigned ?? "").trim();
+  const witnessName = String(body.witnessName ?? "").trim();
+  const witnessDate = String(body.witnessDate ?? "").trim();
+
+  // Document uploads (direct-to-storage)
+  const uploads = Array.isArray(body.uploads) ? body.uploads : [];
 
   if (
     !regimentalNumber ||
@@ -237,18 +203,63 @@ export async function POST(request: Request) {
     );
   }
 
-  const documents: {
-    label: string;
+  // Verify uploaded documents
+  interface UploadInfo {
+    path: string;
+    token: string;
+    fileName: string;
+    documentType: string;
+  }
+
+  const verifiedUploads: Array<{
+    path: string;
     fileName: string;
     mimeType: string;
-    blob: Blob;
-  }[] = [];
-  for (const doc of LEGAL_AID_DOCUMENTS) {
-    const read = await readLegalAidDocument(formData, doc.name, doc.label, doc.required);
-    if (!read.ok) {
-      return NextResponse.json({ ok: false, error: read.error }, { status: 400 });
+    size: number;
+    documentType: string;
+  }> = [];
+
+  for (const upload of uploads) {
+    if (
+      typeof upload !== 'object' ||
+      upload === null ||
+      typeof upload.path !== 'string' ||
+      typeof upload.token !== 'string' ||
+      typeof upload.fileName !== 'string' ||
+      typeof upload.documentType !== 'string'
+    ) {
+      return NextResponse.json(
+        { ok: false, error: "Invalid upload data." },
+        { status: 400 },
+      );
     }
-    if (read.file) documents.push(read.file);
+
+    const uploadInfo = upload as UploadInfo;
+    const verification = await verifyUploadedFile(uploadInfo.path, uploadInfo.token);
+    
+    if (!verification.ok) {
+      return NextResponse.json(
+        { ok: false, error: `Document verification failed: ${verification.error}` },
+        { status: 400 },
+      );
+    }
+
+    verifiedUploads.push({
+      path: uploadInfo.path,
+      fileName: uploadInfo.fileName,
+      mimeType: verification.mimeType,
+      size: verification.size,
+      documentType: uploadInfo.documentType,
+    });
+  }
+
+  // At least required documents must be present
+  const requiredCount = LEGAL_AID_DOCUMENTS.filter(d => d.required).length;
+  if (verifiedUploads.length < requiredCount) {
+    return NextResponse.json(
+      { ok: false, error: "Please upload all required documents." },
+      { status: 400 },
+    );
   }
 
   // Save to Supabase
@@ -325,23 +336,38 @@ export async function POST(request: Request) {
     );
   }
 
-  // Upload each document - fail if any upload fails
-  for (const doc of documents) {
-    const uploadResult = await uploadApplicationDocument({
-      application_id: appResult.application_id,
-      member_id: memberResult.member_id,
-      document_type: doc.label.toLowerCase().replace(/\s+/g, '_'),
-      file: doc.blob,
-      file_name: doc.fileName,
-      mime_type: doc.mimeType,
-    });
+  // Move uploaded documents to final location and record metadata
+  for (const upload of verifiedUploads) {
+    const moveResult = await moveUploadedFile(
+      upload.path,
+      appResult.application_id,
+      upload.fileName,
+    );
 
-    if (!uploadResult) {
-      console.error(`Failed to upload ${doc.label} for application`, appResult.application_id);
-
+    if (!moveResult.ok) {
+      console.error('Failed to move uploaded file:', moveResult.error);
       await deleteApplicationAndDocuments(appResult.application_id);
       return NextResponse.json(
-        { ok: false, error: `Failed to upload ${doc.label}. Please try again.` },
+        { ok: false, error: `Failed to process uploaded documents. Please try again.` },
+        { status: 500 },
+      );
+    }
+
+    const recordResult = await recordUploadedDocument({
+      application_id: appResult.application_id,
+      member_id: memberResult.member_id,
+      document_type: upload.documentType.toLowerCase().replace(/\s+/g, '_'),
+      file_name: upload.fileName,
+      mime_type: upload.mimeType,
+      file_size: upload.size,
+      storage_path: moveResult.path,
+    });
+
+    if (!recordResult) {
+      console.error('Failed to record document metadata');
+      await deleteApplicationAndDocuments(appResult.application_id);
+      return NextResponse.json(
+        { ok: false, error: `Failed to process uploaded documents. Please try again.` },
         { status: 500 },
       );
     }
