@@ -286,4 +286,24 @@ describe("direct-upload routes", () => {
     expect(unknown.status).toBe(400);
     expect(mocks.createApplication).not.toHaveBeenCalled();
   });
+
+  it("merit loan stores the applicant's full name on the application (admin list shows it)", async () => {
+    const { POST } = await loadRoute("merit-loan-application");
+    const res = await POST(postJson({
+      dateOfApplication: "2026-10-26", regimentalNumber: "1", rank: "PC", fullName: "DEMO Member (presentation)",
+      address: "A", email: "t@example.com", phoneCountryCode: "+1868", phone: "6201234", maritalStatus: "single",
+      dateOfBirth: "1990-01-01", age: "36", numberOfDependents: "0", employer: "TTPS",
+      divisionBranchSection: "X", employmentType: "regular", yearsOfService: "5", amountRequestedTTD: "1000",
+      priorMeritLoanApplied: "no", purposeOfLoan: "p", currentNetSalaryTTD: "1", totalSalaryDeductionsTTD: "1",
+      repaymentInstallmentTTD: "1", repaymentPeriodMonths: "12", declarationAccurate: "yes",
+      electronicSignature: "yes", applicantDateSigned: "2026-10-26", signatureRegimentalNumber: "1", signatureRank: "PC",
+      uploads: ["idDocument", "payslipDocument"].map((documentType) => ({
+        path: `pending/1-${documentType}.pdf`, token: "t", fileName: "a.pdf", documentType,
+      })),
+    }));
+    expect((await res.json()).ok).toBe(true);
+    const arg = mocks.createApplication.mock.calls[0][0];
+    expect(arg.application_type).toBe("merit_loan_application");
+    expect(arg.application_data).toMatchObject({ fullName: "DEMO Member (presentation)" });
+  });
 });

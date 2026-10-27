@@ -3,6 +3,8 @@ import { getMemberSessionUserId } from "@/lib/member-session";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { verifyDocumentOwnership } from "@/lib/supabase/member-helpers";
 import { getDocumentSignedUrl } from "@/lib/supabase/applications";
+import { createServiceClient } from "@/lib/supabase/service";
+import { serveDocumentInline } from "@/lib/document-inline";
 import { isEmailVerified } from "@/lib/verify-account-helper";
 import { getWebAccountById } from "@/lib/web-account-storage";
 
@@ -47,13 +49,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Document not found or access denied" }, { status: 403 });
   }
 
-  // Generate signed URL
-  const signedUrl = await getDocumentSignedUrl(ownership.document.storage_path);
-  
-  if (!signedUrl) {
-    return NextResponse.json({ error: "Could not generate document URL" }, { status: 500 });
+  const supabase = createServiceClient();
+  if (!supabase) {
+    return NextResponse.json({ error: "Storage not available" }, { status: 503 });
   }
 
-  // Redirect to signed URL
-  return NextResponse.redirect(signedUrl);
+  // Show the document inline (opens in the browser tab instead of downloading).
+  const doc = ownership.document;
+  return serveDocumentInline(supabase, doc, () => getDocumentSignedUrl(doc.storage_path));
 }

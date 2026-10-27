@@ -4,6 +4,7 @@ import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getDocumentSignedUrl } from "@/lib/supabase/applications";
+import { serveDocumentInline } from "@/lib/document-inline";
 
 export const runtime = "nodejs";
 
@@ -43,13 +44,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Document not found" }, { status: 404 });
   }
 
-  // Generate signed URL
-  const signedUrl = await getDocumentSignedUrl(doc.storage_path);
-  
-  if (!signedUrl) {
-    return NextResponse.json({ error: "Could not generate document URL" }, { status: 500 });
-  }
-
-  // Redirect to signed URL
-  return NextResponse.redirect(signedUrl);
+  // Show the document inline (opens in the browser tab instead of downloading).
+  return serveDocumentInline(supabase, doc, () => getDocumentSignedUrl(doc.storage_path));
 }

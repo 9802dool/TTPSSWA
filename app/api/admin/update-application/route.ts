@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/server";
 import { updateApplicationStatus, getApplicationById } from "@/lib/supabase/applications";
 import type { ApplicationStatus } from "@/lib/supabase/types";
 import { sendStatusChangeEmail } from "@/lib/email-notifications";
+import { getApplicantDisplayName } from "@/lib/applicant-name";
 
 export const runtime = "nodejs";
 
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
   if (appDetails) {
     const data = appDetails.application.application_data as Record<string, unknown>;
     const email = String(data.email || '');
-    const name = String(data.fullName || data.guestName || '');
+    const name = getApplicantDisplayName(data, appDetails.member?.full_name);
     
     if (email) {
       sendStatusChangeEmail({

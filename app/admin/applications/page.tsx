@@ -5,7 +5,8 @@ import { AdminLogoutButton } from "@/components/AdminLogoutButton";
 import SiteHeader from "@/components/SiteHeader";
 import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-auth";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
-import { getApplications } from "@/lib/supabase/applications";
+import { getApplications, getMemberNamesByIds } from "@/lib/supabase/applications";
+import { getApplicantDisplayName } from "@/lib/applicant-name";
 import { AdminApplicationsTable } from "@/components/admin/AdminApplicationsTable";
 import { AutoSubmitSelect } from "@/components/admin/AutoSubmitSelect";
 import type { ApplicationType, ApplicationStatus } from "@/lib/supabase/types";
@@ -57,12 +58,29 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
     loadError = "Applications could not be loaded. Please refresh, or try again shortly.";
   }
 
-  // Client-side search filter (on application data)
+  // Applicant names: some forms (e.g. Merit Loan) keep the name only on the member record.
+  let memberNames: Record<string, string> = {};
+  if (!loadError && applications.length > 0) {
+    try {
+      memberNames = await getMemberNamesByIds(applications.map((app) => app.member_id));
+    } catch (err) {
+      console.error("Admin applications: failed to load member names", err);
+    }
+  }
+  const applicantNames: Record<string, string> = {};
+  for (const app of applications) {
+    applicantNames[app.id] = getApplicantDisplayName(
+      app.application_data,
+      app.member_id ? memberNames[app.member_id] : undefined,
+    );
+  }
+
+  // Client-side search filter (on application data and applicant name)
   if (searchQuery) {
     const qLower = searchQuery.toLowerCase();
     applications = applications.filter(app => {
       const data = (app.application_data ?? {}) as Record<string, unknown>;
-      const searchableText = JSON.stringify(data).toLowerCase();
+      const searchableText = `${JSON.stringify(data)} ${applicantNames[app.id] ?? ""}`.toLowerCase();
       return searchableText.includes(qLower) || app.id.includes(qLower);
     });
   }
@@ -154,7 +172,7 @@ export default async function AdminApplicationsPage({ searchParams }: Props) {
           </p>
         ) : null}
 
-        <AdminApplicationsTable applications={applications} />
+        <AdminApplicationsTable applications={applications} applicantNames={applicantNames} />
       </div>
     </AdminShell>
   );

@@ -3,9 +3,12 @@
 import { useState } from "react";
 import type { Application, ApplicationStatus } from "@/lib/supabase/types";
 import { AdminApplicationModal } from "./AdminApplicationModal";
+import { getApplicantDisplayName } from "@/lib/applicant-name";
 
 interface Props {
   applications: Application[];
+  /** Pre-resolved display names keyed by application id (includes member-record fallback). */
+  applicantNames?: Record<string, string>;
 }
 
 const APPLICATION_TYPE_LABELS: Record<string, string> = {
@@ -29,7 +32,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: "bg-gray-100 text-gray-800",
 };
 
-export function AdminApplicationsTable({ applications }: Props) {
+export function AdminApplicationsTable({ applications, applicantNames }: Props) {
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
 
   if (applications.length === 0) {
@@ -56,7 +59,7 @@ export function AdminApplicationsTable({ applications }: Props) {
           <tbody>
             {applications.map((app) => {
               const data = (app.application_data ?? {}) as Record<string, unknown>;
-              const applicantName = String(data.fullName || data.guestName || 'N/A');
+              const applicantName = applicantNames?.[app.id] || getApplicantDisplayName(data) || 'N/A';
               const applicantEmail = String(data.email || 'N/A');
 
               return (
