@@ -10,6 +10,8 @@ import {
   MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE,
   MEMBERSHIP_PHONE_COUNTRY_CODES,
 } from "@/lib/phone-country-codes";
+import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
+import { checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
 
 const line =
   "w-full min-w-0 border-0 border-b border-black bg-transparent px-1 py-0.5 text-[13px] uppercase text-black outline-none placeholder:normal-case placeholder:text-neutral-400 focus:border-[#0d2a70]";
@@ -19,6 +21,7 @@ const label = "whitespace-nowrap text-xs font-bold uppercase";
 export function SalaryDeductionForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -41,6 +44,18 @@ export function SalaryDeductionForm() {
       .filter(Boolean)
       .join(" ");
     fd.set("commencementDate", commencing);
+    
+    const uploadTooLarge = checkUploadTotal(fd);
+    if (uploadTooLarge) {
+      setStatus("error");
+      setMessage(uploadTooLarge);
+      return;
+    }
+
+    // Add Turnstile token if available
+    if (turnstileToken) {
+      fd.set("turnstileToken", turnstileToken);
+    }
     try {
       const res = await fetch("/api/salary-deduction", {
         method: "POST",
@@ -50,9 +65,12 @@ export function SalaryDeductionForm() {
         ok?: boolean;
         error?: string;
       };
+      // Turnstile tokens are single-use: get a fresh one for any retry
+      setTurnstileToken(null);
+      resetTurnstileWidgets();
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Something went wrong. Please try again.");
+        setMessage(uploadErrorMessage(res.status, data.error) ?? "Something went wrong. Please try again.");
         return;
       }
       setStatus("success");
@@ -385,6 +403,10 @@ export function SalaryDeductionForm() {
         <p className="mt-1 text-[11px] font-bold uppercase">Witness to signature of applicant</p>
 
         <AssociationOfficersFooter variant="salary" />
+
+        <div className="mt-6">
+          <TurnstileWidget onToken={setTurnstileToken} />
+        </div>
 
         {message ? (
           <p

@@ -5,11 +5,14 @@ import {
   upsertMember,
   createApplication,
   uploadApplicationDocument,
+  deleteApplicationAndDocuments,
 } from "@/lib/supabase/applications";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
+import { MAX_UPLOAD_TOTAL_BYTES, UPLOAD_TOO_LARGE_MESSAGE, totalUploadBytes } from "@/lib/upload-limits";
+import { validateFile, getExtensionForMimeType } from "@/lib/file-validation";
 
 export const runtime = "nodejs";
 
@@ -18,8 +21,6 @@ function optionalDigits(s: unknown): string {
     .trim()
     .replace(/\D/g, "");
 }
-
-const MAX_DOCUMENT_BYTES = 800 * 1024;
 
 const LEGAL_AID_DOCUMENTS = [
   { name: "reportFromApplicant", label: "Report from Applicant", required: true },
@@ -33,30 +34,13 @@ const LEGAL_AID_DOCUMENTS = [
   },
 ] as const;
 
-const ALLOWED_DOCUMENT_TYPES = new Set([
-  "application/pdf",
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-]);
-
-function documentExtension(fileName: string): string {
-  const dot = fileName.lastIndexOf(".");
-  return dot >= 0 ? fileName.slice(dot + 1).toLowerCase() : "";
-}
-
-function isAllowedDocument(file: Blob, fileName: string): boolean {
-  if (ALLOWED_DOCUMENT_TYPES.has(file.type)) return true;
-  return ["pdf", "jpg", "jpeg", "png", "webp"].includes(documentExtension(fileName));
-}
-
 async function readLegalAidDocument(
   formData: FormData,
   name: string,
   label: string,
   required: boolean,
 ): Promise<
-  | { ok: true; file: { label: string; fileName: string; mimeType: string; base64: string } | null }
+  | { ok: true; file: { label: string; fileName: string; mimeType: string; blob: Blob } | null }
   | { ok: false; error: string }
 > {
   const value = formData.get(name);
@@ -66,21 +50,23 @@ async function readLegalAidDocument(
     }
     return { ok: true, file: null };
   }
-  const fileName = value instanceof File && value.name ? value.name : `${name}.bin`;
-  if (value.size > MAX_DOCUMENT_BYTES) {
-    return { ok: false, error: `${label} must be 800 KB or smaller.` };
+
+  // Validate file type and size with magic byte checking
+  const validation = await validateFile(value);
+  if (!validation.valid) {
+    return { ok: false, error: `${label}: ${validation.error}` };
   }
-  if (!isAllowedDocument(value, fileName)) {
-    return { ok: false, error: `${label} must be a PDF, JPG, PNG, or WebP file.` };
-  }
-  const base64 = Buffer.from(await value.arrayBuffer()).toString("base64");
+
+  const fileExtension = getExtensionForMimeType(validation.mimeType);
+  const fileName = value instanceof File && value.name ? value.name : `${name}${fileExtension}`;
+  
   return {
     ok: true,
     file: {
       label,
       fileName,
-      mimeType: value.type || "application/octet-stream",
-      base64,
+      mimeType: validation.mimeType,
+      blob: value,
     },
   };
 }
@@ -102,6 +88,10 @@ export async function POST(request: Request) {
   }
 
   // Spam protection: honeypot check (silent rejection)
+  if (totalUploadBytes(formData) > MAX_UPLOAD_TOTAL_BYTES) {
+    return NextResponse.json({ ok: false, error: UPLOAD_TOO_LARGE_MESSAGE }, { status: 413 });
+  }
+
   if (checkHoneypot(formData.get("website"))) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
@@ -114,7 +104,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
 
-  // Turnstile verification (only if configured)
+  // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
     const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
     const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
@@ -251,7 +241,7 @@ export async function POST(request: Request) {
     label: string;
     fileName: string;
     mimeType: string;
-    base64: string;
+    blob: Blob;
   }[] = [];
   for (const doc of LEGAL_AID_DOCUMENTS) {
     const read = await readLegalAidDocument(formData, doc.name, doc.label, doc.required);
@@ -335,17 +325,26 @@ export async function POST(request: Request) {
     );
   }
 
-  // Upload each document
+  // Upload each document - fail if any upload fails
   for (const doc of documents) {
-    const docBuffer = Buffer.from(doc.base64, 'base64');
-    await uploadApplicationDocument({
+    const uploadResult = await uploadApplicationDocument({
       application_id: appResult.application_id,
       member_id: memberResult.member_id,
       document_type: doc.label.toLowerCase().replace(/\s+/g, '_'),
-      file: docBuffer,
+      file: doc.blob,
       file_name: doc.fileName,
       mime_type: doc.mimeType,
     });
+
+    if (!uploadResult) {
+      console.error(`Failed to upload ${doc.label} for application`, appResult.application_id);
+
+      await deleteApplicationAndDocuments(appResult.application_id);
+      return NextResponse.json(
+        { ok: false, error: `Failed to upload ${doc.label}. Please try again.` },
+        { status: 500 },
+      );
+    }
   }
 
   // Send notifications (failures are logged but don't block success)

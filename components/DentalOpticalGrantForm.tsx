@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
+import { MAX_UPLOAD_FILE_BYTES, checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
 import {
   AssociationFormHeader,
   AssociationOfficersFooter,
@@ -15,11 +17,12 @@ const line =
 
 const label = "whitespace-nowrap text-xs font-bold uppercase";
 
-const MAX_DOCUMENT_BYTES = 800 * 1024;
+const MAX_DOCUMENT_BYTES = MAX_UPLOAD_FILE_BYTES;
 
 export function DentalOpticalGrantForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -47,8 +50,20 @@ export function DentalOpticalGrantForm() {
     }
     if (file.size > MAX_DOCUMENT_BYTES) {
       setStatus("error");
-      setMessage("The receipt or invoice must be 800 KB or smaller.");
+      setMessage("The receipt or invoice must be 4 MB or smaller.");
       return;
+    }
+
+    const uploadTooLarge = checkUploadTotal(fd);
+    if (uploadTooLarge) {
+      setStatus("error");
+      setMessage(uploadTooLarge);
+      return;
+    }
+
+    // Add Turnstile token if available
+    if (turnstileToken) {
+      fd.set("turnstileToken", turnstileToken);
     }
 
     setStatus("loading");
@@ -61,9 +76,12 @@ export function DentalOpticalGrantForm() {
         ok?: boolean;
         error?: string;
       };
+      // Turnstile tokens are single-use: get a fresh one for any retry
+      setTurnstileToken(null);
+      resetTurnstileWidgets();
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Something went wrong. Please try again.");
+        setMessage(uploadErrorMessage(res.status, data.error) ?? "Something went wrong. Please try again.");
         return;
       }
       setStatus("success");
@@ -397,7 +415,11 @@ export function DentalOpticalGrantForm() {
               className="text-xs"
             />
           </div>
-          <p className="mt-2 text-[11px]">PDF, JPG, or PNG. Maximum 800 KB. This upload is not part of the printed form.</p>
+          <p className="mt-2 text-[11px]">PDF, JPG, or PNG. Maximum 4 MB. This upload is not part of the printed form.</p>
+        </div>
+
+        <div className="mt-6">
+          <TurnstileWidget onToken={setTurnstileToken} />
         </div>
 
         {message ? (

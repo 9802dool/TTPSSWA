@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
 import {
   HOTEL_RATES,
   MEAL_PRICES,
@@ -117,6 +118,7 @@ type BookingConfirmation = {
 export default function SimpleBookingForm() {
   const [formData, setFormData] = useState<FormState>(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [availability, setAvailability] = useState<AvailabilityData | null>(null);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [message, setMessage] = useState<{
@@ -243,8 +245,12 @@ export default function SimpleBookingForm() {
         body: JSON.stringify({
           ...formData,
           meals: mealQuantities,
+          ...(turnstileToken ? { turnstileToken } : {}),
         }),
       });
+      // Turnstile tokens are single-use: get a fresh one for any retry
+      setTurnstileToken(null);
+      resetTurnstileWidgets();
 
       const data = (await response.json().catch(() => ({}))) as {
         message?: string;
@@ -886,6 +892,8 @@ export default function SimpleBookingForm() {
             </a>
           </div>
         </div>
+
+        <TurnstileWidget onToken={setTurnstileToken} />
 
         <button
           type="submit"

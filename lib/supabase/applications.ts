@@ -491,3 +491,36 @@ export async function getMemberWithApplications(
     applications: applications || [],
   };
 }
+
+/**
+ * Removes an application that could not be completed (e.g. a required document
+ * failed to upload): deletes its stored files, then the application row.
+ * application_documents and application_status_history rows cascade.
+ * Best-effort; failures are logged. The member record is kept.
+ */
+export async function deleteApplicationAndDocuments(applicationId: string): Promise<boolean> {
+  const supabase = createServiceClient();
+  if (!supabase) return false;
+
+  const { data: docs } = await supabase
+    .from('application_documents')
+    .select('storage_bucket, storage_path')
+    .eq('application_id', applicationId);
+
+  const paths = (docs ?? [])
+    .filter((d) => d.storage_bucket === 'application-documents' && d.storage_path)
+    .map((d) => d.storage_path as string);
+  if (paths.length > 0) {
+    const { error: removeError } = await supabase.storage
+      .from('application-documents')
+      .remove(paths);
+    if (removeError) console.error('Cleanup: could not remove stored files', applicationId, removeError);
+  }
+
+  const { error } = await supabase.from('applications').delete().eq('id', applicationId);
+  if (error) {
+    console.error('Cleanup: could not delete incomplete application', applicationId, error);
+    return false;
+  }
+  return true;
+}

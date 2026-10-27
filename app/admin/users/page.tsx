@@ -72,10 +72,10 @@ export default async function AdminUsersPage() {
               Dashboard
             </Link>
             <Link
-              href="/admin/dashboard"
+              href="/admin/applications"
               className="text-sm text-[var(--brand)] hover:underline"
             >
-              Registration documents
+              Applications
             </Link>
             <Link
               href="/admin/new-membership"

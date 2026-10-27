@@ -10,6 +10,8 @@ import {
   MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE,
   MEMBERSHIP_PHONE_COUNTRY_CODES,
 } from "@/lib/phone-country-codes";
+import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
+import { checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
 
 const line =
   "w-full min-w-0 border-0 border-b border-black bg-transparent px-1 py-0.5 text-[13px] uppercase text-black outline-none placeholder:normal-case placeholder:text-neutral-400 focus:border-[#0d2a70]";
@@ -19,6 +21,7 @@ const label = "whitespace-nowrap text-xs font-bold uppercase";
 export function MemberSignupForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -31,6 +34,18 @@ export function MemberSignupForm() {
     const forename = String(fd.get("forename") ?? "").trim();
     const surname = String(fd.get("surname") ?? "").trim();
     fd.set("fullName", `${forename} ${surname}`.trim());
+    
+    const uploadTooLarge = checkUploadTotal(fd);
+    if (uploadTooLarge) {
+      setStatus("error");
+      setMessage(uploadTooLarge);
+      return;
+    }
+
+    // Add Turnstile token if available
+    if (turnstileToken) {
+      fd.set("turnstileToken", turnstileToken);
+    }
     try {
       const res = await fetch("/api/member-signup", {
         method: "POST",
@@ -40,9 +55,12 @@ export function MemberSignupForm() {
         ok?: boolean;
         error?: string;
       };
+      // Turnstile tokens are single-use: get a fresh one for any retry
+      setTurnstileToken(null);
+      resetTurnstileWidgets();
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Something went wrong. Please try again.");
+        setMessage(uploadErrorMessage(res.status, data.error) ?? "Something went wrong. Please try again.");
         return;
       }
       setStatus("success");
@@ -429,6 +447,10 @@ export function MemberSignupForm() {
         </p>
 
         <AssociationOfficersFooter variant="membership" />
+
+        <div className="mt-6">
+          <TurnstileWidget onToken={setTurnstileToken} />
+        </div>
 
         {message ? (
           <p

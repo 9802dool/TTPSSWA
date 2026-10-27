@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
+import { MAX_UPLOAD_FILE_BYTES, checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
 import Link from "next/link";
 import {
   AssociationFormHeader,
@@ -19,7 +21,7 @@ const label = "whitespace-nowrap text-xs font-bold uppercase";
 const section =
   "mb-3 mt-4 border border-[#ccc] bg-[#e6ecf8] px-2 py-1 text-xs font-bold uppercase";
 
-const MAX_DOCUMENT_BYTES = 800 * 1024;
+const MAX_DOCUMENT_BYTES = MAX_UPLOAD_FILE_BYTES;
 
 const MERIT_DOCUMENTS = [
   {
@@ -32,6 +34,7 @@ const MERIT_DOCUMENTS = [
 export function MeritLoanForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const todaySigned = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -56,9 +59,21 @@ export function MeritLoanForm() {
       }
       if (file.size > MAX_DOCUMENT_BYTES) {
         setStatus("error");
-        setMessage(`${doc.label} must be 800 KB or smaller.`);
+        setMessage(`${doc.label} must be 4 MB or smaller.`);
         return;
       }
+    }
+
+    const uploadTooLarge = checkUploadTotal(fd);
+    if (uploadTooLarge) {
+      setStatus("error");
+      setMessage(uploadTooLarge);
+      return;
+    }
+
+    // Add Turnstile token if available
+    if (turnstileToken) {
+      fd.set("turnstileToken", turnstileToken);
     }
 
     setStatus("loading");
@@ -71,9 +86,12 @@ export function MeritLoanForm() {
         ok?: boolean;
         error?: string;
       };
+      // Turnstile tokens are single-use: get a fresh one for any retry
+      setTurnstileToken(null);
+      resetTurnstileWidgets();
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Something went wrong. Please try again.");
+        setMessage(uploadErrorMessage(res.status, data.error) ?? "Something went wrong. Please try again.");
         return;
       }
       setStatus("success");
@@ -377,7 +395,7 @@ export function MeritLoanForm() {
               />
             </div>
           ))}
-          <p className="text-[10px] uppercase text-neutral-700">PDF, JPG, or PNG. Maximum 800 KB each.</p>
+          <p className="text-[10px] uppercase text-neutral-700">PDF, JPG, or PNG. Maximum 4 MB each.</p>
         </div>
 
         <h5 className={section}>Merit details</h5>
@@ -514,6 +532,10 @@ export function MeritLoanForm() {
         </p>
 
         <AssociationOfficersFooter variant="merit" />
+
+        <div className="mt-6">
+          <TurnstileWidget onToken={setTurnstileToken} />
+        </div>
 
         {message ? (
           <p

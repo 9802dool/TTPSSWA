@@ -1,3 +1,4 @@
+import { MAX_UPLOAD_FILE_BYTES } from "./upload-limits";
 /**
  * File validation utilities with magic byte (file signature) verification.
  * Prevents MIME type spoofing by checking actual file contents.
@@ -16,9 +17,15 @@ export const ALLOWED_FILE_TYPES = {
     extensions: ['.png'],
     magicBytes: [[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]], // PNG signature
   },
+  'image/webp': {
+    extensions: ['.webp'],
+    magicBytes: [
+      [0x52, 0x49, 0x46, 0x46], // RIFF (WebP files start with RIFF at offset 0)
+    ],
+  },
 } as const;
 
-export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+export const MAX_FILE_SIZE = MAX_UPLOAD_FILE_BYTES; // 4 MB (see lib/upload-limits.ts)
 
 export type AllowedMimeType = keyof typeof ALLOWED_FILE_TYPES;
 
@@ -37,6 +44,17 @@ export async function validateFileType(
   for (const [mimeType, config] of Object.entries(ALLOWED_FILE_TYPES)) {
     for (const signature of config.magicBytes) {
       if (matchesSignature(bytes, signature)) {
+        // Special handling for WebP: verify WEBP string at offset 8
+        if (mimeType === 'image/webp') {
+          if (bytes.length >= 12) {
+            const webpCheck = bytes[8] === 0x57 && bytes[9] === 0x45 && 
+                             bytes[10] === 0x42 && bytes[11] === 0x50; // "WEBP"
+            if (webpCheck) {
+              return mimeType as AllowedMimeType;
+            }
+          }
+          continue; // RIFF but not WebP
+        }
         return mimeType as AllowedMimeType;
       }
     }
@@ -87,9 +105,17 @@ export async function validateFile(
   if (!mimeType) {
     return {
       valid: false,
-      error: 'Invalid file type. Only PDF, JPEG, and PNG files are allowed.',
+      error: 'Invalid file type. Only PDF, JPG, PNG, and WebP files are allowed.',
     };
   }
 
   return { valid: true, mimeType };
+}
+
+/**
+ * Gets the correct file extension for a given MIME type.
+ */
+export function getExtensionForMimeType(mimeType: AllowedMimeType): string {
+  const config = ALLOWED_FILE_TYPES[mimeType];
+  return config.extensions[0]; // Return primary extension
 }

@@ -5,15 +5,16 @@ import {
   upsertMember,
   createApplication,
   uploadApplicationDocument,
+  deleteApplicationAndDocuments,
 } from "@/lib/supabase/applications";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { sendAdminNotification } from "@/lib/email-notifications";
+import { MAX_UPLOAD_TOTAL_BYTES, UPLOAD_TOO_LARGE_MESSAGE, totalUploadBytes } from "@/lib/upload-limits";
+import { validateFile, getExtensionForMimeType } from "@/lib/file-validation";
 
 export const runtime = "nodejs";
-
-const MAX_PHOTO_BYTES = 5 * 1024 * 1024; // 5 MB
 
 const PLACEHOLDER_GIF_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
 
@@ -21,7 +22,7 @@ const PLACEHOLDER_GIF_BASE64 = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEA
 async function handleJson(request: Request) {
   const clientIP = getClientIP(request);
 
-  let body: { fullName?: string; email?: string; phone?: string; website?: string };
+  let body: { fullName?: string; email?: string; phone?: string; website?: string; turnstileToken?: string };
   try {
     body = await request.json();
   } catch {
@@ -32,6 +33,10 @@ async function handleJson(request: Request) {
   if (body.website && checkHoneypot(body.website)) {
     return NextResponse.json({ ok: true });
   }
+
+  // No Turnstile on this JSON endpoint: it is used by non-browser clients (mobile app)
+  // that cannot render the widget. It is protected by the honeypot and the IP/email
+  // rate limits below instead.
 
   const fullName = typeof body.fullName === "string" ? body.fullName.trim() : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
@@ -132,6 +137,10 @@ async function handleMultipart(request: Request) {
   }
 
   // Spam protection: honeypot check (silent rejection)
+  if (totalUploadBytes(formData) > MAX_UPLOAD_TOTAL_BYTES) {
+    return NextResponse.json({ ok: false, error: UPLOAD_TOO_LARGE_MESSAGE }, { status: 413 });
+  }
+
   if (checkHoneypot(formData.get("website"))) {
     return NextResponse.json({ ok: true });
   }
@@ -144,7 +153,7 @@ async function handleMultipart(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // Turnstile verification (only if configured)
+  // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
     const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
     const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
@@ -227,8 +236,16 @@ async function handleMultipart(request: Request) {
   if (!(facial instanceof Blob) || facial.size === 0) {
     return NextResponse.json({ ok: false, error: "Facial photograph is required." }, { status: 400 });
   }
-  if (facial.size > MAX_PHOTO_BYTES) {
-    return NextResponse.json({ ok: false, error: "Photo must be smaller than 5 MB." }, { status: 400 });
+
+  // Validate file type and size with magic byte checking
+  const validation = await validateFile(facial);
+  if (!validation.valid) {
+    return NextResponse.json({ ok: false, error: validation.error }, { status: 400 });
+  }
+
+  // Ensure we only accept image types for facial photos
+  if (!validation.mimeType.startsWith('image/')) {
+    return NextResponse.json({ ok: false, error: "Facial photo must be an image file (JPG, PNG, or WebP)." }, { status: 400 });
   }
 
   // Create or update member record
@@ -297,19 +314,25 @@ async function handleMultipart(request: Request) {
     );
   }
 
-  // Upload facial photo
+  // Upload facial photo with validated type
+  const fileExtension = getExtensionForMimeType(validation.mimeType);
   const photoUpload = await uploadApplicationDocument({
     application_id: appResult.application_id,
     member_id: memberResult.member_id,
     document_type: 'facial_photo',
     file: facial,
-    file_name: 'facial-photo.jpg',
-    mime_type: facial.type || 'image/jpeg',
+    file_name: `facial-photo${fileExtension}`,
+    mime_type: validation.mimeType,
   });
 
   if (!photoUpload) {
     console.error('Failed to upload facial photo for application', appResult.application_id);
-    // Continue anyway - application is saved
+
+    await deleteApplicationAndDocuments(appResult.application_id);
+    return NextResponse.json(
+      { ok: false, error: "Failed to upload facial photo. Please try again." },
+      { status: 500 },
+    );
   }
 
   // Send admin notification
