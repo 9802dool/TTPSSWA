@@ -57,6 +57,8 @@ export function parseGuestMeals(
   guests: number,
 ): GuestMealSelection[] | string {
   if (body.guestMealSelections === undefined || body.guestMealSelections === null) {
+    // An array here is a malformed per-guest payload, not the legacy flags object.
+    if (Array.isArray(body.meals)) return "Invalid meal selections.";
     const m =
       typeof body.meals === "object" && body.meals !== null
         ? (body.meals as Record<string, unknown>)
