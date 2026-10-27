@@ -19,6 +19,18 @@ const nextConfig = {
         permanent: true,
       },
       {
+        // Legacy signup page. Done here (not only in the page) so the response has a
+        // real Location header; a statically prerendered redirect() does not.
+        source: "/membership-registration",
+        destination: "/become-a-member",
+        permanent: false,
+      },
+      {
+        source: "/admin/dashboard",
+        destination: "/admin/applications",
+        permanent: false,
+      },
+      {
         source: "/dashboard/apply-membership",
         destination: "/services/membership-application",
         permanent: false,
