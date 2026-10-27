@@ -235,6 +235,7 @@ export async function getApplications(filters?: {
   type?: ApplicationType;
   status?: ApplicationStatus;
   member_id?: string;
+  member_ids?: string[];
   limit?: number;
   offset?: number;
   count?: boolean;
@@ -256,6 +257,10 @@ export async function getApplications(filters?: {
   if (filters?.member_id) {
     query = query.eq('member_id', filters.member_id);
   }
+  if (filters?.member_ids) {
+    if (filters.member_ids.length === 0) return [];
+    query = query.in('member_id', filters.member_ids);
+  }
   if (filters?.limit) {
     query = query.limit(filters.limit);
   }
@@ -271,6 +276,59 @@ export async function getApplications(filters?: {
   }
 
   return data || [];
+}
+
+/**
+ * Builds a PostgREST `.or()` filter that matches `search` (case-insensitive,
+ * substring) in any of `columns`. User input is reduced to a safe character set
+ * and double-quoted, so it cannot inject extra filters through `,`, `(`, `)`,
+ * `.` or quotes, and PostgREST/SQL wildcards (`*`, `%`, `_`) and backslashes are
+ * removed. Returns null when nothing searchable is left.
+ */
+// Anything except letters, digits, spaces and @ . - ' (built at runtime: TS target lacks the u flag).
+const SEARCH_DISALLOWED = new RegExp("[^\\p{L}\\p{N}@.\\-' ]", 'gu');
+
+export function buildMemberSearchFilter(search: string, columns: readonly string[]): string | null {
+  const cleaned = search
+    .normalize('NFKC')
+    .replace(SEARCH_DISALLOWED, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 100);
+  if (!cleaned) return null;
+  return columns.map((c) => `${c}.ilike."%${cleaned}%"`).join(',');
+}
+
+/** A page of applications (newest first) plus the total count, for admin pagination. */
+export async function getApplicationsPage(opts: {
+  limit: number;
+  offset: number;
+}): Promise<{ applications: Application[]; total: number }> {
+  const supabase = createServiceClient();
+  if (!supabase) return { applications: [], total: 0 };
+  const { data, error, count } = await supabase
+    .from('applications')
+    .select('*', { count: 'exact' })
+    .order('submitted_at', { ascending: false })
+    .range(opts.offset, opts.offset + opts.limit - 1);
+  if (error) {
+    console.error('Error fetching applications page:', error);
+    return { applications: [], total: 0 };
+  }
+  return { applications: data || [], total: count ?? 0 };
+}
+
+/** Parses ?page= / ?limit= safely (NaN, negatives and huge values fall back to sane bounds). */
+export function parsePagination(
+  pageParam: string | undefined,
+  limitParam: string | undefined,
+  defaults: { limit: number; min: number; max: number } = { limit: 50, min: 10, max: 100 },
+): { page: number; limit: number; offset: number } {
+  const p = Number.parseInt(pageParam ?? '', 10);
+  const l = Number.parseInt(limitParam ?? '', 10);
+  const page = Number.isFinite(p) && p >= 1 ? Math.min(p, 100_000) : 1;
+  const limit = Number.isFinite(l) ? Math.min(defaults.max, Math.max(defaults.min, l)) : defaults.limit;
+  return { page, limit, offset: (page - 1) * limit };
 }
 
 /**
@@ -295,11 +353,13 @@ export async function getMembersPaginated(filters?: {
   }
 
   if (filters?.search) {
-    // Search across multiple fields using OR
-    const searchLower = filters.search.toLowerCase();
-    query = query.or(
-      `full_name.ilike.%${searchLower}%,email.ilike.%${searchLower}%,service_number.ilike.%${searchLower}%,username.ilike.%${searchLower}%`
-    );
+    const orFilter = buildMemberSearchFilter(filters.search, [
+      'full_name',
+      'email',
+      'service_number',
+      'username',
+    ]);
+    if (orFilter) query = query.or(orFilter);
   }
 
   if (filters?.offset !== undefined && filters?.limit) {
@@ -485,9 +545,8 @@ export async function getMembers(filters?: {
 
   if (filters?.search) {
     const search = filters.search.toLowerCase();
-    query = query.or(
-      `full_name.ilike.%${search}%,email.ilike.%${search}%,service_number.ilike.%${search}%`,
-    );
+    const orFilter = buildMemberSearchFilter(search, ['full_name', 'email', 'service_number']);
+    if (orFilter) query = query.or(orFilter);
   }
 
   if (filters?.limit) {

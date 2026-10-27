@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
-import { MAX_UPLOAD_FILE_BYTES, checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
+import { MAX_DIRECT_UPLOAD_FILE_BYTES, uploadErrorMessage } from "@/lib/upload-limits";
+import {
+  UploadError,
+  checkDocuments,
+  formFieldsToJson,
+  uploadDocuments,
+  type UploadedRef,
+} from "@/lib/direct-upload-client";
 import Link from "next/link";
 import {
   AssociationFormHeader,
@@ -30,7 +37,7 @@ const CATEGORIES = [
 
 const DISCIPLINARY = new Set<string>(["Three Man Tribunal", "Ordinary Tribunal"]);
 
-const MAX_DOCUMENT_BYTES = MAX_UPLOAD_FILE_BYTES;
+const MAX_DOCUMENT_BYTES = MAX_DIRECT_UPLOAD_FILE_BYTES;
 
 const LEGAL_AID_DOCUMENTS = [
   { name: "reportFromApplicant", label: "Report from Applicant", required: true },
@@ -81,7 +88,7 @@ export function LegalAidApplicationForm() {
       }
       if (uploaded && file instanceof File && file.size > MAX_DOCUMENT_BYTES) {
         setStatus("error");
-        setMessage(`${doc.label} must be 4 MB or smaller.`);
+        setMessage(`${doc.label} must be 10 MB or smaller.`);
         return;
       }
     }
@@ -115,23 +122,34 @@ export function LegalAidApplicationForm() {
         .join("\n"),
     );
 
-    const uploadTooLarge = checkUploadTotal(fd);
-    if (uploadTooLarge) {
+    const docError = checkDocuments(fd, LEGAL_AID_DOCUMENTS);
+    if (docError) {
       setStatus("error");
-      setMessage(uploadTooLarge);
+      setMessage(docError);
       return;
     }
 
-    // Add Turnstile token if available
-    if (turnstileToken) {
-      fd.set("turnstileToken", turnstileToken);
-    }
-
     setStatus("loading");
+    // Documents go straight to storage via signed URLs; the form itself is sent as JSON.
+    let uploads: UploadedRef[];
+    try {
+      uploads = await uploadDocuments(fd, LEGAL_AID_DOCUMENTS);
+    } catch (err) {
+      setStatus("error");
+      setMessage(err instanceof UploadError ? err.message : "Could not upload your documents. Please try again.");
+      return;
+    }
+    const payload = {
+      ...formFieldsToJson(fd, []),
+      uploads,
+      ...(turnstileToken ? { turnstileToken } : {}),
+    };
+
     try {
       const res = await fetch("/api/legal-aid-application", {
         method: "POST",
-        body: fd,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -464,7 +482,7 @@ export function LegalAidApplicationForm() {
         <section className="mt-6 border-t border-black pt-4">
           <h5 className="text-xs font-bold uppercase">Documents</h5>
           <p className="mt-1 text-[11px] uppercase">
-            PDF, JPG, PNG, or WebP. Maximum 4 MB each.
+            PDF, JPG, PNG, or WebP. Maximum 10 MB each.
           </p>
           <div className="mt-3 space-y-3">
             {LEGAL_AID_DOCUMENTS.map((doc) => (

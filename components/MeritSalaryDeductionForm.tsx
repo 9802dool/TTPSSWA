@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
-import { MAX_UPLOAD_FILE_BYTES, checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
+import { MAX_DIRECT_UPLOAD_FILE_BYTES, uploadErrorMessage } from "@/lib/upload-limits";
+import {
+  UploadError,
+  checkDocuments,
+  formFieldsToJson,
+  uploadDocuments,
+  type UploadedRef,
+} from "@/lib/direct-upload-client";
 import {
   AssociationFormHeader,
   AssociationOfficersFooter,
@@ -16,7 +23,9 @@ const inline =
 
 const label = "whitespace-nowrap text-xs font-bold uppercase";
 
-const MAX_DOCUMENT_BYTES = MAX_UPLOAD_FILE_BYTES;
+const MAX_DOCUMENT_BYTES = MAX_DIRECT_UPLOAD_FILE_BYTES;
+
+const DOCUMENTS = [{ name: "signedSalaryDeduction", label: "the signed salary deduction form" }] as const;
 
 export function MeritSalaryDeductionForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -40,27 +49,38 @@ export function MeritSalaryDeductionForm() {
     }
     if (file.size > MAX_DOCUMENT_BYTES) {
       setStatus("error");
-      setMessage("The signed salary deduction form must be 4 MB or smaller.");
+      setMessage("The signed salary deduction form must be 10 MB or smaller.");
       return;
     }
 
-    const uploadTooLarge = checkUploadTotal(fd);
-    if (uploadTooLarge) {
+    const docError = checkDocuments(fd, DOCUMENTS);
+    if (docError) {
       setStatus("error");
-      setMessage(uploadTooLarge);
+      setMessage(docError);
       return;
-    }
-
-    // Add Turnstile token if available
-    if (turnstileToken) {
-      fd.set("turnstileToken", turnstileToken);
     }
 
     setStatus("loading");
+    // Documents go straight to storage via signed URLs; the form itself is sent as JSON.
+    let uploads: UploadedRef[];
+    try {
+      uploads = await uploadDocuments(fd, DOCUMENTS);
+    } catch (err) {
+      setStatus("error");
+      setMessage(err instanceof UploadError ? err.message : "Could not upload your documents. Please try again.");
+      return;
+    }
+    const payload = {
+      ...formFieldsToJson(fd, []),
+      uploads,
+      ...(turnstileToken ? { turnstileToken } : {}),
+    };
+
     try {
       const res = await fetch("/api/merit-salary-deduction", {
         method: "POST",
-        body: fd,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -106,12 +126,12 @@ export function MeritSalaryDeductionForm() {
           id="signedSalaryDeduction"
           name="signedSalaryDeduction"
           type="file"
-          accept=".pdf,.jpg,.jpeg,.png"
+          accept=".pdf,.jpg,.jpeg,.png,.webp"
           required
           form="meritSalaryDeductionForm"
           className="text-[11px]"
         />
-        <p className="mt-2 text-[11px]">PDF, JPG, or PNG. Maximum 4 MB.</p>
+        <p className="mt-2 text-[11px]">PDF, JPG, PNG, or WebP. Maximum 10 MB.</p>
       </div>
 
       <form id="meritSalaryDeductionForm" onSubmit={(e) => void onSubmit(e)}>

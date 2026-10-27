@@ -104,15 +104,15 @@ export async function loadHotelBookings(filters?: {
 
   // Filter by date range using JSON operators
   if (filters?.startDate) {
-    query = query.gte('application_data->checkIn', filters.startDate);
+    query = query.gte('application_data->>checkIn', filters.startDate);
   }
   if (filters?.endDate) {
-    query = query.lte('application_data->checkIn', filters.endDate);
+    query = query.lte('application_data->>checkIn', filters.endDate);
   }
 
   // Filter by room category using JSON operators
   if (filters?.roomCategory) {
-    query = query.eq('application_data->roomCategory', filters.roomCategory);
+    query = query.eq('application_data->>roomCategory', filters.roomCategory);
   }
 
   const { data: applications, error } = await query;

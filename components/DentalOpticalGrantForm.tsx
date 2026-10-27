@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
-import { MAX_UPLOAD_FILE_BYTES, checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
+import { MAX_DIRECT_UPLOAD_FILE_BYTES, uploadErrorMessage } from "@/lib/upload-limits";
+import {
+  UploadError,
+  checkDocuments,
+  formFieldsToJson,
+  uploadDocuments,
+  type UploadedRef,
+} from "@/lib/direct-upload-client";
 import {
   AssociationFormHeader,
   AssociationOfficersFooter,
@@ -17,7 +24,9 @@ const line =
 
 const label = "whitespace-nowrap text-xs font-bold uppercase";
 
-const MAX_DOCUMENT_BYTES = MAX_UPLOAD_FILE_BYTES;
+const MAX_DOCUMENT_BYTES = MAX_DIRECT_UPLOAD_FILE_BYTES;
+
+const DOCUMENTS = [{ name: "grantReceiptInvoiceDoc", label: "the original receipt and/or invoice" }] as const;
 
 export function DentalOpticalGrantForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -50,27 +59,38 @@ export function DentalOpticalGrantForm() {
     }
     if (file.size > MAX_DOCUMENT_BYTES) {
       setStatus("error");
-      setMessage("The receipt or invoice must be 4 MB or smaller.");
+      setMessage("The receipt or invoice must be 10 MB or smaller.");
       return;
     }
 
-    const uploadTooLarge = checkUploadTotal(fd);
-    if (uploadTooLarge) {
+    const docError = checkDocuments(fd, DOCUMENTS);
+    if (docError) {
       setStatus("error");
-      setMessage(uploadTooLarge);
+      setMessage(docError);
       return;
-    }
-
-    // Add Turnstile token if available
-    if (turnstileToken) {
-      fd.set("turnstileToken", turnstileToken);
     }
 
     setStatus("loading");
+    // Documents go straight to storage via signed URLs; the form itself is sent as JSON.
+    let uploads: UploadedRef[];
+    try {
+      uploads = await uploadDocuments(fd, DOCUMENTS);
+    } catch (err) {
+      setStatus("error");
+      setMessage(err instanceof UploadError ? err.message : "Could not upload your documents. Please try again.");
+      return;
+    }
+    const payload = {
+      ...formFieldsToJson(fd, ["grantType"]),
+      uploads,
+      ...(turnstileToken ? { turnstileToken } : {}),
+    };
+
     try {
       const res = await fetch("/api/dental-optical-grant", {
         method: "POST",
-        body: fd,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -410,12 +430,12 @@ export function DentalOpticalGrantForm() {
               id="dog-grantReceiptInvoiceDoc"
               name="grantReceiptInvoiceDoc"
               type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
+              accept=".pdf,.jpg,.jpeg,.png,.webp"
               required
               className="text-xs"
             />
           </div>
-          <p className="mt-2 text-[11px]">PDF, JPG, or PNG. Maximum 4 MB. This upload is not part of the printed form.</p>
+          <p className="mt-2 text-[11px]">PDF, JPG, PNG, or WebP. Maximum 10 MB. This upload is not part of the printed form.</p>
         </div>
 
         <div className="mt-6">

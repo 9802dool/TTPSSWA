@@ -1,14 +1,6 @@
 /**
  * Cron job to clean up orphaned pending uploads.
- * Run daily via Vercel Cron or external scheduler.
- * 
- * Add to vercel.json:
- * {
- *   "crons": [{
- *     "path": "/api/cron/cleanup-orphaned-uploads",
- *     "schedule": "0 2 * * *"
- *   }]
- * }
+ * Runs daily via Vercel Cron (registered in vercel.json). Requires CRON_SECRET.
  */
 
 import { NextResponse } from "next/server";
@@ -18,11 +10,10 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 export async function GET(request: Request) {
-  // Verify cron secret (if set)
+  // Fail closed: only Vercel Cron (which sends "Authorization: Bearer $CRON_SECRET") may run this.
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
-  
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json(
       { ok: false, error: 'Unauthorized' },
       { status: 401 },

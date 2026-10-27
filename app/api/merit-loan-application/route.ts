@@ -10,6 +10,8 @@ import {
   verifyUploadedFile,
   moveUploadedFile,
   recordUploadedDocument,
+  matchDocumentUploads,
+  discardStoredFile,
 } from "@/lib/supabase/direct-upload";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
@@ -44,6 +46,13 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
+    // Old cached pages still post multipart form data; ask them to reload.
+    return NextResponse.json(
+      { ok: false, error: "This form has been updated. Please refresh the page and submit again." },
+      { status: 400 },
+    );
+  }
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
   }
 
@@ -264,7 +273,12 @@ export async function POST(request: Request) {
     documentType: string;
   }> = [];
 
-  for (const upload of uploads) {
+  const matched = matchDocumentUploads(uploads, MERIT_DOCUMENTS);
+  if (!matched.ok) {
+    return NextResponse.json({ ok: false, error: matched.error }, { status: 400 });
+  }
+
+  for (const upload of matched.uploads) {
     if (
       typeof upload !== 'object' ||
       upload === null ||
@@ -294,7 +308,7 @@ export async function POST(request: Request) {
       fileName: uploadInfo.fileName,
       mimeType: verification.mimeType,
       size: verification.size,
-      documentType: uploadInfo.documentType,
+      documentType: upload.label,
     });
   }
 
@@ -414,6 +428,7 @@ export async function POST(request: Request) {
 
     if (!recordResult) {
       console.error('Failed to record document metadata');
+      await discardStoredFile(moveResult.path);
       await deleteApplicationAndDocuments(appResult.application_id);
       return NextResponse.json(
         { ok: false, error: `Failed to process uploaded documents. Please try again.` },

@@ -9,6 +9,7 @@ import {
   verifyUploadedFile,
   moveUploadedFile,
   recordUploadedDocument,
+  discardStoredFile,
 } from "@/lib/supabase/direct-upload";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
@@ -31,6 +32,13 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
+    // Old cached pages still post multipart form data; ask them to reload.
+    return NextResponse.json(
+      { ok: false, error: "This form has been updated. Please refresh the page and submit again." },
+      { status: 400 },
+    );
+  }
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
   }
 
@@ -263,6 +271,7 @@ export async function POST(request: Request) {
 
   if (!recordResult) {
     console.error('Failed to record document metadata');
+    await discardStoredFile(moveResult.path);
     await deleteApplicationAndDocuments(appResult.application_id);
     return NextResponse.json(
       { ok: false, error: `Failed to process uploaded document. Please try again.` },

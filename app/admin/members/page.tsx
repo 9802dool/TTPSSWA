@@ -6,7 +6,7 @@ import SiteHeader from "@/components/SiteHeader";
 import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-auth";
 import { getAllMemberApplications } from "@/lib/member-signup-storage";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
-import { getMembersPaginated, getApplications } from "@/lib/supabase/applications";
+import { getMembersPaginated, getApplications, parsePagination } from "@/lib/supabase/applications";
 import type { Member, Application } from "@/lib/supabase/types";
 
 type Props = {
@@ -17,8 +17,7 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
   const sp = await Promise.resolve(searchParams);
   const nameQuery = (sp.q ?? "").trim();
   const statusFilter = (sp.status ?? "all").trim().toLowerCase();
-  const page = Math.max(1, parseInt(sp.page ?? "1", 10));
-  const limit = Math.min(100, Math.max(10, parseInt(sp.limit ?? "50", 10)));
+  const { page, limit, offset } = parsePagination(sp.page, sp.limit);
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
@@ -42,17 +41,21 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
   if (isSupabaseConfigured()) {
     try {
       supabaseResult = await getMembersPaginated({
-        status: statusFilter === 'all' ? undefined : statusFilter,
+        // The filter offers pending/accepted/rejected (application outcome); members.member_status
+        // uses pending/active/suspended/retired. "accepted" maps to active members. "rejected" has
+        // no member status, so it is applied to the page's rows below.
+        status:
+          statusFilter === 'pending' ? 'pending' : statusFilter === 'accepted' ? 'active' : undefined,
         search: nameQuery || undefined,
         limit,
-        offset: (page - 1) * limit,
+        offset,
       });
-      // Fetch applications for status mapping (limited to current page's members)
+      // Fetch the membership applications of this page's members only (for status display)
       if (supabaseResult.members.length > 0) {
-        const memberIds = supabaseResult.members.map(m => m.id);
         supabaseApplications = await getApplications({
           type: 'membership_signup',
-          limit: 1000, // Get all applications for these members
+          member_ids: supabaseResult.members.map(m => m.id),
+          limit: 1000,
         });
       }
     } catch (e) {
@@ -154,7 +157,9 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
     }));
 
   // Show first page only includes Supabase (paginated); add legacy to end only on first page
-  const filtered = page === 1 ? [...allMembers, ...legacyFiltered] : allMembers;
+  const supabaseRows =
+    statusOk === "all" ? allMembers : allMembers.filter((m) => m.applicationStatus === statusOk);
+  const filtered = page === 1 ? [...supabaseRows, ...legacyFiltered] : supabaseRows;
   const totalCount = supabaseResult.total + (page === 1 ? legacyFiltered.length : 0);
   const totalPages = Math.ceil(totalCount / limit);
   const hasNextPage = page < totalPages;

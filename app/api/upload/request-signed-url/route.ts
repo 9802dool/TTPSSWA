@@ -3,23 +3,21 @@
  * Returns Supabase signed upload URLs that clients can POST files to.
  */
 
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { checkRateLimit, getClientIP } from "@/lib/rate-limit";
-import { createUploadToken } from "@/lib/upload-tokens";
+import { createUploadToken, isUploadTokenSecretConfigured } from "@/lib/upload-tokens";
+import {
+  DIRECT_UPLOAD_MIME_TYPES,
+  MAX_DIRECT_UPLOAD_FILE_BYTES,
+  MAX_DIRECT_UPLOAD_FILE_LABEL,
+} from "@/lib/upload-limits";
 
 export const runtime = "nodejs";
 
-const ALLOWED_MIME_TYPES = new Set([
-  'application/pdf',
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-]);
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB per file
+const ALLOWED_MIME_TYPES = new Set<string>(DIRECT_UPLOAD_MIME_TYPES);
+const MAX_FILE_SIZE = MAX_DIRECT_UPLOAD_FILE_BYTES;
 
 interface UploadRequest {
   fileName: string;
@@ -76,7 +74,8 @@ export async function POST(request: Request) {
     }
 
     const fileName = f.fileName.trim();
-    const mimeType = f.mimeType.toLowerCase().trim();
+    const rawMime = f.mimeType.toLowerCase().trim();
+    const mimeType = rawMime === 'image/jpg' ? 'image/jpeg' : rawMime;
     const fileSize = f.fileSize;
 
     if (!fileName || fileName.length > 255) {
@@ -88,14 +87,14 @@ export async function POST(request: Request) {
 
     if (!ALLOWED_MIME_TYPES.has(mimeType)) {
       return NextResponse.json(
-        { ok: false, error: `File type ${mimeType} is not allowed. Allowed: PDF, JPEG, PNG, GIF, WEBP.` },
+        { ok: false, error: `"${fileName}" is not an allowed file type. Please upload a PDF, JPG, PNG or WebP file.` },
         { status: 400 },
       );
     }
 
-    if (fileSize <= 0 || fileSize > MAX_FILE_SIZE) {
+    if (!Number.isFinite(fileSize) || fileSize <= 0 || fileSize > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { ok: false, error: `File size must be between 1 byte and 5 MB. Received: ${fileSize} bytes.` },
+        { ok: false, error: `"${fileName}" must be ${MAX_DIRECT_UPLOAD_FILE_LABEL} or smaller.` },
         { status: 400 },
       );
     }
@@ -104,7 +103,7 @@ export async function POST(request: Request) {
   }
 
   const supabase = createServiceClient();
-  if (!supabase) {
+  if (!supabase || !isUploadTokenSecretConfigured()) {
     return NextResponse.json(
       { ok: false, error: "Storage is not configured." },
       { status: 503 },
@@ -121,8 +120,8 @@ export async function POST(request: Request) {
   for (const file of files) {
     // Generate unique storage path
     const timestamp = Date.now();
-    const randomSuffix = Math.random().toString(36).substring(2, 12);
-    const sanitizedName = file.fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const randomSuffix = randomUUID();
+    const sanitizedName = file.fileName.replace(/[^a-zA-Z0-9._-]/g, '_').slice(-100);
     const storagePath = `pending/${timestamp}-${randomSuffix}-${sanitizedName}`;
 
     // Create signed upload URL (valid for 10 minutes)
