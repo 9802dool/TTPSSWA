@@ -34,7 +34,7 @@ export async function POST(request: Request) {
       password?: string;
       bootstrap?: boolean;
     };
-    email = typeof body.email === "string" ? body.email.trim() : "";
+    email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
     password = typeof body.password === "string" ? body.password : "";
     bootstrapMode = body.bootstrap === true;
   } catch {
