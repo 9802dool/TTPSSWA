@@ -5,12 +5,14 @@ import {
   upsertMember,
   createApplication,
   uploadApplicationDocument,
+  deleteApplicationAndDocuments,
 } from "@/lib/supabase/applications";
 import type { DentalOpticalGrantData } from "@/lib/supabase/types";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
+import { MAX_UPLOAD_TOTAL_BYTES, UPLOAD_TOO_LARGE_MESSAGE, totalUploadBytes } from "@/lib/upload-limits";
 import { validateFile, getExtensionForMimeType } from "@/lib/file-validation";
 
 export const runtime = "nodejs";
@@ -38,6 +40,10 @@ export async function POST(request: Request) {
   }
 
   // Spam protection: honeypot check (silent rejection)
+  if (totalUploadBytes(formData) > MAX_UPLOAD_TOTAL_BYTES) {
+    return NextResponse.json({ ok: false, error: UPLOAD_TOO_LARGE_MESSAGE }, { status: 413 });
+  }
+
   if (checkHoneypot(formData.get("website"))) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
@@ -308,6 +314,8 @@ export async function POST(request: Request) {
 
   if (!uploadResult) {
     console.error('Failed to upload receipt/invoice for application', appResult.application_id);
+
+    await deleteApplicationAndDocuments(appResult.application_id);
     return NextResponse.json(
       { ok: false, error: "Failed to upload document. Please try again." },
       { status: 500 },

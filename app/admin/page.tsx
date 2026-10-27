@@ -135,10 +135,10 @@ export default async function AdminPage({ searchParams }: Props) {
               </Link>
             )}
             <Link
-              href="/admin/dashboard"
+              href="/admin/applications"
               className="text-sm font-medium text-[var(--brand)] hover:underline"
             >
-              Registration documents
+              Applications
             </Link>
             <Link
               href="/admin/new-membership"

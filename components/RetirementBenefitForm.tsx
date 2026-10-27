@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
+import { MAX_UPLOAD_FILE_BYTES, checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
 import {
   AssociationFormHeader,
   AssociationOfficersFooter,
@@ -16,7 +17,7 @@ const line =
 
 const label = "whitespace-nowrap text-xs font-bold uppercase";
 
-const MAX_DOCUMENT_BYTES = 800 * 1024;
+const MAX_DOCUMENT_BYTES = MAX_UPLOAD_FILE_BYTES;
 
 export function RetirementBenefitForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -44,7 +45,14 @@ export function RetirementBenefitForm() {
     }
     if (file.size > MAX_DOCUMENT_BYTES) {
       setStatus("error");
-      setMessage("The departmental order or retirement letter must be 800 KB or smaller.");
+      setMessage("The departmental order or retirement letter must be 4 MB or smaller.");
+      return;
+    }
+
+    const uploadTooLarge = checkUploadTotal(fd);
+    if (uploadTooLarge) {
+      setStatus("error");
+      setMessage(uploadTooLarge);
       return;
     }
 
@@ -63,9 +71,12 @@ export function RetirementBenefitForm() {
         ok?: boolean;
         error?: string;
       };
+      // Turnstile tokens are single-use: get a fresh one for any retry
+      setTurnstileToken(null);
+      resetTurnstileWidgets();
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Something went wrong. Please try again.");
+        setMessage(uploadErrorMessage(res.status, data.error) ?? "Something went wrong. Please try again.");
         return;
       }
       setStatus("success");
@@ -307,7 +318,7 @@ export function RetirementBenefitForm() {
                 className="text-xs"
               />
             </div>
-            <p className="mt-2 text-[11px]">PDF, JPG, or PNG. Maximum 800 KB.</p>
+            <p className="mt-2 text-[11px]">PDF, JPG, or PNG. Maximum 4 MB.</p>
           </div>
 
           <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end">

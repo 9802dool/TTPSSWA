@@ -1,3 +1,4 @@
+import { MAX_UPLOAD_FILE_BYTES } from "./upload-limits";
 /**
  * File validation utilities with magic byte (file signature) verification.
  * Prevents MIME type spoofing by checking actual file contents.
@@ -24,7 +25,7 @@ export const ALLOWED_FILE_TYPES = {
   },
 } as const;
 
-export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+export const MAX_FILE_SIZE = MAX_UPLOAD_FILE_BYTES; // 4 MB (see lib/upload-limits.ts)
 
 export type AllowedMimeType = keyof typeof ALLOWED_FILE_TYPES;
 

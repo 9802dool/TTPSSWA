@@ -18,6 +18,23 @@ declare global {
   }
 }
 
+const activeWidgetIds = new Set<string>();
+
+/**
+ * Turnstile tokens are single-use. Call after every submit attempt so the
+ * applicant gets a fresh token if they need to submit again.
+ */
+export function resetTurnstileWidgets(): void {
+  if (typeof window === "undefined" || !window.turnstile) return;
+  activeWidgetIds.forEach((id) => {
+    try {
+      window.turnstile?.reset(id);
+    } catch {
+      /* ignore */
+    }
+  });
+}
+
 interface TurnstileWidgetProps {
   onToken?: (token: string) => void;
   onError?: () => void;
@@ -58,6 +75,7 @@ export function TurnstileWidget({ onToken, onError, onExpire }: TurnstileWidgetP
           "error-callback": onError,
           "expired-callback": onExpire,
         });
+        if (widgetIdRef.current) activeWidgetIds.add(widgetIdRef.current);
       } catch (error) {
         console.error("Failed to render Turnstile widget:", error);
       }
@@ -78,6 +96,7 @@ export function TurnstileWidget({ onToken, onError, onExpire }: TurnstileWidgetP
       return () => {
         clearInterval(checkInterval);
         if (widgetIdRef.current && window.turnstile) {
+          activeWidgetIds.delete(widgetIdRef.current);
           window.turnstile.remove(widgetIdRef.current);
           widgetIdRef.current = null;
         }

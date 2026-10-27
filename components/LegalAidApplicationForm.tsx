@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
+import { MAX_UPLOAD_FILE_BYTES, checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
 import Link from "next/link";
 import {
   AssociationFormHeader,
@@ -29,7 +30,7 @@ const CATEGORIES = [
 
 const DISCIPLINARY = new Set<string>(["Three Man Tribunal", "Ordinary Tribunal"]);
 
-const MAX_DOCUMENT_BYTES = 800 * 1024;
+const MAX_DOCUMENT_BYTES = MAX_UPLOAD_FILE_BYTES;
 
 const LEGAL_AID_DOCUMENTS = [
   { name: "reportFromApplicant", label: "Report from Applicant", required: true },
@@ -80,7 +81,7 @@ export function LegalAidApplicationForm() {
       }
       if (uploaded && file instanceof File && file.size > MAX_DOCUMENT_BYTES) {
         setStatus("error");
-        setMessage(`${doc.label} must be 800 KB or smaller.`);
+        setMessage(`${doc.label} must be 4 MB or smaller.`);
         return;
       }
     }
@@ -114,6 +115,13 @@ export function LegalAidApplicationForm() {
         .join("\n"),
     );
 
+    const uploadTooLarge = checkUploadTotal(fd);
+    if (uploadTooLarge) {
+      setStatus("error");
+      setMessage(uploadTooLarge);
+      return;
+    }
+
     // Add Turnstile token if available
     if (turnstileToken) {
       fd.set("turnstileToken", turnstileToken);
@@ -129,9 +137,12 @@ export function LegalAidApplicationForm() {
         ok?: boolean;
         error?: string;
       };
+      // Turnstile tokens are single-use: get a fresh one for any retry
+      setTurnstileToken(null);
+      resetTurnstileWidgets();
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Something went wrong. Please try again.");
+        setMessage(uploadErrorMessage(res.status, data.error) ?? "Something went wrong. Please try again.");
         return;
       }
       setStatus("success");
@@ -453,7 +464,7 @@ export function LegalAidApplicationForm() {
         <section className="mt-6 border-t border-black pt-4">
           <h5 className="text-xs font-bold uppercase">Documents</h5>
           <p className="mt-1 text-[11px] uppercase">
-            PDF, JPG, PNG, or WebP. Maximum 800 KB each.
+            PDF, JPG, PNG, or WebP. Maximum 4 MB each.
           </p>
           <div className="mt-3 space-y-3">
             {LEGAL_AID_DOCUMENTS.map((doc) => (

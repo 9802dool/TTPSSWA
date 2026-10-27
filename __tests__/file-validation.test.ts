@@ -14,13 +14,13 @@ describe("file validation", () => {
       expect(validateFileSize(file)).toBe(true);
     });
 
-    it("rejects files over 5 MB", () => {
+    it("rejects files over the size limit", () => {
       const content = new Uint8Array(MAX_FILE_SIZE + 1);
       const file = new File([content], "toolarge.pdf");
       expect(validateFileSize(file)).toBe(false);
     });
 
-    it("accepts 5 MB files", () => {
+    it("accepts files at the size limit", () => {
       const content = new Uint8Array(MAX_FILE_SIZE);
       const file = new File([content], "exactly5mb.pdf");
       expect(validateFileSize(file)).toBe(true);
@@ -118,7 +118,7 @@ describe("file validation", () => {
       }
     });
 
-    it("rejects file over 5 MB", async () => {
+    it("rejects file over the size limit", async () => {
       const largeContent = new Uint8Array(MAX_FILE_SIZE + 1);
       // Add PDF magic bytes so type validation passes
       largeContent[0] = 0x25;
@@ -129,7 +129,7 @@ describe("file validation", () => {
       const result = await validateFile(file);
       expect(result.valid).toBe(false);
       if (!result.valid) {
-        expect(result.error).toContain("5 MB");
+        expect(result.error).toContain("4 MB");
       }
     });
   });

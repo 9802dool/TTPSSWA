@@ -10,7 +10,8 @@ import {
   MEMBERSHIP_DEFAULT_PHONE_COUNTRY_CODE,
   MEMBERSHIP_PHONE_COUNTRY_CODES,
 } from "@/lib/phone-country-codes";
-import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
+import { checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
 
 const line =
   "w-full min-w-0 border-0 border-b border-black bg-transparent px-1 py-0.5 text-[13px] uppercase text-black outline-none placeholder:normal-case placeholder:text-neutral-400 focus:border-[#0d2a70]";
@@ -44,6 +45,13 @@ export function SalaryDeductionForm() {
       .join(" ");
     fd.set("commencementDate", commencing);
     
+    const uploadTooLarge = checkUploadTotal(fd);
+    if (uploadTooLarge) {
+      setStatus("error");
+      setMessage(uploadTooLarge);
+      return;
+    }
+
     // Add Turnstile token if available
     if (turnstileToken) {
       fd.set("turnstileToken", turnstileToken);
@@ -57,9 +65,12 @@ export function SalaryDeductionForm() {
         ok?: boolean;
         error?: string;
       };
+      // Turnstile tokens are single-use: get a fresh one for any retry
+      setTurnstileToken(null);
+      resetTurnstileWidgets();
       if (!res.ok) {
         setStatus("error");
-        setMessage(data.error ?? "Something went wrong. Please try again.");
+        setMessage(uploadErrorMessage(res.status, data.error) ?? "Something went wrong. Please try again.");
         return;
       }
       setStatus("success");
