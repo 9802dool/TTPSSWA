@@ -2,7 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { TurnstileWidget, resetTurnstileWidgets } from "@/components/TurnstileWidget";
-import { MAX_UPLOAD_FILE_BYTES, checkUploadTotal, uploadErrorMessage } from "@/lib/upload-limits";
+import { MAX_DIRECT_UPLOAD_FILE_BYTES, uploadErrorMessage } from "@/lib/upload-limits";
+import {
+  UploadError,
+  checkDocuments,
+  formFieldsToJson,
+  uploadDocuments,
+  type UploadedRef,
+} from "@/lib/direct-upload-client";
 import Link from "next/link";
 import {
   AssociationFormHeader,
@@ -21,7 +28,7 @@ const label = "whitespace-nowrap text-xs font-bold uppercase";
 const section =
   "mb-3 mt-4 border border-[#ccc] bg-[#e6ecf8] px-2 py-1 text-xs font-bold uppercase";
 
-const MAX_DOCUMENT_BYTES = MAX_UPLOAD_FILE_BYTES;
+const MAX_DOCUMENT_BYTES = MAX_DIRECT_UPLOAD_FILE_BYTES;
 
 const MERIT_DOCUMENTS = [
   {
@@ -59,28 +66,39 @@ export function MeritLoanForm() {
       }
       if (file.size > MAX_DOCUMENT_BYTES) {
         setStatus("error");
-        setMessage(`${doc.label} must be 4 MB or smaller.`);
+        setMessage(`${doc.label} must be 10 MB or smaller.`);
         return;
       }
     }
 
-    const uploadTooLarge = checkUploadTotal(fd);
-    if (uploadTooLarge) {
+    const docError = checkDocuments(fd, MERIT_DOCUMENTS);
+    if (docError) {
       setStatus("error");
-      setMessage(uploadTooLarge);
+      setMessage(docError);
       return;
     }
 
-    // Add Turnstile token if available
-    if (turnstileToken) {
-      fd.set("turnstileToken", turnstileToken);
-    }
-
     setStatus("loading");
+    // Documents go straight to storage via signed URLs; the form itself is sent as JSON.
+    let uploads: UploadedRef[];
+    try {
+      uploads = await uploadDocuments(fd, MERIT_DOCUMENTS);
+    } catch (err) {
+      setStatus("error");
+      setMessage(err instanceof UploadError ? err.message : "Could not upload your documents. Please try again.");
+      return;
+    }
+    const payload = {
+      ...formFieldsToJson(fd, []),
+      uploads,
+      ...(turnstileToken ? { turnstileToken } : {}),
+    };
+
     try {
       const res = await fetch("/api/merit-loan-application", {
         method: "POST",
-        body: fd,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
@@ -390,12 +408,12 @@ export function MeritLoanForm() {
                 name={doc.name}
                 type="file"
                 required
-                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp"
                 className="text-[11px]"
               />
             </div>
           ))}
-          <p className="text-[10px] uppercase text-neutral-700">PDF, JPG, or PNG. Maximum 4 MB each.</p>
+          <p className="text-[10px] uppercase text-neutral-700">PDF, JPG, PNG, or WebP. Maximum 10 MB each.</p>
         </div>
 
         <h5 className={section}>Merit details</h5>

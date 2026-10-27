@@ -6,17 +6,18 @@ import SiteHeader from "@/components/SiteHeader";
 import { verifyAdminSession, getAdminCookieName } from "@/lib/admin-auth";
 import { getAllMemberApplications } from "@/lib/member-signup-storage";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
-import { getMembers, getApplications } from "@/lib/supabase/applications";
+import { getMembersPaginated, getApplications, parsePagination } from "@/lib/supabase/applications";
 import type { Member, Application } from "@/lib/supabase/types";
 
 type Props = {
-  searchParams: Promise<{ q?: string; status?: string }> | { q?: string; status?: string };
+  searchParams: Promise<{ q?: string; status?: string; page?: string; limit?: string }> | { q?: string; status?: string; page?: string; limit?: string };
 };
 
 export default async function AdminMembersDatabasePage({ searchParams }: Props) {
   const sp = await Promise.resolve(searchParams);
   const nameQuery = (sp.q ?? "").trim();
   const statusFilter = (sp.status ?? "all").trim().toLowerCase();
+  const { page, limit, offset } = parsePagination(sp.page, sp.limit);
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
@@ -26,9 +27,9 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
     redirect("/admin/login?next=/admin/members");
   }
 
-  // Fetch from both Redis (legacy) and Supabase (new)
+  // Fetch from both Redis (legacy) and Supabase (new) with server-side pagination
   let redisMembers: Awaited<ReturnType<typeof getAllMemberApplications>> = [];
-  let supabaseMembers: Member[] = [];
+  let supabaseResult: { members: Member[]; total: number } = { members: [], total: 0 };
   let supabaseApplications: Application[] = [];
 
   try {
@@ -39,14 +40,24 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
 
   if (isSupabaseConfigured()) {
     try {
-      supabaseMembers = await getMembers({
-        status: statusFilter === 'all' ? undefined : statusFilter,
-        limit: 1000,
+      supabaseResult = await getMembersPaginated({
+        // The filter offers pending/accepted/rejected (application outcome); members.member_status
+        // uses pending/active/suspended/retired. "accepted" maps to active members. "rejected" has
+        // no member status, so it is applied to the page's rows below.
+        status:
+          statusFilter === 'pending' ? 'pending' : statusFilter === 'accepted' ? 'active' : undefined,
+        search: nameQuery || undefined,
+        limit,
+        offset,
       });
-      supabaseApplications = await getApplications({
-        type: 'membership_signup',
-        limit: 1000,
-      });
+      // Fetch the membership applications of this page's members only (for status display)
+      if (supabaseResult.members.length > 0) {
+        supabaseApplications = await getApplications({
+          type: 'membership_signup',
+          member_ids: supabaseResult.members.map(m => m.id),
+          limit: 1000,
+        });
+      }
     } catch (e) {
       console.error("Error fetching Supabase members:", e);
     }
@@ -72,9 +83,10 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
     createdAt?: string;
   }
 
+  // Combine Supabase (paginated, server-filtered) with Redis (filtered client-side for backward compat)
   const allMembers: DisplayMember[] = [
-    // Supabase members (primary)
-    ...supabaseMembers.map(m => {
+    // Supabase members (already paginated and filtered server-side)
+    ...supabaseResult.members.map(m => {
       // Find associated application to get status
       const app = supabaseApplications.find(a => a.member_id === m.id);
       const status = app?.status === 'approved' ? 'accepted' 
@@ -99,28 +111,10 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
         created_at: m.created_at,
       };
     }),
-    // Redis members (legacy - only show if not in Supabase)
-    ...redisMembers
-      .filter(rm => !supabaseMembers.some(sm => sm.email === rm.email))
-      .map(m => ({
-        id: m.id,
-        fullName: m.fullName,
-        email: m.email,
-        regimentalNumber: m.regimentalNumber,
-        username: m.username || null,
-        applicationStatus: m.applicationStatus,
-        rank: m.rank,
-        phone: m.phone,
-        address: m.address,
-        dateOfBirth: m.dateOfBirth || '',
-        financialMember: m.financialMember || '',
-        photoMimeType: m.photoMimeType,
-        photoBase64: m.photoBase64,
-        source: 'redis' as const,
-        createdAt: m.createdAt,
-      })),
   ];
 
+  // For legacy Redis members, apply client-side filtering (not paginated since small dataset)
+  const qLower = nameQuery.toLowerCase();
   const statusOk =
     statusFilter === "pending" ||
     statusFilter === "accepted" ||
@@ -128,26 +122,48 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
       ? statusFilter
       : "all";
 
-  let rows = statusOk !== "all"
-    ? allMembers.filter((m) => m.applicationStatus === statusOk)
-    : allMembers;
+  const legacyFiltered = redisMembers
+    .filter(rm => !supabaseResult.members.some(sm => sm.email === rm.email))
+    .filter(m => statusOk === "all" || m.applicationStatus === statusOk)
+    .filter(m => {
+      if (!nameQuery) return true;
+      const name = m.fullName.toLowerCase();
+      const reg = m.regimentalNumber.toLowerCase();
+      const user = (m.username ?? "").toLowerCase();
+      const mail = m.email.toLowerCase();
+      return (
+        name.includes(qLower) ||
+        reg.includes(qLower) ||
+        user.includes(qLower) ||
+        mail.includes(qLower)
+      );
+    })
+    .map(m => ({
+      id: m.id,
+      fullName: m.fullName,
+      email: m.email,
+      regimentalNumber: m.regimentalNumber,
+      username: m.username || null,
+      applicationStatus: m.applicationStatus,
+      rank: m.rank,
+      phone: m.phone,
+      address: m.address,
+      dateOfBirth: m.dateOfBirth || '',
+      financialMember: m.financialMember || '',
+      photoMimeType: m.photoMimeType,
+      photoBase64: m.photoBase64,
+      source: 'redis' as const,
+      createdAt: m.createdAt,
+    }));
 
-  const qLower = nameQuery.toLowerCase();
-  const filtered =
-    nameQuery.length > 0
-      ? rows.filter((m) => {
-          const name = m.fullName.toLowerCase();
-          const reg = m.regimentalNumber.toLowerCase();
-          const user = (m.username ?? "").toLowerCase();
-          const mail = m.email.toLowerCase();
-          return (
-            name.includes(qLower) ||
-            reg.includes(qLower) ||
-            user.includes(qLower) ||
-            mail.includes(qLower)
-          );
-        })
-      : rows;
+  // Show first page only includes Supabase (paginated); add legacy to end only on first page
+  const supabaseRows =
+    statusOk === "all" ? allMembers : allMembers.filter((m) => m.applicationStatus === statusOk);
+  const filtered = page === 1 ? [...supabaseRows, ...legacyFiltered] : supabaseRows;
+  const totalCount = supabaseResult.total + (page === 1 ? legacyFiltered.length : 0);
+  const totalPages = Math.ceil(totalCount / limit);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
 
   const statusBadge = (s: string) => {
     if (s === "accepted")
@@ -172,8 +188,8 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
               Members profile database
             </h1>
             <p className="text-sm text-[var(--muted)]">
-              All member applications in Redis ({allMembers.length} record
-              {allMembers.length === 1 ? "" : "s"})
+              {totalCount} record{totalCount === 1 ? "" : "s"} total
+              {totalPages > 1 && ` • Page ${page} of ${totalPages}`}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
@@ -278,12 +294,41 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
           ) : null}
         </form>
 
-        {supabaseMembers.length > 0 && (
+        {supabaseResult.members.length > 0 && (
           <p className="text-sm text-[var(--muted)]">
-            Showing {supabaseMembers.length} from Supabase
-            {redisMembers.length > 0 && redisMembers.filter(rm => !supabaseMembers.some(sm => sm.email === rm.email)).length > 0 
-              && ` + ${redisMembers.filter(rm => !supabaseMembers.some(sm => sm.email === rm.email)).length} legacy from Redis`}
+            Showing {filtered.length} records on this page
+            ({supabaseResult.members.length} from Supabase{legacyFiltered.length > 0 && ` + ${legacyFiltered.length} legacy from Redis`})
           </p>
+        )}
+
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-sm text-[var(--muted)]">
+              Showing {((page - 1) * limit) + 1}–{Math.min(page * limit, totalCount)} of {totalCount}
+            </div>
+            <div className="flex gap-2">
+              {hasPrevPage && (
+                <Link
+                  href={`/admin/members?page=${page - 1}${statusOk !== 'all' ? `&status=${statusOk}` : ''}${nameQuery ? `&q=${encodeURIComponent(nameQuery)}` : ''}&limit=${limit}`}
+                  className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium hover:bg-[var(--surface)]"
+                >
+                  ← Previous
+                </Link>
+              )}
+              <span className="flex items-center px-4 py-2 text-sm text-[var(--muted)]">
+                Page {page} of {totalPages}
+              </span>
+              {hasNextPage && (
+                <Link
+                  href={`/admin/members?page=${page + 1}${statusOk !== 'all' ? `&status=${statusOk}` : ''}${nameQuery ? `&q=${encodeURIComponent(nameQuery)}` : ''}&limit=${limit}`}
+                  className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm font-medium hover:bg-[var(--surface)]"
+                >
+                  Next →
+                </Link>
+              )}
+            </div>
+          </div>
         )}
 
         <div className="overflow-x-auto rounded-xl border border-[var(--border)] bg-[var(--surface)]">
@@ -326,7 +371,7 @@ export default async function AdminMembersDatabasePage({ searchParams }: Props) 
                       {row.applicationStatus}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 font-mono text-xs text-[var(--muted)]">
-                      {row.created_at || row.createdAt || ''}
+                      {'created_at' in row ? row.created_at : row.createdAt || ''}
                     </td>
                     <td className="px-4 py-3">
                       {/* eslint-disable-next-line @next/next/no-img-element */}

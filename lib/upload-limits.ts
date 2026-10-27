@@ -9,6 +9,21 @@
 export const MAX_UPLOAD_FILE_BYTES = 4 * 1024 * 1024;
 export const MAX_UPLOAD_TOTAL_BYTES = 4 * 1024 * 1024;
 
+/**
+ * Application forms upload documents straight to Supabase Storage with signed
+ * URLs (see lib/direct-upload-client.ts), so the Vercel 4.5 MB body limit does
+ * not apply to them. These limits apply per file on those forms. The 4 MB limits
+ * above still apply to forms that post files through our API (member signup photo).
+ */
+export const MAX_DIRECT_UPLOAD_FILE_BYTES = 10 * 1024 * 1024;
+export const MAX_DIRECT_UPLOAD_FILE_LABEL = "10 MB";
+export const DIRECT_UPLOAD_MIME_TYPES = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+
 export const UPLOAD_TOO_LARGE_MESSAGE =
   "Your attachments are too large to send together (4 MB total). Please attach smaller files, for example a lower-resolution scan or photo, and try again.";
 

@@ -4,15 +4,19 @@ import { isSupabaseConfigured } from "@/lib/supabase/server";
 import {
   upsertMember,
   createApplication,
-  uploadApplicationDocument,
   deleteApplicationAndDocuments,
 } from "@/lib/supabase/applications";
+import {
+  verifyUploadedFile,
+  moveUploadedFile,
+  recordUploadedDocument,
+  matchDocumentUploads,
+  discardStoredFile,
+} from "@/lib/supabase/direct-upload";
 import { checkRateLimit, getClientIP, RATE_LIMITS } from "@/lib/rate-limit";
 import { checkHoneypot, verifyFormToken } from "@/lib/spam-protection";
 import { isTurnstileConfigured, verifyTurnstileToken } from "@/lib/turnstile";
 import { sendAdminNotification, sendApplicantConfirmation } from "@/lib/email-notifications";
-import { MAX_UPLOAD_TOTAL_BYTES, UPLOAD_TOO_LARGE_MESSAGE, totalUploadBytes } from "@/lib/upload-limits";
-import { validateFile, getExtensionForMimeType } from "@/lib/file-validation";
 
 export const runtime = "nodejs";
 
@@ -27,39 +31,6 @@ const MERIT_DOCUMENTS = [
   { name: "payslipDocument", label: "Payslip" },
 ] as const;
 
-async function readMeritDocument(
-  formData: FormData,
-  name: string,
-  label: string,
-): Promise<
-  | { ok: true; file: { label: string; fileName: string; mimeType: string; blob: Blob } }
-  | { ok: false; error: string }
-> {
-  const value = formData.get(name);
-  if (!(value instanceof Blob) || value.size === 0) {
-    return { ok: false, error: `Please upload ${label}.` };
-  }
-
-  // Validate file type and size with magic byte checking
-  const validation = await validateFile(value);
-  if (!validation.valid) {
-    return { ok: false, error: `${label}: ${validation.error}` };
-  }
-
-  const fileExtension = getExtensionForMimeType(validation.mimeType);
-  const fileName = value instanceof File && value.name ? value.name : `${name}${fileExtension}`;
-  
-  return {
-    ok: true,
-    file: {
-      label,
-      fileName,
-      mimeType: validation.mimeType,
-      blob: value,
-    },
-  };
-}
-
 function validateOptionalPhoneDigits(digitsStr: string, label: string): string | null {
   if (!digitsStr) return null;
   if (digitsStr.length < 6 || digitsStr.length > 15) {
@@ -71,22 +42,27 @@ function validateOptionalPhoneDigits(digitsStr: string, label: string): string |
 export async function POST(request: Request) {
   const clientIP = getClientIP(request);
 
-  const formData = (await request.formData().catch(() => null)) as globalThis.FormData | null;
-  if (!formData) {
-    return NextResponse.json({ ok: false, error: "Invalid form data." }, { status: 400 });
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    // Old cached pages still post multipart form data; ask them to reload.
+    return NextResponse.json(
+      { ok: false, error: "This form has been updated. Please refresh the page and submit again." },
+      { status: 400 },
+    );
+  }
+  if (typeof body !== "object" || body === null || Array.isArray(body)) {
+    return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
   }
 
   // Spam protection: honeypot check (silent rejection)
-  if (totalUploadBytes(formData) > MAX_UPLOAD_TOTAL_BYTES) {
-    return NextResponse.json({ ok: false, error: UPLOAD_TOO_LARGE_MESSAGE }, { status: 413 });
-  }
-
-  if (checkHoneypot(formData.get("website"))) {
+  if (checkHoneypot(body.website)) {
     return NextResponse.json({ ok: true, id: "spam-rejected" });
   }
 
   // Spam protection: minimum fill time check (only if token is provided)
-  const formToken = String(formData.get("formToken") ?? "").trim();
+  const formToken = String(body.formToken ?? "").trim();
   const tokenCheck = verifyFormToken(formToken || null, 3);
   // Only reject if token was provided but invalid (skipCheck means token not provided)
   if (!tokenCheck.valid && !tokenCheck.skipCheck) {
@@ -95,7 +71,7 @@ export async function POST(request: Request) {
 
   // Turnstile verification (reject if configured and token is missing or invalid)
   if (isTurnstileConfigured()) {
-    const turnstileToken = String(formData.get("turnstileToken") ?? "").trim();
+    const turnstileToken = String(body.turnstileToken ?? "").trim();
     const turnstileResult = await verifyTurnstileToken(turnstileToken || null, clientIP);
     if (!turnstileResult.success) {
       return NextResponse.json(
@@ -105,38 +81,47 @@ export async function POST(request: Request) {
     }
   }
 
-  const dateOfApplication = String(formData.get("dateOfApplication") ?? "").trim();
-  const regimentalNumber = String(formData.get("regimentalNumber") ?? "").trim();
-  const rank = String(formData.get("rank") ?? "").trim();
-  const fullName = String(formData.get("fullName") ?? "").trim();
-  const address = String(formData.get("address") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
-  const phoneCountryCode = String(formData.get("phoneCountryCode") ?? "").trim();
-  const phoneHome = optionalDigits(formData.get("phoneHome"));
-  const phoneWork = optionalDigits(formData.get("phoneWork"));
-  const phone = optionalDigits(formData.get("phone"));
-  const maritalStatus = String(formData.get("maritalStatus") ?? "").trim();
-  const dateOfBirth = String(formData.get("dateOfBirth") ?? "").trim();
-  const age = String(formData.get("age") ?? "").trim();
-  const numberOfDependents = String(formData.get("numberOfDependents") ?? "").trim();
-  const employer = String(formData.get("employer") ?? "").trim();
-  const divisionBranchSection = String(formData.get("divisionBranchSection") ?? "").trim();
-  const employmentType = String(formData.get("employmentType") ?? "").trim();
-  const yearsOfService = String(formData.get("yearsOfService") ?? "").trim();
-  const amountRequestedTTD = String(formData.get("amountRequestedTTD") ?? "").trim();
-  const priorMeritLoanApplied = String(formData.get("priorMeritLoanApplied") ?? "").trim();
-  const purposeOfLoan = String(formData.get("purposeOfLoan") ?? "").trim();
-  const currentNetSalaryTTD = String(formData.get("currentNetSalaryTTD") ?? "").trim();
-  const totalSalaryDeductionsTTD = String(formData.get("totalSalaryDeductionsTTD") ?? "").trim();
-  const repaymentInstallmentTTD = String(formData.get("repaymentInstallmentTTD") ?? "").trim();
-  const repaymentPeriodMonths = String(formData.get("repaymentPeriodMonths") ?? "").trim();
-  const declarationAccurate = String(formData.get("declarationAccurate") ?? "").trim();
-  const electronicSignature = String(formData.get("electronicSignature") ?? "").trim();
-  const applicantDateSigned = String(formData.get("applicantDateSigned") ?? "").trim();
-  const witnessName = String(formData.get("witnessName") ?? "").trim();
-  const witnessDate = String(formData.get("witnessDate") ?? "").trim();
-  const signatureRegimentalNumber = String(formData.get("signatureRegimentalNumber") ?? "").trim();
-  const signatureRank = String(formData.get("signatureRank") ?? "").trim();
+  const dateOfApplication = String(body.dateOfApplication ?? "").trim();
+  const regimentalNumber = String(body.regimentalNumber ?? "").trim();
+  const rank = String(body.rank ?? "").trim();
+  const fullName = String(body.fullName ?? "").trim();
+  const address = String(body.address ?? "").trim();
+  const email = String(body.email ?? "").trim();
+  const phoneCountryCode = String(body.phoneCountryCode ?? "").trim();
+  const phoneHome = optionalDigits(body.phoneHome);
+  const phoneWork = optionalDigits(body.phoneWork);
+  const phone = optionalDigits(body.phone);
+  const maritalStatus = String(body.maritalStatus ?? "").trim();
+  const dateOfBirth = String(body.dateOfBirth ?? "").trim();
+  const age = String(body.age ?? "").trim();
+  const numberOfDependents = String(body.numberOfDependents ?? "").trim();
+  const employer = String(body.employer ?? "").trim();
+  const divisionBranchSection = String(body.divisionBranchSection ?? "").trim();
+  const employmentType = String(body.employmentType ?? "").trim();
+  const yearsOfService = String(body.yearsOfService ?? "").trim();
+  const amountRequestedTTD = String(body.amountRequestedTTD ?? "").trim();
+  const priorMeritLoanApplied = String(body.priorMeritLoanApplied ?? "").trim();
+  const purposeOfLoan = String(body.purposeOfLoan ?? "").trim();
+  const currentNetSalaryTTD = String(body.currentNetSalaryTTD ?? "").trim();
+  const totalSalaryDeductionsTTD = String(body.totalSalaryDeductionsTTD ?? "").trim();
+  const repaymentInstallmentTTD = String(body.repaymentInstallmentTTD ?? "").trim();
+  const repaymentPeriodMonths = String(body.repaymentPeriodMonths ?? "").trim();
+  const declarationAccurate = String(body.declarationAccurate ?? "").trim();
+  const electronicSignature = String(body.electronicSignature ?? "").trim();
+  const applicantDateSigned = String(body.applicantDateSigned ?? "").trim();
+  const witnessName = String(body.witnessName ?? "").trim();
+  const witnessDate = String(body.witnessDate ?? "").trim();
+  const signatureRegimentalNumber = String(body.signatureRegimentalNumber ?? "").trim();
+  const signatureRank = String(body.signatureRank ?? "").trim();
+
+  // Document uploads (direct-to-storage)
+  const uploads = Array.isArray(body.uploads) ? body.uploads : [];
+  if (uploads.length !== MERIT_DOCUMENTS.length) {
+    return NextResponse.json(
+      { ok: false, error: "Please upload all required documents." },
+      { status: 400 },
+    );
+  }
 
   if (
     !dateOfApplication ||
@@ -272,18 +257,59 @@ export async function POST(request: Request) {
     );
   }
 
-  const documents: {
-    label: string;
+  // Verify uploaded documents
+  interface UploadInfo {
+    path: string;
+    token: string;
+    fileName: string;
+    documentType: string;
+  }
+
+  const verifiedUploads: Array<{
+    path: string;
     fileName: string;
     mimeType: string;
-    blob: Blob;
-  }[] = [];
-  for (const doc of MERIT_DOCUMENTS) {
-    const read = await readMeritDocument(formData, doc.name, doc.label);
-    if (!read.ok) {
-      return NextResponse.json({ ok: false, error: read.error }, { status: 400 });
+    size: number;
+    documentType: string;
+  }> = [];
+
+  const matched = matchDocumentUploads(uploads, MERIT_DOCUMENTS);
+  if (!matched.ok) {
+    return NextResponse.json({ ok: false, error: matched.error }, { status: 400 });
+  }
+
+  for (const upload of matched.uploads) {
+    if (
+      typeof upload !== 'object' ||
+      upload === null ||
+      typeof upload.path !== 'string' ||
+      typeof upload.token !== 'string' ||
+      typeof upload.fileName !== 'string' ||
+      typeof upload.documentType !== 'string'
+    ) {
+      return NextResponse.json(
+        { ok: false, error: "Invalid upload data." },
+        { status: 400 },
+      );
     }
-    documents.push(read.file);
+
+    const uploadInfo = upload as UploadInfo;
+    const verification = await verifyUploadedFile(uploadInfo.path, uploadInfo.token);
+    
+    if (!verification.ok) {
+      return NextResponse.json(
+        { ok: false, error: `Document verification failed: ${verification.error}` },
+        { status: 400 },
+      );
+    }
+
+    verifiedUploads.push({
+      path: uploadInfo.path,
+      fileName: uploadInfo.fileName,
+      mimeType: verification.mimeType,
+      size: verification.size,
+      documentType: upload.label,
+    });
   }
 
   // Save to Supabase
@@ -371,23 +397,41 @@ export async function POST(request: Request) {
     );
   }
 
-  // Upload documents - fail if any upload fails
-  for (const doc of documents) {
-    const uploadResult = await uploadApplicationDocument({
-      application_id: appResult.application_id,
-      member_id: memberResult.member_id,
-      document_type: doc.label.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
-      file: doc.blob,
-      file_name: doc.fileName,
-      mime_type: doc.mimeType,
-    });
+  // Move uploaded documents to final location and record metadata
+  for (const upload of verifiedUploads) {
+    // Move from pending/ to application folder
+    const moveResult = await moveUploadedFile(
+      upload.path,
+      appResult.application_id,
+      upload.fileName,
+    );
 
-    if (!uploadResult) {
-      console.error(`Failed to upload ${doc.label} for application`, appResult.application_id);
-
+    if (!moveResult.ok) {
+      console.error('Failed to move uploaded file:', moveResult.error);
       await deleteApplicationAndDocuments(appResult.application_id);
       return NextResponse.json(
-        { ok: false, error: `Failed to upload ${doc.label}. Please try again.` },
+        { ok: false, error: `Failed to process uploaded documents. Please try again.` },
+        { status: 500 },
+      );
+    }
+
+    // Record document metadata
+    const recordResult = await recordUploadedDocument({
+      application_id: appResult.application_id,
+      member_id: memberResult.member_id,
+      document_type: upload.documentType.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
+      file_name: upload.fileName,
+      mime_type: upload.mimeType,
+      file_size: upload.size,
+      storage_path: moveResult.path,
+    });
+
+    if (!recordResult) {
+      console.error('Failed to record document metadata');
+      await discardStoredFile(moveResult.path);
+      await deleteApplicationAndDocuments(appResult.application_id);
+      return NextResponse.json(
+        { ok: false, error: `Failed to process uploaded documents. Please try again.` },
         { status: 500 },
       );
     }

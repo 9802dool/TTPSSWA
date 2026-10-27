@@ -10,16 +10,18 @@ import { getAdminStats } from "@/lib/analytics-storage";
 import { getPendingMemberSignups } from "@/lib/member-signup-storage";
 import { listWebAccounts } from "@/lib/web-account-storage";
 import { isSupabaseConfigured } from "@/lib/supabase/server";
-import { getApplications } from "@/lib/supabase/applications";
+import { getApplicationsPage, parsePagination } from "@/lib/supabase/applications";
 import type { Application } from "@/lib/supabase/types";
 
 type Props = {
-  searchParams: Promise<{ q?: string }> | { q?: string };
+  searchParams: Promise<{ q?: string; page?: string; limit?: string }> | { q?: string; page?: string; limit?: string };
 };
 
 export default async function AdminPage({ searchParams }: Props) {
   const sp = await Promise.resolve(searchParams);
   const nameQuery = (sp.q ?? "").trim();
+  const { page, limit, offset } = parsePagination(sp.page, sp.limit);
+  let applicationsTotal = 0;
 
   const cookieStore = cookies();
   const token = cookieStore.get(getAdminCookieName())?.value;
@@ -60,10 +62,12 @@ export default async function AdminPage({ searchParams }: Props) {
     webAccounts = [];
   }
 
-  // Fetch applications from Supabase
+  // Fetch applications from Supabase with pagination
   if (isSupabaseConfigured()) {
     try {
-      supabaseApplications = await getApplications({ limit: 1000 });
+      const result = await getApplicationsPage({ limit, offset });
+      supabaseApplications = result.applications;
+      applicationsTotal = result.total;
     } catch (e) {
       console.error("Error fetching Supabase applications:", e);
     }
@@ -176,11 +180,29 @@ export default async function AdminPage({ searchParams }: Props) {
       </header>
 
       <main className="site-container-admin space-y-10 py-10">
-        {supabaseApplications.length > 0 && (
-          <p className="text-sm text-[var(--muted)]">
-            Applications: {supabaseApplications.length} from Supabase
-            {stats.serviceRequests.length > 0 && ` + ${stats.serviceRequests.length} from Redis`}
-          </p>
+        {applicationsTotal > 0 && (
+          <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--muted)]">
+            <span>
+              Applications {offset + 1}–{offset + supabaseApplications.length} of {applicationsTotal} from Supabase
+              {stats.serviceRequests.length > 0 && ` + ${stats.serviceRequests.length} from Redis`}
+            </span>
+            {page > 1 && (
+              <Link
+                href={`/admin?page=${page - 1}&limit=${limit}${nameQuery ? `&q=${encodeURIComponent(nameQuery)}` : ""}`}
+                className="text-[var(--brand)] hover:underline"
+              >
+                ← Newer
+              </Link>
+            )}
+            {offset + supabaseApplications.length < applicationsTotal && (
+              <Link
+                href={`/admin?page=${page + 1}&limit=${limit}${nameQuery ? `&q=${encodeURIComponent(nameQuery)}` : ""}`}
+                className="text-[var(--brand)] hover:underline"
+              >
+                Older →
+              </Link>
+            )}
+          </div>
         )}
 
         {!stats.storageConfigured && !isSupabaseConfigured() ? (
