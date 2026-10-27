@@ -64,7 +64,7 @@ export default async function RuleBookPage() {
             ) : (
               <RuleBookArticle
                 html={html}
-                className="prose prose-slate max-w-none px-6 py-8 sm:px-10 sm:py-12 prose-headings:scroll-mt-24 prose-headings:font-bold prose-a:text-brand prose-table:text-sm dark:prose-invert dark:prose-headings:text-white"
+                className="prose prose-slate max-w-none break-words px-4 py-8 sm:px-10 sm:py-12 prose-headings:font-bold prose-a:text-brand prose-a:break-words prose-table:text-sm dark:prose-invert dark:prose-headings:text-white"
               />
             )}
           </div>

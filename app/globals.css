@@ -27,6 +27,7 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
   }
 
   img,
@@ -48,6 +49,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
@@ -181,5 +186,49 @@
   }
   .site-btn-modal-close {
     @apply rounded-full border border-white/20 bg-white/10 p-2 text-lg leading-none text-white transition hover:bg-white/20;
+  }
+}
+
+/*
+  Rule book chapter jumps. scroll-margin clears the fixed header (promo + nav).
+  Unlayered so it wins over typography heading utilities.
+*/
+.rule-book-body {
+  overflow-wrap: break-word;
+}
+
+.rule-book-body .rule-book-anchor {
+  scroll-margin-top: calc(var(--site-header-stack) + 1.25rem);
+}
+
+.rule-book-body a.rule-book-toc-link {
+  display: inline-block;
+  max-width: 100%;
+  padding-block: 0.2rem;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  overflow-wrap: break-word;
+}
+
+.rule-book-body a.rule-book-toc-link:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+@media (max-width: 639px) {
+  .rule-book-body .rule-book-anchor {
+    /* Phone header can grow past the 5.5rem bar when the wordmark wraps. */
+    scroll-margin-top: calc(var(--site-header-stack) + 2rem);
+  }
+
+  .rule-book-body a.rule-book-toc-link {
+    display: block;
+    padding-block: 0.55rem;
+    line-height: 1.45;
+  }
+
+  .rule-book-body ol {
+    padding-inline-start: 1.25rem;
   }
 }
