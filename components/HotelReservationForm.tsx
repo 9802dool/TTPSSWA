@@ -6,12 +6,30 @@ import HotelAvailabilityCalendar from "@/components/HotelAvailabilityCalendar";
 import {
   eachNight,
   HOTEL_NIGHT_CAPACITY,
+  checkMultiRoomAvailability,
   type NightAvailability,
 } from "@/lib/hotel-availability";
+import {
+  calculateMultiRoomBookingTotal,
+  calculateNights,
+  calculateTotalCapacity,
+  calculateMealsFromGuestSelections,
+  formatTTD,
+  formatRoomCategory,
+  MEAL_PRICES,
+  type RoomCategory,
+  type GuestMealSelection as GuestMealSelectionType,
+} from "@/lib/hotel-pricing";
 
 /* ── Airbnb-style field class ── */
 const fieldClass =
   "w-full rounded-xl border border-[#b0b0b0] bg-white px-4 py-3 text-[15px] text-[#222] outline-none transition placeholder:text-[#717171] focus:border-[#222] focus:ring-1 focus:ring-[#222] dark:border-[#3a3a3a] dark:bg-[#1a1a1a] dark:text-[#e8e8e8] dark:placeholder:text-[#717171] dark:focus:border-white dark:focus:ring-white";
+
+type GuestMeal = {
+  breakfast: boolean;
+  lunch: boolean;
+  dinner: boolean;
+};
 
 type FormState = {
   fullName: string;
@@ -26,6 +44,7 @@ type FormState = {
   doubleBedRoom: string;
   guests: string;
   children: string;
+  guestMeals: GuestMeal[];  // Per-guest meal selections
   notes: string;
 };
 
@@ -42,6 +61,7 @@ const initial: FormState = {
   doubleBedRoom: "1",
   guests: "1",
   children: "0",
+  guestMeals: [{ breakfast: false, lunch: false, dinner: false }],  // Start with 1 guest
   notes: "",
 };
 
@@ -59,9 +79,22 @@ function roomMixLine(f: FormState): string {
   const d = Math.min(4, Math.max(0, parseInt(f.doubleBedRoom, 10) || 0));
   const parts: string[] = [];
   if (p) parts.push(`${p} presidential suite${p === 1 ? "" : "s"}`);
-  if (u) parts.push(`${u} full bed room${u === 1 ? "" : "s"}`);
-  if (d) parts.push(`${d} double bed room${d === 1 ? "" : "s"}`);
+  if (u) parts.push(`${u} single${u === 1 ? "" : "s"}`);
+  if (d) parts.push(`${d} double${d === 1 ? "" : "s"}`);
   return parts.length ? parts.join(", ") : "—";
+}
+
+function getRoomLineItems(f: FormState): Array<{ roomCategory: RoomCategory; roomCount: number }> {
+  const items: Array<{ roomCategory: RoomCategory; roomCount: number }> = [];
+  const p = Math.min(2, Math.max(0, parseInt(f.presidentialSuite, 10) || 0));
+  const u = Math.min(2, Math.max(0, parseInt(f.fullBedRoom, 10) || 0));
+  const d = Math.min(4, Math.max(0, parseInt(f.doubleBedRoom, 10) || 0));
+  
+  if (p > 0) items.push({ roomCategory: "PRESIDENTIAL_SUITE", roomCount: p });
+  if (u > 0) items.push({ roomCategory: "SINGLE_OCCUPANCY", roomCount: u });
+  if (d > 0) items.push({ roomCategory: "DOUBLE_OCCUPANCY", roomCount: d });
+  
+  return items;
 }
 
 function icsEscape(s: string): string {
@@ -394,9 +427,11 @@ export default function HotelReservationForm() {
   const [pickingField, setPickingField] = useState<"checkIn" | "checkOut">("checkIn");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
-  const update = useCallback((key: keyof FormState, value: string) => {
+  const update = useCallback((key: keyof FormState, value: string | GuestMeal[]) => {
     setForm((prev) => {
       let next = { ...prev, [key]: value };
+      
+      // Enforce room capacity limits
       if (key === "presidentialSuite" || key === "fullBedRoom" || key === "doubleBedRoom") {
         let p = Math.min(2, Math.max(0, parseInt(next.presidentialSuite, 10) || 0));
         let u = Math.min(2, Math.max(0, parseInt(next.fullBedRoom, 10) || 0));
@@ -408,12 +443,42 @@ export default function HotelReservationForm() {
           next = { ...next, presidentialSuite: String(p), fullBedRoom: String(u), doubleBedRoom: String(d) };
         }
       }
+      
+      // Sync guest meal selections array with guest count
+      if (key === "guests") {
+        const newGuestCount = Math.max(1, Math.min(10, parseInt(value as string, 10) || 1));
+        const currentMeals = prev.guestMeals;
+        const newMeals = [...currentMeals];
+        
+        // Add new guest entries if count increased
+        while (newMeals.length < newGuestCount) {
+          newMeals.push({ breakfast: false, lunch: false, dinner: false });
+        }
+        
+        // Remove excess entries if count decreased
+        if (newMeals.length > newGuestCount) {
+          newMeals.splice(newGuestCount);
+        }
+        
+        next.guestMeals = newMeals;
+      }
+      
       return next;
     });
     setErrors((e) => {
       const n = { ...e };
       delete n[key]; delete n.roomMix; delete n.availability;
       return n;
+    });
+  }, []);
+  
+  const updateGuestMeal = useCallback((guestIndex: number, mealType: 'breakfast' | 'lunch' | 'dinner', checked: boolean) => {
+    setForm((prev) => {
+      const newMeals = [...prev.guestMeals];
+      if (newMeals[guestIndex]) {
+        newMeals[guestIndex] = { ...newMeals[guestIndex], [mealType]: checked };
+      }
+      return { ...prev, guestMeals: newMeals };
     });
   }, []);
 
@@ -449,9 +514,11 @@ export default function HotelReservationForm() {
     if (!form.checkOutDate) e.checkOutDate = "Choose a check-out date.";
     if (!form.checkInTime) e.checkInTime = "Choose a check-in time.";
     if (!form.checkOutTime) e.checkOutTime = "Choose a check-out time.";
+    
     const total = sumRooms(form);
     if (total < 1) e.roomMix = "Select at least one room.";
     else if (total > HOTEL_NIGHT_CAPACITY) e.roomMix = `Max ${HOTEL_NIGHT_CAPACITY} rooms.`;
+    
     if (form.checkInDate && form.checkOutDate) {
       if (new Date(form.checkOutDate) < new Date(form.checkInDate)) {
         e.checkOutDate = "Check-out must be on or after check-in.";
@@ -460,13 +527,45 @@ export default function HotelReservationForm() {
         const [oh, om] = form.checkOutTime.split(":").map(Number);
         if (ih * 60 + im >= oh * 60 + om) e.checkOutTime = "Check-out time must be after check-in on the same day.";
       }
-    }
-    if (!e.roomMix && total >= 1 && form.checkInDate && form.checkOutDate && !e.checkOutDate) {
-      for (const night of eachNight(form.checkInDate, form.checkOutDate)) {
-        const avail = byNight[night]?.available ?? HOTEL_NIGHT_CAPACITY;
-        if (avail < total) { e.availability = `Only ${avail} room${avail === 1 ? "" : "s"} free on ${night}. Reduce rooms or pick different dates.`; break; }
+      
+      // Check if booking exceeds 30 nights
+      const nights = calculateNights(form.checkInDate, form.checkOutDate);
+      if (nights > 30) {
+        e.checkOutDate = "Bookings are limited to 30 nights.";
+      }
+      
+      // Check guest capacity
+      const roomLineItems = getRoomLineItems(form);
+      const totalCapacity = calculateTotalCapacity(roomLineItems);
+      const guestCount = parseInt(form.guests, 10) || 0;
+      if (guestCount > totalCapacity) {
+        e.guests = `Selected rooms accommodate up to ${totalCapacity} guest${totalCapacity === 1 ? "" : "s"}.`;
       }
     }
+    
+    // Check per-room-type availability
+    if (!e.roomMix && total >= 1 && form.checkInDate && form.checkOutDate && !e.checkOutDate) {
+      const p = Math.min(2, Math.max(0, parseInt(form.presidentialSuite, 10) || 0));
+      const u = Math.min(2, Math.max(0, parseInt(form.fullBedRoom, 10) || 0));
+      const d = Math.min(4, Math.max(0, parseInt(form.doubleBedRoom, 10) || 0));
+      
+      const availCheck = checkMultiRoomAvailability(
+        byNight,
+        form.checkInDate,
+        form.checkOutDate,
+        { presidential: p, fullBed: u, doubleBed: d }
+      );
+      
+      if (!availCheck.available) {
+        const typeLabel = availCheck.conflictType === 'presidential' 
+          ? 'Presidential Suite' 
+          : availCheck.conflictType === 'fullBed' 
+          ? 'Single Occupancy' 
+          : 'Double Occupancy';
+        e.availability = `${typeLabel} rooms not available on ${availCheck.conflictNight}. Please adjust your selection.`;
+      }
+    }
+    
     setErrors(e);
     return Object.keys(e).length === 0;
   }, [form, byNight]);
@@ -474,7 +573,9 @@ export default function HotelReservationForm() {
   const summaryLines = useMemo(() => {
     if (!submitted) return [];
     const total = sumRooms(form);
-    return [
+    const nights = calculateNights(form.checkInDate, form.checkOutDate);
+    
+    const lines = [
       `Guest: ${form.fullName}`,
       `Email: ${form.email}`,
       `Phone: ${form.phone}`,
@@ -482,9 +583,31 @@ export default function HotelReservationForm() {
       `Check-out: ${form.checkOutDate} at ${form.checkOutTime}`,
       `Rooms (${total}): ${roomMixLine(form)}`,
       `Adults: ${form.guests}`,
-      Number(form.children) > 0 ? `Children: ${form.children}` : "",
-      form.notes.trim() ? `Notes: ${form.notes.trim()}` : "",
-    ].filter(Boolean);
+    ];
+    
+    if (Number(form.children) > 0) {
+      lines.push(`Children: ${form.children}`);
+    }
+    
+    // Add meal summary
+    const breakfastCount = form.guestMeals.filter(g => g.breakfast).length;
+    const lunchCount = form.guestMeals.filter(g => g.lunch).length;
+    const dinnerCount = form.guestMeals.filter(g => g.dinner).length;
+    
+    if (breakfastCount > 0 || lunchCount > 0 || dinnerCount > 0) {
+      lines.push('Meals:');
+      if (breakfastCount > 0) lines.push(`  Breakfast: ${breakfastCount} guest${breakfastCount === 1 ? '' : 's'} × ${nights} night${nights === 1 ? '' : 's'} = ${breakfastCount * nights} meals`);
+      if (lunchCount > 0) lines.push(`  Lunch: ${lunchCount} guest${lunchCount === 1 ? '' : 's'} × ${nights} night${nights === 1 ? '' : 's'} = ${lunchCount * nights} meals`);
+      if (dinnerCount > 0) lines.push(`  Dinner: ${dinnerCount} guest${dinnerCount === 1 ? '' : 's'} × ${nights} night${nights === 1 ? '' : 's'} = ${dinnerCount * nights} meals`);
+    } else {
+      lines.push('Meals: None selected');
+    }
+    
+    if (form.notes.trim()) {
+      lines.push(`Notes: ${form.notes.trim()}`);
+    }
+    
+    return lines;
   }, [submitted, form]);
 
   const canAddToCalendar = form.checkInDate && form.checkOutDate && new Date(form.checkOutDate) >= new Date(form.checkInDate);
@@ -494,8 +617,26 @@ export default function HotelReservationForm() {
     if (!validate()) return;
     setSubmitError(null); setMailtoFallbackHref(null); setSubmitting(true);
     try {
+      const roomLineItems = getRoomLineItems(form);
       const total = sumRooms(form);
-      const payload = { ...form, rooms: String(total), turnstileToken };
+      
+      // Build guest meal selections with indices
+      const guestMealSelections = form.guestMeals.map((meal, index) => ({
+        guestIndex: index,
+        breakfast: meal.breakfast,
+        lunch: meal.lunch,
+        dinner: meal.dinner,
+      }));
+      
+      // Build multi-room payload
+      const payload = { 
+        ...form, 
+        rooms: roomLineItems,  // Array of {roomCategory, roomCount}
+        guestMealSelections,   // Per-guest meal selections
+        roomsTotal: String(total),  // Legacy compatibility
+        turnstileToken 
+      };
+      
       const res = await fetch("/api/hotel-booking", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const data = (await res.json().catch(() => ({}))) as { error?: string; mailtoHref?: string };
       if (!res.ok) { setSubmitError(data.error || "Something went wrong."); setMailtoFallbackHref(typeof data.mailtoHref === "string" ? data.mailtoHref : null); return; }
@@ -728,6 +869,108 @@ export default function HotelReservationForm() {
 
           <hr className="border-[#ebebeb] dark:border-[#333]" />
 
+          {/* Meal Selection */}
+          <section>
+            <h2 className="text-[22px] font-bold text-[#222] dark:text-white">
+              Meal preferences
+            </h2>
+            <p className="mt-1 text-[14px] text-[#717171]">
+              Select meals for each guest. Prices are per person, per meal, per night.
+            </p>
+            
+            <div className="mt-5 space-y-3">
+              {form.guestMeals.map((guestMeal, index) => (
+                <div
+                  key={index}
+                  className="rounded-2xl border border-[#ddd] bg-white p-5 dark:border-[#333] dark:bg-[#1a1a1a]"
+                >
+                  <div className="mb-3">
+                    <p className="text-[15px] font-semibold text-[#222] dark:text-white">
+                      Guest {index + 1}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-4">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={guestMeal.breakfast}
+                        onChange={(e) => updateGuestMeal(index, 'breakfast', e.target.checked)}
+                        className="h-5 w-5 rounded border-[#b0b0b0] text-[#222] focus:ring-2 focus:ring-[#222] dark:border-[#555] dark:bg-[#1a1a1a] dark:text-white dark:focus:ring-white"
+                      />
+                      <span className="text-[14px] text-[#222] dark:text-white">
+                        Breakfast ({formatTTD(MEAL_PRICES.Breakfast)}/night)
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={guestMeal.lunch}
+                        onChange={(e) => updateGuestMeal(index, 'lunch', e.target.checked)}
+                        className="h-5 w-5 rounded border-[#b0b0b0] text-[#222] focus:ring-2 focus:ring-[#222] dark:border-[#555] dark:bg-[#1a1a1a] dark:text-white dark:focus:ring-white"
+                      />
+                      <span className="text-[14px] text-[#222] dark:text-white">
+                        Lunch ({formatTTD(MEAL_PRICES.Lunch)}/night)
+                      </span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={guestMeal.dinner}
+                        onChange={(e) => updateGuestMeal(index, 'dinner', e.target.checked)}
+                        className="h-5 w-5 rounded border-[#b0b0b0] text-[#222] focus:ring-2 focus:ring-[#222] dark:border-[#555] dark:bg-[#1a1a1a] dark:text-white dark:focus:ring-white"
+                      />
+                      <span className="text-[14px] text-[#222] dark:text-white">
+                        Dinner ({formatTTD(MEAL_PRICES.Dinner)}/night)
+                      </span>
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {nightCount > 0 && form.guestMeals.some(g => g.breakfast || g.lunch || g.dinner) && (
+              <div className="mt-4 rounded-xl border border-[#ebebeb] bg-[#f7f7f7] p-4 dark:border-[#333] dark:bg-[#111]">
+                <p className="text-[13px] font-semibold text-[#222] dark:text-white">Meal Summary</p>
+                <div className="mt-2 space-y-1 text-[13px] text-[#717171]">
+                  {(() => {
+                    const guestMealSelections = form.guestMeals.map((meal, idx) => ({
+                      guestIndex: idx,
+                      breakfast: meal.breakfast,
+                      lunch: meal.lunch,
+                      dinner: meal.dinner,
+                    }));
+                    const breakdown = calculateMealsFromGuestSelections(guestMealSelections, nightCount);
+                    
+                    return (
+                      <>
+                        {breakdown.breakfast.guestCount > 0 && (
+                          <p>
+                            Breakfast: {breakdown.breakfast.guestCount} guest{breakdown.breakfast.guestCount === 1 ? '' : 's'} × {nightCount} night{nightCount === 1 ? '' : 's'} = {breakdown.breakfast.totalMeals} meals · {formatTTD(breakdown.breakfast.subtotal)}
+                          </p>
+                        )}
+                        {breakdown.lunch.guestCount > 0 && (
+                          <p>
+                            Lunch: {breakdown.lunch.guestCount} guest{breakdown.lunch.guestCount === 1 ? '' : 's'} × {nightCount} night{nightCount === 1 ? '' : 's'} = {breakdown.lunch.totalMeals} meals · {formatTTD(breakdown.lunch.subtotal)}
+                          </p>
+                        )}
+                        {breakdown.dinner.guestCount > 0 && (
+                          <p>
+                            Dinner: {breakdown.dinner.guestCount} guest{breakdown.dinner.guestCount === 1 ? '' : 's'} × {nightCount} night{nightCount === 1 ? '' : 's'} = {breakdown.dinner.totalMeals} meals · {formatTTD(breakdown.dinner.subtotal)}
+                          </p>
+                        )}
+                        <p className="pt-2 font-semibold text-[#222] dark:text-white">
+                          Total Meals: {formatTTD(breakdown.total)}
+                        </p>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+          </section>
+
+          <hr className="border-[#ebebeb] dark:border-[#333]" />
+
           {/* Guest info */}
           <section>
             <h2 className="text-[22px] font-bold text-[#222] dark:text-white">
@@ -786,13 +1029,25 @@ export default function HotelReservationForm() {
           </p>
 
           <div className="mt-5 space-y-3 text-[14px] text-[#222] dark:text-[#e8e8e8]">
-            <div className="flex justify-between">
-              <span className="text-[#717171]">Rooms</span>
-              <span className="font-semibold tabular-nums">{sumRooms(form)} / {HOTEL_NIGHT_CAPACITY}</span>
-            </div>
-            {sumRooms(form) > 0 ? (
-              <p className="text-[13px] text-[#717171]">{roomMixLine(form)}</p>
+            {form.checkInDate && form.checkOutDate && nightCount > 0 ? (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-[#717171]">Check-in</span>
+                  <span className="font-medium text-[13px]">{form.checkInDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#717171]">Check-out</span>
+                  <span className="font-medium text-[13px]">{form.checkOutDate}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#717171]">Nights</span>
+                  <span className="font-semibold tabular-nums">{nightCount}</span>
+                </div>
+              </>
             ) : null}
+            
+            <hr className="border-[#ebebeb] dark:border-[#333]" />
+            
             <div className="flex justify-between">
               <span className="text-[#717171]">Adults</span>
               <span className="font-semibold tabular-nums">{form.guests}</span>
@@ -803,30 +1058,80 @@ export default function HotelReservationForm() {
                 <span className="font-semibold tabular-nums">{form.children}</span>
               </div>
             ) : null}
-            {nightCount > 0 ? (
-              <div className="flex justify-between">
-                <span className="text-[#717171]">Nights</span>
-                <span className="font-semibold tabular-nums">{nightCount}</span>
-              </div>
-            ) : null}
-            {form.checkInDate ? (
-              <div className="flex justify-between">
-                <span className="text-[#717171]">Check-in</span>
-                <span className="font-medium">{form.checkInDate}</span>
-              </div>
-            ) : null}
-            {form.checkOutDate ? (
-              <div className="flex justify-between">
-                <span className="text-[#717171]">Check-out</span>
-                <span className="font-medium">{form.checkOutDate}</span>
-              </div>
-            ) : null}
+            
+            <hr className="border-[#ebebeb] dark:border-[#333]" />
+            
+            <div className="flex justify-between">
+              <span className="text-[#717171]">Rooms</span>
+              <span className="font-semibold tabular-nums">{sumRooms(form)}</span>
+            </div>
+            {sumRooms(form) > 0 && (
+              <>
+                {(() => {
+                  const roomLineItems = getRoomLineItems(form);
+                  return roomLineItems.map((room, idx) => (
+                    <div key={idx} className="pl-3 flex justify-between text-[13px]">
+                      <span className="text-[#717171]">
+                        {formatRoomCategory(room.roomCategory)} × {room.roomCount}
+                      </span>
+                    </div>
+                  ));
+                })()}
+              </>
+            )}
+            
+            {nightCount > 0 && form.guestMeals.some(g => g.breakfast || g.lunch || g.dinner) && (
+              <>
+                <hr className="border-[#ebebeb] dark:border-[#333]" />
+                <div className="flex justify-between">
+                  <span className="text-[#717171]">Meals</span>
+                </div>
+                {(() => {
+                  const guestMealSelections = form.guestMeals.map((meal, idx) => ({
+                    guestIndex: idx,
+                    breakfast: meal.breakfast,
+                    lunch: meal.lunch,
+                    dinner: meal.dinner,
+                  }));
+                  const breakdown = calculateMealsFromGuestSelections(guestMealSelections, nightCount);
+                  
+                  return (
+                    <>
+                      {breakdown.breakfast.guestCount > 0 && (
+                        <div className="pl-3 flex justify-between text-[13px]">
+                          <span className="text-[#717171]">
+                            Breakfast ({breakdown.breakfast.guestCount}g × {nightCount}n)
+                          </span>
+                          <span className="font-medium tabular-nums">{formatTTD(breakdown.breakfast.subtotal)}</span>
+                        </div>
+                      )}
+                      {breakdown.lunch.guestCount > 0 && (
+                        <div className="pl-3 flex justify-between text-[13px]">
+                          <span className="text-[#717171]">
+                            Lunch ({breakdown.lunch.guestCount}g × {nightCount}n)
+                          </span>
+                          <span className="font-medium tabular-nums">{formatTTD(breakdown.lunch.subtotal)}</span>
+                        </div>
+                      )}
+                      {breakdown.dinner.guestCount > 0 && (
+                        <div className="pl-3 flex justify-between text-[13px]">
+                          <span className="text-[#717171]">
+                            Dinner ({breakdown.dinner.guestCount}g × {nightCount}n)
+                          </span>
+                          <span className="font-medium tabular-nums">{formatTTD(breakdown.dinner.subtotal)}</span>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+              </>
+            )}
           </div>
 
           <hr className="my-5 border-[#ebebeb] dark:border-[#333]" />
 
           <p className="text-center text-[13px] leading-relaxed text-[#717171]">
-            Availability is confirmed after submission.
+            Pricing shown after dates are selected. Availability confirmed after submission.
           </p>
 
           <button type="submit" disabled={submitting} className="site-btn-hotel-submit mt-5 py-3.5 text-[16px] disabled:opacity-60">

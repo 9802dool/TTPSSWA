@@ -74,6 +74,53 @@ export type NightAvailability = {
   doubleBedAvailable: number;
 };
 
+export type RoomTypeKey = 'presidential' | 'fullBed' | 'doubleBed';
+
+/**
+ * Check if requested rooms are available for all nights in the range.
+ * Returns true if all room types have sufficient availability, false otherwise.
+ */
+export function checkMultiRoomAvailability(
+  byNight: Record<string, NightAvailability>,
+  checkIn: string,
+  checkOut: string,
+  requestedRooms: { presidential: number; fullBed: number; doubleBed: number }
+): { available: boolean; conflictNight?: string; conflictType?: RoomTypeKey } {
+  const nights = eachNight(checkIn, checkOut);
+  
+  for (const night of nights) {
+    const avail = byNight[night];
+    if (!avail) {
+      // Night not in availability data - assume unavailable
+      return { available: false, conflictNight: night };
+    }
+    
+    if (requestedRooms.presidential > avail.presidentialAvailable) {
+      return { 
+        available: false, 
+        conflictNight: night, 
+        conflictType: 'presidential' 
+      };
+    }
+    if (requestedRooms.fullBed > avail.fullBedAvailable) {
+      return { 
+        available: false, 
+        conflictNight: night, 
+        conflictType: 'fullBed' 
+      };
+    }
+    if (requestedRooms.doubleBed > avail.doubleBedAvailable) {
+      return { 
+        available: false, 
+        conflictNight: night, 
+        conflictType: 'doubleBed' 
+      };
+    }
+  }
+  
+  return { available: true };
+}
+
 export function roomCountFromPayload(p: Record<string, unknown>): number {
   const pres = Number(p.presidentialSuite ?? p.presidential ?? 0);
   const full = Number(p.fullBedRoom ?? p.fullBed ?? 0);

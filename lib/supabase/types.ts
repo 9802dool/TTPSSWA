@@ -121,15 +121,35 @@ export interface FormalMembershipData {
   privacyPolicyConsent: boolean;
 }
 
+export type RoomCategoryType = 'PRESIDENTIAL_SUITE' | 'SINGLE_OCCUPANCY' | 'DOUBLE_OCCUPANCY';
+
+export interface RoomLineItem {
+  roomCategory: RoomCategoryType;
+  roomCount: number;
+}
+
+export interface GuestMealSelection {
+  guestIndex: number;
+  breakfast: boolean;
+  lunch: boolean;
+  dinner: boolean;
+}
+
 export interface HotelBookingData {
   guestName: string;
   email: string;
   phone: string;
-  roomCategory: 'PRESIDENTIAL_SUITE' | 'SINGLE_OCCUPANCY' | 'DOUBLE_OCCUPANCY';
-  roomCount: number;
+  // Multi-room support: array of room line items
+  rooms: RoomLineItem[];
+  // Legacy single-room fields (for backward compatibility)
+  roomCategory?: RoomCategoryType;
+  roomCount?: number;
   checkIn: string;
   checkOut: string;
   guests: number;
+  // Per-guest meal selections (new format)
+  guestMealSelections?: GuestMealSelection[];
+  // Legacy aggregate meal counts (for backward compatibility)
   meals: {
     Breakfast: number;
     Lunch: number;
