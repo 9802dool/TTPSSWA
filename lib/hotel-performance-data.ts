@@ -136,34 +136,75 @@ export async function loadHotelBookings(filters?: {
       continue;
     }
     
-    const roomCategory = parseRoomCategory(data);
     const checkIn = parseCheckIn(data);
     const checkOut = parseCheckOut(data);
     
-    if (!roomCategory || !checkIn || !checkOut) {
+    if (!checkIn || !checkOut) {
       skipped++;
       continue;
     }
     
-    const booking: HotelBooking = {
-      id: app.id,
-      guestName: String(data.guestName ?? data.fullName ?? ""),
-      email: String(data.email ?? ""),
-      phone: String(data.phone ?? ""),
-      roomCategory,
-      roomCount: parseRoomCount(data),
-      checkIn,
-      checkOut,
-      guests: Math.max(1, Math.floor(Number(data.guests ?? 1))),
-      meals: parseMeals(data),
-      specialRequests: typeof data.specialRequests === "string" ? data.specialRequests : null,
-      isMember: isMember(data),
-      status: app.status,
-      submittedAt: app.submitted_at,
-      isLegacy: false,
-    };
-    
-    bookings.push(booking);
+    // Handle multi-room bookings: expand to individual room records
+    const rooms = data.rooms;
+    if (Array.isArray(rooms) && rooms.length > 0) {
+      // Multi-room format - create one booking record per room type
+      for (const room of rooms) {
+        if (typeof room !== 'object' || room === null) continue;
+        
+        const r = room as Record<string, unknown>;
+        const roomCategory = parseRoomCategory(r);
+        const roomCount = parseRoomCount(r);
+        
+        if (!roomCategory || roomCount <= 0) continue;
+        
+        const booking: HotelBooking = {
+          id: `${app.id}-${roomCategory}`,  // Unique ID per room type
+          guestName: String(data.guestName ?? data.fullName ?? ""),
+          email: String(data.email ?? ""),
+          phone: String(data.phone ?? ""),
+          roomCategory,
+          roomCount,
+          checkIn,
+          checkOut,
+          guests: Math.max(1, Math.floor(Number(data.guests ?? 1))),
+          meals: parseMeals(data),
+          specialRequests: typeof data.specialRequests === "string" ? data.specialRequests : null,
+          isMember: isMember(data),
+          status: app.status,
+          submittedAt: app.submitted_at,
+          isLegacy: false,
+        };
+        
+        bookings.push(booking);
+      }
+    } else {
+      // Legacy single-room format
+      const roomCategory = parseRoomCategory(data);
+      if (!roomCategory) {
+        skipped++;
+        continue;
+      }
+      
+      const booking: HotelBooking = {
+        id: app.id,
+        guestName: String(data.guestName ?? data.fullName ?? ""),
+        email: String(data.email ?? ""),
+        phone: String(data.phone ?? ""),
+        roomCategory,
+        roomCount: parseRoomCount(data),
+        checkIn,
+        checkOut,
+        guests: Math.max(1, Math.floor(Number(data.guests ?? 1))),
+        meals: parseMeals(data),
+        specialRequests: typeof data.specialRequests === "string" ? data.specialRequests : null,
+        isMember: isMember(data),
+        status: app.status,
+        submittedAt: app.submitted_at,
+        isLegacy: false,
+      };
+      
+      bookings.push(booking);
+    }
   }
   
   return { bookings, skipped };
