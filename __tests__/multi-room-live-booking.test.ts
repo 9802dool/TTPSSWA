@@ -93,6 +93,19 @@ describe("POST /api/hotel/book (multi-room)", () => {
     expect((await res.json()).roomsSubtotal).toBe((440 + 385 + 715) * 2);
   });
 
+  it("rejects a meals array instead of treating it as no meals", async () => {
+    const res = await POST(
+      req("http://x/api/hotel/book", {
+        ...base,
+        guestMealSelections: undefined,
+        meals: [{ guestIndex: 0, breakfast: true, lunch: false, dinner: false }],
+      }),
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json()).message).toBe("Invalid meal selections.");
+    expect(reserveHotelRooms).not.toHaveBeenCalled();
+  });
+
   it("rejects more guests than the selected rooms hold", async () => {
     const res = await POST(
       req("http://x/api/hotel/book", { ...base, guests: 9, guestMealSelections: undefined }),
@@ -166,6 +179,8 @@ describe("request parsing bounds", () => {
     // legacy all-guest flags
     const legacy = parseGuestMeals({ meals: { includeDinner: true } }, 3);
     expect(Array.isArray(legacy) && legacy.every((g) => g.dinner && !g.breakfast)).toBe(true);
+    // a meals array is a malformed per-guest payload, not the legacy flags object
+    expect(parseGuestMeals({ meals: [{ breakfast: true }] }, 2)).toBe("Invalid meal selections.");
   });
 });
 
