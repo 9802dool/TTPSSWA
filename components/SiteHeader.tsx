@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { SITE_LOGO_ALT, SITE_LOGO_SRC } from "@/lib/site-logo";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { PromoBanner } from "@/components/PromoBanner";
@@ -50,8 +51,8 @@ export default function SiteHeader() {
           >
             <span className="relative h-16 w-16 shrink-0 overflow-hidden">
               <Image
-                src="/logo1.png"
-                alt="TTPSSWA logo"
+                src={SITE_LOGO_SRC}
+                alt={SITE_LOGO_ALT}
                 width={256}
                 height={256}
                 priority
