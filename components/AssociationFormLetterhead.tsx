@@ -1,3 +1,6 @@
+import Image from "next/image";
+import { SITE_LOGO_ALT, SITE_LOGO_SIZE, SITE_LOGO_SRC } from "@/lib/site-logo";
+
 const OFFICERS_FOOTER = {
   membership: [
     "Vice President: Ag. A.S.P Owie Russell; Assistant Secretary: No. 16940 W/Ag. Sgt. Tricia Durant-Charles",
@@ -43,15 +46,24 @@ const OFFICERS_FOOTER = {
   ],
 } as const;
 
+/**
+ * The association's real logo (same file as the site header) for form
+ * letterheads. The site header is hidden when printing, so this is the logo
+ * that appears on printed/saved-as-PDF forms.
+ */
 export function AssociationFormLogo() {
   return (
-    <svg width="80" height="80" viewBox="0 0 100 100" aria-hidden>
-      <polygon points="50,5 90,75 10,75" fill="none" stroke="#0d2a70" strokeWidth="3" />
-      <polygon points="50,95 90,25 10,25" fill="none" stroke="#0d2a70" strokeWidth="3" />
-      <text x="50" y="55" fontSize="10" textAnchor="middle" fill="#0d2a70">
-        SERVICE
-      </text>
-    </svg>
+    <span className="relative block h-20 w-[7.5rem] overflow-hidden" data-testid="association-form-logo">
+      <Image
+        src={SITE_LOGO_SRC}
+        alt={SITE_LOGO_ALT}
+        width={SITE_LOGO_SIZE}
+        height={SITE_LOGO_SIZE}
+        priority
+        sizes="120px"
+        className="h-full w-full object-cover brightness-0"
+      />
+    </span>
   );
 }
 
