@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { isSectionEnabled } from "@/lib/feature-flags";
 
 export default function SiteFooter() {
+  const showHotel = isSectionEnabled("hotel");
+  const showMembershipServices = isSectionEnabled("membershipServices");
   return (
     <footer className="border-t border-line bg-navy text-slate-300 print:hidden">
       <div className="site-container py-12 sm:py-14">
@@ -40,16 +43,20 @@ export default function SiteFooter() {
                   About
                 </Link>
               </li>
-              <li>
-                <Link href="/hotel-reservations" className="transition hover:text-white">
-                  Hotel reservations
-                </Link>
-              </li>
-              <li>
-                <Link href="/membership-services" className="transition hover:text-white">
-                  Membership services
-                </Link>
-              </li>
+              {showHotel ? (
+                <li>
+                  <Link href="/hotel-reservations" className="transition hover:text-white">
+                    Hotel reservations
+                  </Link>
+                </li>
+              ) : null}
+              {showMembershipServices ? (
+                <li>
+                  <Link href="/membership-services" className="transition hover:text-white">
+                    Membership services
+                  </Link>
+                </li>
+              ) : null}
               <li>
                 <Link href="/executive" className="transition hover:text-white">
                   Executive
