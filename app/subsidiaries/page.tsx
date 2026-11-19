@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { isSectionEnabled } from "@/lib/feature-flags";
 
 export const metadata: Metadata = {
   title: "Subsidiaries | TTPSSWA",
@@ -36,6 +37,9 @@ const PILLARS = [
 ] as const;
 
 export default function SubsidiariesPage() {
+  const pillars = isSectionEnabled("hotel")
+    ? PILLARS
+    : PILLARS.filter((pillar) => pillar.href !== "/noel-chase-hotel-and-conference-centre");
   return (
     <>
       <SiteHeader />
@@ -74,13 +78,13 @@ export default function SubsidiariesPage() {
               id="subsidiaries-pillars-heading"
               className="text-xl font-bold tracking-tight text-white md:text-2xl"
             >
-              Three pillars
+              {pillars.length === PILLARS.length ? "Three pillars" : "Subsidiaries"}
             </h2>
             <p className="mt-3 max-w-3xl text-base leading-relaxed text-slate-400">
               TTPSSWA subsidiaries at a glance.
             </p>
             <ul className="mt-10 grid list-none gap-6 p-0 sm:grid-cols-2 lg:grid-cols-3">
-              {PILLARS.map((pillar) => (
+              {pillars.map((pillar) => (
                 <li key={pillar.title}>
                   <Link
                     href={pillar.href}

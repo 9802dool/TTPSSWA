@@ -35,6 +35,13 @@ const nextConfig = {
         destination: "/services/membership-application",
         permanent: false,
       },
+      {
+        // Statically prerendered redirect() on this page responds 307 with no
+        // Location header. Keep the page file; this redirect is what browsers follow.
+        source: "/noel-chase-hotel-and-conference-centre",
+        destination: "/hotel-reservations",
+        permanent: false,
+      },
     ];
   },
 };

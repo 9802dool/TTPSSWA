@@ -27,7 +27,7 @@ describe("site logo", () => {
   });
 
   it("the site header uses the shared logo constant", () => {
-    const src = readFileSync(path.join(root, "components/SiteHeader.tsx"), "utf8");
+    const src = readFileSync(path.join(root, "components/SiteHeaderClient.tsx"), "utf8");
     expect(src).toContain("src={SITE_LOGO_SRC}");
   });
 });

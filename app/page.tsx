@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { HeroVideoSlideshow } from '@/components/HeroVideoSlideshow';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
+import { isSectionEnabled, type SiteSection } from '@/lib/feature-flags';
 
 export const metadata: Metadata = {
   title: 'Home | TTPSSWA',
@@ -16,15 +17,18 @@ export const metadata: Metadata = {
 };
 
 const heroActions = [
-  { href: '/become-a-member', label: 'Become a Member', primary: true },
-  { href: '/hotel-reservations', label: 'Hotel reservations' },
-  { href: '/membership-services', label: 'Membership services' },
+  { href: '/become-a-member', label: 'Become a Member', primary: true, section: 'membershipSignup' },
+  { href: '/hotel-reservations', label: 'Hotel reservations', section: 'hotel' },
+  { href: '/membership-services', label: 'Membership services', section: 'membershipServices' },
   { href: '/central-committee-representatives', label: 'Central Committee Reps' },
   { href: '/committees', label: 'Committees' },
   { href: '/rule-book', label: 'Rule Book' },
 ] as const;
 
 export default function HomePage() {
+  const actions = heroActions.filter(
+    (action) => !('section' in action) || isSectionEnabled(action.section as SiteSection),
+  );
   return (
     <>
       <SiteHeader />
@@ -37,7 +41,7 @@ export default function HomePage() {
             className="relative border-t border-white/15 bg-black/30"
           >
             <div className="site-container flex flex-wrap items-center justify-center gap-2 px-4 py-3 sm:gap-3">
-              {heroActions.map((action) => (
+              {actions.map((action) => (
                 <Link
                   key={action.href}
                   href={action.href}

@@ -24,6 +24,26 @@ Next.js site and API for the Trinidad & Tobago Police Service Social & Welfare A
 
 Add any other keys you already use locally (e.g. Twilio for WhatsApp) via **Settings → Environment Variables**.
 
+### Launch switches
+
+Hotel booking, membership services, member signup/login, and the admin area are **off** until you set the matching variable and redeploy. The pages and API routes stay in the repo. With a switch off:
+
+- Navigation, the home page, the footer, and the Subsidiaries Noel Chase card do not link to that section.
+- Visiting a switched-off page shows a Coming soon page with the office phone numbers (235-5260 / 792-6226). Hotel pages also include WhatsApp for hotel enquiries: https://wa.me/18687926226
+- API routes for that section return `503` with `{ "error": "This service is not available." }` and do not process submissions.
+- Those URLs are left out of the sitemap.
+
+| Variable | Set to `true` to turn on | What it covers |
+|----------|--------------------------|----------------|
+| `ENABLE_HOTEL` | Hotel reservations | `/hotel-reservations`, `/noel-chase-hotel-and-conference-centre`, `/api/hotel/book`, `/api/hotel-availability`, `/api/hotel-booking` (including quotation open), and the hotel performance cron |
+| `ENABLE_MEMBERSHIP_SERVICES` | Membership services | `/membership-services` and every benefit page, `/legal-aid-application`, `/dental-optical-grant`, `/retirement-benefit-application`, `/merit-loan-application`, and the legal aid, dental/optical, retirement, merit loan, merit salary deduction, and upload signed-URL APIs |
+| `ENABLE_MEMBERSHIP_SIGNUP` | Become a member, signup, and login | `/become-a-member`, `/membership-form`, `/membership-registration`, `/salary-deduction`, `/register`, `/login`, `/members/login`, `/members-portal`, `/verify-email`, `/member/dashboard`, `/services/membership-application`, plus auth register/verify/resend/session, members login/logout, member-signup, salary deduction, membership apply, and member document upload/view APIs |
+| `ENABLE_ADMIN` | Admin area | `/admin` and every `/admin/*` page, `/unauthorized`, and `/api/admin/*` (login, check-bootstrap, and the rest) |
+
+Accepted on-values are `true`, `1`, `yes`, and `on` (any other value, or leaving the variable unset, keeps the section off). On Vercel, add the variable under **Settings → Environment Variables**, then start a **new deployment** so the build picks it up. Turning a section back on does not require a code change.
+
+Home, About, Executive team, Central Committee Representatives, Committees, Subsidiaries (without the hotel link while `ENABLE_HOTEL` is off), Partnership, Rule Book, and Privacy Policy stay available either way.
+
 ### Expo web + “Network error” / failed API calls
 
 If the mobile web app is on a different domain than this site, the browser blocks API responses unless CORS is enabled. After setting `MOBILE_WEB_ORIGINS` or `MOBILE_WEB_ALLOW_ALL_VERCEL=1` on **this** (TTPSSWA) Vercel project, redeploy.
