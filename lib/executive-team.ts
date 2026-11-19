@@ -62,7 +62,7 @@ Respected by peers and colleagues, PC Marcano continues to champion transparency
   {
     title: "First Division Officer Representative",
     name: "Oswain Subero",
-    bio: `Acting Assistant Commissioner of Police (ACP) Oswain Subero is a visionary leader with over 37 years of distinguished service in law enforcement. Currently serving as the First Division Officer Representative, ACP Subero brings a wealth of experience, strategic insight, and unwavering dedication to the Trinidad and Tobago Police Service.
+    bio: `Assistant Commissioner of Police (ACP) Oswain Subero is a visionary leader with over 37 years of distinguished service in law enforcement. Currently serving as the First Division Officer Representative, ACP Subero brings a wealth of experience, strategic insight, and unwavering dedication to the Trinidad and Tobago Police Service.
 
 As former head of the Tobago and Eastern Division, he championed operational excellence, officer welfare, and community-driven policing. His leadership extended to the Inter-Agency Task Force, where he spearheaded initiatives to strengthen interdepartmental collaboration, and to the Hearts and Minds Programme Foundation, which he chaired to promote crime prevention and community empowerment.
 

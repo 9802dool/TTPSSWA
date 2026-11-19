@@ -312,7 +312,7 @@ export const COMMITTEES: readonly Committee[] = [
         phone: "(868) 354-7341",
       },
       {
-        name: "Snr Supt Oswain Subero",
+        name: "Assistant Commissioner of Police Oswain Subero",
         role: "1st Division Representative",
         phone: "(868) 488-7302",
       },
@@ -376,7 +376,7 @@ export const COMMITTEES: readonly Committee[] = [
     ],
     members: [
       {
-        name: "Ag ACP Oswain Subero",
+        name: "Assistant Commissioner of Police Oswain Subero",
         role: "Executive",
         phone: "(868) 488-7302",
       },
