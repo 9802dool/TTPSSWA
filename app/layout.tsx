@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { AnalyticsTracker } from '@/components/AnalyticsTracker';
 import { SITE_LOGO_SRC } from '@/lib/site-logo';
-import { ASSOCIATION_NAME, SITE_NAME, SITE_ORIGIN, absoluteUrl } from '@/lib/site';
+import { ASSOCIATION_NAME, SHARE_IMAGE, SITE_NAME, SITE_ORIGIN, absoluteUrl } from '@/lib/site';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -18,11 +18,17 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     locale: 'en_TT',
     type: 'website',
+    images: [SHARE_IMAGE],
   },
   twitter: {
     card: 'summary_large_image',
     title: `${SITE_NAME} | ${ASSOCIATION_NAME}`,
     description: `${SITE_NAME} — the ${ASSOCIATION_NAME}. Member services, benefits, and resources.`,
+    images: [SHARE_IMAGE],
+  },
+  icons: {
+    icon: [{ url: '/favicon.ico', sizes: 'any' }],
+    apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
 };
 

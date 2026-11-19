@@ -5,7 +5,7 @@ import { SalaryDeductionForm } from "@/components/SalaryDeductionForm";
 import { MembershipFlowBanner } from "@/components/MembershipFlowBanner";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { absoluteUrl } from "@/lib/site";
+import { SHARE_IMAGE, absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Become a Member | TTPSSWA",
@@ -15,6 +15,7 @@ export const metadata: Metadata = {
     title: "Become a Member | TTPSSWA",
     description: "Membership application and salary deduction forms for the Trinidad and Tobago Police Service Social and Welfare Association.",
     url: absoluteUrl('/become-a-member'),
+    images: [SHARE_IMAGE],
   },
 };
 

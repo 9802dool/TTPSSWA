@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import SimpleBookingForm from "@/components/hotel/SimpleBookingForm";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { absoluteUrl } from "@/lib/site";
+import { SHARE_IMAGE, absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Hotel reservations | TTPSSWA",
@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     title: "Hotel reservations | TTPSSWA",
     description: "Book a TTPSSWA guest house room with live category capacity checks.",
     url: absoluteUrl('/hotel-reservations'),
+    images: [SHARE_IMAGE],
   },
 };
 
