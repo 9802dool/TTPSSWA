@@ -5,6 +5,7 @@ import SiteHeader from '@/components/SiteHeader';
 import RuleBookArticle from '@/components/RuleBookArticle';
 import { getRuleBookHtml } from '@/lib/rule-book-html';
 import { RULE_BOOK_DOC_PATH } from '@/lib/rule-book';
+import { absoluteUrl } from '@/lib/site';
 
 export const metadata: Metadata = {
   title: 'Rule Book | TTPSSWA',
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Rule Book | TTPSSWA',
     description: 'Read the TTPSSWA association rule book online or download the original document.',
-    url: 'https://ttpsswa.vercel.app/rule-book',
+    url: absoluteUrl('/rule-book'),
   },
 };
 

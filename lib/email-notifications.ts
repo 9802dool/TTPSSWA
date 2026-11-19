@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { absoluteUrl } from "@/lib/site";
 import type { ApplicationType, ApplicationStatus } from "./supabase/types";
 
 const APPLICATION_TYPE_LABELS: Record<string, string> = {
@@ -53,7 +54,7 @@ export async function sendStatusChangeEmail(params: StatusChangeEmailParams): Pr
     emailBody += `Administrator Message:\n${params.adminNotes}\n\n`;
   }
 
-  emailBody += `You can view your application details at: ${process.env.NEXT_PUBLIC_SITE_URL || 'https://ttpsswa.vercel.app'}/member/dashboard\n\n`;
+  emailBody += `You can view your application details at: ${process.env.NEXT_PUBLIC_SITE_URL || absoluteUrl("/")}/member/dashboard\n\n`;
   emailBody += `If you have any questions, please contact the TTPSSWA office.\n\n`;
   emailBody += `Best regards,\nTTPSSWA Administration`;
 
@@ -128,7 +129,7 @@ export async function sendAdminNotification(params: AdminNotificationParams): Pr
     `Service Number: ${params.applicantServiceNumber}`,
     `Application ID: ${params.applicationId}`,
     '',
-    `View application: https://ttpsswa.vercel.app/admin/applications`,
+    `View application: ${absoluteUrl("/admin/applications")}`,
     '',
     'TTPSSWA Admin System',
   ].join('\n');

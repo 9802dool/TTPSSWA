@@ -163,4 +163,22 @@ describe("middleware", () => {
     expect(api.status).toBe(200);
     expect(api.headers.get("x-middleware-rewrite")).toBeNull();
   });
+
+  it("301s the production Vercel host to ttpsswa.org and leaves preview hosts alone", () => {
+    const production = middleware(
+      new NextRequest("https://ttpsswa.vercel.app/about?ref=old"),
+    );
+    expect(production.status).toBe(301);
+    expect(production.headers.get("location")).toBe("https://ttpsswa.org/about?ref=old");
+
+    const www = middleware(new NextRequest("https://www.ttpsswa.org/executive"));
+    expect(www.status).toBe(301);
+    expect(www.headers.get("location")).toBe("https://ttpsswa.org/executive");
+
+    const preview = middleware(
+      new NextRequest("https://ttpsswa-git-cursor-example.vercel.app/about"),
+    );
+    expect(preview.status).toBe(200);
+    expect(preview.headers.get("location")).toBeNull();
+  });
 });

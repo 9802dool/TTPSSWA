@@ -1,6 +1,20 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { disabledSectionForPath, SECTION_QUERY } from "@/lib/feature-flags";
 import { mobileWebCorsHeaders } from "@/lib/mobile-web-cors";
+import { LEGACY_CANONICAL_HOSTS, SITE_ORIGIN } from "@/lib/site";
+
+const legacyHosts = new Set<string>(LEGACY_CANONICAL_HOSTS);
+
+/** 301 the production Vercel hostname (and www) to the canonical domain. Preview hosts stay put. */
+function canonicalHostRedirect(request: NextRequest): NextResponse | null {
+  const host = request.nextUrl.hostname.toLowerCase();
+  if (!legacyHosts.has(host)) return null;
+  const destination = request.nextUrl.clone();
+  destination.protocol = "https:";
+  destination.hostname = new URL(SITE_ORIGIN).hostname;
+  destination.port = "";
+  return NextResponse.redirect(destination, 301);
+}
 
 function applyCors(request: NextRequest, response: NextResponse): NextResponse {
   const origin = request.headers.get("origin");
@@ -35,6 +49,9 @@ function apiUnavailable(request: NextRequest): NextResponse {
 }
 
 export function middleware(request: NextRequest) {
+  const redirect = canonicalHostRedirect(request);
+  if (redirect) return redirect;
+
   const { pathname } = request.nextUrl;
   const section = disabledSectionForPath(pathname);
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { MEMBER_BENEFITS, MEMBER_BENEFITS_PILLAR } from "@/lib/member-benefits-data";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Membership services | TTPSSWA",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Membership services | TTPSSWA",
     description: "Member benefits, grants, and service applications.",
-    url: 'https://ttpsswa.vercel.app/membership-services',
+    url: absoluteUrl('/membership-services'),
   },
 };
 

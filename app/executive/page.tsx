@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ExecutiveTeamGrid } from "@/components/ExecutiveTeamGrid";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Executive team | TTPSSWA",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Executive team | TTPSSWA",
     description: "National officers and leadership of the TTPSSWA.",
-    url: 'https://ttpsswa.vercel.app/executive',
+    url: absoluteUrl('/executive'),
   },
 };
 

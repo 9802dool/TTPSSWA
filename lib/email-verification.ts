@@ -4,6 +4,7 @@
  */
 
 import { Resend } from "resend";
+import { SITE_ORIGIN } from "@/lib/site";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { getRedis } from "./redis";
 
@@ -78,7 +79,7 @@ export async function sendVerificationEmail(params: {
     process.env.MEMBERSHIP_FROM_EMAIL?.trim() || 
     process.env.BOOKING_FROM_EMAIL?.trim() || 
     'TTPSSWA <noreply@ttpsswa.org>';
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://ttpsswa.vercel.app';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || SITE_ORIGIN;
 
   if (!apiKey) {
     console.error('Cannot send verification email: RESEND_API_KEY not configured');

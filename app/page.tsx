@@ -4,15 +4,18 @@ import { HeroVideoSlideshow } from '@/components/HeroVideoSlideshow';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
 import { isSectionEnabled, type SiteSection } from '@/lib/feature-flags';
+import { ASSOCIATION_NAME, SITE_NAME, absoluteUrl } from '@/lib/site';
+
+const homeTitle = `${SITE_NAME} | ${ASSOCIATION_NAME}`;
+const homeDescription = `${SITE_NAME} — the ${ASSOCIATION_NAME}. Member benefits, the executive team, and association services.`;
 
 export const metadata: Metadata = {
-  title: 'Home | TTPSSWA',
-  description:
-    'Trinidad and Tobago Police Service Social and Welfare Association — member benefits, executive team, and services.',
+  title: homeTitle,
+  description: homeDescription,
   openGraph: {
-    title: 'Home | TTPSSWA',
-    description: 'Trinidad and Tobago Police Service Social and Welfare Association — member benefits, executive team, and services.',
-    url: 'https://ttpsswa.vercel.app',
+    title: homeTitle,
+    description: homeDescription,
+    url: absoluteUrl('/'),
   },
 };
 

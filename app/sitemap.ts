@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next'
 import { isSectionEnabled } from '@/lib/feature-flags'
+import { SITE_ORIGIN } from '@/lib/site'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://ttpsswa.vercel.app'
+  const baseUrl = SITE_ORIGIN
   const lastModified = new Date()
 
   const entries: MetadataRoute.Sitemap = [
