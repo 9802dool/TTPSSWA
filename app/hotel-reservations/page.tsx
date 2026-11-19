@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import SimpleBookingForm from "@/components/hotel/SimpleBookingForm";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Hotel reservations | TTPSSWA",
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Hotel reservations | TTPSSWA",
     description: "Book a TTPSSWA guest house room with live category capacity checks.",
-    url: 'https://ttpsswa.vercel.app/hotel-reservations',
+    url: absoluteUrl('/hotel-reservations'),
   },
 };
 

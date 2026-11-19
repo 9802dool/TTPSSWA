@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { disabledPublicPaths } from '@/lib/feature-flags'
+import { absoluteUrl } from '@/lib/site'
  
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -8,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin/', '/api/', '/members/', '/coming-soon', ...disabledPublicPaths()],
     },
-    sitemap: 'https://ttpsswa.vercel.app/sitemap.xml',
+    sitemap: absoluteUrl('/sitemap.xml'),
   }
 }

@@ -3,6 +3,7 @@ import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 import { isSectionEnabled } from "@/lib/feature-flags";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Subsidiaries | TTPSSWA",
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Subsidiaries | TTPSSWA",
     description: "Subsidiaries and related entities of the Trinidad and Tobago Police Service Social and Welfare Association.",
-    url: 'https://ttpsswa.vercel.app/subsidiaries',
+    url: absoluteUrl('/subsidiaries'),
   },
 };
 

@@ -55,7 +55,7 @@ If the **mobile** Vercel URL returns **401** in the browser, open that project o
 In `ttpsswa-mobile/.env` (local dev or EAS builds):
 
 ```bash
-EXPO_PUBLIC_API_BASE_URL=https://YOUR-TTPSSWA-PROJECT.vercel.app
+EXPO_PUBLIC_API_BASE_URL=https://ttpsswa.org
 ```
 
 No trailing slash.
