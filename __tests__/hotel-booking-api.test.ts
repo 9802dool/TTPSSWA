@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { POST } from "../app/api/hotel/book/route";
 import { NextRequest } from "next/server";
+import { Resend } from "resend";
 
 // Mock external dependencies
 vi.mock("../lib/simple-hotel-booking-storage", () => ({
@@ -506,6 +507,88 @@ describe("Hotel Booking API", () => {
       expect(nonMemberData.estimatedTotal).toBeGreaterThan(
         memberData.estimatedTotal,
       );
+    });
+  });
+
+  describe("booking emails", () => {
+    const envKeys = ["RESEND_API_KEY", "BOOKING_FROM_EMAIL", "HOTEL_BOOKING_NOTIFY_EMAIL"] as const;
+    const previous: Record<string, string | undefined> = {};
+
+    afterEach(() => {
+      for (const key of envKeys) {
+        if (previous[key] === undefined) delete process.env[key];
+        else process.env[key] = previous[key];
+      }
+      vi.mocked(Resend).mockImplementation(
+        () =>
+          ({
+            emails: {
+              send: vi.fn(() => Promise.resolve({ data: { id: "test" }, error: null })),
+            },
+          }) as never,
+      );
+    });
+
+    it("logs a Resend error for the association email instead of ignoring it", async () => {
+      for (const key of envKeys) previous[key] = process.env[key];
+      process.env.RESEND_API_KEY = "re_test";
+      process.env.BOOKING_FROM_EMAIL = "";
+      process.env.HOTEL_BOOKING_NOTIFY_EMAIL = "desk@example.com";
+
+      const send = vi
+        .fn()
+        .mockResolvedValueOnce({
+          data: null,
+          error: {
+            name: "validation_error",
+            statusCode: 403,
+            message: "You can only send testing emails to your own email address.",
+          },
+        })
+        .mockResolvedValueOnce({
+          data: null,
+          error: {
+            name: "validation_error",
+            statusCode: 403,
+            message: "You can only send testing emails to your own email address.",
+          },
+        });
+      vi.mocked(Resend).mockImplementation(() => ({ emails: { send } }) as never);
+
+      vi.mocked(reserveHotelRooms).mockResolvedValue({
+        ok: true,
+        booking: {
+          id: "test-booking-123",
+          guestName: "John Doe",
+          email: "john@example.com",
+          phone: "1-868-555-1234",
+          roomCategory: "DOUBLE_OCCUPANCY",
+          roomCount: 2,
+          roomLines: [{ roomCategory: "DOUBLE_OCCUPANCY", roomCount: 2 }],
+          checkIn: "2026-12-01",
+          checkOut: "2026-12-05",
+          guests: 4,
+          meals: [],
+          specialRequests: "",
+          status: "CONFIRMED",
+          createdAt: "2026-10-26T12:00:00Z",
+          updatedAt: "2026-10-26T12:00:00Z",
+        },
+      });
+
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+      const response = await POST(createRequest(validBooking));
+      const data = await response.json();
+
+      expect(response.status).toBe(201);
+      expect(data.guestEmailSent).toBe(false);
+      const logged = errorSpy.mock.calls.map((call) => call.map(String).join(" ")).join("\n");
+      expect(logged).toContain("BOOKING_FROM_EMAIL is empty");
+      expect(logged).toContain("onboarding@resend.dev");
+      expect(logged).toContain("hotel guest acknowledgment email failed");
+      expect(logged).toContain("hotel booking notification email failed for 1 recipient");
+      expect(logged).toContain("validation_error 403");
+      errorSpy.mockRestore();
     });
   });
 });

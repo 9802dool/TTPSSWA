@@ -27,6 +27,17 @@ export const runtime = "nodejs";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Resend returns `{ error }` for API failures and does not throw. Log that shape explicitly. */
+function logHotelEmailFailure(label: string, from: string, error: unknown) {
+  const err = error as { name?: string; statusCode?: number; message?: string } | null;
+  const summary =
+    err && typeof err === "object" && typeof err.message === "string"
+      ? `${err.name ?? "error"} ${err.statusCode ?? ""}: ${err.message}`.replace(/\s+/g, " ").trim()
+      : error;
+  console.error(`${label} (from ${from}):`, summary);
+}
+
 export async function POST(request: Request) {
   const clientIP = getClientIP(request);
 
@@ -270,9 +281,13 @@ export async function POST(request: Request) {
   let guestEmailSent = false;
   if (apiKey) {
     const resend = new Resend(apiKey);
-    const from =
-      process.env.BOOKING_FROM_EMAIL?.trim() ||
-      "TTPSSWA Bookings <onboarding@resend.dev>";
+    const configuredFrom = process.env.BOOKING_FROM_EMAIL?.trim() || "";
+    const from = configuredFrom || "TTPSSWA Bookings <onboarding@resend.dev>";
+    if (!configuredFrom) {
+      console.error(
+        "hotel booking email: BOOKING_FROM_EMAIL is empty, so mail is sent from the Resend test address onboarding@resend.dev. That address only delivers to the Resend account owner. Verify a domain at https://resend.com/domains and set BOOKING_FROM_EMAIL to an address on that domain.",
+      );
+    }
 
     try {
       const guestEmail = await resend.emails.send({
@@ -300,17 +315,17 @@ export async function POST(request: Request) {
           .join("\n"),
       });
       if (guestEmail.error) {
-        console.error("hotel guest acknowledgment email:", guestEmail.error);
+        logHotelEmailFailure("hotel guest acknowledgment email failed", from, guestEmail.error);
       } else {
         guestEmailSent = true;
       }
     } catch (error) {
-      console.error("hotel guest acknowledgment email:", error);
+      logHotelEmailFailure("hotel guest acknowledgment email failed", from, error);
     }
 
     if (notifyEmails.length > 0) {
       try {
-        await resend.emails.send({
+        const staffEmail = await resend.emails.send({
           from,
           to: notifyEmails,
           replyTo: [email],
@@ -336,10 +351,29 @@ export async function POST(request: Request) {
             .filter(Boolean)
             .join("\n"),
         });
+        if (staffEmail.error) {
+          logHotelEmailFailure(
+            `hotel booking notification email failed for ${notifyEmails.length} recipient(s)`,
+            from,
+            staffEmail.error,
+          );
+        }
       } catch (error) {
-        console.error("hotel booking notification email:", error);
+        logHotelEmailFailure(
+          `hotel booking notification email failed for ${notifyEmails.length} recipient(s)`,
+          from,
+          error,
+        );
       }
+    } else {
+      console.error(
+        "hotel booking notification email skipped: HOTEL_BOOKING_NOTIFY_EMAIL is empty, so the association was not notified.",
+      );
     }
+  } else {
+    console.error(
+      "hotel booking email skipped: RESEND_API_KEY is not set, so neither the guest nor the association was emailed.",
+    );
   }
 
   // Also save to Supabase unified storage if configured
