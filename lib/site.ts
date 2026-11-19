@@ -13,3 +13,11 @@ export function absoluteUrl(path = "/"): string {
   if (!path || path === "/") return SITE_ORIGIN;
   return `${SITE_ORIGIN}${path.startsWith("/") ? path : `/${path}`}`;
 }
+
+/** 1200×630 share card at public/og-image.png */
+export const SHARE_IMAGE = {
+  url: absoluteUrl("/og-image.png"),
+  width: 1200,
+  height: 630,
+  alt: `${SITE_NAME} crest — ${ASSOCIATION_NAME}`,
+} as const;

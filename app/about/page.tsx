@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { absoluteUrl } from "@/lib/site";
+import { SHARE_IMAGE, absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "About | TTPSSWA",
@@ -12,6 +12,7 @@ export const metadata: Metadata = {
     title: "About | TTPSSWA",
     description: "About the Trinidad and Tobago Police Service Social and Welfare Association — advocacy, benefits, and community.",
     url: absoluteUrl('/about'),
+    images: [SHARE_IMAGE],
   },
 };
 

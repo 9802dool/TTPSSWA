@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
-import { absoluteUrl } from "@/lib/site";
+import { SHARE_IMAGE, absoluteUrl } from "@/lib/site";
 
 const PARTNERSHIP_CARDS = [
   {
@@ -33,6 +33,7 @@ export const metadata: Metadata = {
     title: "Partnership | TTPSSWA",
     description: "TTPSSWA corporate partners — Hardware and Beyond, Antar Auto, Dream Builder Colour Studio Ltd.",
     url: absoluteUrl('/partnership'),
+    images: [SHARE_IMAGE],
   },
 };
 

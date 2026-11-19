@@ -4,7 +4,7 @@ import { HeroVideoSlideshow } from '@/components/HeroVideoSlideshow';
 import SiteFooter from '@/components/SiteFooter';
 import SiteHeader from '@/components/SiteHeader';
 import { isSectionEnabled, type SiteSection } from '@/lib/feature-flags';
-import { ASSOCIATION_NAME, SITE_NAME, absoluteUrl } from '@/lib/site';
+import { ASSOCIATION_NAME, SHARE_IMAGE, SITE_NAME, absoluteUrl } from '@/lib/site';
 
 const homeTitle = `${SITE_NAME} | ${ASSOCIATION_NAME}`;
 const homeDescription = `${SITE_NAME} — the ${ASSOCIATION_NAME}. Member benefits, the executive team, and association services.`;
@@ -16,6 +16,7 @@ export const metadata: Metadata = {
     title: homeTitle,
     description: homeDescription,
     url: absoluteUrl('/'),
+    images: [SHARE_IMAGE],
   },
 };
 
